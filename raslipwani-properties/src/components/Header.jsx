@@ -21,7 +21,7 @@ const Header = () => {
         <nav className="hidden md:flex space-x-8">
           <NavLink 
             to="/" 
-            className={({ isActive }) =>
+            className={({isActive}) => 
               `font-medium ${isActive ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`
             }
           >
@@ -29,7 +29,7 @@ const Header = () => {
           </NavLink>
           <NavLink 
             to="/properties" 
-            className={({ isActive }) =>
+            className={({isActive}) => 
               `font-medium ${isActive ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`
             }
           >
@@ -37,7 +37,7 @@ const Header = () => {
           </NavLink>
           <NavLink 
             to="/services" 
-            className={({ isActive }) =>
+            className={({isActive}) => 
               `font-medium ${isActive ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`
             }
           >
@@ -45,7 +45,7 @@ const Header = () => {
           </NavLink>
           <NavLink 
             to="/about" 
-            className={({ isActive }) =>
+            className={({isActive}) => 
               `font-medium ${isActive ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`
             }
           >
@@ -53,7 +53,7 @@ const Header = () => {
           </NavLink>
           <NavLink 
             to="/contact" 
-            className={({ isActive }) =>
+            className={({isActive}) => 
               `font-medium ${isActive ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`
             }
           >
