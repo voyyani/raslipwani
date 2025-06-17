@@ -65,7 +65,8 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {currentYear} Raslipwani Properties. All rights reserved.</p>
+          <p>&copy; {currentYear} Raslipwani Properties. Designed by <a href="https://voyani.tech" className="text-gray-300 hover:text-white">Voyani </a> 
+  </p>
         </div>
       </div>
     </footer>
