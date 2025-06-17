@@ -11,9 +11,9 @@ const Home = () => {
         <title>Raslipwani Properties | Your Trusted Real Estate Partner</title>
         <meta 
           name="description" 
-          content="Leading real estate company specializing in property sales, purchases, and management along the Kenyan coast." 
+          content="A Leading real estate company specializing in property sales, purchases, and management along the Kenyan coast." 
         />
-        <link rel="canonical" href="https://www.raslipwani.com" />
+        <link rel="canonical" href="https://res.cloudinary.com/dzqdxosk2/image/upload/v1750188349/raslipwanilogo_kryuwa.jpg" />
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
