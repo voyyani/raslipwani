@@ -1,0 +1,105 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
+
+
+import Home from './pages/Home';
+import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
+import Services from './pages/Services';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import AdminDashboard from './pages/admin/Dashboard';
+
+// Get Clerk publishable key from environment variables
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+// Protected route component
+const ProtectedRoute = ({ children }) => {
+  const { isLoaded, isSignedIn } = useUser();
+  
+  if (!isLoaded) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
+  }
+  
+  if (!isSignedIn) {
+    return <RedirectToSignIn />;
+  }
+  
+  return children;
+};
+
+function App() {
+  // Show error if Clerk key is missing
+  if (!clerkPubKey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h1>
+          <p className="mb-4">
+            Clerk publishable key is missing. Please set up your environment variables:
+          </p>
+          <ol className="list-decimal pl-5 mb-4 space-y-2">
+            <li>Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in project root</li>
+            <li>Add <code className="bg-gray-100 px-1 rounded">VITE_CLERK_PUBLISHABLE_KEY=your_key_here</code></li>
+            <li>Restart the development server</li>
+          </ol>
+          <p className="mb-2">
+            Get your keys from{' '}
+            <a 
+              href="https://dashboard.clerk.com" 
+              className="text-blue-600 hover:underline font-medium"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Clerk Dashboard
+            </a>
+          </p>
+          <p className="text-sm text-gray-600 mt-4">
+            If you've already added the key, make sure you've restarted the server.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ClerkProvider 
+      publishableKey={clerkPubKey}
+      appearance={{
+        baseTheme: "dark",
+        variables: {
+          colorPrimary: '#0D4B6E',
+        }
+      }}
+    >
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/properties/:id" element={<PropertyDetail />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          
+          {/* Protected admin routes */}
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ClerkProvider>
+  );
+}
+
+export default App;
