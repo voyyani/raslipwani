@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { supabase } from '../utils/supabaseClient'; // Make sure this path is correct
+import { supabase } from '../utils/supabaseClient';
 
 const Services = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -29,8 +29,7 @@ const Services = () => {
         "Targeted digital marketing campaigns",
         "Open house coordination",
         "Negotiation support"
-      ],
-      fee: "5% commission on sale price"
+      ]
     },
     {
       title: "Property Acquisition",
@@ -42,8 +41,7 @@ const Services = () => {
         "Property evaluation & due diligence",
         "Offer negotiation strategy",
         "Closing coordination"
-      ],
-      fee: "2% of property value or fixed fee"
+      ]
     },
     {
       title: "Property Valuation",
@@ -55,8 +53,7 @@ const Services = () => {
         "Investment potential assessment",
         "Rental yield calculations",
         "Future value projections"
-      ],
-      fee: "KSh 15,000 - KSh 50,000"
+      ]
     },
     {
       title: "Property Management",
@@ -68,8 +65,7 @@ const Services = () => {
         "Maintenance coordination",
         "Property inspections",
         "Legal compliance management"
-      ],
-      fee: "8-10% of monthly rental income"
+      ]
     }
   ];
 
@@ -78,21 +74,18 @@ const Services = () => {
       type: "physical", 
       title: "In-Person Viewing", 
       description: "Personalized tour of the property with our agent",
-      fee: "KSh 1,000",
       duration: "1 hour"
     },
     { 
       type: "virtual", 
       title: "Virtual Tour", 
       description: "Live video walkthrough with our agent",
-      fee: "KSh 500",
       duration: "30 minutes"
     },
     { 
       type: "premium", 
       title: "Premium Consultation", 
       description: "In-depth property analysis with senior agent",
-      fee: "KSh 2,500",
       duration: "1.5 hours"
     }
   ];
@@ -141,12 +134,14 @@ const Services = () => {
         appointment_at,
         type: activeModal,
         created_at: new Date().toISOString(),
-        status: 'pending'
+        status: 'pending',
+        viewing_type: bookingData.viewingType
       };
 
       // Remove unnecessary fields for Supabase
       delete bookingRecord.date;
       delete bookingRecord.time;
+      delete bookingRecord.viewingType;
 
       // Save to Supabase
       const { data, error } = await supabase
@@ -171,7 +166,7 @@ const Services = () => {
       });
       setActiveModal(null);
       
-      // Optional: Send email notification
+      // Send email notification
       await sendEmailNotification(bookingRecord);
       
     } catch (error) {
@@ -182,19 +177,21 @@ const Services = () => {
     }
   };
 
-  // Optional email notification function
+  // Email notification function
   const sendEmailNotification = async (booking) => {
     try {
-      // This requires a backend API endpoint
-      // Uncomment when you have the API set up
-      /*
-      await fetch('/api/send-booking-email', {
+      const emailData = {
+        to: 'raslipwani@gmail.com',
+        subject: `New Booking - ${booking.type}`,
+        booking: booking
+      };
+
+      await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(booking)
+        body: JSON.stringify(emailData)
       });
-      */
-      console.log('Email notification would be sent for:', booking);
+      
     } catch (emailError) {
       console.error('Email notification failed:', emailError);
     }
@@ -371,9 +368,6 @@ const Services = () => {
                       >
                         <div className="flex justify-between items-start">
                           <h5 className="font-bold text-lg">{option.title}</h5>
-                          <span className="bg-primary text-white text-sm py-1 px-2 rounded-lg">
-                            {option.fee}
-                          </span>
                         </div>
                         <p className="text-gray-600 my-2">{option.description}</p>
                         <div className="text-sm text-gray-500 flex items-center">
@@ -479,22 +473,6 @@ const Services = () => {
         )}
         
         <main className="flex-grow">
-          {/* Hero Section 
-          <section className="relative bg-gradient-to-r from-primary to-secondary">
-            <div className="container mx-auto px-4 py-24 text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Premium Real Estate Services</h1>
-              <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-10">
-                Comprehensive solutions for property sales, acquisition, valuation, and management on the Kenyan coast
-              </p>
-              <button 
-                onClick={() => openBookingModal('General Consultation')}
-                className="bg-white text-primary font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-50 transition-colors"
-              >
-                Book a Consultation
-              </button>
-            </div>
-          </section>*/}
-          
           {/* Services Section */}
           <section className="py-16 bg-gray-50">
             <div className="container mx-auto px-4">
@@ -532,13 +510,9 @@ const Services = () => {
                       </div>
                       
                       <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                        <div>
-                          <p className="text-sm text-gray-500">Service Fee:</p>
-                          <p className="font-bold text-primary">{service.fee}</p>
-                        </div>
                         <button 
                           onClick={() => openBookingModal(service.title)}
-                          className="bg-primary hover:bg-secondary text-white py-2 px-5 rounded-lg transition-colors"
+                          className="w-full bg-primary hover:bg-secondary text-white py-2 px-5 rounded-lg transition-colors"
                         >
                           Book Service
                         </button>
@@ -574,10 +548,6 @@ const Services = () => {
                       <div>
                         <span className="text-sm text-gray-500">Duration:</span>
                         <p>{option.duration}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm text-gray-500">Fee:</span>
-                        <p className="font-bold text-primary">{option.fee}</p>
                       </div>
                     </div>
                   </div>

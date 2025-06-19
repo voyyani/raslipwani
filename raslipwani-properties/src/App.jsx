@@ -1,7 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  Navigate, 
+  Outlet  // Add this import
+} from 'react-router-dom';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
-
+import AdminLayout from './pages/admin/AdminLayout';
 
 import Home from './pages/Home';
 import Properties from './pages/Properties';
@@ -9,7 +15,10 @@ import PropertyDetail from './pages/PropertyDetail';
 import Services from './pages/Services';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import AdminDashboard from './pages/admin/Dashboard';
+import Dashboard from './pages/admin/Dashboard';
+import AdminProperties from './pages/admin/AdminProperties';
+import Bookings from './pages/admin/Bookings';
+import ClientManagement from './pages/admin/ClientManagement';
 
 // Get Clerk publishable key from environment variables
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -79,20 +88,25 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/services" element={<Services />} />
+<Route path="/properties/:id" element={<PropertyDetail />} />          <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          
           {/* Protected admin routes */}
           <Route 
-            path="/admin/*" 
+            path="/admin" 
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <AdminLayout>
+                  <Outlet /> {/* Now properly defined */}
+                </AdminLayout>
               </ProtectedRoute>
             } 
-          />
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="properties" element={<AdminProperties />} />
+            <Route path="viewings" element={<Bookings />} />
+            <Route path="clients" element={<ClientManagement />} />
+          </Route>
           
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" replace />} />

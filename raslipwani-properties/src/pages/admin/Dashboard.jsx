@@ -1,117 +1,301 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import Header from '../../components/Header';
+import { supabase } from '../../utils/supabaseClient';
+import { 
+  FaHome, 
+  FaStar, 
+  FaClock, 
+  FaPlusCircle, 
+  FaEdit, 
+  FaEnvelope,
+  FaCalendarAlt,
+  FaChartLine,
+  FaUserCircle,
+  FaDollarSign,
+  FaArrowUp
+} from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
-const AdminDashboard = () => {
-  const location = useLocation();
+const Dashboard = () => {
+  const [stats, setStats] = useState({
+    totalProperties: 0,
+    featuredProperties: 0,
+    soldProperties: 0,
+    totalBookings: 0,
+    
+  });
   
-  const isActive = (path) => {
-    return location.pathname === `/admin${path}`;
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    views: 1242,
+    leads: 84,
+    conversion: 6.7
+  });
+  
+  // Format time difference for recent activities
+  const timeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} min ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
   
+  // Fetch dashboard stats and recent activities
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch property stats
+        const [
+          { count: total }, 
+          { count: featured }, 
+          { count: sold },
+          { count: bookings },
+         
+        ] = await Promise.all([
+          supabase.from('properties').select('*', { count: 'exact' }),
+          supabase.from('properties').select('*', { count: 'exact' }).eq('featured', true),
+          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'sold'),
+          supabase.from('bookings').select('*', { count: 'exact' }),
+          supabase.from('bookings')
+            .select('*', { count: 'exact' })
+            .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        ]);
+        
+        setStats({
+          totalProperties: total || 0,
+          featuredProperties: featured || 0,
+          soldProperties: sold || 0,
+          totalBookings: bookings || 0,
+          
+        });
+        
+        // Fetch recent activities from both properties and bookings
+        const [
+          { data: propertiesActivities },
+          { data: bookingsActivities }
+        ] = await Promise.all([
+          supabase
+            .from('properties')
+            .select('id, title, created_at, updated_at')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          supabase
+            .from('bookings')
+            .select('id, name, service, viewing_type, type, created_at')
+            .order('created_at', { ascending: false })
+            .limit(5)
+        ]);
+        
+        // Format property activities
+        const formattedProperties = propertiesActivities?.map(property => {
+          const isNew = new Date(property.created_at).getTime() === new Date(property.updated_at).getTime();
+          
+          return {
+            id: `property-${property.id}`,
+            title: property.title,
+            action: isNew ? 'added' : 'updated',
+            timestamp: isNew ? property.created_at : property.updated_at,
+            icon: isNew ? <FaPlusCircle className="text-green-500" /> : <FaEdit className="text-blue-500" />,
+            type: 'property'
+          };
+        }) || [];
+        
+        // Format booking activities
+        const formattedBookings = bookingsActivities?.map(booking => {
+          let title = '';
+          let icon = <FaCalendarAlt className="text-purple-500" />;
+          
+          if (booking.type === 'consultation') {
+            title = `Consultation: ${booking.service}`;
+          } else if (booking.type === 'viewing') {
+            title = `Viewing: ${booking.viewing_type}`;
+          } else if (booking.type === 'contact') {
+            title = `Contact: ${booking.name}`;
+            icon = <FaEnvelope className="text-orange-500" />;
+          } else {
+            title = `Booking: ${booking.name}`;
+          }
+          
+          return {
+            id: `booking-${booking.id}`,
+            title,
+            action: 'received',
+            timestamp: booking.created_at,
+            icon,
+            type: 'booking'
+          };
+        }) || [];
+        
+        // Combine and sort activities
+        const allActivities = [...formattedProperties, ...formattedBookings]
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 8);
+        
+        setRecentActivities(allActivities);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, []);
+
+  // Stats card component
+  const StatCard = ({ title, value, icon, color, link, trend }) => (
+    <Link 
+      to={link || '#'} 
+      className={`bg-gradient-to-br from-${color}-50 to-${color}-100 border border-${color}-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200`}
+    >
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center mb-3">
+            <div className={`bg-${color}-100 p-3 rounded-lg mr-3`}>
+              {React.cloneElement(icon, { className: `text-${color}-600 text-xl` })}
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
+          </div>
+          <p className="text-3xl font-bold text-gray-800">{value}</p>
+        </div>
+        {trend && (
+          <span className={`bg-${color}-100 text-${color}-800 px-2 py-1 rounded-full text-xs font-medium flex items-center`}>
+            <FaArrowUp className="mr-1" /> {trend}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+
   return (
     <>
       <Helmet>
         <title>Admin Dashboard | Raslipwani Properties</title>
       </Helmet>
       
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        
-        <div className="flex flex-grow">
-          {/* Sidebar */}
-          <aside className="bg-dark text-white w-64 min-h-screen p-4">
-            <h2 className="text-xl font-bold mb-8 mt-4">Admin Dashboard</h2>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Overview</h1>
+        <p className="text-gray-600 mt-1">Monitor your property portfolio and business performance</p>
+      </div>
+      
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+        <div className="space-y-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <StatCard 
+              title="Total Properties" 
+              value={stats.totalProperties} 
+              icon={<FaHome />} 
+              color="blue" 
+              link="/admin/properties"
+            />
             
-            <nav className="space-y-2">
-              <Link 
-                to="/admin" 
-                className={`block p-3 rounded-md ${isActive('') || isActive('/') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Dashboard Overview
-              </Link>
-              <Link 
-                to="/admin/properties" 
-                className={`block p-3 rounded-md ${isActive('/properties') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Manage Properties
-              </Link>
-              <Link 
-                to="/admin/viewings" 
-                className={`block p-3 rounded-md ${isActive('/viewings') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Viewing Appointments
-              </Link>
-              <Link 
-                to="/admin/clients" 
-                className={`block p-3 rounded-md ${isActive('/clients') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Client Management
-              </Link>
-              <Link 
-                to="/admin/inquiries" 
-                className={`block p-3 rounded-md ${isActive('/inquiries') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Contact Inquiries
-              </Link>
-              <Link 
-                to="/admin/settings" 
-                className={`block p-3 rounded-md ${isActive('/settings') ? 'bg-primary' : 'hover:bg-gray-700'}`}
-              >
-                Settings
-              </Link>
-            </nav>
-          </aside>
-          
-          {/* Main content */}
-          <main className="flex-grow p-6 bg-light">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <Outlet />
+            <StatCard 
+              title="Featured" 
+              value={stats.featuredProperties} 
+              icon={<FaStar />} 
+              color="amber" 
+              link="/admin/properties?filter=featured"
+            />
+            
+           
+            
+            <StatCard 
+              title="Sold" 
+              value={stats.soldProperties} 
+              icon={<FaHome />} 
+              color="green" 
               
-              {/* Placeholder content for dashboard */}
-              {location.pathname === '/admin' && (
-                <div>
-                  <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold mb-2">Total Properties</h3>
-                      <p className="text-3xl font-bold text-primary">24</p>
+              link="/admin/properties?filter=sold"
+            />
+            
+            <StatCard 
+              title="Total Bookings" 
+              value={stats.totalBookings} 
+              icon={<FaCalendarAlt />} 
+              color="purple" 
+              link="/admin/bookings"
+            />
+            
+            
+          </div>
+          
+          {/* Performance Metrics */}
+            
+            
+            
+            
+            
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Recent Activity */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">Recent Activity</h3>
+                
+              </div>
+              
+              {recentActivities.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No recent activity</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2">
+                  {recentActivities.map(activity => (
+                    <div 
+                      key={activity.id} 
+                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group"
+                    >
+                      <div className="bg-gray-100 p-3 rounded-lg mr-4 mt-1 group-hover:bg-gray-200 transition-colors">
+                        {activity.icon}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">
+                          <span className="capitalize">
+                            {activity.type === 'property' ? 'Property ' : ''}
+                            {activity.action}: 
+                          </span>
+                          <span className="text-blue-600 ml-1">{activity.title}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 flex items-center mt-1">
+                          <FaClock className="mr-1.5 text-gray-400 text-xs" />
+                          {timeAgo(activity.timestamp)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold mb-2">Scheduled Viewings</h3>
-                      <p className="text-3xl font-bold text-primary">12</p>
-                    </div>
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold mb-2">New Inquiries</h3>
-                      <p className="text-3xl font-bold text-primary">5</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                    <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-                    <ul className="space-y-3">
-                      {[1, 2, 3, 4].map(item => (
-                        <li key={item} className="border-b border-gray-100 pb-3 last:border-0">
-                          <div className="flex items-center">
-                            <div className="bg-gray-200 border-2 border-dashed rounded-full w-10 h-10 mr-3" />
-                            <div>
-                              <p>New property listing added</p>
-                              <p className="text-sm text-gray-500">2 hours ago</p>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
-          </main>
+            
+            
+            </div>
+          
         </div>
-      </div>
+      )}
     </>
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;

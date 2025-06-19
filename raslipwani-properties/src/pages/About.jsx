@@ -15,14 +15,7 @@ const About = () => {
         <Header />
         
         <main className="flex-grow">
-          <section className="bg-primary py-16">
-            <div className="container mx-auto px-4 text-center text-white">
-              <h1 className="text-4xl font-bold mb-4">About Raslipwani Properties</h1>
-              <p className="text-xl max-w-3xl mx-auto">
-                Your trusted real estate partner on the Kenyan coast
-              </p>
-            </div>
-          </section>
+          
           
           <section className="py-16">
             <div className="container mx-auto px-4">

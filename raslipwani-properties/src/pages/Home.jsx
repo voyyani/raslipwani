@@ -243,7 +243,7 @@ const Home = () => {
             </div>
           </section>
           
-          {/* CTA Section */}
+          {/* CTA Section 
           <section className="py-20 bg-gradient-to-r from-primary to-secondary">
             <div className="container mx-auto px-4 text-center">
               <h2 className="text-3xl font-bold text-white mb-4">Ready to Begin Your Journey?</h2>
@@ -265,7 +265,7 @@ const Home = () => {
                 </Link>
               </div>
             </div>
-          </section>
+          </section>*/}
         </main>
         
         <Footer />
@@ -283,12 +283,7 @@ const ServiceCard = ({ icon, title, description }) => (
     <h3 className="text-xl font-bold mb-3">{title}</h3>
     <p className="text-gray-600 flex-grow">{description}</p>
     <div className="mt-4">
-      <span className="text-primary font-medium inline-flex items-center">
-        Learn more
-        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </span>
+      
     </div>
   </div>
 );
