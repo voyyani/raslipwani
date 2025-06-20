@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
@@ -90,48 +91,74 @@ const Contact = () => {
         <meta name="description" content="Get in touch with our team" />
       </Helmet>
       
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
         <Header />
         
         <main className="flex-grow">
-          <section className="bg-gradient-to-r from-blue-700 to-primary py-16">
-            <div className="container mx-auto px-4 text-center text-white">
-              <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-              <p className="text-xl max-w-3xl mx-auto">
+          <section className="bg-gradient-to-r from-blue-800 to-primary py-24 md:py-32 relative">
+            <div className="absolute inset-0 bg-black opacity-20"></div>
+            <div className="container mx-auto px-4 relative z-10 text-center text-white">
+              <motion.h1 
+                className="text-4xl md:text-5xl font-bold mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                Contact Us
+              </motion.h1>
+              <motion.p 
+                className="text-xl max-w-3xl mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
                 Get in touch with our team for any inquiries or assistance
-              </p>
+              </motion.p>
             </div>
           </section>
           
           <section className="py-16">
             <div className="container mx-auto px-4 max-w-6xl">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <motion.div 
+                className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="p-8 md:p-12">
+                  <div className="p-6 md:p-10">
                     <h2 className="text-2xl font-bold text-primary mb-6">Send Us a Message</h2>
                     
                     {success && (
-                      <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700">
+                      <motion.div 
+                        className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
                         <div className="flex items-start">
                           <FaCheck className="mt-1 mr-2 flex-shrink-0 text-green-500" />
                           <div>{success}</div>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     
                     {error && (
-                      <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+                      <motion.div 
+                        className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
                         <div className="flex items-start">
                           <FaExclamationTriangle className="mt-1 mr-2 flex-shrink-0 text-red-500" />
                           <div>{error}</div>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                             Full Name <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -140,18 +167,18 @@ const Contact = () => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${formErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            required
+                            className={`w-full px-4 py-3 border ${formErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
+                            placeholder="Your full name"
                           />
                           {formErrors.name && (
-                            <p className="mt-1 text-sm text-red-500 flex items-center">
+                            <p className="mt-2 text-sm text-red-500 flex items-center">
                               <FaExclamationTriangle className="mr-1" /> {formErrors.name}
                             </p>
                           )}
                         </div>
                         
                         <div>
-                          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                             Email Address <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -160,11 +187,11 @@ const Contact = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            required
+                            className={`w-full px-4 py-3 border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
+                            placeholder="your.email@example.com"
                           />
                           {formErrors.email && (
-                            <p className="mt-1 text-sm text-red-500 flex items-center">
+                            <p className="mt-2 text-sm text-red-500 flex items-center">
                               <FaExclamationTriangle className="mr-1" /> {formErrors.email}
                             </p>
                           )}
@@ -173,7 +200,7 @@ const Contact = () => {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                             Phone Number
                           </label>
                           <input
@@ -182,12 +209,13 @@ const Contact = () => {
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            placeholder="+254 700 000 000"
                           />
                         </div>
                         
                         <div>
-                          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
                             Subject
                           </label>
                           <input
@@ -196,13 +224,14 @@ const Contact = () => {
                             name="subject"
                             value={formData.subject}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            placeholder="How can we help?"
                           />
                         </div>
                       </div>
                       
                       <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                           Your Message <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -211,97 +240,112 @@ const Contact = () => {
                           value={formData.message}
                           onChange={handleChange}
                           rows={5}
-                          className={`w-full px-4 py-2 border ${formErrors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                          required
+                          className={`w-full px-4 py-3 border ${formErrors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
+                          placeholder="Tell us about your inquiry..."
                         ></textarea>
                         {formErrors.message && (
-                          <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <p className="mt-2 text-sm text-red-500 flex items-center">
                             <FaExclamationTriangle className="mr-1" /> {formErrors.message}
                           </p>
                         )}
                       </div>
                       
                       <div className="pt-2">
-                        <button
+                        <motion.button
                           type="submit"
-                          className="bg-gradient-to-r from-primary to-blue-700 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-primary transition-all shadow-md hover:shadow-lg w-full md:w-auto flex items-center justify-center"
+                          className="bg-gradient-to-r from-primary to-blue-700 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-primary transition-all shadow-md hover:shadow-lg w-full md:w-auto flex items-center justify-center font-medium"
                           disabled={isSubmitting}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
                           {isSubmitting ? (
                             <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
                               Sending...
                             </>
                           ) : 'Send Message'}
-                        </button>
+                        </motion.button>
                       </div>
                     </form>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-blue-50 to-gray-50 p-8 md:p-12">
+                  <div className="bg-gradient-to-br from-blue-50 to-gray-50 p-6 md:p-10">
                     <h2 className="text-2xl font-bold text-primary mb-6">Contact Information</h2>
                     
                     <div className="space-y-6">
-                      <div className="flex">
+                      <motion.div 
+                        className="flex bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        whileHover={{ x: 5 }}
+                      >
                         <div className="bg-primary p-3 rounded-full text-white mr-4 flex-shrink-0">
                           <FaMapMarkerAlt className="text-xl" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-800">Our Location</h3>
-                          <p className="text-gray-600 mt-1">
+                          <h3 className="font-semibold text-gray-800 mb-1">Our Location</h3>
+                          <p className="text-gray-600">
                             123 Real Estate Avenue<br />
                             Nairobi, Kenya
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                       
-                      <div className="flex">
+                      <motion.div 
+                        className="flex bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        whileHover={{ x: 5 }}
+                      >
                         <div className="bg-primary p-3 rounded-full text-white mr-4 flex-shrink-0">
                           <FaPhone className="text-xl" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-800">Phone Number</h3>
-                          <p className="text-gray-600 mt-1">
+                          <h3 className="font-semibold text-gray-800 mb-1">Phone Number</h3>
+                          <p className="text-gray-600">
                             +254 712 345 678<br />
                             +254 734 567 890
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                       
-                      <div className="flex">
+                      <motion.div 
+                        className="flex bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        whileHover={{ x: 5 }}
+                      >
                         <div className="bg-primary p-3 rounded-full text-white mr-4 flex-shrink-0">
                           <FaEnvelope className="text-xl" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-800">Email Address</h3>
-                          <p className="text-gray-600 mt-1">
+                          <h3 className="font-semibold text-gray-800 mb-1">Email Address</h3>
+                          <p className="text-gray-600">
                             info@raslipwani.com<br />
                             support@raslipwani.com
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                       
-                      <div className="flex">
+                      <motion.div 
+                        className="flex bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        whileHover={{ x: 5 }}
+                      >
                         <div className="bg-primary p-3 rounded-full text-white mr-4 flex-shrink-0">
                           <FaClock className="text-xl" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-800">Working Hours</h3>
-                          <p className="text-gray-600 mt-1">
+                          <h3 className="font-semibold text-gray-800 mb-1">Working Hours</h3>
+                          <p className="text-gray-600">
                             Monday - Friday: 8:00 AM - 6:00 PM<br />
                             Saturday: 9:00 AM - 4:00 PM<br />
                             Sunday: Closed
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                     
-                    <div className="mt-10">
-                      
-                    </div>
+                    
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </section>
         </main>
