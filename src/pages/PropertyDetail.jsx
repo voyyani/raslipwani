@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../src/utils/supabaseClient'
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -10,6 +11,7 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Format price as currency
   const formatPrice = (price) => {
@@ -42,6 +44,31 @@ const PropertyDetail = () => {
     
     if (id) fetchProperty();
   }, [id]);
+
+  const handlePrev = () => {
+    setCurrentImageIndex(prev => 
+      prev === 0 ? property.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex(prev => 
+      (prev + 1) % property.images.length
+    );
+  };
+
+  // Touch handling for mobile swipe
+  const handleTouchStart = (e) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    
+    if (diff > 50) handleNext(); // Swipe left
+    if (diff < -50) handlePrev(); // Swipe right
+  };
 
   if (loading) {
     return (
@@ -94,13 +121,81 @@ const PropertyDetail = () => {
             &larr; Back to Properties
           </Link>
           
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-            {property.images?.[0] ? (
-              <img 
-                src={property.images[0]} 
-                alt={property.title} 
-                className="w-full h-96 object-cover"
-              />
+          {/* Image Carousel */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 relative">
+            {property.images?.length > 0 ? (
+              <div 
+                className="relative h-[50vh] min-h-[400px] bg-gray-100"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Main Image */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <AnimatePresence initial={false} mode="wait">
+                    <motion.img
+                      key={currentImageIndex}
+                      src={property.images[currentImageIndex]}
+                      alt={`Property image ${currentImageIndex + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      loading="eager"
+                    />
+                  </AnimatePresence>
+                </div>
+                
+                {/* Navigation Arrows */}
+                <button
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
+                  onClick={handlePrev}
+                  aria-label="Previous image"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
+                  onClick={handleNext}
+                  aria-label="Next image"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                
+                {/* Thumbnail Strip */}
+                <div className="absolute bottom-4 left-0 right-0 px-4 z-10">
+                  <div className="flex justify-center gap-2 overflow-x-auto pb-2">
+                    {property.images.map((img, index) => (
+                      <button
+                        key={index}
+                        className={`w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                          index === currentImageIndex 
+                            ? 'border-primary scale-105' 
+                            : 'border-transparent opacity-70 hover:opacity-100'
+                        }`}
+                        onClick={() => setCurrentImageIndex(index)}
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Image Counter */}
+                <div className="absolute top-4 left-4 z-10 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full">
+                  {currentImageIndex + 1} / {property.images.length}
+                </div>
+              </div>
             ) : (
               <div className="bg-gray-200 border-2 border-dashed w-full h-96 rounded-lg flex items-center justify-center">
                 <span className="text-gray-500 text-lg">No Image Available</span>
