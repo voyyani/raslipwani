@@ -90,11 +90,11 @@ const Footer = () => {
               </p>
               <p>
                 <a 
-                  href="mailto:raslipwani@gmail.com" 
+                  href="mailto:info@raslipwani.co.ke" 
                   className="flex items-start hover:text-white transition-colors duration-300"
                 >
                   <i className="fas fa-envelope text-primary mr-3 mt-1"></i>
-                  <span>raslipwani@gmail.com</span>
+                  <span>info@raslipwani.co.ke</span>
                 </a>
               </p>
             </address>
