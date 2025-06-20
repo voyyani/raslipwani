@@ -261,6 +261,6 @@ This project is licensed under the MIT License - see [LICENSE](https://github.co
 
 For inquiries or support, contact our development team:
 
-* **Project Lead**: Your Name
+* **Project Lead**: NGOWA CHEMBE KARISA
 * **GitHub**: [https://github.com/voyyani](https://github.com/voyyani)
 * **Project Website**: [https://raslipwani.com](https://raslipwani.com)
