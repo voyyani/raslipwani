@@ -286,8 +286,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Our Location</h3>
                           <p className="text-gray-600">
-                            123 Real Estate Avenue<br />
-                            Nairobi, Kenya
+                            Kikambala , Kilifi, Kenya
                           </p>
                         </div>
                       </motion.div>
@@ -302,8 +301,8 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Phone Number</h3>
                           <p className="text-gray-600">
-                            +254 712 345 678<br />
-                            +254 734 567 890
+                            +254758066526<br />
+                            
                           </p>
                         </div>
                       </motion.div>
@@ -318,8 +317,8 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Email Address</h3>
                           <p className="text-gray-600">
-                            info@raslipwani.com<br />
-                            support@raslipwani.com
+                            info@raslipwani.co.ke<br />
+                            raslipwani@gmail.com
                           </p>
                         </div>
                       </motion.div>
