@@ -32,21 +32,21 @@ const Header = () => {
       label: 'For Sale', 
       dropdown: [
         { path: '/properties?type=land&purpose=sale', label: 'Land' },
-        { path: '/properties?type=houses&purpose=sale', label: 'Houses' },
+        { path: '/properties?type=residential&purpose=sale', label: 'Residential' },
         { path: '/properties?type=commercial&purpose=sale', label: 'Commercial' }
       ]
     },
     { 
       label: 'For Rent', 
       dropdown: [
-        { path: '/properties?type=apartments&purpose=rent', label: 'Apartments' },
-        { path: '/properties?type=villas&purpose=rent', label: 'Villas' },
-        { path: '/properties?type=offices&purpose=rent', label: 'Office Spaces' }
+        { path: '/properties?type=apartment&purpose=rent', label: 'Apartments' },
+        { path: '/properties?type=villa&purpose=rent', label: 'Villas' },
+        { path: '/properties?type=commercial&purpose=rent', label: 'Office Spaces' }
       ]
     },
     { path: '/services', label: 'Services' },
     { path: '/about', label: 'About' },
-    { path: '/construction', label: 'Construction Support' },
+    { path: '/construction-support', label: 'Construction Support' },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -114,15 +114,17 @@ const Header = () => {
                 ) : (
                   <button
                     className={`relative font-medium transition-colors duration-200 px-4 py-2 rounded-lg flex items-center
-                      ${isActiveDropdown(item.dropdown) ? 'text-primary bg-primary/10' : 'text-gray-700 hover:text-primary hover:bg-gray-50'}`}
+                      ${isActiveDropdown(item.dropdown) || openDropdown === item.label 
+                        ? 'text-primary bg-primary/10' 
+                        : 'text-gray-700 hover:text-primary hover:bg-gray-50'}`}
                     onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
                     aria-expanded={openDropdown === item.label}
                   >
                     {item.label}
                     {openDropdown === item.label ? (
-                      <FiChevronUp className="ml-1 text-sm" />
+                      <FiChevronUp className="ml-1 text-primary" />
                     ) : (
-                      <FiChevronDown className="ml-1 text-sm" />
+                      <FiChevronDown className={`ml-1 ${isActiveDropdown(item.dropdown) ? 'text-primary' : 'text-gray-500'}`} />
                     )}
                   </button>
                 )}
@@ -164,7 +166,7 @@ const Header = () => {
             
             <button 
               onClick={toggleMenu}
-              className="lg:hidden text-gray-700 hover:text-primary transition-colors p-2 rounded-lg hover:bg-gray-100"
+              className="lg:hidden text-gray-700 hover:text-primary transition-colors p-2 rounded-lg border-2 border-primary bg-white hover:bg-gray-100"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
@@ -201,7 +203,7 @@ const Header = () => {
                 <h2 className="text-xl font-bold">Menu</h2>
                 <button 
                   onClick={closeMenu}
-                  className="text-white hover:text-gray-200"
+                  className="p-2 rounded-lg border-2 border-primary bg-white text-primary hover:bg-gray-100"
                   aria-label="Close menu"
                 >
                   <FiX className="w-6 h-6" />
@@ -228,15 +230,17 @@ const Header = () => {
                       <div>
                         <button
                           className={`w-full text-left px-6 py-4 font-medium transition-colors duration-300 flex justify-between items-center
-                            ${openMobileDropdown === item.label ? 'text-primary' : 'text-gray-700'}`}
+                            ${openMobileDropdown === item.label || isActiveDropdown(item.dropdown) 
+                              ? 'text-primary bg-primary/10 border-l-4 border-primary' 
+                              : 'text-gray-700 hover:bg-gray-50'}`}
                           onClick={() => setOpenMobileDropdown(openMobileDropdown === item.label ? null : item.label)}
                           aria-expanded={openMobileDropdown === item.label}
                         >
-                          {item.label}
+                          <span>{item.label}</span>
                           {openMobileDropdown === item.label ? (
-                            <FiChevronUp className="ml-1" />
+                            <FiChevronUp className="ml-1 text-primary" />
                           ) : (
-                            <FiChevronDown className="ml-1" />
+                            <FiChevronDown className={`ml-1 ${isActiveDropdown(item.dropdown) ? 'text-primary' : 'text-gray-500'}`} />
                           )}
                         </button>
                         
