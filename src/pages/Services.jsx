@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom'; // Added
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
@@ -19,6 +20,14 @@ const Services = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const servicesRef = useRef(null);
+  const location = useLocation(); // Added
+
+  // Added: Open viewing modal when state flag is set
+  useEffect(() => {
+    if (location.state?.openViewingModal) {
+      openViewingModal();
+    }
+  }, [location.state]);
 
   const services = [
     {
@@ -213,10 +222,6 @@ const Services = () => {
 
   const openViewingModal = () => {
     setActiveModal('viewing');
-    // Scroll to form after modal opens
-    setTimeout(() => {
-      servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
   };
 
   const closeModal = () => {
@@ -232,8 +237,6 @@ const Services = () => {
       
       <div className="min-h-screen flex flex-col">
         <Header />
-        
-        
         
         {/* Consultation Booking Modal */}
         {activeModal === 'consultation' && (

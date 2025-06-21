@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX } from 'react-icons/fi';
+import { FiX, FiPhone } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const PropertyModal = ({ property, closeModal }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
+  const navigate = useNavigate();
+  const [showPhone, setShowPhone] = useState(false); // Added state for phone display
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
@@ -50,6 +53,23 @@ const PropertyModal = ({ property, closeModal }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Updated: Handle Contact Agent button click
+  const handleContactAgent = () => {
+    setShowPhone(true); // Show phone number instead of navigating
+  };
+
+  // Added: Copy phone number to clipboard
+  const copyPhoneNumber = () => {
+    navigator.clipboard.writeText('+254758066526');
+    alert('Phone number copied to clipboard!');
+  };
+
+  // Handle Schedule Tour button click
+  const handleScheduleTour = () => {
+    closeModal();
+    navigate('/services', { state: { openViewingModal: true } });
+  };
 
   return (
     <motion.div
@@ -230,20 +250,57 @@ const PropertyModal = ({ property, closeModal }) => {
           
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
-            >
-              Contact Agent
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white border border-primary text-primary font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
-            >
-              Schedule Tour
-            </motion.button>
+            {showPhone ? (
+              <div className="bg-blue-50 rounded-xl p-4 w-full flex flex-col items-center">
+                <div className="flex items-center mb-3">
+                  <FiPhone className="text-blue-600 text-xl mr-2" />
+                  <h4 className="text-lg font-semibold">Contact Agent</h4>
+                </div>
+                <a 
+                  href="tel:+254758066526" 
+                  className="text-2xl font-bold text-primary mb-3 hover:underline"
+                >
+                  +254 758 066 526
+                </a>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={copyPhoneNumber}
+                    className="bg-white border border-primary text-primary font-medium py-2 px-4 rounded-lg shadow-md"
+                  >
+                    Copy Number
+                  </motion.button>
+                  <motion.a
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    href="tel:+254758066526"
+                    className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                  >
+                    Call Now
+                  </motion.a>
+                </div>
+              </div>
+            ) : (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleContactAgent}
+                  className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                >
+                  Contact Agent
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleScheduleTour}
+                  className="bg-white border border-primary text-primary font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                >
+                  Schedule Tour
+                </motion.button>
+              </>
+            )}
           </div>
         </div>
       </motion.div>
