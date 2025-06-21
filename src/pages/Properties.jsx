@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FiX } from 'react-icons/fi';
 import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -13,9 +14,13 @@ const Properties = () => {
   const [error, setError] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [filterOption, setFilterOption] = useState('all');
+  const [purposeFilter, setPurposeFilter] = useState('all'); // NEW: Rent/Sale filter
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [suggestedProperties, setSuggestedProperties] = useState([]);
 
   // Fetch properties from Supabase
   useEffect(() => {
@@ -40,6 +45,31 @@ const Properties = () => {
     fetchProperties();
   }, []);
 
+  // Initialize from URL params
+  useEffect(() => {
+    const type = searchParams.get('type');
+    const purpose = searchParams.get('purpose'); // NEW: Get purpose from URL
+    
+    if (type) {
+      setFilterOption(type);
+      setActiveFilters(prev => [...prev, { 
+        type: 'propertyType', 
+        value: type, 
+        label: `Type: ${type.charAt(0).toUpperCase() + type.slice(1)}` 
+      }]);
+    }
+    
+    // NEW: Set purpose filter if exists in URL
+    if (purpose) {
+      setPurposeFilter(purpose);
+      setActiveFilters(prev => [...prev, { 
+        type: 'purpose', 
+        value: purpose, 
+        label: `For: ${purpose.charAt(0).toUpperCase() + purpose.slice(1)}` 
+      }]);
+    }
+  }, [searchParams]);
+
   // Apply filters and sorting
   useEffect(() => {
     let result = [...properties];
@@ -60,6 +90,13 @@ const Properties = () => {
       );
     }
     
+    // NEW: Apply purpose filter (rent/sale)
+    if (purposeFilter !== 'all') {
+      result = result.filter(property => 
+        property.purpose === purposeFilter
+      );
+    }
+    
     // Apply sorting
     if (sortOption === 'price-low') {
       result.sort((a, b) => a.price - b.price);
@@ -72,7 +109,50 @@ const Properties = () => {
     }
     
     setFilteredProperties(result);
-  }, [properties, sortOption, filterOption, searchQuery]);
+  }, [properties, sortOption, filterOption, purposeFilter, searchQuery]); // NEW: Added purposeFilter
+
+  // Update active filters
+  useEffect(() => {
+    const filters = [];
+    
+    if (filterOption !== 'all') {
+      filters.push({
+        type: 'propertyType',
+        value: filterOption,
+        label: `Type: ${filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}`
+      });
+    }
+    
+    // NEW: Add purpose filter if active
+    if (purposeFilter !== 'all') {
+      filters.push({
+        type: 'purpose',
+        value: purposeFilter,
+        label: `For: ${purposeFilter.charAt(0).toUpperCase() + purposeFilter.slice(1)}`
+      });
+    }
+    
+    if (searchQuery) {
+      filters.push({
+        type: 'search',
+        value: searchQuery,
+        label: `Search: "${searchQuery}"`
+      });
+    }
+    
+    setActiveFilters(filters);
+  }, [filterOption, purposeFilter, searchQuery]); // NEW: Added purposeFilter
+
+  // Fetch suggested properties when no results
+  useEffect(() => {
+    if (filteredProperties.length === 0 && properties.length > 0) {
+      const featured = properties
+        .filter(p => p.featured)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4);
+      setSuggestedProperties(featured);
+    }
+  }, [filteredProperties, properties]);
 
   // Format price as currency
   const formatPrice = (price) => {
@@ -87,7 +167,6 @@ const Properties = () => {
   const openModal = (property) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
-    // Disable background scrolling
     document.body.style.overflow = 'hidden';
   };
 
@@ -95,8 +174,36 @@ const Properties = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedProperty(null);
-    // Re-enable background scrolling
     document.body.style.overflow = 'auto';
+  };
+
+  // Remove a specific filter
+  const removeFilter = (filterType) => {
+    if (filterType === 'propertyType') {
+      setFilterOption('all');
+      const params = new URLSearchParams(searchParams);
+      params.delete('type');
+      setSearchParams(params);
+    }
+    // NEW: Handle purpose filter removal
+    if (filterType === 'purpose') {
+      setPurposeFilter('all');
+      const params = new URLSearchParams(searchParams);
+      params.delete('purpose');
+      setSearchParams(params);
+    }
+    if (filterType === 'search') {
+      setSearchQuery('');
+    }
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setFilterOption('all');
+    setPurposeFilter('all'); // NEW: Reset purpose filter
+    setSortOption('newest');
+    setSearchParams({});
   };
 
   return (
@@ -109,7 +216,7 @@ const Properties = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         
-        {/* Hero Section with Stunning Animation */}
+        {/* Hero Section */}
         <div className="relative overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, y: -50 }}
@@ -219,6 +326,20 @@ const Properties = () => {
                   />
                 </div>
                 
+                {/* NEW: Purpose Filter (Rent/Sale) */}
+                <div className="mb-6">
+                  <label className="block text-gray-700 mb-2">Purpose</label>
+                  <select
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value={purposeFilter}
+                    onChange={(e) => setPurposeFilter(e.target.value)}
+                  >
+                    <option value="all">All Purposes</option>
+                    <option value="sale">For Sale</option>
+                    <option value="rent">For Rent</option>
+                  </select>
+                </div>
+                
                 {/* Property Type */}
                 <div className="mb-6">
                   <label className="block text-gray-700 mb-2">Property Type</label>
@@ -256,11 +377,7 @@ const Properties = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-xl transition-colors"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilterOption('all');
-                    setSortOption('newest');
-                  }}
+                  onClick={clearAllFilters}
                 >
                   Reset Filters
                 </motion.button>
@@ -270,7 +387,7 @@ const Properties = () => {
             {/* Property Listings */}
             <div className="lg:w-3/4">
               <motion.div 
-                className="flex justify-between items-center mb-10"
+                className="flex justify-between items-center mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -282,6 +399,43 @@ const Properties = () => {
                   Showing {filteredProperties.length} of {properties.length} properties
                 </div>
               </motion.div>
+              
+              {/* Active Filters */}
+              {activeFilters.length > 0 && (
+                <motion.div 
+                  className="mb-8"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium text-gray-800">Active Filters</h3>
+                    <button 
+                      onClick={clearAllFilters}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {activeFilters.map((filter, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-primary/10 text-primary rounded-full pl-3 pr-2 py-1.5 flex items-center"
+                      >
+                        <span className="text-sm mr-1">{filter.label}</span>
+                        <button 
+                          onClick={() => removeFilter(filter.type)}
+                          className="ml-1 text-primary/70 hover:text-primary"
+                        >
+                          <FiX size={16} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
               
               {error && (
                 <motion.div 
@@ -300,29 +454,51 @@ const Properties = () => {
                   ))}
                 </div>
               ) : filteredProperties.length === 0 ? (
-                <motion.div 
-                  className="text-center py-16 bg-white rounded-2xl shadow-xl"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <div className="text-5xl text-primary mb-6">🏝️</div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">No properties match your criteria</h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                    Try adjusting your filters or search terms to find your perfect coastal property
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-primary hover:bg-primary-dark text-white font-medium py-3 px-8 rounded-xl transition-colors"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setFilterOption('all');
-                      setSortOption('newest');
-                    }}
+                <div>
+                  <motion.div 
+                    className="text-center py-16 bg-white rounded-2xl shadow-xl mb-12"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                   >
-                    Reset Filters
-                  </motion.button>
-                </motion.div>
+                    <div className="text-5xl text-primary mb-6">🏝️</div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">No properties match your criteria</h3>
+                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      Try adjusting your filters or search terms to find your perfect coastal property
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-primary hover:bg-primary-dark text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                      onClick={clearAllFilters}
+                    >
+                      Reset Filters
+                    </motion.button>
+                  </motion.div>
+                  
+                  {/* Suggested Properties */}
+                  {suggestedProperties.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="mb-12"
+                    >
+                      <h3 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+                        Featured Properties You Might Like
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {suggestedProperties.map((property, index) => (
+                          <PropertyCard 
+                            key={property.id} 
+                            property={property} 
+                            index={index}
+                            openModal={openModal}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               ) : (
                 <motion.div 
                   className="grid grid-cols-1 md:grid-cols-2 gap-8"
@@ -662,7 +838,7 @@ const PropertyModal = ({ property, closeModal, formatPrice }) => {
           
           {/* Property Description */}
           <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Description</h3>
+            <h3 className="text-xl font-semibold mb-4">Description</h3>
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
               {property.description || 'No description available.'}
             </p>
