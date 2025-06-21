@@ -20,7 +20,7 @@ import AdminProperties from './pages/admin/AdminProperties';
 import Bookings from './pages/admin/Bookings';
 import ClientManagement from './pages/admin/ClientManagement';
 import PropertyModal from './components/PropertyModal'; 
-
+import { Analytics } from "@vercel/analytics/next"
 // Get Clerk publishable key from environment variables
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
