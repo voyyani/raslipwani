@@ -4,7 +4,7 @@ import {
   Routes, 
   Route, 
   Navigate, 
-  Outlet  // Add this import
+  Outlet  
 } from 'react-router-dom';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -19,6 +19,7 @@ import Dashboard from './pages/admin/Dashboard';
 import AdminProperties from './pages/admin/AdminProperties';
 import Bookings from './pages/admin/Bookings';
 import ClientManagement from './pages/admin/ClientManagement';
+import PropertyModal from './components/PropertyModal'; 
 
 // Get Clerk publishable key from environment variables
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -88,16 +89,21 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/properties" element={<Properties />} />
-<Route path="/properties/:id" element={<PropertyDetail />} />          <Route path="/services" element={<Services />} />
+          <Route path="/properties/:id" element={<PropertyDetail />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          
+          {/* New route for property modal */}
+          <Route path="/property/:id" element={<PropertyModalRoute />} />
+          
           {/* Protected admin routes */}
           <Route 
             path="/admin" 
             element={
               <ProtectedRoute>
                 <AdminLayout>
-                  <Outlet /> {/* Now properly defined */}
+                  <Outlet />
                 </AdminLayout>
               </ProtectedRoute>
             } 
@@ -115,5 +121,66 @@ function App() {
     </ClerkProvider>
   );
 }
+
+// New component to handle property modal route
+const PropertyModalRoute = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) throw error;
+        setProperty(data);
+      } catch (err) {
+        console.error('Failed to load property:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (id) fetchProperty();
+  }, [id]);
+
+  const closeModal = () => {
+    navigate(-1); // Go back to previous page when closing modal
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+      {property ? (
+        <PropertyModal property={property} closeModal={closeModal} />
+      ) : (
+        <div className="bg-white p-8 rounded-xl max-w-md text-center">
+          <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
+          <p>The property you requested doesn't exist or has been removed.</p>
+          <button 
+            onClick={closeModal}
+            className="mt-6 bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary-dark"
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default App;

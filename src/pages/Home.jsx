@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PropertyModal from '../components/PropertyModal';
 
 const Home = () => {
   const servicesRef = useRef(null);
@@ -12,6 +13,8 @@ const Home = () => {
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch featured properties from Supabase
   useEffect(() => {
@@ -43,6 +46,20 @@ const Home = () => {
       behavior: 'smooth',
       block: 'start'
     });
+  };
+
+  // Open modal function
+  const openModal = (property) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  // Close modal function
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProperty(null);
+    document.body.style.overflow = 'auto';
   };
 
   return (
@@ -131,8 +148,6 @@ const Home = () => {
             </button>
           </section>
           
-          
-          
           {/* Services Section */}
           <section ref={servicesRef} className="py-20 bg-gray-50">
             <div className="container mx-auto px-4">
@@ -205,7 +220,12 @@ const Home = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {featuredProperties.map((property, index) => (
-                    <PropertyCard key={property.id} property={property} index={index} />
+                    <PropertyCard 
+                      key={property.id} 
+                      property={property} 
+                      index={index}
+                      openModal={openModal}
+                    />
                   ))}
                 </div>
               )}
@@ -301,6 +321,16 @@ const Home = () => {
         </main>
         
         <Footer />
+
+        {/* Property Modal */}
+        <AnimatePresence>
+          {isModalOpen && selectedProperty && (
+            <PropertyModal 
+              property={selectedProperty} 
+              closeModal={closeModal}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
@@ -329,7 +359,7 @@ const ServiceCard = ({ icon, title, description, index }) => (
 );
 
 // Property Card Component
-const PropertyCard = ({ property, index }) => {
+const PropertyCard = ({ property, index, openModal }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -359,9 +389,11 @@ const PropertyCard = ({ property, index }) => {
             <span className="text-gray-500">No Image Available</span>
           </div>
         )}
-        <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-          Featured
-        </div>
+        {property.featured && (
+          <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
+            Featured
+          </div>
+        )}
       </div>
       <div className="p-6">
         <h3 className="text-xl font-bold mb-2">{property.title}</h3>
@@ -381,12 +413,12 @@ const PropertyCard = ({ property, index }) => {
             {formatPrice(property.price)}
           </span>
         </div>
-        <Link 
-          to={`/properties/${property.id}`}
-          className="block mt-6 text-center bg-primary hover:bg-primary-dark text-white py-2.5 rounded-lg transition-colors duration-300"
+        <button 
+          onClick={() => openModal(property)}
+          className="block mt-6 w-full text-center bg-primary hover:bg-primary-dark text-white py-2.5 rounded-lg transition-colors duration-300"
         >
           View Details
-        </Link>
+        </button>
       </div>
     </motion.div>
   );
