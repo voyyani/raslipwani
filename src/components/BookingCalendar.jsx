@@ -362,146 +362,145 @@ const BookingCalendar = ({
               </div>
             ))}
             
-            {(viewMode === 'week' || viewMode === 'month') && appointments.map(day => (
-              viewMode === 'week' ? (
-                day.appointments.length > 0 && (
-                  <div key={day.date.toString()} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3">
-                      {format(day.date, 'EEEE, MMMM d, yyyy')}
-                    </h3>
-                    <div className="space-y-3">
-                      {day.appointments.map(booking => (
-                        <div 
-                          key={booking.id} 
-                          className={`p-4 rounded-lg border-l-4 shadow-sm ${
-                            booking.status === 'confirmed' ? 'border-green-500 bg-green-50' :
-                            booking.status === 'cancelled' ? 'border-red-500 bg-red-50' :
-                            'border-yellow-500 bg-yellow-50'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-medium text-gray-900">{booking.name}</h3>
-                              <p className="text-sm text-gray-600">{booking.service || booking.viewing_type}</p>
-                            </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                              booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {booking.status}
-                            </span>
+            {viewMode === 'week' && appointments.map(day => (
+              day.appointments.length > 0 && (
+                <div key={day.date.toString()} className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">
+                    {format(day.date, 'EEEE, MMMM d, yyyy')}
+                  </h3>
+                  <div className="space-y-3">
+                    {day.appointments.map(booking => (
+                      <div 
+                        key={booking.id} 
+                        className={`p-4 rounded-lg border-l-4 shadow-sm ${
+                          booking.status === 'confirmed' ? 'border-green-500 bg-green-50' :
+                          booking.status === 'cancelled' ? 'border-red-500 bg-red-50' :
+                          'border-yellow-500 bg-yellow-50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">{booking.name}</h3>
+                            <p className="text-sm text-gray-600">{booking.service || booking.viewing_type}</p>
                           </div>
-                          
-                          <div className="mt-3">
-                            <p className="text-sm text-gray-700 flex items-center">
-                              <FaClock className="mr-2 text-gray-500 flex-shrink-0" />
-                              <span>{formatDate(booking.appointment_at)}</span>
-                            </p>
-                          </div>
-                          
-                          {/* Status Controls */}
-                          <div className="flex justify-between mt-4">
-                            <div className="flex gap-2">
-                              {booking.status !== 'confirmed' && (
-                                <button
-                                  onClick={() => updateStatus(booking.id, 'confirmed')}
-                                  className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
-                                  title="Confirm appointment"
-                                >
-                                  <FaCheck className="mr-1" /> Confirm
-                                </button>
-                              )}
-                              {booking.status !== 'cancelled' && (
-                                <button
-                                  onClick={() => updateStatus(booking.id, 'cancelled')}
-                                  className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs flex items-center"
-                                  title="Cancel appointment"
-                                >
-                                  <FaTimes className="mr-1" /> Cancel
-                                </button>
-                              )}
-                            </div>
-                            
-                            <div className="flex space-x-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                        
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-700 flex items-center">
+                            <FaClock className="mr-2 text-gray-500 flex-shrink-0" />
+                            <span>{formatDate(booking.appointment_at)}</span>
+                          </p>
+                        </div>
+                        
+                        {/* Status Controls */}
+                        <div className="flex justify-between mt-4">
+                          <div className="flex gap-2">
+                            {booking.status !== 'confirmed' && (
                               <button
-                                onClick={() => openBookingModal(booking)}
-                                className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                                onClick={() => updateStatus(booking.id, 'confirmed')}
+                                className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
+                                title="Confirm appointment"
                               >
-                                <FaEye className="mr-1" /> Details
+                                <FaCheck className="mr-1" /> Confirm
                               </button>
-                            </div>
+                            )}
+                            {booking.status !== 'cancelled' && (
+                              <button
+                                onClick={() => updateStatus(booking.id, 'cancelled')}
+                                className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs flex items-center"
+                                title="Cancel appointment"
+                              >
+                                <FaTimes className="mr-1" /> Cancel
+                              </button>
+                            )}
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => openBookingModal(booking)}
+                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                            >
+                              <FaEye className="mr-1" /> Details
+                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              ) : (
-                // Month view
-                <div 
-                  key={booking.id} 
-                  className={`p-4 rounded-lg border-l-4 shadow-sm ${
-                    booking.status === 'confirmed' ? 'border-green-500 bg-green-50' :
-                    booking.status === 'cancelled' ? 'border-red-500 bg-red-50' :
-                    'border-yellow-500 bg-yellow-50'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{booking.name}</h3>
-                      <p className="text-sm text-gray-600">{booking.service || booking.viewing_type}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                  
-                  <div className="mt-3">
-                    <p className="text-sm text-gray-700 flex items-center">
-                      <FaClock className="mr-2 text-gray-500 flex-shrink-0" />
-                      <span>{formatDate(booking.appointment_at)}</span>
-                    </p>
-                  </div>
-                  
-                  {/* Status Controls */}
-                  <div className="flex justify-between mt-4">
-                    <div className="flex gap-2">
-                      {booking.status !== 'confirmed' && (
-                        <button
-                          onClick={() => updateStatus(booking.id, 'confirmed')}
-                          className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
-                          title="Confirm appointment"
-                        >
-                          <FaCheck className="mr-1" /> Confirm
-                        </button>
-                      )}
-                      {booking.status !== 'cancelled' && (
-                        <button
-                          onClick={() => updateStatus(booking.id, 'cancelled')}
-                          className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs flex items-center"
-                          title="Cancel appointment"
-                        >
-                          <FaTimes className="mr-1" /> Cancel
-                        </button>
-                      )}
-                    </div>
-                    
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => openBookingModal(booking)}
-                        className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                      >
-                        <FaEye className="mr-1" /> Details
-                      </button>
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )
+            ))}
+            
+            {viewMode === 'month' && appointments.map(booking => (
+              <div 
+                key={booking.id} 
+                className={`p-4 rounded-lg border-l-4 shadow-sm ${
+                  booking.status === 'confirmed' ? 'border-green-500 bg-green-50' :
+                  booking.status === 'cancelled' ? 'border-red-500 bg-red-50' :
+                  'border-yellow-500 bg-yellow-50'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{booking.name}</h3>
+                    <p className="text-sm text-gray-600">{booking.service || booking.viewing_type}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {booking.status}
+                  </span>
+                </div>
+                
+                <div className="mt-3">
+                  <p className="text-sm text-gray-700 flex items-center">
+                    <FaClock className="mr-2 text-gray-500 flex-shrink-0" />
+                    <span>{formatDate(booking.appointment_at)}</span>
+                  </p>
+                </div>
+                
+                {/* Status Controls */}
+                <div className="flex justify-between mt-4">
+                  <div className="flex gap-2">
+                    {booking.status !== 'confirmed' && (
+                      <button
+                        onClick={() => updateStatus(booking.id, 'confirmed')}
+                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
+                        title="Confirm appointment"
+                      >
+                        <FaCheck className="mr-1" /> Confirm
+                      </button>
+                    )}
+                    {booking.status !== 'cancelled' && (
+                      <button
+                        onClick={() => updateStatus(booking.id, 'cancelled')}
+                        className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs flex items-center"
+                        title="Cancel appointment"
+                      >
+                        <FaTimes className="mr-1" /> Cancel
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => openBookingModal(booking)}
+                      className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                    >
+                      <FaEye className="mr-1" /> Details
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
