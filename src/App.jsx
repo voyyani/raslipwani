@@ -17,7 +17,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Dashboard from './pages/admin/Dashboard';
 import AdminProperties from './pages/admin/AdminProperties';
-import Bookings from './pages/admin/Bookings';
+import Bookings from './features/bookings/Bookings';
 import ClientManagement from './pages/admin/ClientManagement';
 import PropertyModal from './components/PropertyModal'; 
 // Get Clerk publishable key from environment variables

@@ -29,7 +29,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  @apply text-gray-800 bg-light;
+  color: #1f2937; /* Tailwind's text-gray-800 */
+  background-color: #f8fafc; /* Tailwind's bg-light (use #f8fafc for light background) */
 }
 
 a {
@@ -77,4 +78,31 @@ button:focus-visible {
   button {
     background-color: #333;
   }
+}
+/* Calendar styling */
+.custom-calendar .react-calendar__tile--has-bookings {
+  background-color: #dbeafe;
+}
+
+.custom-calendar .react-calendar__tile--has-pending {
+  background-color: #fef3c7;
+}
+
+.custom-calendar .react-calendar__tile--has-confirmed {
+  background-color: #dcfce7;
+}
+
+.custom-calendar .react-calendar__tile:enabled:hover,
+.custom-calendar .react-calendar__tile:enabled:focus {
+  background-color: #eff6ff;
+}
+
+/* Success message animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }
