@@ -9,10 +9,9 @@ import {
   FaEdit, 
   FaEnvelope,
   FaCalendarAlt,
-  FaChartLine,
-  FaUserCircle,
+  FaUserFriends,
   FaDollarSign,
-  FaArrowUp
+  FaBuilding
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -20,19 +19,17 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalProperties: 0,
     featuredProperties: 0,
+    pendingProperties: 0,
     soldProperties: 0,
     totalBookings: 0,
-    
+    newBookings: 0,
+    availableProperties: 0
   });
   
   const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [performanceMetrics, setPerformanceMetrics] = useState({
-    views: 1242,
-    leads: 84,
-    conversion: 6.7
-  });
-  
+  const [activeBookings, setActiveBookings] = useState([]);
+
   // Format time difference for recent activities
   const timeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -63,27 +60,42 @@ const Dashboard = () => {
         const [
           { count: total }, 
           { count: featured }, 
+          { count: pending },
           { count: sold },
+          { count: available },
           { count: bookings },
-         
+          { count: newBookings },
+          { data: upcomingBookings }
         ] = await Promise.all([
           supabase.from('properties').select('*', { count: 'exact' }),
           supabase.from('properties').select('*', { count: 'exact' }).eq('featured', true),
+          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'pending'),
           supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'sold'),
+          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'available'),
           supabase.from('bookings').select('*', { count: 'exact' }),
           supabase.from('bookings')
             .select('*', { count: 'exact' })
-            .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+            .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+          supabase
+            .from('bookings')
+            .select('id, name, appointment_at, service, viewing_type')
+            .gte('appointment_at', new Date().toISOString())
+            .order('appointment_at', { ascending: true })
+            .limit(4)
         ]);
         
         setStats({
           totalProperties: total || 0,
           featuredProperties: featured || 0,
+          pendingProperties: pending || 0,
           soldProperties: sold || 0,
+          availableProperties: available || 0,
           totalBookings: bookings || 0,
-          
+          newBookings: newBookings || 0
         });
         
+        setActiveBookings(upcomingBookings || []);
+
         // Fetch recent activities from both properties and bookings
         const [
           { data: propertiesActivities },
@@ -158,29 +170,34 @@ const Dashboard = () => {
   }, []);
 
   // Stats card component
-  const StatCard = ({ title, value, icon, color, link, trend }) => (
+  const StatCard = ({ title, value, icon, color, link }) => (
     <Link 
       to={link || '#'} 
-      className={`bg-gradient-to-br from-${color}-50 to-${color}-100 border border-${color}-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200`}
+      className={`bg-white border border-${color}-100 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 group`}
     >
-      <div className="flex justify-between items-start">
+      <div className="flex items-start">
+        <div className={`bg-${color}-100 p-3 rounded-lg mr-4 group-hover:bg-${color}-200 transition-colors`}>
+          {React.cloneElement(icon, { className: `text-${color}-600 text-xl` })}
+        </div>
         <div>
-          <div className="flex items-center mb-3">
-            <div className={`bg-${color}-100 p-3 rounded-lg mr-3`}>
-              {React.cloneElement(icon, { className: `text-${color}-600 text-xl` })}
-            </div>
-            <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-1">{title}</h3>
           <p className="text-3xl font-bold text-gray-800">{value}</p>
         </div>
-        {trend && (
-          <span className={`bg-${color}-100 text-${color}-800 px-2 py-1 rounded-full text-xs font-medium flex items-center`}>
-            <FaArrowUp className="mr-1" /> {trend}
-          </span>
-        )}
       </div>
     </Link>
   );
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const options = { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
 
   return (
     <>
@@ -198,16 +215,23 @@ const Dashboard = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : (
-        <div className="space-y-6">
         <div className="space-y-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             <StatCard 
               title="Total Properties" 
               value={stats.totalProperties} 
-              icon={<FaHome />} 
+              icon={<FaBuilding />} 
               color="blue" 
               link="/admin/properties"
+            />
+            
+            <StatCard 
+              title="Available" 
+              value={stats.availableProperties} 
+              icon={<FaHome />} 
+              color="green" 
+              link="/admin/properties?status=available"
             />
             
             <StatCard 
@@ -218,15 +242,20 @@ const Dashboard = () => {
               link="/admin/properties?filter=featured"
             />
             
-           
+            <StatCard 
+              title="Pending Sale" 
+              value={stats.pendingProperties} 
+              icon={<FaDollarSign />} 
+              color="yellow" 
+              link="/admin/properties?status=pending"
+            />
             
             <StatCard 
               title="Sold" 
               value={stats.soldProperties} 
               icon={<FaHome />} 
               color="green" 
-              
-              link="/admin/properties?filter=sold"
+              link="/admin/properties?status=sold"
             />
             
             <StatCard 
@@ -237,23 +266,24 @@ const Dashboard = () => {
               link="/admin/bookings"
             />
             
-            
+            <StatCard 
+              title="New Bookings" 
+              value={stats.newBookings} 
+              icon={<FaUserFriends />} 
+              color="indigo" 
+              link="/admin/bookings?filter=recent"
+            />
           </div>
           
-          {/* Performance Metrics */}
-            
-            
-            
-            
-            
-          </div>
-          
+          {/* Data Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Recent Activity */}
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-gray-800">Recent Activity</h3>
-                
+                <Link to="/admin/properties" className="text-blue-600 hover:underline text-sm">
+                  View All
+                </Link>
               </div>
               
               {recentActivities.length === 0 ? (
@@ -265,7 +295,7 @@ const Dashboard = () => {
                   {recentActivities.map(activity => (
                     <div 
                       key={activity.id} 
-                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group"
+                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-2 rounded-lg transition-colors"
                     >
                       <div className="bg-gray-100 p-3 rounded-lg mr-4 mt-1 group-hover:bg-gray-200 transition-colors">
                         {activity.icon}
@@ -289,9 +319,47 @@ const Dashboard = () => {
               )}
             </div>
             
-            
+            {/* Upcoming Viewings */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">Upcoming Viewings</h3>
+                <Link to="/admin/viewings" className="text-blue-600 hover:underline text-sm">
+                  View All
+                </Link>
+              </div>
+              
+              {activeBookings.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No upcoming viewings scheduled</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activeBookings.map(booking => (
+                    <div 
+                      key={booking.id} 
+                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-3 rounded-lg transition-colors"
+                    >
+                      <div className="bg-purple-100 p-3 rounded-lg mr-4">
+                        <FaCalendarAlt className="text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">
+                          {booking.name || 'Client'}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1 flex items-center">
+                          <FaClock className="mr-1.5 text-gray-400 text-xs" />
+                          {formatDate(booking.appointment_at)}
+                        </p>
+                        <p className="text-sm text-gray-700 mt-2">
+                          {booking.service || booking.viewing_type || 'Property Viewing'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          
+          </div>
         </div>
       )}
     </>

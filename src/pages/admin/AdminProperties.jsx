@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../../utils/supabaseClient';
-import { FaEdit, FaTrash, FaPlus, FaTimes, FaUpload, FaSearch } from 'react-icons/fa';
+import { 
+  FaEdit, 
+  FaTrash, 
+  FaPlus, 
+  FaTimes, 
+  FaUpload, 
+  FaSearch,
+  FaCheck,
+  FaDollarSign,
+  FaHome,
+  FaBuilding,
+  FaLandmark
+} from 'react-icons/fa';
 
 const AdminProperties = () => {
   const [properties, setProperties] = useState([]);
@@ -14,22 +26,21 @@ const AdminProperties = () => {
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [newAmenity, setNewAmenity] = useState('');
+  const [errors, setErrors] = useState({});
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
-    property_type: 'house',
+    property_type: '',
     status: 'available',
+    purpose: 'sale',
     location: '',
     address: '',
-    city: '',
-    state: '',
-    zip_code: '',
     bedrooms: '',
     bathrooms: '',
     area_sqft: '',
-    year_built: '',
     lot_size_sqft: '',
     has_pool: false,
     has_garden: false,
@@ -44,10 +55,11 @@ const AdminProperties = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const amenitiesOptions = [
-    'pool', 'gym', 'security', 'fireplace', 'garden',
-    'balcony', 'parking', 'air-conditioning', 'heating'
-  ];
+  // Property types based on purpose
+  const propertyTypes = {
+    sale: ['land', 'residential', 'commercial'],
+    rent: ['apartment', 'villa', 'office']
+  };
 
   // Fetch Cloudinary settings and properties
   useEffect(() => {
@@ -87,26 +99,46 @@ const AdminProperties = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    // Reset property type when purpose changes
+    if (name === 'purpose') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        property_type: ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+    
+    // Clear error when field changes
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
-  const handleAmenitiesChange = (amenity) => {
+  const handleAddAmenity = () => {
+    if (newAmenity.trim() && !formData.amenities.includes(newAmenity.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        amenities: [...prev.amenities, newAmenity.trim()]
+      }));
+      setNewAmenity('');
+    }
+  };
+
+  const handleRemoveAmenity = (index) => {
     setFormData(prev => {
-      const currentAmenities = [...prev.amenities];
-      if (currentAmenities.includes(amenity)) {
-        return {
-          ...prev,
-          amenities: currentAmenities.filter(a => a !== amenity)
-        };
-      } else {
-        return {
-          ...prev,
-          amenities: [...currentAmenities, amenity]
-        };
-      }
+      const newAmenities = [...prev.amenities];
+      newAmenities.splice(index, 1);
+      return { ...prev, amenities: newAmenities };
     });
   };
 
@@ -165,17 +197,14 @@ const AdminProperties = () => {
       title: '',
       description: '',
       price: '',
-      property_type: 'house',
+      property_type: '',
       status: 'available',
+      purpose: 'sale',
       location: '',
       address: '',
-      city: '',
-      state: '',
-      zip_code: '',
       bedrooms: '',
       bathrooms: '',
       area_sqft: '',
-      year_built: '',
       lot_size_sqft: '',
       has_pool: false,
       has_garden: false,
@@ -185,6 +214,30 @@ const AdminProperties = () => {
     });
     setImageFiles([]);
     setImagePreviews([]);
+    setNewAmenity('');
+    setErrors({});
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+    const requiredFields = [
+      'title', 'description', 'price', 'property_type', 
+      'location', 'address', 'bedrooms', 'bathrooms', 'area_sqft'
+    ];
+    
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
+        newErrors[field] = `${field.replace('_', ' ')} is required`;
+      }
+    });
+    
+    if (formData.images.length === 0 && imageFiles.length === 0) {
+      newErrors.images = 'At least one image is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Upload multiple images to Cloudinary
@@ -218,6 +271,8 @@ const AdminProperties = () => {
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+    
     try {
       setLoading(true);
       setError('');
@@ -233,7 +288,7 @@ const AdminProperties = () => {
       // Convert number fields
       const numericFields = [
         'price', 'bedrooms', 'bathrooms', 'area_sqft', 
-        'year_built', 'lot_size_sqft'
+        'lot_size_sqft'
       ];
       const submitData = { ...formData, images: cloudinaryUrls };
       
@@ -318,15 +373,12 @@ const AdminProperties = () => {
       price: property.price,
       property_type: property.property_type,
       status: property.status,
+      purpose: property.purpose || 'sale',
       location: property.location,
       address: property.address || '',
-      city: property.city || '',
-      state: property.state || '',
-      zip_code: property.zip_code || '',
       bedrooms: property.bedrooms,
       bathrooms: property.bathrooms,
       area_sqft: property.area_sqft,
-      year_built: property.year_built || '',
       lot_size_sqft: property.lot_size_sqft || '',
       has_pool: property.has_pool || false,
       has_garden: property.has_garden || false,
@@ -336,6 +388,7 @@ const AdminProperties = () => {
     });
     setImageFiles([]);
     setImagePreviews([]);
+    setNewAmenity('');
     setIsModalOpen(true);
   };
 
@@ -504,7 +557,7 @@ const AdminProperties = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-gray-900">{property.location}</div>
                     <div className="text-sm text-gray-500">
-                      {property.city}, {property.state}
+                      {property.address}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-900">
@@ -580,9 +633,10 @@ const AdminProperties = () => {
                       name="title"
                       value={formData.title}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className={`w-full border ${errors.title ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                       required
                     />
+                    {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                   </div>
                   
                   <div>
@@ -591,39 +645,140 @@ const AdminProperties = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg p-3 h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className={`w-full border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                       required
                     ></textarea>
+                    {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price (KES)*</label>
                     <input
                       type="number"
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className={`w-full border ${errors.price ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                       required
                     />
+                    {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Purpose*</label>
+                      <select
+                        name="purpose"
+                        value={formData.purpose}
+                        onChange={handleInputChange}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        required
+                      >
+                        <option value="sale">For Sale</option>
+                        <option value="rent">For Rent</option>
+                      </select>
+                    </div>
+                    
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Property Type*</label>
                       <select
                         name="property_type"
                         value={formData.property_type}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className={`w-full border ${errors.property_type ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                         required
                       >
-                        <option value="house">House</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="condo">Condo</option>
-                        <option value="townhouse">Townhouse</option>
-                        <option value="land">Land</option>
+                        <option value="">Select Type</option>
+                        {propertyTypes[formData.purpose]?.map(type => (
+                          <option key={type} value={type}>
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </option>
+                        ))}
                       </select>
+                      {errors.property_type && <p className="text-red-500 text-sm mt-1">{errors.property_type}</p>}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Location*</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className={`w-full border ${errors.location ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                      required
+                    />
+                    {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address*</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className={`w-full border ${errors.address ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                      required
+                    />
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms*</label>
+                      <input
+                        type="number"
+                        name="bedrooms"
+                        value={formData.bedrooms}
+                        onChange={handleInputChange}
+                        className={`w-full border ${errors.bedrooms ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                        required
+                      />
+                      {errors.bedrooms && <p className="text-red-500 text-sm mt-1">{errors.bedrooms}</p>}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms*</label>
+                      <input
+                        type="number"
+                        name="bathrooms"
+                        value={formData.bathrooms}
+                        onChange={handleInputChange}
+                        className={`w-full border ${errors.bathrooms ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                        required
+                      />
+                      {errors.bathrooms && <p className="text-red-500 text-sm mt-1">{errors.bathrooms}</p>}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Area (sqft)*</label>
+                      <input
+                        type="number"
+                        name="area_sqft"
+                        value={formData.area_sqft}
+                        onChange={handleInputChange}
+                        className={`w-full border ${errors.area_sqft ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                        required
+                      />
+                      {errors.area_sqft && <p className="text-red-500 text-sm mt-1">{errors.area_sqft}</p>}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Lot Size (sqft)</label>
+                      <input
+                        type="number"
+                        name="lot_size_sqft"
+                        value={formData.lot_size_sqft}
+                        onChange={handleInputChange}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
                     </div>
                     
                     <div>
@@ -643,148 +798,39 @@ const AdminProperties = () => {
                     </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Location*</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address*</label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">City*</label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">State*</label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code*</label>
-                      <input
-                        type="text"
-                        name="zip_code"
-                        value={formData.zip_code}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Column */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms*</label>
-                      <input
-                        type="number"
-                        name="bedrooms"
-                        value={formData.bedrooms}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms*</label>
-                      <input
-                        type="number"
-                        name="bathrooms"
-                        value={formData.bathrooms}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Area (sqft)*</label>
-                      <input
-                        type="number"
-                        name="area_sqft"
-                        value={formData.area_sqft}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Year Built</label>
-                      <input
-                        type="number"
-                        name="year_built"
-                        value={formData.year_built}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Lot Size (sqft)</label>
-                      <input
-                        type="number"
-                        name="lot_size_sqft"
-                        value={formData.lot_size_sqft}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {amenitiesOptions.map(amenity => (
-                        <div key={amenity} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={amenity}
-                            checked={formData.amenities.includes(amenity)}
-                            onChange={() => handleAmenitiesChange(amenity)}
-                            className="mr-2 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-                          />
-                          <label htmlFor={amenity} className="capitalize text-gray-700">
-                            {amenity.replace('-', ' ')}
-                          </label>
+                    <div className="flex mb-3">
+                      <input
+                        type="text"
+                        value={newAmenity}
+                        onChange={(e) => setNewAmenity(e.target.value)}
+                        placeholder="Add amenity (e.g. Swimming Pool)"
+                        className="flex-grow border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddAmenity}
+                        className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {formData.amenities.map((amenity, index) => (
+                        <div 
+                          key={index} 
+                          className="bg-blue-100 text-blue-800 rounded-full pl-3 pr-2 py-1.5 flex items-center"
+                        >
+                          <span className="text-sm">{amenity}</span>
+                          <button 
+                            type="button"
+                            onClick={() => handleRemoveAmenity(index)}
+                            className="ml-1 text-blue-600 hover:text-blue-800"
+                          >
+                            <FaTimes size={14} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -821,7 +867,7 @@ const AdminProperties = () => {
                         onChange={handleInputChange}
                         className="mr-2 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                       />
-                      <label className="text-sm font-medium text-gray-700">Featured</label>
+                      <label className="text-sm font-medium text-gray-700">Featured Property</label>
                     </div>
                   </div>
                   
@@ -846,6 +892,8 @@ const AdminProperties = () => {
                         />
                       </div>
                     </div>
+                    
+                    {errors.images && <p className="text-red-500 text-sm mt-1">{errors.images}</p>}
                     
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
                       {/* Existing images */}
