@@ -91,8 +91,8 @@ graph TD
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/raslipwani-properties.git
-cd raslipwani-properties
+git clone https://github.com/your-username/raslipwani.git
+cd raslipwani
 
 # Install dependencies
 npm install
