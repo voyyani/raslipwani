@@ -1,0 +1,71 @@
+/* Add to your main CSS file */
+.react-calendar {
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.react-calendar__tile--has-confirmed {
+  background-color: rgba(72, 187, 120, 0.2);
+  position: relative;
+}
+
+.react-calendar__tile--has-confirmed::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #48bb78;
+  border-radius: 50%;
+}
+
+.react-calendar__tile--has-pending {
+  background-color: rgba(246, 224, 94, 0.2);
+  position: relative;
+}
+
+.react-calendar__tile--has-pending::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #f6e05e;
+  border-radius: 50%;
+}
+
+.react-calendar__tile--has-bookings {
+  position: relative;
+}
+
+.react-calendar__tile--has-bookings::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #4299e1;
+  border-radius: 50%;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #ebf8ff;
+}
+
+.react-calendar__tile--active {
+  background-color: #4299e1 !important;
+  color: white;
+}
+
+.react-calendar__tile--active::after {
+  background-color: white !important;
+}
