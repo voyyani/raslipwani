@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="space-y-5">
             <div className="flex items-center gap-4">
               <img
-                src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1750188349/raslipwanilogo_kryuwa.jpg"
+                src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
                 alt="Raslipwani Logo"
                 className="w-14 h-14 rounded-xl object-cover border-2 border-dashed border-white"
               />
