@@ -115,7 +115,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 # Application Settings
 VITE_SITE_NAME=Raslipwani Properties
-VITE_CONTACT_EMAIL=info@raslipwani.com
+VITE_CONTACT_EMAIL=info@raslipwani.co.ke
 ```
 
 ## 📈 Database Schema
@@ -263,4 +263,4 @@ For inquiries or support, contact our development team:
 
 * **Project Lead**: NGOWA CHEMBE KARISA
 * **GitHub**: [https://github.com/voyyani](https://github.com/voyyani)
-* **Project Website**: [https://www.raslipwani.com](https://raslipwani.com)
+* **Project Website**: [https://raslipwani.co.ke](https://raslipwani.co.ke)
