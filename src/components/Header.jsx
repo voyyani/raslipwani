@@ -76,7 +76,7 @@ const Header = () => {
             onClick={closeMenu}
           >
             <img
-              src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1750188349/raslipwanilogo_kryuwa.jpg"
+              src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
               alt="Raslipwani Logo"
               className={`transition-all duration-300 rounded-xl object-cover border-2 border-primary ${
                 isScrolled ? 'w-10 h-10' : 'w-12 h-12 md:w-16 md:h-16'
