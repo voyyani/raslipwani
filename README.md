@@ -263,4 +263,4 @@ For inquiries or support, contact our development team:
 
 * **Project Lead**: NGOWA CHEMBE KARISA
 * **GitHub**: [https://github.com/voyyani](https://github.com/voyyani)
-* **Project Website**: [https://raslipwani.com](https://raslipwani.com)
+* **Project Website**: [https://www.raslipwani.com](https://raslipwani.com)
