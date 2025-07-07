@@ -1,6 +1,6 @@
 # Raslipwani Properties - Real Estate Platform
 
-![Raslipwani Properties Banner](https://res.cloudinary.com/dzqdxosk2/image/upload/v1750188349/raslipwanilogo_kryuwa.jpg)
+![Raslipwani Properties Banner](https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![React Version](https://img.shields.io/badge/React-18.2.0-61dafb)](https://reactjs.org/)
