@@ -233,7 +233,10 @@ const PropertyDetail = () => {
                 onTouchEnd={handleTouchEnd}
               >
                 {/* Main Image */}
-                <div className="absolute inset-0 overflow-hidden">
+                <div 
+                  className="absolute inset-0 overflow-hidden cursor-pointer"
+                  onClick={toggleFullscreen}
+                >
                   <AnimatePresence initial={false} mode="wait">
                     <motion.img
                       key={currentImageIndex}
@@ -279,25 +282,6 @@ const PropertyDetail = () => {
                   </svg>
                 </button>
                 
-                {/* Fullscreen Toggle */}
-                <button
-                  className={`absolute top-4 right-4 z-20 ${
-                    isFullscreen 
-                      ? 'bg-black/50 hover:bg-black/70 text-white' 
-                      : 'bg-white/80 hover:bg-white text-gray-800'
-                  } rounded-full p-3 shadow-lg transition-colors`}
-                  onClick={toggleFullscreen}
-                  aria-label={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isFullscreen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 20L20 6M4 4l16 16" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" />
-                    )}
-                  </svg>
-                </button>
-                
                 {/* Thumbnail Strip */}
                 <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 ${
                   isFullscreen ? 'bg-black/30 py-2' : ''
@@ -311,7 +295,10 @@ const PropertyDetail = () => {
                             ? 'border-primary scale-105' 
                             : 'border-transparent opacity-70 hover:opacity-100'
                         }`}
-                        onClick={() => setCurrentImageIndex(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentImageIndex(index);
+                        }}
                         aria-label={`View image ${index + 1}`}
                       >
                         <img
@@ -335,7 +322,7 @@ const PropertyDetail = () => {
                 {/* Close Fullscreen Button */}
                 {isFullscreen && (
                   <button
-                    className="absolute top-4 right-16 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors"
+                    className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors"
                     onClick={toggleFullscreen}
                     aria-label="Exit fullscreen"
                   >
@@ -343,6 +330,16 @@ const PropertyDetail = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
+                )}
+                
+                {/* Fullscreen Hint */}
+                {!isFullscreen && (
+                  <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Click to view fullscreen
+                  </div>
                 )}
               </div>
             ) : (
