@@ -65,12 +65,51 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Raslipwani Properties | Premium Coastal Real Estate</title>
+        <title>Luxury Coastal Real Estate in Kenya | Raslipwani Properties</title>
         <meta 
           name="description" 
-          content="Discover luxury coastal properties in Kenya with Raslipwani - your trusted partner for beachfront homes, villas, and investment opportunities" 
+          content="Premium beachfront homes, villas & investment properties along Kenya's coast. 100+ luxury listings in Kilifi, Mombasa & Diani." 
         />
+        <meta property="og:title" content="Kenyan Coastal Real Estate Experts | Raslipwani" />
+        <meta property="og:description" content="Discover your dream beach property with Kenya's leading coastal real estate specialists" />
+        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/coastal-property-hero_md_omfqo1.jpg" />
         <link rel="canonical" href="https://www.raslipwani.com" />
+        
+        {/* Local Business Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateAgent",
+            "name": "Raslipwani Properties",
+            "image": "https://raslipwani.com/logo.png",
+            "@id": "https://www.raslipwani.com",
+            "url": "https://www.raslipwani.com",
+            "telephone": "+254758066526",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Kikambala Road",
+              "addressLocality": "Kilifi",
+              "postalCode": "80108",
+              "addressCountry": "KE"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "-3.6308",
+              "longitude": "39.8499"
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "08:00",
+              "closes": "18:00"
+            },
+            "sameAs": [
+              "https://www.facebook.com/raslipwani",
+              "https://www.instagram.com/raslipwani",
+              "https://twitter.com/raslipwani"
+            ]
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
@@ -94,7 +133,7 @@ const Home = () => {
               />
               <img 
                 src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/coastal-property-hero_lg_omfqo1.jpg" 
-                alt="Luxury coastal property in Kenya"
+                alt="Luxury coastal property with ocean view in Kilifi, Kenya"
                 className="w-full h-full object-cover"
                 loading="eager"
                 onLoad={() => setHeroLoaded(true)}
@@ -114,18 +153,13 @@ const Home = () => {
                 className="max-w-2xl text-white"
               >
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-                  Discover Your Coastal <span className="text-primary">Paradise</span>
+                  Luxury Coastal Properties in Kenya
                 </h1>
                 <p className="text-xl mb-8 max-w-xl">
-                  Premium real estate along Kenya's stunning coastline. Find your dream property with our expert team.
+                  Premium beachfront homes, villas, and investment opportunities along Kenya's stunning coastline
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Link 
-                    to="/properties" 
-                    className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-md text-center transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                  >
-                    Browse Properties
-                  </Link>
+                  
                   <button 
                     onClick={scrollToServices}
                     className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-md transition-all duration-300 border border-white/30"
@@ -309,12 +343,7 @@ const Home = () => {
                 >
                   Get in Touch
                 </Link>
-                <Link 
-                  to="/properties" 
-                  className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-md hover:bg-white hover:text-primary transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  View Properties
-                </Link>
+                
               </div>
             </div>
           </section>
@@ -380,9 +409,11 @@ const PropertyCard = ({ property, index, openModal }) => {
         {property.images?.[0] ? (
           <img 
             src={property.images[0]} 
-            alt={property.title} 
+            alt={`${property.title} in ${property.location}`}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-            loading="lazy"
+            loading={index > 1 ? "lazy" : "eager"}
+            width="400"
+            height="300"
           />
         ) : (
           <div className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center">

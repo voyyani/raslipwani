@@ -1,36 +1,47 @@
-import React from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { 
   BrowserRouter as Router, 
   Routes, 
   Route, 
   Navigate, 
-  Outlet  
+  Outlet,
+  useParams,
+  useNavigate,
+  Link
 } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import AdminLayout from './pages/admin/AdminLayout';
+import Header from './components/Header'; // Added import
+import Footer from './components/Footer'; // Added import
+import { supabase } from './utils/supabaseClient'; // Added import
 
-import Home from './pages/Home';
-import Properties from './pages/Properties';
-import PropertyDetail from './pages/PropertyDetail';
-import Services from './pages/Services';
-import About from './pages/About';
-import Contact from './pages/Contact';
+// Lazy-loaded main components
+const Home = lazy(() => import('./pages/Home'));
+const Properties = lazy(() => import('./pages/Properties'));
+const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
+const Services = lazy(() => import('./pages/Services'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+
+// Admin components
 import Dashboard from './pages/admin/Dashboard';
 import AdminProperties from './pages/admin/AdminProperties';
 import Bookings from './features/bookings/Bookings';
 import ClientManagement from './pages/admin/ClientManagement';
 import PropertyModal from './components/PropertyModal'; 
-// Get Clerk publishable key from environment variables
+
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Protected route component
 const ProtectedRoute = ({ children }) => {
   const { isLoaded, isSignedIn } = useUser();
   
   if (!isLoaded) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
   
   if (!isSignedIn) {
@@ -41,7 +52,6 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-  // Show error if Clerk key is missing
   if (!clerkPubKey) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -84,44 +94,109 @@ function App() {
         }
       }}
     >
+      {/* Global SEO Structure */}
+      <Helmet>
+        <html lang="en" />
+        <link rel="canonical" href="https://raslipwani.com" />
+        
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Raslipwani Properties",
+            "url": "https://raslipwani.com/",
+            "logo": "https://raslipwani.com/logo.png",
+            "sameAs": [
+              "https://www.facebook.com/raslipwani",
+              "https://www.instagram.com/raslipwani",
+              "https://twitter.com/raslipwani"
+            ],
+            "contactPoint": [{
+              "@type": "ContactPoint",
+              "telephone": "+254758066526",
+              "contactType": "Customer Service",
+              "areaServed": "KE"
+            }]
+          })}
+        </script>
+        
+        {/* Website Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Raslipwani Properties",
+            "url": "https://raslipwani.com/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://raslipwani.com/properties?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
+      </Helmet>
+      
       <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          
-          {/* New route for property modal */}
-          <Route path="/property/:id" element={<PropertyModalRoute />} />
-          
-          {/* Protected admin routes */}
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute>
-                <AdminLayout>
-                  <Outlet />
-                </AdminLayout>
-              </ProtectedRoute>
-            } 
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="properties" element={<AdminProperties />} />
-            <Route path="viewings" element={<Bookings />} />
-            <Route path="clients" element={<ClientManagement />} />
-          </Route>
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/properties" element={<Properties />} />
+            <Route path="/properties/:id" element={<PropertyDetail />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            
+            {/* SEO-friendly redirects */}
+            <Route path="/listings" element={<Navigate to="/properties" replace />} />
+            <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
+            
+            <Route path="/property/:id" element={<PropertyModalRoute />} />
+            
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Outlet />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="properties" element={<AdminProperties />} />
+              <Route path="viewings" element={<Bookings />} />
+              <Route path="clients" element={<ClientManagement />} />
+            </Route>
+            
+            {/* Enhanced 404 page */}
+            <Route path="*" element={
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="flex-grow container mx-auto px-4 py-32 text-center">
+                  <h1 className="text-4xl font-bold mb-6">Page Not Found</h1>
+                  <p className="text-xl mb-8">The page you're looking for doesn't exist or has been moved.</p>
+                  <Link 
+                    to="/" 
+                    className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
+                  >
+                    Return to Homepage
+                  </Link>
+                </main>
+                <Footer />
+              </div>
+            } />
+          </Routes>
+        </Suspense>
       </Router>
     </ClerkProvider>
   );
 }
 
-// New component to handle property modal route
 const PropertyModalRoute = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -151,7 +226,7 @@ const PropertyModalRoute = () => {
   }, [id]);
 
   const closeModal = () => {
-    navigate(-1); // Go back to previous page when closing modal
+    navigate(-1);
   };
 
   if (loading) {

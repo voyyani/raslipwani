@@ -87,8 +87,44 @@ const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us | Raslipwani Properties</title>
-        <meta name="description" content="Get in touch with our team" />
+        <title>Contact Coastal Kenya Real Estate Experts | Raslipwani Properties</title>
+        <meta name="description" content="Get in touch with our team in Kilifi for property inquiries, viewings, and investment consultations" />
+        
+        {/* Local Business Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateAgent",
+            "name": "Raslipwani Properties",
+            "image": "https://raslipwani.com/logo.png",
+            "@id": "https://raslipwani.com",
+            "url": "https://raslipwani.com",
+            "telephone": "+254758066526",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Kikambala Road",
+              "addressLocality": "Kilifi",
+              "postalCode": "80108",
+              "addressCountry": "KE"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "-3.6308",
+              "longitude": "39.8499"
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "08:00",
+              "closes": "18:00"
+            },
+            "sameAs": [
+              "https://www.facebook.com/raslipwani",
+              "https://www.instagram.com/raslipwani",
+              "https://twitter.com/raslipwani"
+            ]
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
@@ -104,7 +140,7 @@ const Contact = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                Contact Us
+                Contact Coastal Kenya Real Estate Experts
               </motion.h1>
               <motion.p 
                 className="text-xl max-w-3xl mx-auto"
@@ -112,7 +148,7 @@ const Contact = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                Get in touch with our team for any inquiries or assistance
+                Get personalized assistance for property inquiries, viewings, and investment opportunities
               </motion.p>
             </div>
           </section>
@@ -286,7 +322,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Our Location</h3>
                           <p className="text-gray-600">
-                            Kikambala , Kilifi, Kenya
+                            Kikambala Road, Kilifi, Kenya
                           </p>
                         </div>
                       </motion.div>
@@ -301,8 +337,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Phone Number</h3>
                           <p className="text-gray-600">
-                            +254758066526<br />
-                            
+                            +254758066526
                           </p>
                         </div>
                       </motion.div>
@@ -339,9 +374,27 @@ const Contact = () => {
                           </p>
                         </div>
                       </motion.div>
+                      
+                      {/* Google Map Embed */}
+                      <motion.div 
+                        className="mt-8 rounded-xl overflow-hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <h3 className="font-semibold text-gray-800 mb-4">Our Office Location</h3>
+                        <iframe 
+                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15918.21890246001!2d39.8499!3d-3.6308!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM8KwMzcnNTAuOCJTIDM5wrA1MCc1OS4xIkU!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
+                          width="100%"
+                          height="250"
+                          style={{ border: 0 }}
+                          allowFullScreen=""
+                          loading="lazy"
+                          title="Raslipwani Properties Location"
+                          className="rounded-lg shadow-md"
+                        ></iframe>
+                      </motion.div>
                     </div>
-                    
-                    
                   </div>
                 </div>
               </motion.div>

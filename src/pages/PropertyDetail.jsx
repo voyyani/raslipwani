@@ -58,6 +58,8 @@ const PropertyDetail = () => {
   };
 
   // Touch handling for mobile swipe
+  const [touchStart, setTouchStart] = useState(0);
+  
   const handleTouchStart = (e) => {
     setTouchStart(e.touches[0].clientX);
   };
@@ -109,14 +111,58 @@ const PropertyDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{property.title} | Raslipwani Properties</title>
-        <meta name="description" content={property.description.substring(0, 160)} />
+        <title>{property.title} | Coastal Kenya Property | Raslipwani</title>
+        <meta name="description" content={`${property.description.substring(0, 155)}...`} />
+        
+        {/* Structured Data for Property Listing */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            "name": property.title,
+            "description": property.description.substring(0, 160),
+            "image": property.images,
+            "url": window.location.href,
+            "offers": {
+              "@type": "Offer",
+              "price": property.price,
+              "priceCurrency": "KES",
+              "availability": property.status === 'available' ? 
+                "https://schema.org/InStock" : 
+                "https://schema.org/OutOfStock"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": property.address,
+              "addressLocality": property.city,
+              "addressRegion": property.state,
+              "postalCode": property.zip_code,
+              "addressCountry": "KE"
+            },
+            "numberOfRooms": property.bedrooms,
+            "numberOfBathroomsTotal": property.bathrooms,
+            "floorSize": {
+              "@type": "QuantitativeValue",
+              "value": property.area_sqft,
+              "unitCode": "FTK"
+            }
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
         <Header />
         
         <main className="flex-grow container mx-auto px-4 py-8">
+          {/* Breadcrumb Navigation */}
+          <div className="text-sm mb-4" aria-label="Breadcrumb">
+            <Link to="/" className="text-primary hover:underline">Home</Link>
+            <span className="mx-2">/</span>
+            <Link to="/properties" className="text-primary hover:underline">Properties</Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-600">{property.title.substring(0, 20)}...</span>
+          </div>
+          
           <Link to="/properties" className="text-primary hover:underline mb-4 inline-block">
             &larr; Back to Properties
           </Link>
@@ -135,7 +181,7 @@ const PropertyDetail = () => {
                     <motion.img
                       key={currentImageIndex}
                       src={property.images[currentImageIndex]}
-                      alt={`Property image ${currentImageIndex + 1}`}
+                      alt={`${property.title} in ${property.location}`}
                       className="absolute inset-0 w-full h-full object-cover"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -182,7 +228,7 @@ const PropertyDetail = () => {
                       >
                         <img
                           src={img}
-                          alt={`Thumbnail ${index + 1}`}
+                          alt={`Thumbnail for ${property.title}`}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
@@ -241,12 +287,12 @@ const PropertyDetail = () => {
                 </div>
               </div>
               
-              <h3 className="text-xl font-semibold mb-3">Description</h3>
+              <h2 className="text-2xl font-semibold mb-3">Property Description</h2>
               <p className="text-gray-700 mb-6 whitespace-pre-line">
                 {property.description}
               </p>
               
-              <h3 className="text-xl font-semibold mb-3">Property Features</h3>
+              <h2 className="text-2xl font-semibold mb-3">Property Features</h2>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {property.amenities?.map((amenity, i) => (
                   <div key={i} className="flex items-center bg-gray-50 px-4 py-2.5 rounded-lg">
@@ -257,8 +303,8 @@ const PropertyDetail = () => {
               </div>
               
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-3">Additional Details</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <h2 className="text-2xl font-semibold mb-3">Property Details</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-gray-600">Property Type</p>
                     <p className="font-medium capitalize">{property.property_type}</p>
@@ -279,16 +325,25 @@ const PropertyDetail = () => {
               </div>
               
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-3">Location</h3>
-                <p className="text-gray-700">
+                <h2 className="text-2xl font-semibold mb-3">Location Details</h2>
+                <p className="text-gray-700 mb-4">
                   {property.address}, {property.city}, {property.state} {property.zip_code}
                 </p>
+                <div className="bg-gray-100 rounded-lg p-4">
+                  <p className="font-medium mb-2">Coastal Kenya Location Highlights:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Proximity to pristine beaches</li>
+                    <li>Access to local markets and amenities</li>
+                    <li>Growing real estate investment area</li>
+                    <li>Tourist-friendly neighborhood</li>
+                  </ul>
+                </div>
               </div>
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-md h-fit border border-gray-100">
-              <h3 className="text-xl font-semibold mb-4">Schedule a Viewing</h3>
-              <p className="mb-4 text-gray-600">Interested in this property? Contact us to arrange a private viewing.</p>
+              <h2 className="text-2xl font-semibold mb-4">Schedule a Viewing</h2>
+              <p className="mb-4 text-gray-600">Interested in this coastal property? Contact us to arrange a private viewing.</p>
               
               <div className="bg-blue-50 rounded-lg p-4 mb-6">
                 <div className="flex items-center mb-2">
@@ -297,7 +352,7 @@ const PropertyDetail = () => {
                   </svg>
                   <span className="font-medium">Call Us</span>
                 </div>
-                <p className="text-gray-700">+254 712 345 678</p>
+                <p className="text-gray-700">+254 758 066 526</p>
               </div>
               
               <button className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors mb-4 font-medium">
@@ -308,7 +363,7 @@ const PropertyDetail = () => {
               </button>
               
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="font-semibold mb-3">Property Status</h4>
+                <h3 className="font-semibold mb-3">Property Status</h3>
                 <div className="flex items-center">
                   <div className={`h-3 w-3 rounded-full mr-2 ${
                     property.status === 'available' ? 'bg-green-500' : 
@@ -320,6 +375,24 @@ const PropertyDetail = () => {
                      property.status === 'pending' ? 'Pending Sale' : 
                      'Sold'}
                   </span>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="font-semibold mb-3">Share This Property</h3>
+                <div className="flex space-x-4">
+                  <button className="text-gray-600 hover:text-blue-600">
+                    <i className="fab fa-facebook text-xl"></i>
+                  </button>
+                  <button className="text-gray-600 hover:text-blue-400">
+                    <i className="fab fa-twitter text-xl"></i>
+                  </button>
+                  <button className="text-gray-600 hover:text-red-600">
+                    <i className="fab fa-pinterest text-xl"></i>
+                  </button>
+                  <button className="text-gray-600 hover:text-blue-400">
+                    <i className="fab fa-linkedin text-xl"></i>
+                  </button>
                 </div>
               </div>
             </div>
