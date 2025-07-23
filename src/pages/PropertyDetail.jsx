@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,8 @@ const PropertyDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
   
   // Format price as currency
   const formatPrice = (price) => {
@@ -71,6 +73,52 @@ const PropertyDetail = () => {
     if (diff > 50) handleNext(); // Swipe left
     if (diff < -50) handlePrev(); // Swipe right
   };
+
+  // Fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.mozRequestFullScreen) {
+        containerRef.current.mozRequestFullScreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      } else if (containerRef.current.msRequestFullscreen) {
+        containerRef.current.msRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  // Handle fullscreen change
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -168,10 +216,19 @@ const PropertyDetail = () => {
           </Link>
           
           {/* Image Carousel */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 relative">
+          <div 
+            className={`bg-white rounded-xl shadow-md overflow-hidden mb-8 relative ${
+              isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
+            }`}
+          >
             {property.images?.length > 0 ? (
               <div 
-                className="relative h-[50vh] min-h-[400px] bg-gray-100"
+                ref={containerRef}
+                className={`relative ${
+                  isFullscreen 
+                    ? 'h-screen w-full bg-black' 
+                    : 'h-[50vh] min-h-[400px] bg-gray-100'
+                }`}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
@@ -182,7 +239,9 @@ const PropertyDetail = () => {
                       key={currentImageIndex}
                       src={property.images[currentImageIndex]}
                       alt={`${property.title} in ${property.location}`}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className={`absolute inset-0 w-full h-full ${
+                        isFullscreen ? 'object-contain' : 'object-cover'
+                      }`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -194,7 +253,11 @@ const PropertyDetail = () => {
                 
                 {/* Navigation Arrows */}
                 <button
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
+                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
+                    isFullscreen 
+                      ? 'bg-black/50 hover:bg-black/70 text-white' 
+                      : 'bg-white/80 hover:bg-white text-gray-800'
+                  } rounded-full p-3 shadow-lg transition-colors`}
                   onClick={handlePrev}
                   aria-label="Previous image"
                 >
@@ -203,7 +266,11 @@ const PropertyDetail = () => {
                   </svg>
                 </button>
                 <button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
+                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-20 ${
+                    isFullscreen 
+                      ? 'bg-black/50 hover:bg-black/70 text-white' 
+                      : 'bg-white/80 hover:bg-white text-gray-800'
+                  } rounded-full p-3 shadow-lg transition-colors`}
                   onClick={handleNext}
                   aria-label="Next image"
                 >
@@ -212,8 +279,29 @@ const PropertyDetail = () => {
                   </svg>
                 </button>
                 
+                {/* Fullscreen Toggle */}
+                <button
+                  className={`absolute top-4 right-4 z-20 ${
+                    isFullscreen 
+                      ? 'bg-black/50 hover:bg-black/70 text-white' 
+                      : 'bg-white/80 hover:bg-white text-gray-800'
+                  } rounded-full p-3 shadow-lg transition-colors`}
+                  onClick={toggleFullscreen}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {isFullscreen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 20L20 6M4 4l16 16" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" />
+                    )}
+                  </svg>
+                </button>
+                
                 {/* Thumbnail Strip */}
-                <div className="absolute bottom-4 left-0 right-0 px-4 z-10">
+                <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 ${
+                  isFullscreen ? 'bg-black/30 py-2' : ''
+                }`}>
                   <div className="flex justify-center gap-2 overflow-x-auto pb-2">
                     {property.images.map((img, index) => (
                       <button
@@ -238,9 +326,24 @@ const PropertyDetail = () => {
                 </div>
                 
                 {/* Image Counter */}
-                <div className="absolute top-4 left-4 z-10 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full">
+                <div className={`absolute top-4 left-4 z-20 ${
+                  isFullscreen ? 'bg-black/70 text-white' : 'bg-black/50 text-white'
+                } text-sm font-medium px-3 py-1 rounded-full`}>
                   {currentImageIndex + 1} / {property.images.length}
                 </div>
+                
+                {/* Close Fullscreen Button */}
+                {isFullscreen && (
+                  <button
+                    className="absolute top-4 right-16 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors"
+                    onClick={toggleFullscreen}
+                    aria-label="Exit fullscreen"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="bg-gray-200 border-2 border-dashed w-full h-96 rounded-lg flex items-center justify-center">
