@@ -23,7 +23,6 @@ const Properties = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [suggestedProperties, setSuggestedProperties] = useState([]);
 
-  // Updated property type mapping
   const propertyTypeMap = {
     'house': ['house', 'apartment', 'villa'],
     'land': ['land'],
@@ -84,7 +83,6 @@ const Properties = () => {
   useEffect(() => {
     let result = [...properties];
     
-    // Apply search filter
     if (searchQuery) {
       result = result.filter(property => 
         property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -93,9 +91,7 @@ const Properties = () => {
       );
     }
     
-    // Apply property type filter
     if (filterOption !== 'all') {
-      // Get mapped types or use the filter option directly
       const mappedTypes = propertyTypeMap[filterOption] || [filterOption];
       
       result = result.filter(property => 
@@ -104,7 +100,6 @@ const Properties = () => {
       );
     }
     
-    // Apply purpose filter (case-insensitive)
     if (purposeFilter !== 'all') {
       result = result.filter(property => 
         property.purpose && 
@@ -112,7 +107,6 @@ const Properties = () => {
       );
     }
     
-    // Apply sorting
     if (sortOption === 'price-low') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-high') {
@@ -213,8 +207,37 @@ const Properties = () => {
   return (
     <>
       <Helmet>
-        <title>Properties | Raslipwani Properties</title>
-        <meta name="description" content="Browse our premium properties along the Kenyan coast" />
+        <title>Coastal Properties in Kenya | Raslipwani Properties</title>
+        <meta name="description" content={`Discover premium ${filterOption} properties along Kenya's coast. ${filteredProperties.length} listings available`} />
+        <link rel="canonical" href={`https://raslipwani.com/properties?type=${filterOption}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`Coastal ${filterOption} Properties | Raslipwani`} />
+        <meta property="og:description" content={`Browse luxury ${filterOption} properties in Kilifi, Mombasa, and Diani`} />
+        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/properties-hero_md_omfqo1.jpg" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "itemListElement": filteredProperties.slice(0, 5).map((prop, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "RealEstateListing",
+                "name": prop.title,
+                "url": `https://raslipwani.com/properties/${prop.id}`,
+                "image": prop.images?.[0] || '',
+                "price": prop.price,
+                "priceCurrency": "KES",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": prop.location
+                }
+              }
+            }))
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
@@ -562,9 +585,11 @@ const PropertyCard = ({ property, index, openModal }) => {
         {property.images?.[0] ? (
           <img 
             src={property.images[0]} 
-            alt={property.title} 
+            alt={`${property.property_type} for ${property.purpose} in ${property.location} | ${property.bedrooms} bedrooms, ${property.bathrooms} bathrooms`}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading="lazy"
+            loading={index > 2 ? "lazy" : "eager"}
+            width="400"
+            height="300"
           />
         ) : (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">

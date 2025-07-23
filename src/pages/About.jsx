@@ -12,8 +12,30 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About Us | Raslipwani Properties</title>
-        <meta name="description" content="Learn about our company and team" />
+        <title>About Our Coastal Real Estate Agency | Raslipwani Properties</title>
+        <meta name="description" content="Kenyan coastal property experts with 10+ years experience in Kilifi, Mombasa and Diani real estate markets" />
+        
+        {/* AboutPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "About Raslipwani Properties",
+            "description": "Leading real estate agency specializing in coastal Kenyan properties",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Raslipwani Properties",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://raslipwani.com/logo.png"
+              }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://raslipwani.com/about"
+            }
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
@@ -51,19 +73,25 @@ const About = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
                 >
-                  <h2 className="text-3xl font-bold text-primary mb-6">Our Story</h2>
+                  <h1 className="text-3xl font-bold text-primary mb-6">Our Story</h1>
                   <p className="text-gray-700 mb-4">
-                    Founded in Kilifi County, Raslipwani Properties has grown to become a leading real estate agency 
-                    specializing in property sales, purchases, and management along the stunning Kenyan coast.
+                    Founded in Kilifi County, Raslipwani Properties has grown to become a leading real estate agency specializing in property sales, purchases, and management along the stunning Kenyan coast.
                   </p>
                   <p className="text-gray-700 mb-4">
-                    Our team of local experts and expatriates brings together decades of experience in the real estate 
-                    industry, combining international standards with deep local market knowledge.
+                    Our team of local experts and expatriates brings together decades of experience in the real estate industry, combining international standards with deep local market knowledge.
+
                   </p>
-                  <p className="text-gray-700">
-                    We pride ourselves on delivering exceptional service with integrity, transparency, and professionalism, 
-                    ensuring our clients have a seamless and rewarding property transaction experience.
+                  <p className="text-gray-700 mb-4">We pride ourselves on delivering exceptional service with integrity, transparency, and professionalism, ensuring our clients have a seamless and rewarding property transaction experience.
                   </p>
+              
+              
+                <h2 className="text-2xl font-semibold text-primary mt-8 mb-4">Why Coastal Kenya?</h2>
+                  <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                    <li>Fastest growing real estate market in East Africa</li>
+                    <li>Average property value appreciation of 12% annually</li>
+                    <li>Tax incentives for foreign investors</li>
+                    <li>Growing tourism industry with high rental yields</li>
+                  </ul>
                 </motion.div>
                 
                 <motion.div 
@@ -95,7 +123,7 @@ const About = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <h2 className="text-3xl font-bold text-primary mb-4">Our Mission & Vision</h2>
+                <h1 className="text-3xl font-bold text-primary mb-4">Our Mission & Vision</h1>
                 <p className="text-gray-600 max-w-3xl mx-auto">
                   Guiding principles that drive our business forward
                 </p>
@@ -114,10 +142,11 @@ const About = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 text-primary">Mission</h3>
+                  <h2 className="text-2xl font-bold mb-4 text-primary">Our Mission</h2>
                   <p className="text-gray-700">
                     To deliver exceptional real estate services that exceed client expectations, ensuring 
-                    a seamless and rewarding property transaction experience.
+                    a seamless and rewarding property transaction experience. We specialize in coastal properties 
+                    along Kenya's beautiful shoreline, providing expert guidance through every step of the process.
                   </p>
                 </motion.div>
                 
@@ -133,15 +162,19 @@ const About = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 text-primary">Vision</h3>
+                  <h2 className="text-2xl font-bold mb-4 text-primary">Our Vision</h2>
                   <p className="text-gray-700">
                     To be the most trusted and recognized real estate company on the Kenyan coast, 
-                    known for integrity, professionalism, and excellence.
+                    known for integrity, professionalism, and excellence. We aim to transform coastal 
+                    property ownership by connecting international buyers with prime investment opportunities 
+                    in Kilifi, Mombasa, and Diani.
                   </p>
                 </motion.div>
               </div>
             </div>
           </section>
+          
+          
         </main>
         
         <Footer />

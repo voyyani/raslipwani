@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom'; // Added
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
@@ -20,9 +20,8 @@ const Services = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const servicesRef = useRef(null);
-  const location = useLocation(); // Added
+  const location = useLocation();
 
-  // Added: Open viewing modal when state flag is set
   useEffect(() => {
     if (location.state?.openViewingModal) {
       openViewingModal();
@@ -141,12 +140,10 @@ const Services = () => {
     setIsSubmitting(true);
     
     try {
-      // Combine date and time into a single timestamp
       const appointment_at = bookingData.date && bookingData.time 
         ? `${bookingData.date}T${bookingData.time}:00.000Z`
         : null;
 
-      // Prepare booking data
       const bookingRecord = {
         ...bookingData,
         appointment_at,
@@ -156,22 +153,18 @@ const Services = () => {
         viewing_type: bookingData.viewingType
       };
 
-      // Remove unnecessary fields for Supabase
       delete bookingRecord.date;
       delete bookingRecord.time;
       delete bookingRecord.viewingType;
 
-      // Save to Supabase
       const { data, error } = await supabase
         .from('bookings')
         .insert([bookingRecord]);
 
       if (error) throw error;
 
-      // Show success message
       alert("Thank you for your booking! We'll confirm your appointment shortly.");
       
-      // Reset form and close modal
       setBookingData({
         name: '',
         email: '',
@@ -184,7 +177,6 @@ const Services = () => {
       });
       setActiveModal(null);
       
-      // Send email notification
       await sendEmailNotification(bookingRecord);
       
     } catch (error) {
@@ -195,7 +187,6 @@ const Services = () => {
     }
   };
 
-  // Email notification function
   const sendEmailNotification = async (booking) => {
     try {
       const emailData = {
@@ -231,8 +222,33 @@ const Services = () => {
   return (
     <>
       <Helmet>
-        <title>Premium Real Estate Services | Raslipwani Properties</title>
-        <meta name="description" content="Expert property sales, acquisition, valuation and management services along the Kenyan coast" />
+        <title>Premium Real Estate Services in Coastal Kenya | Raslipwani</title>
+        <meta name="description" content="Property sales, acquisition, valuation & management services for coastal Kenya real estate. Serving Kilifi, Mombasa & Diani." />
+        
+        {/* Service Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "serviceType": "Real estate services",
+            "provider": {
+              "@type": "RealEstateAgent",
+              "name": "Raslipwani Properties"
+            },
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "Real Estate Services",
+              "itemListElement": services.map(service => ({
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": service.title,
+                  "description": service.description
+                }
+              }))
+            }
+          })}
+        </script>
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
