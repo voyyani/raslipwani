@@ -13,8 +13,9 @@ const PropertyDetail = () => {
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const imageRef = useRef(null);
   const containerRef = useRef(null);
-  
+
   // Format price as currency
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
@@ -76,7 +77,7 @@ const PropertyDetail = () => {
 
   // Fullscreen toggle
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
+    if (!isFullscreen) {
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
       } else if (containerRef.current.mozRequestFullScreen) {
@@ -234,23 +235,23 @@ const PropertyDetail = () => {
               >
                 {/* Main Image */}
                 <div 
-                  className="absolute inset-0 overflow-hidden cursor-pointer"
-                  onClick={toggleFullscreen}
+                  className="absolute inset-0 overflow-hidden"
                 >
                   <AnimatePresence initial={false} mode="wait">
-                    <motion.img
-                      key={currentImageIndex}
-                      src={property.images[currentImageIndex]}
-                      alt={`${property.title} in ${property.location}`}
-                      className={`absolute inset-0 w-full h-full ${
-                        isFullscreen ? 'object-contain' : 'object-cover'
-                      }`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      loading="eager"
-                    />
+                    <motion.div
+                      className="absolute inset-0 w-full h-full cursor-pointer"
+                      onClick={toggleFullscreen}
+                    >
+                      <img
+                        ref={imageRef}
+                        src={property.images[currentImageIndex]}
+                        alt={`${property.title} in ${property.location}`}
+                        className={`w-full h-full ${
+                          isFullscreen ? 'object-contain' : 'object-cover'
+                        }`}
+                        loading="eager"
+                      />
+                    </motion.div>
                   </AnimatePresence>
                 </div>
                 
@@ -261,7 +262,10 @@ const PropertyDetail = () => {
                       ? 'bg-black/50 hover:bg-black/70 text-white' 
                       : 'bg-white/80 hover:bg-white text-gray-800'
                   } rounded-full p-3 shadow-lg transition-colors`}
-                  onClick={handlePrev}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrev();
+                  }}
                   aria-label="Previous image"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +278,10 @@ const PropertyDetail = () => {
                       ? 'bg-black/50 hover:bg-black/70 text-white' 
                       : 'bg-white/80 hover:bg-white text-gray-800'
                   } rounded-full p-3 shadow-lg transition-colors`}
-                  onClick={handleNext}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNext();
+                  }}
                   aria-label="Next image"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
