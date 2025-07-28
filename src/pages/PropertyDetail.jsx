@@ -2,9 +2,35 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../../src/utils/supabaseClient'
+import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+
+// Helper to request fullscreen
+const requestFullscreen = (element) => {
+  if (element.requestFullscreen) {
+    return element.requestFullscreen().catch(console.error);
+  } else if (element.mozRequestFullScreen) {
+    return element.mozRequestFullScreen();
+  } else if (element.webkitRequestFullscreen) {
+    return element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    return element.msRequestFullscreen();
+  }
+};
+
+// Helper to exit fullscreen
+const exitFullscreen = () => {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+};
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -14,8 +40,17 @@ const PropertyDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
-  const imageRef = useRef(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [showControls, setShowControls] = useState(true);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  
   const containerRef = useRef(null);
+  const imageRef = useRef(null);
+  const lastTapRef = useRef(0);
+  const timerRef = useRef(null);
+  const touchStartRef = useRef(0);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
@@ -25,6 +60,7 @@ const PropertyDetail = () => {
     }).format(price);
   };
 
+  // Fetch property details
   useEffect(() => {
     const fetchProperty = async () => {
       try {
@@ -47,10 +83,12 @@ const PropertyDetail = () => {
     if (id) fetchProperty();
   }, [id]);
 
+  // Handle image navigation
   const handlePrev = useCallback(() => {
     setCurrentImageIndex(prev => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
+    resetZoom();
     setIsImageLoading(true);
   }, [property?.images?.length]);
 
@@ -58,65 +96,61 @@ const PropertyDetail = () => {
     setCurrentImageIndex(prev => 
       (prev + 1) % property.images.length
     );
+    resetZoom();
     setIsImageLoading(true);
   }, [property?.images?.length]);
 
-  const [touchStart, setTouchStart] = useState(0);
-  
-  const handleTouchStart = (e) => {
-    setTouchStart(e.touches[0].clientX);
+  // Reset zoom state
+  const resetZoom = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
-  const handleTouchEnd = (e) => {
-    const touchEnd = e.changedTouches[0].clientX;
-    const diff = touchStart - touchEnd;
-    
-    if (diff > 50) handleNext();
-    if (diff < -50) handlePrev();
-  };
-
-  // ✅ FIXED fullscreen toggle
+  // Toggle fullscreen mode - FIXED
   const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      if (containerRef.current) {
-        containerRef.current.requestFullscreen().catch((err) => {
-          console.error("Fullscreen failed:", err);
-        });
-      }
+    if (!document.fullscreenElement && containerRef.current) {
+      requestFullscreen(containerRef.current);
     } else {
-      document.exitFullscreen();
+      exitFullscreen();
     }
+    resetControlsTimer();
   }, []);
 
+  // Handle container click - NEW FUNCTION
+  const handleContainerClick = (e) => {
+    if (!isFullscreen) {
+      toggleFullscreen();
+    } else {
+      resetControlsTimer();
+    }
+  };
+
+  // Handle fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
+      if (!document.fullscreenElement) {
+        resetZoom();
+      }
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
-  // Keyboard navigation in fullscreen mode
+  // Handle keyboard navigation in fullscreen
   useEffect(() => {
     if (!isFullscreen) return;
     
     const handleKeyDown = (e) => {
       switch (e.key) {
-        case 'ArrowLeft':
-          handlePrev();
-          break;
-        case 'ArrowRight':
-          handleNext();
-          break;
-        case 'Escape':
-          toggleFullscreen();
-          break;
-        default:
-          break;
+        case 'ArrowLeft': handlePrev(); break;
+        case 'ArrowRight': handleNext(); break;
+        case 'Escape': toggleFullscreen(); break;
+        case 'z': setZoom(prev => prev > 1 ? 1 : 2); break;
+        default: break;
       }
     };
     
@@ -124,6 +158,119 @@ const PropertyDetail = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isFullscreen, handlePrev, handleNext, toggleFullscreen]);
 
+  // Reset controls visibility timer
+  const resetControlsTimer = useCallback(() => {
+    setShowControls(true);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }, []);
+
+  // Auto-hide controls in fullscreen
+  useEffect(() => {
+    if (isFullscreen) {
+      resetControlsTimer();
+      return () => clearTimeout(timerRef.current);
+    }
+  }, [isFullscreen, resetControlsTimer]);
+
+  // Handle touch gestures
+  const handleTouchStart = (e) => {
+    touchStartRef.current = e.touches[0].clientX;
+    resetControlsTimer();
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStartRef.current - touchEnd;
+    
+    if (zoom === 1) {
+      if (diff > 50) handleNext();
+      if (diff < -50) handlePrev();
+    }
+    
+    // Double-tap detection
+    const currentTime = new Date().getTime();
+    if (currentTime - lastTapRef.current < 300) {
+      handleDoubleTap(e);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = currentTime;
+    }
+  };
+
+  // Double-tap zoom functionality
+  const handleDoubleTap = (e) => {
+    if (!isFullscreen) return;
+    
+    const newZoom = zoom > 1 ? 1 : 2;
+    setZoom(newZoom);
+    
+    if (newZoom > 1) {
+      const container = containerRef.current;
+      const rect = container.getBoundingClientRect();
+      const touchX = e.changedTouches[0].clientX - rect.left;
+      const touchY = e.changedTouches[0].clientY - rect.top;
+      
+      // Calculate new position to center on tap point
+      const newX = (rect.width/2 - touchX) * newZoom;
+      const newY = (rect.height/2 - touchY) * newZoom;
+      
+      setPosition({ x: newX, y: newY });
+    } else {
+      setPosition({ x: 0, y: 0 });
+    }
+    
+    resetControlsTimer();
+  };
+
+  // Handle image load
+  const handleImageLoad = (e) => {
+    setIsImageLoading(false);
+    setImageDimensions({
+      width: e.target.naturalWidth,
+      height: e.target.naturalHeight
+    });
+  };
+
+  // Update drag constraints when zoom changes
+  useEffect(() => {
+    if (!containerRef.current || !imageDimensions.width || !imageDimensions.height) return;
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    
+    const imgAspect = imageDimensions.width / imageDimensions.height;
+    const containerAspect = containerWidth / containerHeight;
+    
+    let displayedWidth, displayedHeight;
+    if (imgAspect > containerAspect) {
+      displayedWidth = containerWidth;
+      displayedHeight = containerWidth / imgAspect;
+    } else {
+      displayedHeight = containerHeight;
+      displayedWidth = containerHeight * imgAspect;
+    }
+    
+    const horizontal = Math.max(0, (displayedWidth * zoom - containerWidth) / 2);
+    const vertical = Math.max(0, (displayedHeight * zoom - containerHeight) / 2);
+    
+    setDragConstraints({
+      left: -horizontal,
+      right: horizontal,
+      top: -vertical,
+      bottom: vertical
+    });
+  }, [zoom, imageDimensions]);
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    resetZoom();
+  }, [currentImageIndex]);
+
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -136,6 +283,7 @@ const PropertyDetail = () => {
     );
   }
 
+  // Error state
   if (!property) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -216,7 +364,7 @@ const PropertyDetail = () => {
             &larr; Back to Properties
           </Link>
           
-          {/* ✅ FIXED Fullscreen Container */}
+          {/* Enhanced Image Viewer */}
           <div 
             className={`bg-white rounded-xl shadow-md overflow-hidden mb-8 relative ${
               isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
@@ -232,12 +380,12 @@ const PropertyDetail = () => {
                 }`}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
+                onClick={handleContainerClick}
               >
                 <div className="absolute inset-0 overflow-hidden">
                   <AnimatePresence initial={false} mode="wait">
                     <motion.div
                       className="absolute inset-0 w-full h-full cursor-pointer"
-                      onClick={toggleFullscreen}
                       key={currentImageIndex}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -249,86 +397,126 @@ const PropertyDetail = () => {
                           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                         </div>
                       )}
-                      <img
-                        ref={imageRef}
+                      <motion.img
                         src={property.images[currentImageIndex]}
                         alt={`${property.title} in ${property.location}`}
                         className={`w-full h-full ${
                           isFullscreen ? 'object-contain' : 'object-cover'
                         } ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
                         loading="eager"
-                        onLoad={() => setIsImageLoading(false)}
+                        onLoad={handleImageLoad}
                         onError={() => setIsImageLoading(false)}
+                        drag={isFullscreen && zoom > 1}
+                        dragConstraints={dragConstraints}
+                        dragElastic={0}
+                        dragMomentum={false}
+                        style={{ 
+                          x: position.x, 
+                          y: position.y,
+                          scale: zoom
+                        }}
+                        animate={{ 
+                          x: position.x, 
+                          y: position.y,
+                          scale: zoom
+                        }}
+                        transition={{ type: "tween", duration: 0.2 }}
+                        onDoubleClick={(e) => {
+                          if (isFullscreen) {
+                            const container = containerRef.current;
+                            if (!container) return;
+                            const rect = container.getBoundingClientRect();
+                            const clickX = e.clientX - rect.left;
+                            const clickY = e.clientY - rect.top;
+                            
+                            const newZoom = zoom > 1 ? 1 : 2;
+                            setZoom(newZoom);
+                            
+                            if (newZoom > 1) {
+                              const newX = (rect.width/2 - clickX) * newZoom;
+                              const newY = (rect.height/2 - clickY) * newZoom;
+                              setPosition({ x: newX, y: newY });
+                            } else {
+                              setPosition({ x: 0, y: 0 });
+                            }
+                          }
+                        }}
                       />
                     </motion.div>
                   </AnimatePresence>
                 </div>
                 
-                {/* Navigation Arrows */}
-                <button
-                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
-                    isFullscreen 
-                      ? 'bg-black/50 hover:bg-black/70 text-white' 
-                      : 'bg-white/80 hover:bg-white text-gray-800'
-                  } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrev();
-                  }}
-                  aria-label="Previous image"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-20 ${
-                    isFullscreen 
-                      ? 'bg-black/50 hover:bg-black/70 text-white' 
-                      : 'bg-white/80 hover:bg-white text-gray-800'
-                  } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNext();
-                  }}
-                  aria-label="Next image"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                {/* Navigation Arrows - Conditionally shown */}
+                {showControls && (
+                  <>
+                    <button
+                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
+                        isFullscreen 
+                          ? 'bg-black/50 hover:bg-black/70 text-white' 
+                          : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrev();
+                      }}
+                      aria-label="Previous image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-20 ${
+                        isFullscreen 
+                          ? 'bg-black/50 hover:bg-black/70 text-white' 
+                          : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNext();
+                      }}
+                      aria-label="Next image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
                 
-                {/* Thumbnails */}
-                <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 transition-opacity duration-300 ${
-                  isFullscreen ? 'bg-black/30 py-2 backdrop-blur-sm' : ''
-                }`}>
-                  <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-                    {property.images.map((img, index) => (
-                      <button
-                        key={index}
-                        className={`w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                          index === currentImageIndex 
-                            ? 'border-primary scale-105 ring-2 ring-white' 
-                            : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex(index);
-                        }}
-                        aria-label={`View image ${index + 1}`}
-                      >
-                        <img
-                          src={img}
-                          alt={`Thumbnail for ${property.title}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </button>
-                    ))}
+                {/* Thumbnails - Conditionally shown */}
+                {showControls && (
+                  <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 transition-opacity duration-300 ${
+                    isFullscreen ? 'bg-black/30 py-2 backdrop-blur-sm' : ''
+                  }`}>
+                    <div className="flex justify-center gap-2 overflow-x-auto pb-2">
+                      {property.images.map((img, index) => (
+                        <button
+                          key={index}
+                          className={`w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                            index === currentImageIndex 
+                              ? 'border-primary scale-105 ring-2 ring-white' 
+                              : 'border-transparent opacity-70 hover:opacity-100'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentImageIndex(index);
+                          }}
+                          aria-label={`View image ${index + 1}`}
+                        >
+                          <img
+                            src={img}
+                            alt={`Thumbnail for ${property.title}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
-                {/* Image Counter */}
+                {/* Image Counter - Always visible */}
                 <div className={`absolute top-4 left-4 z-20 ${
                   isFullscreen ? 'bg-black/70 text-white' : 'bg-black/50 text-white'
                 } text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm`}>
@@ -336,7 +524,7 @@ const PropertyDetail = () => {
                 </div>
                 
                 {/* Fullscreen Controls */}
-                {isFullscreen && (
+                {isFullscreen && showControls && (
                   <button
                     className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm"
                     onClick={toggleFullscreen}
@@ -348,6 +536,14 @@ const PropertyDetail = () => {
                   </button>
                 )}
                 
+                {/* Zoom Indicator */}
+                {isFullscreen && zoom > 1 && (
+                  <div className="absolute top-4 right-20 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm">
+                    {zoom.toFixed(1)}x
+                  </div>
+                )}
+                
+                {/* Fullscreen Hint */}
                 {!isFullscreen && (
                   <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center backdrop-blur-sm transition-opacity hover:opacity-100 opacity-90">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,6 +560,7 @@ const PropertyDetail = () => {
             )}
           </div>
           
+          {/* Property Details */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="flex justify-between items-start mb-4">
