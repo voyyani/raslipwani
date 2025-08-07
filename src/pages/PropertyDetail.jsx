@@ -6,32 +6,6 @@ import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// Helper to request fullscreen
-const requestFullscreen = (element) => {
-  if (element.requestFullscreen) {
-    return element.requestFullscreen().catch(console.error);
-  } else if (element.mozRequestFullScreen) {
-    return element.mozRequestFullScreen();
-  } else if (element.webkitRequestFullscreen) {
-    return element.webkitRequestFullscreen();
-  } else if (element.msRequestFullscreen) {
-    return element.msRequestFullscreen();
-  }
-};
-
-// Helper to exit fullscreen
-const exitFullscreen = () => {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
-  }
-};
-
 const PropertyDetail = () => {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
@@ -85,6 +59,7 @@ const PropertyDetail = () => {
 
   // Handle image navigation
   const handlePrev = useCallback(() => {
+    if (!property?.images?.length) return;
     setCurrentImageIndex(prev => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
@@ -93,6 +68,7 @@ const PropertyDetail = () => {
   }, [property?.images?.length]);
 
   const handleNext = useCallback(() => {
+    if (!property?.images?.length) return;
     setCurrentImageIndex(prev => 
       (prev + 1) % property.images.length
     );
@@ -106,37 +82,72 @@ const PropertyDetail = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Toggle fullscreen mode - FIXED
+  // Enhanced toggle fullscreen mode
   const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement && containerRef.current) {
-      requestFullscreen(containerRef.current);
+    if (!containerRef.current) return;
+    
+    // Check current fullscreen state
+    const isFullscreen = document.fullscreenElement || 
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement;
+    
+    if (isFullscreen) {
+      // Exit fullscreen
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
     } else {
-      exitFullscreen();
+      // Enter fullscreen
+      const element = containerRef.current;
+      if (element.requestFullscreen) element.requestFullscreen();
+      else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+      else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+      else if (element.msRequestFullscreen) element.msRequestFullscreen();
     }
     resetControlsTimer();
   }, []);
 
-  // Handle container click - NEW FUNCTION
-  const handleContainerClick = (e) => {
-    if (!isFullscreen) {
+  // Handle container click
+  const handleContainerClick = useCallback((e) => {
+    // Only trigger fullscreen if clicking directly on the image container
+    if (e.target === containerRef.current || e.target === imageRef.current) {
       toggleFullscreen();
-    } else {
-      resetControlsTimer();
     }
-  };
+    resetControlsTimer();
+  }, [toggleFullscreen]);
 
   // Handle fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-      if (!document.fullscreenElement) {
+      const fullscreenElement = 
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+      
+      setIsFullscreen(!!fullscreenElement);
+      if (!fullscreenElement) {
         resetZoom();
       }
     };
     
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    // Add all browser-specific events
+    const events = [
+      'fullscreenchange',
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'MSFullscreenChange'
+    ];
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleFullscreenChange);
+    });
+    
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      events.forEach(event => {
+        document.removeEventListener(event, handleFullscreenChange);
+      });
     };
   }, []);
 
@@ -146,11 +157,23 @@ const PropertyDetail = () => {
     
     const handleKeyDown = (e) => {
       switch (e.key) {
-        case 'ArrowLeft': handlePrev(); break;
-        case 'ArrowRight': handleNext(); break;
-        case 'Escape': toggleFullscreen(); break;
-        case 'z': setZoom(prev => prev > 1 ? 1 : 2); break;
-        default: break;
+        case 'ArrowLeft': 
+          handlePrev(); 
+          break;
+        case 'ArrowRight': 
+          handleNext(); 
+          break;
+        case 'Escape': 
+          toggleFullscreen(); 
+          break;
+        case 'z': 
+          setZoom(prev => prev > 1 ? 1 : 2); 
+          break;
+        case ' ': 
+          handleNext();
+          break;
+        default: 
+          break;
       }
     };
     
@@ -163,31 +186,33 @@ const PropertyDetail = () => {
     setShowControls(true);
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      setShowControls(false);
+      if (isFullscreen) {
+        setShowControls(false);
+      }
     }, 3000);
-  }, []);
+  }, [isFullscreen]);
 
   // Auto-hide controls in fullscreen
   useEffect(() => {
     if (isFullscreen) {
       resetControlsTimer();
-      return () => clearTimeout(timerRef.current);
     }
+    return () => clearTimeout(timerRef.current);
   }, [isFullscreen, resetControlsTimer]);
 
   // Handle touch gestures
-  const handleTouchStart = (e) => {
+  const handleTouchStart = useCallback((e) => {
     touchStartRef.current = e.touches[0].clientX;
     resetControlsTimer();
-  };
+  }, [resetControlsTimer]);
 
-  const handleTouchEnd = (e) => {
+  const handleTouchEnd = useCallback((e) => {
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStartRef.current - touchEnd;
     
-    if (zoom === 1) {
+    if (zoom === 1 && property?.images?.length > 1) {
       if (diff > 50) handleNext();
-      if (diff < -50) handlePrev();
+      else if (diff < -50) handlePrev();
     }
     
     // Double-tap detection
@@ -198,10 +223,10 @@ const PropertyDetail = () => {
     } else {
       lastTapRef.current = currentTime;
     }
-  };
+  }, [zoom, handleNext, handlePrev, property?.images?.length]);
 
   // Double-tap zoom functionality
-  const handleDoubleTap = (e) => {
+  const handleDoubleTap = useCallback((e) => {
     if (!isFullscreen) return;
     
     const newZoom = zoom > 1 ? 1 : 2;
@@ -209,6 +234,8 @@ const PropertyDetail = () => {
     
     if (newZoom > 1) {
       const container = containerRef.current;
+      if (!container) return;
+      
       const rect = container.getBoundingClientRect();
       const touchX = e.changedTouches[0].clientX - rect.left;
       const touchY = e.changedTouches[0].clientY - rect.top;
@@ -223,16 +250,16 @@ const PropertyDetail = () => {
     }
     
     resetControlsTimer();
-  };
+  }, [isFullscreen, zoom, resetControlsTimer]);
 
   // Handle image load
-  const handleImageLoad = (e) => {
+  const handleImageLoad = useCallback((e) => {
     setIsImageLoading(false);
     setImageDimensions({
       width: e.target.naturalWidth,
       height: e.target.naturalHeight
     });
-  };
+  }, []);
 
   // Update drag constraints when zoom changes
   useEffect(() => {
@@ -269,6 +296,24 @@ const PropertyDetail = () => {
   useEffect(() => {
     resetZoom();
   }, [currentImageIndex]);
+
+  // Preload next and previous images
+  useEffect(() => {
+    if (!property?.images || property.images.length < 2) return;
+    
+    const preloadImage = (index) => {
+      const img = new Image();
+      img.src = property.images[index];
+    };
+    
+    // Preload next image
+    const nextIndex = (currentImageIndex + 1) % property.images.length;
+    preloadImage(nextIndex);
+    
+    // Preload previous image
+    const prevIndex = (currentImageIndex - 1 + property.images.length) % property.images.length;
+    preloadImage(prevIndex);
+  }, [currentImageIndex, property?.images]);
 
   // Loading state
   if (loading) {
@@ -375,8 +420,8 @@ const PropertyDetail = () => {
                 ref={containerRef}
                 className={`relative ${
                   isFullscreen 
-                    ? 'h-screen w-full bg-black' 
-                    : 'h-[50vh] min-h-[400px] bg-gray-100'
+                    ? 'h-screen w-full bg-black cursor-grab' 
+                    : 'h-[50vh] min-h-[400px] bg-gray-100 cursor-pointer'
                 }`}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
@@ -385,7 +430,7 @@ const PropertyDetail = () => {
                 <div className="absolute inset-0 overflow-hidden">
                   <AnimatePresence initial={false} mode="wait">
                     <motion.div
-                      className="absolute inset-0 w-full h-full cursor-pointer"
+                      className="absolute inset-0 w-full h-full"
                       key={currentImageIndex}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -398,6 +443,7 @@ const PropertyDetail = () => {
                         </div>
                       )}
                       <motion.img
+                        ref={imageRef}
                         src={property.images[currentImageIndex]}
                         alt={`${property.title} in ${property.location}`}
                         className={`w-full h-full ${
@@ -447,7 +493,7 @@ const PropertyDetail = () => {
                 </div>
                 
                 {/* Navigation Arrows - Conditionally shown */}
-                {showControls && (
+                {showControls && property.images.length > 1 && (
                   <>
                     <button
                       className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
@@ -485,7 +531,7 @@ const PropertyDetail = () => {
                 )}
                 
                 {/* Thumbnails - Conditionally shown */}
-                {showControls && (
+                {showControls && property.images.length > 1 && (
                   <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 transition-opacity duration-300 ${
                     isFullscreen ? 'bg-black/30 py-2 backdrop-blur-sm' : ''
                   }`}>
@@ -517,17 +563,22 @@ const PropertyDetail = () => {
                 )}
                 
                 {/* Image Counter - Always visible */}
-                <div className={`absolute top-4 left-4 z-20 ${
-                  isFullscreen ? 'bg-black/70 text-white' : 'bg-black/50 text-white'
-                } text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm`}>
-                  {currentImageIndex + 1} / {property.images.length}
-                </div>
+                {property.images.length > 1 && (
+                  <div className={`absolute top-4 left-4 z-20 ${
+                    isFullscreen ? 'bg-black/70 text-white' : 'bg-black/50 text-white'
+                  } text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm`}>
+                    {currentImageIndex + 1} / {property.images.length}
+                  </div>
+                )}
                 
                 {/* Fullscreen Controls */}
                 {isFullscreen && showControls && (
                   <button
                     className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm"
-                    onClick={toggleFullscreen}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFullscreen();
+                    }}
                     aria-label="Exit fullscreen"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
