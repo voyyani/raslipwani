@@ -530,44 +530,17 @@ const PropertyDetail = () => {
                   </>
                 )}
                 
-                {/* Thumbnails - Conditionally shown */}
+                {/* Dot Indicators */}
                 {showControls && property.images.length > 1 && (
-                  <div className={`absolute bottom-4 left-0 right-0 px-4 z-20 transition-opacity duration-300 ${
-                    isFullscreen ? 'bg-black/30 py-2 backdrop-blur-sm' : ''
-                  }`}>
-                    <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-                      {property.images.map((img, index) => (
-                        <button
-                          key={index}
-                          className={`w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                            index === currentImageIndex 
-                              ? 'border-primary scale-105 ring-2 ring-white' 
-                              : 'border-transparent opacity-70 hover:opacity-100'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCurrentImageIndex(index);
-                          }}
-                          aria-label={`View image ${index + 1}`}
-                        >
-                          <img
-                            src={img}
-                            alt={`Thumbnail for ${property.title}`}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Image Counter - Always visible */}
-                {property.images.length > 1 && (
-                  <div className={`absolute top-4 left-4 z-20 ${
-                    isFullscreen ? 'bg-black/70 text-white' : 'bg-black/50 text-white'
-                  } text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm`}>
-                    {currentImageIndex + 1} / {property.images.length}
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center z-20">
+                    {property.images.map((_, i) => (
+                      <div 
+                        key={i}
+                        className={`w-2 h-2 mx-1 rounded-full transition-all ${
+                          i === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                        }`}
+                      />
+                    ))}
                   </div>
                 )}
                 

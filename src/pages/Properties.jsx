@@ -530,9 +530,9 @@ const Properties = () => {
                 <motion.div 
                   className="grid grid-cols-1 md:grid-cols-2 gap-8"
                   initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ staggerChildren: 0.1 }}
-                  >
+                  animate={{ opacity: 1 }}
+                  transition={{ staggerChildren: 0.1 }}
+                >
                   {filteredProperties.map((property, index) => (
                     <PropertyCard 
                       key={property.id} 
@@ -579,13 +579,14 @@ const PropertyCard = ({ property, index, openModal }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -10 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group"
+      className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group cursor-pointer"
+      onClick={() => openModal(property)}
     >
       <div className="relative pb-[75%] overflow-hidden">
         {property.images?.[0] ? (
           <img 
             src={property.images[0]} 
-            alt={`${property.property_type} for ${property.purpose} in ${property.location} | ${property.bedrooms} bedrooms, ${property.bathrooms} bathrooms`}
+            alt={`${property.title} in ${property.location}`}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading={index > 2 ? "lazy" : "eager"}
             width="400"
@@ -601,21 +602,13 @@ const PropertyCard = ({ property, index, openModal }) => {
             Featured
           </div>
         )}
-        <button className="absolute top-4 left-4 bg-white text-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100 transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </button>
       </div>
       
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">
-          <motion.h2 
-            className="text-xl font-bold text-gray-800"
-            whileHover={{ color: '#3b82f6' }}
-          >
+          <h2 className="text-xl font-bold text-gray-800 group-hover:text-primary transition-colors">
             {property.title}
-          </motion.h2>
+          </h2>
           <span className="text-xl font-bold text-primary">
             {formatPrice(property.price)}
           </span>
@@ -650,17 +643,9 @@ const PropertyCard = ({ property, index, openModal }) => {
           </div>
         </div>
         
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <button 
-            onClick={() => openModal(property)}
-            className="block w-full text-center bg-gradient-to-r from-primary to-secondary text-white py-3.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            View Details
-          </button>
-        </motion.div>
+        <div className="mt-4 text-center text-primary font-medium group-hover:text-primary-dark transition-colors">
+          View Details
+        </div>
       </div>
     </motion.div>
   );
