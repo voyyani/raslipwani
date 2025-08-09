@@ -17,13 +17,14 @@ const PropertyModal = ({ property, closeModal }) => {
   const [showControls, setShowControls] = useState(true);
   const imageRef = useRef(null);
   const lastTouchDistance = useRef(0);
-  const timerRef = useRef(null);
 
   // Reset states when image changes or fullscreen toggles
   useEffect(() => {
     setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
     setIsImageLoading(true);
+    // Always show controls in fullscreen
+    setShowControls(true);
   }, [currentImageIndex, isFullscreen]);
 
   const formatPrice = (price) => {
@@ -50,6 +51,8 @@ const PropertyModal = ({ property, closeModal }) => {
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
       setTouchStart(e.touches[0].clientX);
+      // Always show controls on touch
+      setShowControls(true);
     } else if (e.touches.length === 2 && zoomLevel > 1) {
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
@@ -68,6 +71,8 @@ const PropertyModal = ({ property, closeModal }) => {
       if (diff > 50) handleNext();
       if (diff < -50) handlePrev();
     }
+    // Always show controls on touch end
+    setShowControls(true);
   };
 
   const handleTouchMove = (e) => {
@@ -149,7 +154,8 @@ const PropertyModal = ({ property, closeModal }) => {
       setZoomLevel(1);
       setPosition({ x: 0, y: 0 });
     }
-    resetControlsTimer();
+    // Always show controls on double tap
+    setShowControls(true);
   };
 
   // Handle drag start for panning
@@ -180,6 +186,8 @@ const PropertyModal = ({ property, closeModal }) => {
     setIsFullscreen(!isFullscreen);
     setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
+    // Always show controls in fullscreen
+    setShowControls(true);
   };
 
   // Handle image load
@@ -193,34 +201,11 @@ const PropertyModal = ({ property, closeModal }) => {
     console.error('Error loading image:', property.images[currentImageIndex]);
   };
 
-  // Reset controls visibility timer
-  const resetControlsTimer = useCallback(() => {
-    setShowControls(true);
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      if (isFullscreen) {
-        setShowControls(false);
-      }
-    }, 3000);
-  }, [isFullscreen]);
-
-  // Auto-hide controls in fullscreen
-  useEffect(() => {
-    if (isFullscreen) {
-      resetControlsTimer();
-    } else {
-      setShowControls(true);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [isFullscreen, resetControlsTimer]);
-
   // Tap gestures
   const handleTap = (e) => {
     if (e.touches && e.touches.length > 1) return;
-    if (isFullscreen) {
-      setShowControls(prev => !prev);
-      resetControlsTimer();
-    }
+    // Always show controls on tap
+    setShowControls(true);
   };
 
   // Preload images

@@ -23,7 +23,6 @@ const PropertyDetail = () => {
   const containerRef = useRef(null);
   const imageRef = useRef(null);
   const lastTapRef = useRef(0);
-  const timerRef = useRef(null);
   const touchStartRef = useRef(0);
 
   const formatPrice = (price) => {
@@ -105,7 +104,8 @@ const PropertyDetail = () => {
       else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
       else if (element.msRequestFullscreen) element.msRequestFullscreen();
     }
-    resetControlsTimer();
+    // Always show controls in fullscreen
+    setShowControls(true);
   }, []);
 
   // Handle container click
@@ -114,7 +114,8 @@ const PropertyDetail = () => {
     if (e.target === containerRef.current || e.target === imageRef.current) {
       toggleFullscreen();
     }
-    resetControlsTimer();
+    // Always show controls in fullscreen
+    setShowControls(true);
   }, [toggleFullscreen]);
 
   // Handle fullscreen changes
@@ -130,6 +131,8 @@ const PropertyDetail = () => {
       if (!fullscreenElement) {
         resetZoom();
       }
+      // Always show controls in fullscreen
+      setShowControls(true);
     };
     
     // Add all browser-specific events
@@ -181,30 +184,12 @@ const PropertyDetail = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isFullscreen, handlePrev, handleNext, toggleFullscreen]);
 
-  // Reset controls visibility timer
-  const resetControlsTimer = useCallback(() => {
-    setShowControls(true);
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      if (isFullscreen) {
-        setShowControls(false);
-      }
-    }, 3000);
-  }, [isFullscreen]);
-
-  // Auto-hide controls in fullscreen
-  useEffect(() => {
-    if (isFullscreen) {
-      resetControlsTimer();
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [isFullscreen, resetControlsTimer]);
-
   // Handle touch gestures
   const handleTouchStart = useCallback((e) => {
     touchStartRef.current = e.touches[0].clientX;
-    resetControlsTimer();
-  }, [resetControlsTimer]);
+    // Always show controls on touch
+    setShowControls(true);
+  }, []);
 
   const handleTouchEnd = useCallback((e) => {
     const touchEnd = e.changedTouches[0].clientX;
@@ -249,8 +234,9 @@ const PropertyDetail = () => {
       setPosition({ x: 0, y: 0 });
     }
     
-    resetControlsTimer();
-  }, [isFullscreen, zoom, resetControlsTimer]);
+    // Always show controls on double tap
+    setShowControls(true);
+  }, [isFullscreen, zoom]);
 
   // Handle image load
   const handleImageLoad = useCallback((e) => {
