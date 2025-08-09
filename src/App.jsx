@@ -12,17 +12,24 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import AdminLayout from './pages/admin/AdminLayout';
-import Header from './components/Header'; // Added import
-import Footer from './components/Footer'; // Added import
-import { supabase } from './utils/supabaseClient'; // Added import
+import Header from './components/Header';
+import Footer from './components/Footer';
+import { supabase } from './utils/supabaseClient';
 
 // Lazy-loaded main components
 const Home = lazy(() => import('./pages/Home'));
 const Properties = lazy(() => import('./pages/Properties'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
-const Services = lazy(() => import('./pages/Services'));
+const Services = lazy(() => import('./pages/ServicesMain')); // Updated path
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
+
+// Placeholder components for new service pages
+const PropertySales = lazy(() => import('./components/services/PropertySales'));
+const PropertyAcquisition = lazy(() => import('./components/services/PropertyAcquisition'));
+const PropertyValuation = lazy(() => import('./components/services/PropertyValuation'));
+const PropertyManagement = lazy(() => import('./components/services/PropertyManagement'));
+const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
 // Admin components
 import Dashboard from './pages/admin/Dashboard';
@@ -147,7 +154,15 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />
+            
+            {/* Updated services routes */}
             <Route path="/services" element={<Services />} />
+            <Route path="/services/sales" element={<PropertySales />} />
+            <Route path="/services/acquisition" element={<PropertyAcquisition />} />
+            <Route path="/services/valuation" element={<PropertyValuation />} />
+            <Route path="/services/management" element={<PropertyManagement />} />
+            <Route path="/services/viewing" element={<ViewingExperience />} />
+            
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             
