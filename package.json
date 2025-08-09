@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.50.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.18.1",
+    "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-calendar": "^6.0.0",
     "react-dom": "^18.3.1",
