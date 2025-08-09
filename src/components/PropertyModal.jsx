@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiPhone, FiMaximize, FiMinimize, FiZoomIn, FiZoomOut, FiMove } from 'react-icons/fi';
+import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const PropertyModal = ({ property, closeModal }) => {
@@ -13,15 +13,17 @@ const PropertyModal = ({ property, closeModal }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true); // Added loading state
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [showControls, setShowControls] = useState(true);
   const imageRef = useRef(null);
   const lastTouchDistance = useRef(0);
+  const timerRef = useRef(null);
 
   // Reset states when image changes or fullscreen toggles
   useEffect(() => {
     setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
-    setIsImageLoading(true); // Reset loading state when image changes
+    setIsImageLoading(true);
   }, [currentImageIndex, isFullscreen]);
 
   const formatPrice = (price) => {
@@ -49,7 +51,6 @@ const PropertyModal = ({ property, closeModal }) => {
     if (e.touches.length === 1) {
       setTouchStart(e.touches[0].clientX);
     } else if (e.touches.length === 2 && zoomLevel > 1) {
-      // Pinch to zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       lastTouchDistance.current = Math.hypot(
@@ -64,14 +65,13 @@ const PropertyModal = ({ property, closeModal }) => {
       const touchEnd = e.changedTouches[0].clientX;
       const diff = touchStart - touchEnd;
       
-      if (diff > 50) handleNext(); // Swipe left
-      if (diff < -50) handlePrev(); // Swipe right
+      if (diff > 50) handleNext();
+      if (diff < -50) handlePrev();
     }
   };
 
   const handleTouchMove = (e) => {
     if (e.touches.length === 2 && zoomLevel > 1) {
-      // Handle pinch zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       const currentDistance = Math.hypot(
@@ -136,7 +136,6 @@ const PropertyModal = ({ property, closeModal }) => {
     
     setZoomLevel(newZoom);
     
-    // Reset position when zooming out to minimum
     if (newZoom <= 1) {
       setPosition({ x: 0, y: 0 });
     }
@@ -150,6 +149,7 @@ const PropertyModal = ({ property, closeModal }) => {
       setZoomLevel(1);
       setPosition({ x: 0, y: 0 });
     }
+    resetControlsTimer();
   };
 
   // Handle drag start for panning
@@ -178,6 +178,8 @@ const PropertyModal = ({ property, closeModal }) => {
   // Toggle fullscreen mode
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+    setZoomLevel(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   // Handle image load
@@ -191,6 +193,54 @@ const PropertyModal = ({ property, closeModal }) => {
     console.error('Error loading image:', property.images[currentImageIndex]);
   };
 
+  // Reset controls visibility timer
+  const resetControlsTimer = useCallback(() => {
+    setShowControls(true);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (isFullscreen) {
+        setShowControls(false);
+      }
+    }, 3000);
+  }, [isFullscreen]);
+
+  // Auto-hide controls in fullscreen
+  useEffect(() => {
+    if (isFullscreen) {
+      resetControlsTimer();
+    } else {
+      setShowControls(true);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [isFullscreen, resetControlsTimer]);
+
+  // Tap gestures
+  const handleTap = (e) => {
+    if (e.touches && e.touches.length > 1) return;
+    if (isFullscreen) {
+      setShowControls(prev => !prev);
+      resetControlsTimer();
+    }
+  };
+
+  // Preload images
+  useEffect(() => {
+    if (!property?.images || property.images.length < 2) return;
+    
+    const preloadImage = (index) => {
+      const img = new Image();
+      img.src = property.images[index];
+    };
+    
+    // Preload next image
+    const nextIndex = (currentImageIndex + 1) % property.images.length;
+    preloadImage(nextIndex);
+    
+    // Preload previous image
+    const prevIndex = (currentImageIndex - 1 + property.images.length) % property.images.length;
+    preloadImage(prevIndex);
+  }, [currentImageIndex, property?.images]);
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
@@ -200,34 +250,16 @@ const PropertyModal = ({ property, closeModal }) => {
       onClick={closeModal}
     >
       <motion.div
-        className={`relative bg-white ${isFullscreen ? 'fixed inset-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
+        className={`relative bg-white ${isFullscreen ? 'fixed inset-0 !m-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
         initial={{ scale: 0.9 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.9 }}
         transition={{ type: "spring", damping: 25 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with close button and controls */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
-          <button
-            onClick={toggleFullscreen}
-            className="bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-colors"
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            {isFullscreen ? <FiMinimize size={24} /> : <FiMaximize size={24} />}
-          </button>
-          <button
-            onClick={isFullscreen ? toggleFullscreen : closeModal}
-            className="bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-colors"
-            aria-label={isFullscreen ? "Exit fullscreen" : "Close modal"}
-          >
-            <FiX size={24} />
-          </button>
-        </div>
-
         {/* Image Carousel */}
         <div 
-          className={`relative ${isFullscreen ? 'h-screen' : 'h-[50vh] min-h-[300px]'} bg-black`}
+          className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-[50vh] min-h-[300px]'} bg-black`}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -235,7 +267,10 @@ const PropertyModal = ({ property, closeModal }) => {
           {property.images?.length > 0 ? (
             <>
               {/* Main Image */}
-              <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+              <div 
+                className="absolute inset-0 overflow-hidden flex items-center justify-center"
+                onTap={handleTap}
+              >
                 <AnimatePresence initial={false} mode="wait">
                   <motion.div
                     key={`${currentImageIndex}-${isFullscreen}`}
@@ -244,7 +279,6 @@ const PropertyModal = ({ property, closeModal }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    onDoubleClick={handleDoubleTap}
                   >
                     {isImageLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -273,101 +307,117 @@ const PropertyModal = ({ property, closeModal }) => {
                         top: -window.innerHeight * (zoomLevel - 1) / 2,
                         bottom: window.innerHeight * (zoomLevel - 1) / 2
                       }}
-                      loading="eager"
+                      onDoubleTap={handleDoubleTap}
+                      loading={currentImageIndex === 0 ? "eager" : "lazy"}
                       onLoad={handleImageLoad}
                       onError={handleImageError}
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: zoomLevel, opacity: 1 }}
+                      transition={{ 
+                        scale: { type: "spring", damping: 20 },
+                        opacity: { duration: 0.3 }
+                      }}
                     />
                   </motion.div>
                 </AnimatePresence>
               </div>
               
-              {/* Zoom Controls */}
-              <div className="absolute bottom-4 left-4 z-10 flex gap-2 bg-black/50 text-white text-sm font-medium px-3 py-2 rounded-full">
-                <button 
-                  onClick={() => handleZoom('out')}
-                  disabled={zoomLevel <= 1}
-                  className={`p-1 rounded-full ${zoomLevel <= 1 ? 'opacity-50' : 'hover:bg-white/20'}`}
-                  aria-label="Zoom out"
-                >
-                  <FiZoomOut size={20} />
-                </button>
-                <span className="mx-1">{(zoomLevel * 100).toFixed(0)}%</span>
-                <button 
-                  onClick={() => handleZoom('in')}
-                  disabled={zoomLevel >= 3}
-                  className={`p-1 rounded-full ${zoomLevel >= 3 ? 'opacity-50' : 'hover:bg-white/20'}`}
-                  aria-label="Zoom in"
-                >
-                  <FiZoomIn size={20} />
-                </button>
-                {zoomLevel > 1 && (
-                  <button 
-                    onClick={() => {
-                      setZoomLevel(1);
-                      setPosition({ x: 0, y: 0 });
-                    }}
-                    className="p-1 rounded-full hover:bg-white/20 ml-2"
-                    aria-label="Reset zoom"
-                  >
-                    <FiMove size={20} />
-                  </button>
+              {/* Dot Indicators */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center z-20">
+                {property.images.map((_, i) => (
+                  <div 
+                    key={i}
+                    className={`w-2 h-2 mx-1 rounded-full transition-all ${
+                      i === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+              
+              {/* Navigation Arrows - Always visible in fullscreen */}
+              <AnimatePresence>
+                {(showControls || !isFullscreen) && (
+                  <>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-10 ${
+                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-3 shadow-lg transition-colors`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrev();
+                      }}
+                      aria-label="Previous image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-10 ${
+                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-3 shadow-lg transition-colors`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNext();
+                      }}
+                      aria-label="Next image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </motion.button>
+                  </>
                 )}
-              </div>
+              </AnimatePresence>
               
-              {/* Navigation Arrows */}
-              <button
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
-                onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                aria-label="Previous image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg transition-colors"
-                onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                aria-label="Next image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              
-              {/* Thumbnail Strip */}
-              {!isFullscreen && (
-                <div className="absolute bottom-4 left-0 right-0 px-4 z-10">
-                  <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-                    {property.images.map((img, index) => (
-                      <button
-                        key={index}
-                        className={`w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                          index === currentImageIndex 
-                            ? 'border-primary scale-105' 
-                            : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex(index);
-                        }}
-                        aria-label={`View image ${index + 1}`}
-                      >
-                        <img
-                          src={img}
-                          alt={`Thumbnail ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </button>
-                    ))}
+              {/* Header Controls - Always visible in fullscreen */}
+              <AnimatePresence>
+                {(showControls || !isFullscreen) && (
+                  <div className="absolute top-4 right-4 z-20 flex gap-2">
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={toggleFullscreen}
+                      className={`${
+                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-2 shadow-lg transition-colors`}
+                      aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                    >
+                      {isFullscreen ? <FiMinimize size={24} /> : <FiMaximize size={24} />}
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={isFullscreen ? toggleFullscreen : closeModal}
+                      className={`${
+                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                      } rounded-full p-2 shadow-lg transition-colors`}
+                      aria-label={isFullscreen ? "Exit fullscreen" : "Close modal"}
+                    >
+                      <FiX size={24} />
+                    </motion.button>
                   </div>
-                </div>
-              )}
+                )}
+              </AnimatePresence>
               
-              {/* Image Counter */}
-              <div className="absolute top-4 left-4 z-10 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full">
-                {currentImageIndex + 1} / {property.images.length}
-              </div>
+              {/* Zoom Indicator */}
+              {zoomLevel > 1 && (
+                <motion.div 
+                  className="absolute top-4 left-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  {zoomLevel.toFixed(1)}x
+                </motion.div>
+              )}
             </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-500">
@@ -376,9 +426,15 @@ const PropertyModal = ({ property, closeModal }) => {
           )}
         </div>
 
+        {/* Property Details - Always visible when not in fullscreen */}
         {!isFullscreen && (
-          /* Property Details */
-          <div className="p-6 md:p-8 overflow-y-auto flex-grow" style={{ maxHeight: 'calc(90vh - 50vh)' }}>
+          <motion.div 
+            className="p-6 md:p-8 overflow-y-auto flex-grow"
+            style={{ maxHeight: 'calc(90vh - 50vh)' }}
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
@@ -496,7 +552,7 @@ const PropertyModal = ({ property, closeModal }) => {
                 </>
               )}
             </div>
-          </div>
+          </motion.div>
         )}
       </motion.div>
     </motion.div>
