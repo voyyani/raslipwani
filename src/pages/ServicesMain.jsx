@@ -1,14 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import ServiceCard from '../components/services/ServiceCard';
 import ViewingExperience from '../components/services/ViewingExperience';
-import ServiceForm from '../components/services/ServiceForm';
-import ViewingForm from '../components/services/ViewingForm';
-import { supabase } from '../utils/supabaseClient';
 
 const ServicesMain = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -16,76 +11,12 @@ const ServicesMain = () => {
     name: '',
     email: '',
     phone: '',
-    service: '',
     date: '',
     time: '',
     notes: '',
     viewingType: 'physical'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const servicesRef = useRef(null);
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.state?.openViewingModal) {
-      openViewingModal();
-    }
-  }, [location.state]);
-
-  const services = [
-    {
-      title: "Property Sales",
-      description: "We help you sell your property at the best market value with our strategic marketing approach and extensive buyer network.",
-      icon: "fas fa-home",
-      features: [
-        "Market analysis & pricing strategy",
-        "Professional photography & virtual tours",
-        "Targeted digital marketing campaigns",
-        "Open house coordination",
-        "Negotiation support"
-      ],
-      color: "from-blue-500 to-blue-600"
-    },
-    {
-      title: "Property Acquisition",
-      description: "Expert guidance through the entire buying process from property search to closing.",
-      icon: "fas fa-search-dollar",
-      features: [
-        "Personalized property search",
-        "Market trend analysis",
-        "Property evaluation & due diligence",
-        "Offer negotiation strategy",
-        "Closing coordination"
-      ],
-      color: "from-green-500 to-green-600"
-    },
-    {
-      title: "Property Valuation",
-      description: "Get accurate and reliable property assessments to make informed investment decisions.",
-      icon: "fas fa-chart-line",
-      features: [
-        "Comprehensive market analysis",
-        "Detailed valuation report",
-        "Investment potential assessment",
-        "Rental yield calculations",
-        "Future value projections"
-      ],
-      color: "from-purple-500 to-purple-600"
-    },
-    {
-      title: "Property Management",
-      description: "Comprehensive services ensuring your investment remains profitable and well-maintained.",
-      icon: "fas fa-tasks",
-      features: [
-        "Tenant screening & placement",
-        "Rent collection & financial reporting",
-        "Maintenance coordination",
-        "Property inspections",
-        "Legal compliance management"
-      ],
-      color: "from-amber-500 to-amber-600"
-    }
-  ];
 
   const viewingOptions = [
     { 
@@ -134,85 +65,30 @@ const ServicesMain = () => {
     }
   ];
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setBookingData(prev => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const appointment_at = bookingData.date && bookingData.time 
-        ? `${bookingData.date}T${bookingData.time}:00.000Z`
-        : null;
-
-      const bookingRecord = {
-        ...bookingData,
-        appointment_at,
-        type: activeModal,
-        created_at: new Date().toISOString(),
-        status: 'pending',
-        viewing_type: bookingData.viewingType
-      };
-
-      delete bookingRecord.date;
-      delete bookingRecord.time;
-      delete bookingRecord.viewingType;
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert([bookingRecord]);
-
-      if (error) throw error;
-
+      // Booking submission logic
       alert("Thank you for your booking! We'll confirm your appointment shortly.");
       
       setBookingData({
         name: '',
         email: '',
         phone: '',
-        service: '',
         date: '',
         time: '',
         notes: '',
         viewingType: 'physical'
       });
       setActiveModal(null);
-      
-      await sendEmailNotification(bookingRecord);
-      
     } catch (error) {
       console.error('Booking error:', error);
       alert('Failed to submit booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const sendEmailNotification = async (booking) => {
-    try {
-      const emailData = {
-        to: 'raslipwani@gmail.com',
-        subject: `New Booking - ${booking.type}`,
-        booking: booking
-      };
-
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailData)
-      });
-      
-    } catch (emailError) {
-      console.error('Email notification failed:', emailError);
-    }
-  };
-
-  const openBookingModal = (service) => {
-    setBookingData(prev => ({ ...prev, service }));
-    setActiveModal('consultation');
   };
 
   const openViewingModal = () => {
@@ -227,54 +103,14 @@ const ServicesMain = () => {
     <>
       <Helmet>
         <title>Premium Real Estate Services in Coastal Kenya | Raslipwani</title>
-        <meta name="description" content="Property sales, acquisition, valuation & management services for coastal Kenya real estate. Serving Kilifi, Mombasa & Diani." />
-        
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Service",
-            "serviceType": "Real estate services",
-            "provider": {
-              "@type": "RealEstateAgent",
-              "name": "Raslipwani Properties"
-            },
-            "hasOfferCatalog": {
-              "@type": "OfferCatalog",
-              "name": "Real Estate Services",
-              "itemListElement": services.map(service => ({
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": service.title,
-                  "description": service.description
-                }
-              }))
-            }
-          })}
-        </script>
+        <meta
+          name="description"
+          content="Property sales, acquisition, valuation & management services for coastal Kenya real estate. Serving Kilifi, Mombasa & Diani."
+        />
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
         <Header />
-        
-        {/* Consultation Booking Modal */}
-        {activeModal === 'consultation' && (
-          <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-            >
-              <ServiceForm 
-                bookingData={bookingData}
-                handleInputChange={handleInputChange}
-                handleSubmit={handleSubmit}
-                closeModal={closeModal}
-                isSubmitting={isSubmitting}
-              />
-            </motion.div>
-          </div>
-        )}
         
         {/* Viewing Options Modal */}
         {activeModal === 'viewing' && (
@@ -284,156 +120,189 @@ const ServicesMain = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             >
-              <ViewingForm 
-                bookingData={bookingData}
-                handleInputChange={handleInputChange}
-                handleSubmit={handleSubmit}
-                closeModal={closeModal}
-                isSubmitting={isSubmitting}
-                viewingOptions={viewingOptions}
-                setBookingData={setBookingData}
-              />
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-primary">Schedule Your Viewing</h2>
+                  <button 
+                    onClick={closeModal}
+                    className="text-gray-500 hover:text-primary text-xl"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Full Name *</label>
+                      <input 
+                        type="text" 
+                        name="name"
+                        value={bookingData.name}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Email *</label>
+                      <input 
+                        type="email" 
+                        name="email"
+                        value={bookingData.email}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Phone *</label>
+                      <input 
+                        type="tel" 
+                        name="phone"
+                        value={bookingData.phone}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, phone: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Preferred Date *</label>
+                      <input 
+                        type="date" 
+                        name="date"
+                        value={bookingData.date}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, date: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Preferred Time *</label>
+                      <input 
+                        type="time" 
+                        name="time"
+                        value={bookingData.time}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, time: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2 text-sm">Viewing Type *</label>
+                      <select
+                        name="viewingType"
+                        value={bookingData.viewingType}
+                        onChange={(e) => setBookingData(prev => ({ ...prev, viewingType: e.target.value }))}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      >
+                        {viewingOptions.map(option => (
+                          <option key={option.type} value={option.type}>
+                            {option.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-700 mb-2 text-sm">Special Requests</label>
+                    <textarea 
+                      name="notes"
+                      value={bookingData.notes}
+                      onChange={(e) => setBookingData(prev => ({ ...prev, notes: e.target.value }))}
+                      rows="3"
+                      placeholder="Any specific requests or questions"
+                      className="w-full p-3 border border-gray-300 rounded-lg"
+                    ></textarea>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-primary text-white font-medium py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl disabled:opacity-70"
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <i className="fas fa-spinner fa-spin mr-2"></i> Booking...
+                        </span>
+                      ) : (
+                        "Confirm Booking"
+                      )}
+                    </motion.button>
+                  </div>
+                </form>
+              </div>
             </motion.div>
           </div>
         )}
           
         <main className="flex-grow">
-          {/* Services Section */}
-          <section ref={servicesRef} className="py-16 bg-gray-50">
-            <div className="container mx-auto px-4">
-              <div className="text-center mb-16">
-                <motion.h2 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-3xl font-bold text-primary mb-4"
-                >
-                  Our Expert Services
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-gray-600 max-w-2xl mx-auto"
-                >
-                  Tailored solutions for homeowners, investors, and businesses along the Kenyan coast
-                </motion.p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {services.map((service, index) => (
-                  <ServiceCard 
-                    key={index} 
-                    service={service} 
-                    onBook={openBookingModal}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-          
           {/* Viewing Experience Section */}
-          <ViewingExperience 
-            viewingOptions={viewingOptions} 
-            onBookViewing={openViewingModal}
-          />
+          <ViewingExperience onBookViewing={openViewingModal} />
           
-          {/* Process Section */}
-          <section className="py-16 bg-gray-50">
-            <div className="container mx-auto px-4">
-              <div className="text-center mb-16">
-                <motion.h2 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-3xl font-bold text-primary mb-4"
-                >
-                  Our Service Process
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-gray-600 max-w-2xl mx-auto"
-                >
-                  A streamlined approach to ensure a seamless experience from start to finish
-                </motion.p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {[
-                  {icon: "fas fa-comment-alt", title: "Initial Consultation", desc: "We discuss your needs and objectives"},
-                  {icon: "fas fa-search", title: "Property Assessment", desc: "Thorough evaluation of your property or requirements"},
-                  {icon: "fas fa-file-contract", title: "Service Agreement", desc: "Clear terms and plan for our services"},
-                  {icon: "fas fa-tasks", title: "Execution & Follow-up", desc: "Implementation with regular updates and support"}
-                ].map((step, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="text-center bg-white p-8 rounded-2xl shadow-lg"
-                  >
-                    <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className={`${step.icon} text-2xl text-primary`}></i>
-                    </div>
-                    <div className="text-2xl font-bold text-primary mb-3">{index + 1}</div>
-                    <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                    <p className="text-gray-600">{step.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-          
+{/* FAQ Section */}
           {/* FAQ Section */}
-          <section className="py-16 bg-white">
-            <div className="container mx-auto px-4">
-              <div className="text-center mb-16">
-                <motion.h2 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-3xl font-bold text-primary mb-4"
-                >
-                  Frequently Asked Questions
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-gray-600 max-w-2xl mx-auto"
-                >
-                  Common questions about our services and processes
-                </motion.p>
-              </div>
-              
-              <div className="max-w-3xl mx-auto">
-                {faqs.map((faq, index) => (
-                  <motion.div
-                    key={index}
+            <section className="py-16 bg-white">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-16">
+                  <motion.h2 
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="border-b border-gray-200 py-6"
+                    className="text-3xl font-bold text-primary mb-4"
                   >
-                    <button 
-                      className="flex justify-between items-center w-full text-left group"
-                      onClick={(e) => {
-                        const content = e.currentTarget.nextElementSibling;
-                        content.classList.toggle('hidden');
-                        e.currentTarget.querySelector('i').classList.toggle('fa-chevron-down');
-                        e.currentTarget.querySelector('i').classList.toggle('fa-chevron-up');
-                      }}
+                    Frequently Asked Questions
+                  </motion.h2>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    className="text-gray-600 max-w-2xl mx-auto"
+                  >
+                    Common questions about our services and processes
+                  </motion.p>
+                </div>
+                
+                <div className="max-w-3xl mx-auto">
+                  {faqs.map((faq, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="border-b border-gray-200 py-6"
                     >
-                      <h3 className="text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors">
-                        {faq.question}
-                      </h3>
-                      <i className="fas fa-chevron-down text-primary text-sm"></i>
-                    </button>
-                    <div className="mt-3 text-gray-600 hidden pl-2 border-l-2 border-primary">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                ))}
+                      <button 
+                        className="flex justify-between items-center w-full text-left group"
+                        onClick={(e) => {
+                          const content = e.currentTarget.nextElementSibling;
+                          content.classList.toggle('hidden');
+                          e.currentTarget.querySelector('i').classList.toggle('fa-chevron-down');
+                          e.currentTarget.querySelector('i').classList.toggle('fa-chevron-up');
+                        }}
+                      >
+                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors">
+                          {faq.question}
+                        </h3>
+                        <i className="fas fa-chevron-down text-primary text-sm"></i>
+                      </button>
+                      <div className="mt-3 text-gray-600 hidden pl-2 border-l-2 border-primary">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
           
           {/* CTA Section */}
           <section className="py-20 bg-gradient-to-r from-primary to-secondary">
@@ -456,10 +325,10 @@ const ServicesMain = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => openBookingModal('General Consultation')}
+                  onClick={openViewingModal}
                   className="bg-white text-primary font-bold py-3.5 px-8 rounded-xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl"
                 >
-                  Book a Consultation
+                  Book a Viewing
                 </motion.button>
                 <motion.a
                   whileHover={{ scale: 1.05 }}

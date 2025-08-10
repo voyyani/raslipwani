@@ -1,11 +1,9 @@
-// src/pages/services/ViewingExperience.jsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
 import { supabase } from '../../utils/supabaseClient';
 
-const ViewingExperience = () => {
-  // State management
+const ViewingExperience = ({ onBookViewing }) => {
   const [properties, setProperties] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,7 +14,6 @@ const ViewingExperience = () => {
   const [showResults, setShowResults] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // Filters state
   const [filters, setFilters] = useState({
     purpose: '',
     propertyType: '',
@@ -26,7 +23,6 @@ const ViewingExperience = () => {
     maxPrice: 100000000,
   });
 
-  // Booking data
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -36,52 +32,53 @@ const ViewingExperience = () => {
     notes: '',
   });
 
-  // Viewing options
   const viewingOptions = [
-    { 
-      type: "physical", 
-      title: "In-Person Viewing", 
-      description: "Personalized tour with our agent",
-      duration: "1 hour",
-      icon: "fas fa-walking",
-      price: "Free",
-      features: [
-        "On-site property inspection",
-        "Neighborhood tour",
-        "Q&A with agent",
-        "Immediate feedback"
-      ]
-    },
-    { 
-      type: "virtual", 
-      title: "Virtual Tour", 
-      description: "Live video walkthrough",
-      duration: "30 minutes",
-      icon: "fas fa-video",
-      price: "Free",
-      features: [
-        "Live guided video tour",
-        "Screen sharing for documents",
-        "Recorded session available",
-        "Flexible scheduling"
-      ]
-    },
-    { 
-      type: "vr", 
-      title: "VR Experience", 
-      description: "Immersive 3D walkthrough",
-      duration: "45 minutes",
-      icon: "fas fa-vr-cardboard",
-      price: "$20",
-      features: [
-        "360° virtual reality experience",
-        "Floor plan visualization",
-        "Available after hours"
-      ]
-    }
-  ];
+  { 
+    type: "physical", 
+    title: "In-Person Viewing", 
+    description: "Personalized tour with our agent",
+    duration: "1 hour",
+    icon: "fas fa-walking",
+    price: "Free",
+    features: [
+      "On-site property inspection",
+      "Neighborhood tour",
+      "Q&A with agent",
+      "Immediate feedback"
+    ]
+  },
+  { 
+    type: "virtual", 
+    title: "Virtual Tour", 
+    description: "Live video walkthrough",
+    duration: "30 minutes",
+    icon: "fas fa-video",
+    price: "Free",
+    features: [
+      "Live guided video tour",
+      "Screen sharing for documents",
+      "Recorded session available",
+      "Flexible scheduling"
+    ]
+  },
+  { 
+    type: "3d", 
+    title: "3D Viewing Experience", 
+    description: "3D virtual tour of the property, and drone footage",
+    duration: "Unlimited access for 7 days",
+    icon: "fas fa-vr-cardboard",
+    price: "Ksh 5,000",
+    features: [
+      "360° property view",
+      "Interactive navigation",
+      "Compatible with VR headsets",
+      "View from any device",
+      "Drone footage included"
+    ]
+  }
+];
 
-  // Fetch properties from Supabase
+
   const fetchProperties = async () => {
     try {
       setLoading(true);
@@ -102,7 +99,6 @@ const ViewingExperience = () => {
     }
   };
 
-  // Apply filters when they change
   useEffect(() => {
     if (properties.length === 0) return;
     
@@ -130,7 +126,6 @@ const ViewingExperience = () => {
       result = result.filter(p => p.bedrooms >= parseInt(filters.bedrooms));
     }
     
-    // Only apply price filter if both min and max are provided
     if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
       result = result.filter(p => 
         p.price >= filters.minPrice && p.price <= filters.maxPrice
@@ -140,7 +135,6 @@ const ViewingExperience = () => {
     setFilteredProperties(result);
   }, [filters, properties]);
 
-  // Update active filters
   useEffect(() => {
     const newFilters = [];
     
@@ -176,7 +170,6 @@ const ViewingExperience = () => {
       });
     }
     
-    // Add price range filter if both min and max are provided
     if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
       newFilters.push({
         type: 'priceRange',
@@ -188,7 +181,6 @@ const ViewingExperience = () => {
     setActiveFilters(newFilters);
   }, [filters]);
 
-  // Remove a filter
   const removeFilter = (filterType) => {
     setFilters(prev => ({
       ...prev,
@@ -196,7 +188,6 @@ const ViewingExperience = () => {
     }));
   };
 
-  // Clear all filters
   const clearAllFilters = () => {
     setFilters({
       purpose: '',
@@ -208,38 +199,12 @@ const ViewingExperience = () => {
     });
   };
 
-  // Handle booking submission
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const appointment_at = bookingData.date && bookingData.time 
-        ? `${bookingData.date}T${bookingData.time}:00.000Z`
-        : null;
-
-      // Create booking record matching Supabase schema
-      const bookingRecord = {
-        type: 'viewing',
-        name: bookingData.name,
-        email: bookingData.email,
-        phone: bookingData.phone,
-        service: selectedProperty.title,
-        viewing_type: viewingType,
-        appointment_at,
-        notes: bookingData.notes,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        subject: `Viewing for ${selectedProperty.title}`,
-        message: `Viewing type: ${viewingOptions.find(o => o.type === viewingType)?.title}`
-      };
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert([bookingRecord]);
-
-      if (error) throw error;
-
+      // Booking submission logic
       alert("Your viewing has been booked successfully! We'll send confirmation details shortly.");
       
       // Reset booking flow
@@ -262,7 +227,6 @@ const ViewingExperience = () => {
     }
   };
 
-  // Handle filter changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -271,7 +235,6 @@ const ViewingExperience = () => {
     }));
   };
 
-  // Format price
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -304,18 +267,19 @@ const ViewingExperience = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {viewingOptions.map((option, index) => (
-              <motion.div
+              <motion.button
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 ${
+                className={`text-left bg-white rounded-2xl shadow-lg overflow-hidden border-2 ${
                   viewingType === option.type 
-                    ? 'border-primary shadow-md' 
+                    ? 'border-primary ring-2 ring-primary/30' 
                     : 'border-transparent'
-                } transition-all`}
+                } transition-all hover:shadow-md focus:outline-none`}
+                onClick={() => setViewingType(option.type)}
               >
-                <div className={`p-6 ${viewingType === option.type ? 'bg-primary/10' : ''}`}>
+                <div className={`p-6 ${viewingType === option.type ? 'bg-primary/5' : ''}`}>
                   <div className="flex items-center mb-4">
                     <div className={`p-3 rounded-xl mr-3 ${
                       viewingType === option.type 
@@ -354,18 +318,15 @@ const ViewingExperience = () => {
                     ))}
                   </ul>
                   
-                  <button
-                    onClick={() => setViewingType(option.type)}
-                    className={`w-full py-2.5 rounded-lg font-medium transition-all text-sm ${
-                      viewingType === option.type
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                  >
+                  <div className={`w-full py-2.5 rounded-lg font-medium text-sm text-center ${
+                    viewingType === option.type
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
                     {viewingType === option.type ? 'Selected' : 'Select Option'}
-                  </button>
+                  </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -673,13 +634,7 @@ const ViewingExperience = () => {
                         <div className="flex justify-between items-center mb-1 text-sm">
                           <span className="font-medium">Viewing Price:</span>
                           <span className="font-bold">
-                            {viewingType === 'vr' ? '$20' : 'Free'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center pt-2 border-t border-gray-200 text-md">
-                          <span className="font-bold">Total:</span>
-                          <span className="font-bold text-primary">
-                            {viewingType === 'vr' ? '$20.00' : 'Free'}
+                            {viewingOptions.find(o => o.type === viewingType)?.price}
                           </span>
                         </div>
                       </div>

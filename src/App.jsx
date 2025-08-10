@@ -25,10 +25,6 @@ const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 
 // Placeholder components for new service pages
-const PropertySales = lazy(() => import('./components/services/PropertySales'));
-const PropertyAcquisition = lazy(() => import('./components/services/PropertyAcquisition'));
-const PropertyValuation = lazy(() => import('./components/services/PropertyValuation'));
-const PropertyManagement = lazy(() => import('./components/services/PropertyManagement'));
 const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
 // Admin components
@@ -157,10 +153,6 @@ function App() {
             
             {/* Updated services routes */}
             <Route path="/services" element={<Services />} />
-            <Route path="/services/sales" element={<PropertySales />} />
-            <Route path="/services/acquisition" element={<PropertyAcquisition />} />
-            <Route path="/services/valuation" element={<PropertyValuation />} />
-            <Route path="/services/management" element={<PropertyManagement />} />
             <Route path="/services/viewing" element={<ViewingExperience />} />
             
             <Route path="/about" element={<About />} />

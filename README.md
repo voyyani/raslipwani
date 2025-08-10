@@ -42,6 +42,7 @@ graph TD
 * **Recent Activity**: Track all system events in real-time
 * **Booking Management**: Comprehensive interface for handling appointments
 * **User Management**: Administer user roles and permissions
+* **Listing Management**: Add and manage property listings
 
 ### 🌐 User Experience
 
