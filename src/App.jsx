@@ -15,7 +15,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { supabase } from './utils/supabaseClient';
-
+import { SpeedInsights } from '@vercel/speed-insights/next';
 // Lazy-loaded main components
 const Home = lazy(() => import('./pages/Home'));
 const Properties = lazy(() => import('./pages/Properties'));
