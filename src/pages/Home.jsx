@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
@@ -65,14 +66,14 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Luxury Coastal Real Estate in Kenya | Raslipwani Properties</title>
+        <title>Premium Real Estate in Kenya | Raslipwani Properties</title>
         <meta 
           name="description" 
-          content="Premium beachfront homes, villas & investment properties along Kenya's coast. 100+ luxury listings in Kilifi, Mombasa & Diani." 
+          content="Discover your dream home, villa, or investment property across Kenya. 100+ luxury listings in Nairobi, Mombasa, Kilifi, and more." 
         />
-        <meta property="og:title" content="Kenyan Coastal Real Estate Experts | Raslipwani" />
-        <meta property="og:description" content="Discover your dream beach property with Kenya's leading coastal real estate specialists" />
-        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/coastal-property-hero_md_omfqo1.jpg" />
+        <meta property="og:title" content="Kenyan Real Estate Experts | Raslipwani Properties" />
+        <meta property="og:description" content="Find your perfect property with Kenya's leading real estate specialists" />
+        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" />
         <link rel="canonical" href="https://www.raslipwani.com" />
         
         {/* Local Business Schema */}
@@ -94,8 +95,8 @@ const Home = () => {
             },
             "geo": {
               "@type": "GeoCoordinates",
-              "latitude": "-3.6308",
-              "longitude": "39.8499"
+              "latitude": "-1.2921",
+              "longitude": "36.8219"
             },
             "openingHoursSpecification": {
               "@type": "OpeningHoursSpecification",
@@ -124,16 +125,16 @@ const Home = () => {
             {/* Optimized responsive background */}
             <picture className="absolute inset-0 z-[-1]">
               <source 
-                srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/coastal-property-hero_sm_omfqo1.jpg" 
+                srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/kenya-property-hero_sm_omfqo1.jpg" 
                 media="(max-width: 640px)"
               />
               <source 
-                srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/coastal-property-hero_md_omfqo1.jpg" 
+                srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" 
                 media="(max-width: 1024px)"
               />
               <img 
-                src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/coastal-property-hero_lg_omfqo1.jpg" 
-                alt="Luxury coastal property with ocean view in Kilifi, Kenya"
+                src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/kenya-property-hero_lg_omfqo1.jpg" 
+                alt="Luxury property with city view in Nairobi, Kenya"
                 className="w-full h-full object-cover"
                 loading="eager"
                 onLoad={() => setHeroLoaded(true)}
@@ -153,13 +154,18 @@ const Home = () => {
                 className="max-w-2xl text-white"
               >
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-                  Luxury Coastal Properties in Kenya
+                  Premium Properties Across Kenya
                 </h1>
                 <p className="text-xl mb-8 max-w-xl">
-                  Premium beachfront homes, villas, and investment opportunities along Kenya's stunning coastline
+                  Discover your dream home, villa, or investment opportunity in Kenya's most desirable locations
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  
+                  <Link 
+                    to="/properties" 
+                    className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-md transition-colors duration-300 text-center shadow-lg hover:shadow-xl"
+                  >
+                    Browse Properties
+                  </Link>
                   <button 
                     onClick={scrollToServices}
                     className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-md transition-all duration-300 border border-white/30"
@@ -200,7 +206,7 @@ const Home = () => {
                   viewport={{ once: true }}
                   className="text-gray-600 max-w-2xl mx-auto"
                 >
-                  Comprehensive real estate solutions tailored for the Kenyan coast
+                  Comprehensive real estate solutions tailored for the Kenyan market
                 </motion.p>
               </div>
               
@@ -230,7 +236,7 @@ const Home = () => {
                   viewport={{ once: true }}
                   className="text-gray-600 max-w-2xl mx-auto"
                 >
-                  Exclusive coastal listings currently available
+                  Exclusive listings currently available across Kenya
                 </motion.p>
               </div>
               
@@ -293,7 +299,7 @@ const Home = () => {
                   viewport={{ once: true }}
                   className="text-gray-600 max-w-2xl mx-auto"
                 >
-                  The trusted choice for coastal real estate in Kenya
+                  The trusted choice for real estate in Kenya
                 </motion.p>
               </div>
               
@@ -334,7 +340,7 @@ const Home = () => {
                 viewport={{ once: true }}
                 className="text-white text-xl mb-8 max-w-2xl mx-auto"
               >
-                Our experts are ready to guide you to your coastal dream property
+                Our experts are ready to guide you to your dream property in Kenya
               </motion.p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link 
@@ -343,7 +349,12 @@ const Home = () => {
                 >
                   Get in Touch
                 </Link>
-                
+                <Link 
+                  to="/properties" 
+                  className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-md hover:bg-white/10 transition-all duration-300"
+                >
+                  Browse Listings
+                </Link>
               </div>
             </div>
           </section>
@@ -387,7 +398,7 @@ const ServiceCard = ({ icon, title, description, index }) => (
   </motion.div>
 );
 
-// UPDATED Property Card Component to match Properties page
+// Property Card Component
 const PropertyCard = ({ property, index, openModal }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
@@ -475,7 +486,7 @@ const PropertyCard = ({ property, index, openModal }) => {
   );
 };
 
-// UPDATED Property Skeleton Loader to match new design
+// Property Skeleton Loader
 const PropertySkeleton = () => (
   <div className="bg-white rounded-2xl overflow-hidden shadow-xl animate-pulse">
     <div className="pb-[75%] relative bg-gradient-to-br from-gray-100 to-gray-200"></div>
@@ -521,22 +532,22 @@ const services = [
   {
     icon: "fas fa-home",
     title: "Property Sales",
-    description: "Strategic marketing to sell your property at optimal market value."
+    description: "Strategic marketing to sell your property at optimal market value across Kenya"
   },
   {
     icon: "fas fa-search-dollar",
     title: "Property Acquisition",
-    description: "Expert guidance through the entire buying process."
+    description: "Expert guidance through the entire buying process nationwide"
   },
   {
     icon: "fas fa-chart-line",
     title: "Property Valuation",
-    description: "Accurate assessments to inform your investment decisions."
+    description: "Accurate assessments to inform your investment decisions"
   },
   {
     icon: "fas fa-tasks",
     title: "Property Management",
-    description: "Comprehensive services to maximize your investment."
+    description: "Comprehensive services to maximize your investment returns"
   }
 ];
 
@@ -544,27 +555,27 @@ const services = [
 const benefits = [
   {
     title: "Expert Team",
-    description: "Professionals with deep coastal market knowledge"
+    description: "Professionals with deep knowledge of Kenyan real estate markets"
   },
   {
     title: "Client-Centric Approach",
-    description: "We prioritize your needs and goals"
+    description: "We prioritize your needs and goals throughout Kenya"
   },
   {
     title: "Integrity & Transparency",
-    description: "Highest ethical standards in all transactions"
+    description: "Highest ethical standards in all transactions nationwide"
   },
   {
-    title: "Local Market Expertise",
-    description: "Specialized knowledge of Kenyan coast properties"
+    title: "Nationwide Coverage",
+    description: "Properties available across all major Kenyan regions"
   },
   {
     title: "Strategic Alliances",
-    description: "Collaborations for seamless transactions"
+    description: "Collaborations for seamless transactions countrywide"
   },
   {
     title: "Affordable Options",
-    description: "Solutions for all budget levels"
+    description: "Solutions for all budget levels throughout Kenya"
   },
   {
     title: "End-to-End Service",
@@ -572,7 +583,7 @@ const benefits = [
   },
   {
     title: "Technology Driven",
-    description: "Modern tools for efficient property search"
+    description: "Modern tools for efficient property search across Kenya"
   }
 ];
 
