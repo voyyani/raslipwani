@@ -18,14 +18,9 @@ export default defineConfig({
         }
       }
     },
-    // Optimize build
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    // Optimize build using default esbuild minifier (no extra deps required)
+    // Note: Removed 'terser' to avoid optional dependency in Vercel builds
+    // If you still want to drop console/debugger, consider doing it via babel or during logging.
     // Set chunk size warnings
     chunkSizeWarningLimit: 500,
     // CSS code splitting
