@@ -32,8 +32,7 @@ const ServicesMain = () => {
           .from('properties')
           .select('*')
           .eq('status', 'available')
-          .order('created_at', { ascending: false })
-          .limit(6);
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
         setProperties(data || []);
@@ -44,10 +43,11 @@ const ServicesMain = () => {
       }
     };
 
-    if (activeModal === 'viewing') {
+    if (activeModal === 'booking' && bookingData.serviceType === 'viewing') {
+      setLoadingProperties(true);
       fetchProperties();
     }
-  }, [activeModal]);
+  }, [activeModal, bookingData.serviceType]);
 
   const services = [
     {
@@ -334,25 +334,48 @@ const ServicesMain = () => {
                                       : 'border-gray-200 hover:border-primary'
                                   }`}
                                 >
-                                  <input
-                                    type="radio"
-                                    name="propertyId"
-                                    value={property.id}
-                                    checked={bookingData.propertyId === property.id}
-                                    onChange={(e) => setBookingData(prev => ({ ...prev, propertyId: e.target.value }))}
-                                    className="mt-1 mr-4 text-primary"
-                                  />
+                                  <div className="flex-shrink-0 mt-1 mr-4">
+                                    <input
+                                      type="radio"
+                                      name="propertyId"
+                                      value={property.id}
+                                      checked={bookingData.propertyId === property.id}
+                                      onChange={(e) => setBookingData(prev => ({ ...prev, propertyId: e.target.value }))}
+                                      className="hidden"
+                                    />
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                      bookingData.propertyId === property.id 
+                                        ? 'border-primary bg-primary' 
+                                        : 'border-gray-400 bg-white'
+                                    }`}>
+                                      {bookingData.propertyId === property.id && (
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Property Image */}
+                                  {property.images && property.images.length > 0 && (
+                                    <div className="w-24 h-24 rounded-lg overflow-hidden mr-4 flex-shrink-0 border border-gray-200">
+                                      <img 
+                                        src={property.images[0]} 
+                                        alt={property.title}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  )}
+                                  
                                   <div className="flex-1">
-                                    <div className="flex justify-between items-start">
+                                    <div className="flex justify-between items-start mb-2">
                                       <div>
                                         <h4 className="font-semibold text-gray-800">{property.title}</h4>
                                         <p className="text-gray-600 text-sm">{property.location}</p>
                                       </div>
-                                      <span className="font-bold text-primary">
+                                      <span className="font-bold text-primary whitespace-nowrap ml-4">
                                         {property.price ? formatCurrency(property.price) : 'Price on request'}
                                       </span>
                                     </div>
-                                    <p className="text-gray-700 text-sm mt-2 line-clamp-2">
+                                    <p className="text-gray-700 text-sm mt-1 line-clamp-2">
                                       {property.description}
                                     </p>
                                     <div className="flex flex-wrap gap-2 mt-2">
