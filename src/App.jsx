@@ -12,6 +12,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -98,6 +99,7 @@ function App() {
       }}
     >
       <Analytics />
+      <SpeedInsights />
       {/* Global SEO Structure */}
       <Helmet>
         <html lang="en" />
