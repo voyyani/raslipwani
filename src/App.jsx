@@ -11,6 +11,7 @@ import {
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
+import { Analytics } from '@vercel/analytics/react';
 import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -96,6 +97,7 @@ function App() {
         }
       }}
     >
+      <Analytics />
       {/* Global SEO Structure */}
       <Helmet>
         <html lang="en" />
