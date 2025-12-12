@@ -33,6 +33,12 @@ const Properties = () => {
     'office': ['commercial', 'office'],
   };
 
+  // SEO derived values
+  const baseUrl = 'https://raslipwani.co.ke/properties';
+  const canonicalUrl = baseUrl; // Keep canonical clean without query params to avoid duplicate content
+  const listTitle = 'Properties for Sale & Rent Across Kenya | Raslipwani Properties';
+  const listDescription = 'Browse premium properties across Kenya. Filter by type, purpose, and location. Find apartments, villas, land, and commercial listings.';
+
   // Fetch properties from Supabase
   useEffect(() => {
     const fetchProperties = async () => {
@@ -121,6 +127,35 @@ const Properties = () => {
     setFilteredProperties(result);
   }, [properties, sortOption, filterOption, purposeFilter, searchQuery]);
 
+  // Build ItemList JSON-LD for listings (up to 20 items)
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Property Listings",
+    "itemListElement": (filteredProperties || properties).slice(0, 20).map((p, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+  "url": `https://raslipwani.co.ke/properties/${p.slug || p.id}`,
+      "item": {
+        "@type": "RealEstateListing",
+        "name": p.title,
+        "description": p.description?.slice(0, 160),
+        "image": p.images || [],
+        "offers": {
+          "@type": "Offer",
+          "price": p.price,
+          "priceCurrency": "KES",
+          "availability": p.status === 'available' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+        },
+        "address": p.address ? {
+          "@type": "PostalAddress",
+          "streetAddress": p.address,
+          "addressLocality": p.location,
+          "addressCountry": "KE"
+        } : undefined
+      }
+    }))
+  };
   // Update active filters
   useEffect(() => {
     const filters = [];
@@ -208,36 +243,17 @@ const Properties = () => {
   return (
     <>
       <Helmet>
-        <title>Premium Properties in Kenya | Raslipwani Properties</title>
-        <meta name="description" content={`Discover premium ${filterOption} properties across Kenya. ${filteredProperties.length} luxury listings available in Nairobi, Mombasa, Kilifi and more`} />
-        <link rel="canonical" href={`https://raslipwani.com/properties?type=${filterOption}`} />
+        <title>{listTitle}</title>
+        <meta name="description" content={listDescription} />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={`Kenyan ${filterOption} Properties | Raslipwani`} />
-        <meta property="og:description" content={`Browse luxury ${filterOption} properties across Kenya's most desirable locations`} />
+        <meta property="og:title" content={listTitle} />
+        <meta property="og:description" content={listDescription} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-properties-hero_md_omfqo1.jpg" />
-        
-        {/* Structured Data */}
+        {/* Structured Data: ItemList */}
         <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            "itemListElement": filteredProperties.slice(0, 5).map((prop, index) => ({
-              "@type": "ListItem",
-              "position": index + 1,
-              "item": {
-                "@type": "RealEstateListing",
-                "name": prop.title,
-                "url": `https://raslipwani.com/properties/${prop.id}`,
-                "image": prop.images?.[0] || '',
-                "price": prop.price,
-                "priceCurrency": "KES",
-                "address": {
-                  "@type": "PostalAddress",
-                  "addressLocality": prop.location
-                }
-              }
-            }))
-          })}
+          {JSON.stringify(itemListJsonLd)}
         </script>
       </Helmet>
       

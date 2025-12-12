@@ -103,7 +103,7 @@ function App() {
       {/* Global SEO Structure */}
       <Helmet>
         <html lang="en" />
-        <link rel="canonical" href="https://raslipwani.com" />
+  <link rel="canonical" href="https://raslipwani.co.ke" />
         
         {/* Organization Schema */}
         <script type="application/ld+json">
@@ -111,8 +111,8 @@ function App() {
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Raslipwani Properties",
-            "url": "https://raslipwani.com/",
-            "logo": "https://raslipwani.com/logo.png",
+            "url": "https://raslipwani.co.ke/",
+            "logo": "https://raslipwani.co.ke/logo.png",
             "sameAs": [
               "https://www.facebook.com/raslipwani",
               "https://www.instagram.com/raslipwani",
@@ -133,10 +133,10 @@ function App() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "Raslipwani Properties",
-            "url": "https://raslipwani.com/",
+            "url": "https://raslipwani.co.ke/",
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://raslipwani.com/properties?search={search_term_string}",
+              "target": "https://raslipwani.co.ke/properties?search={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           })}
