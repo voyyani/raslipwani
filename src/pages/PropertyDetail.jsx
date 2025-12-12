@@ -56,6 +56,40 @@ const PropertyDetail = () => {
     if (id) fetchProperty();
   }, [id]);
 
+  // Derived SEO fields
+  const pageUrl = property ? `https://raslipwani.co.ke/properties/${property.slug || property.id}` : `https://raslipwani.co.ke/properties/${id}`;
+  const title = property ? `${property.title} | ${property.location} | Raslipwani Properties` : 'Property Details | Raslipwani Properties';
+  const description = property ? (
+    `${property.description?.slice(0, 155) || 'Explore this property at Raslipwani Properties.'}`
+  ) : 'Explore this property at Raslipwani Properties.';
+  const ogImage = property?.images?.[0];
+
+  const jsonLd = property ? {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": property.title,
+    "description": property.description,
+    "url": pageUrl,
+    "image": property.images || [],
+    "address": property.address ? {
+      "@type": "PostalAddress",
+      "streetAddress": property.address,
+      "addressLocality": property.location,
+      "addressCountry": "KE"
+    } : undefined,
+    "offers": {
+      "@type": "Offer",
+      "price": property.price,
+      "priceCurrency": "KES",
+      "availability": property.status === 'available' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    },
+    "seller": {
+      "@type": "Organization",
+      "name": "Raslipwani Properties",
+      "url": "https://raslipwani.co.ke"
+    }
+  } : null;
+
   // Handle image navigation
   const handlePrev = useCallback(() => {
     if (!property?.images?.length) return;
@@ -341,55 +375,58 @@ const PropertyDetail = () => {
 
   return (
     <>
+      {/* Page-specific SEO */}
       <Helmet>
-        <title>{property.title} | Coastal Kenya Property | Raslipwani</title>
-        <meta name="description" content={`${property.description.substring(0, 155)}...`} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "RealEstateListing",
-            "name": property.title,
-            "description": property.description.substring(0, 160),
-            "image": property.images,
-            "url": window.location.href,
-            "offers": {
-              "@type": "Offer",
-              "price": property.price,
-              "priceCurrency": "KES",
-              "availability": property.status === 'available' ? 
-                "https://schema.org/InStock" : 
-                "https://schema.org/OutOfStock"
-            },
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": property.address,
-              "addressLocality": property.city,
-              "addressRegion": property.state,
-              "postalCode": property.zip_code,
-              "addressCountry": "KE"
-            },
-            "numberOfRooms": property.bedrooms,
-            "numberOfBathroomsTotal": property.bathrooms,
-            "floorSize": {
-              "@type": "QuantitativeValue",
-              "value": property.area_sqft,
-              "unitCode": "FTK"
-            }
-          })}
-        </script>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={pageUrl} />
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        <meta property="og:url" content={pageUrl} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+        {jsonLd && (
+          <script type="application/ld+json">
+            {JSON.stringify(jsonLd)}
+          </script>
+        )}
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
         <Header />
         
         <main className="flex-grow container mx-auto px-4 py-8">
-          <div className="text-sm mb-4" aria-label="Breadcrumb">
-            <Link to="/" className="text-primary hover:underline">Home</Link>
-            <span className="mx-2">/</span>
-            <Link to="/properties" className="text-primary hover:underline">Properties</Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-600">{property.title.substring(0, 20)}...</span>
-          </div>
+          {/* Breadcrumbs with schema for SEO */}
+          <nav className="text-sm mb-4" aria-label="Breadcrumb">
+            <ol className="flex items-center gap-2" itemScope itemType="https://schema.org/BreadcrumbList">
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <Link to="/" itemProp="item" className="text-primary hover:underline">
+                  <span itemProp="name">Home</span>
+                </Link>
+                <meta itemProp="position" content="1" />
+              </li>
+              <span className="mx-2">/</span>
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <Link to="/properties" itemProp="item" className="text-primary hover:underline">
+                  <span itemProp="name">Properties</span>
+                </Link>
+                <meta itemProp="position" content="2" />
+              </li>
+              <span className="mx-2">/</span>
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="text-gray-600">
+                <Link to={pageUrl} itemProp="item" className="text-gray-600">
+                  <span itemProp="name">{property.title}</span>
+                </Link>
+                <meta itemProp="position" content="3" />
+              </li>
+            </ol>
+          </nav>
           
           <Link to="/properties" className="text-primary hover:underline mb-4 inline-block">
             &larr; Back to Properties
