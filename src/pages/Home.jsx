@@ -73,8 +73,8 @@ const Home = () => {
         />
         <meta property="og:title" content="Kenyan Real Estate Experts | Raslipwani Properties" />
         <meta property="og:description" content="Find your perfect property with Kenya's leading real estate specialists" />
-        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" />
-        <link rel="canonical" href="https://www.raslipwani.com" />
+  <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" />
+  <link rel="canonical" href="https://www.raslipwani.co.ke" />
         
         {/* Local Business Schema */}
         <script type="application/ld+json">
@@ -123,7 +123,7 @@ const Home = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70 z-0"></div>
             
             {/* Optimized responsive background */}
-            <picture className="absolute inset-0 z-[-1]">
+            <picture className="absolute inset-0 z-[-1] pointer-events-none">
               <source 
                 srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/kenya-property-hero_sm_omfqo1.jpg" 
                 media="(max-width: 640px)"
@@ -137,6 +137,9 @@ const Home = () => {
                 alt="Luxury property with city view in Nairobi, Kenya"
                 className="w-full h-full object-cover"
                 loading="eager"
+                fetchpriority="high"
+                width="1920"
+                height="1080"
                 onLoad={() => setHeroLoaded(true)}
               />
             </picture>
@@ -176,16 +179,7 @@ const Home = () => {
               </motion.div>
             </div>
             
-            {/* Scroll indicator */}
-            <button 
-              onClick={scrollToServices}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10"
-              aria-label="Scroll to services"
-            >
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </button>
+            {/* Scroll indicator removed to eliminate hovering circle */}
           </section>
           
           {/* Services Section */}
