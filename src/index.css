@@ -107,3 +107,17 @@ button:focus-visible {
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* --- Defensive UI fixes ---------------------------------------------- */
+/*
+  Hide any stray circular "scroll indicator" buttons that might slip in
+  from older markup or external snippets. This targets the pattern seen
+  in DevTools (rounded-full absolute button with an aria-label containing
+  "Scroll") without affecting normal buttons or badges.
+*/
+[aria-label="Scroll to learn more"],
+button[aria-label*="Scroll"][aria-label*="learn"],
+.absolute.bottom-6.left-1\/2.rounded-full[aria-label*="Scroll"] {
+  display: none !important;
+}
+
