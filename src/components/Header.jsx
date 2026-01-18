@@ -43,6 +43,11 @@ const Header = () => {
       icon: FiTool 
     },
     { 
+      path: '/international', 
+      label: 'International', 
+      icon: FiGrid 
+    },
+    { 
       path: '/about', 
       label: 'About', 
       icon: FiInfo 
@@ -98,6 +103,48 @@ const Header = () => {
           <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => {
               const IconComponent = item.icon;
+              
+              // Handle dropdown menus
+              if (item.dropdown) {
+                return (
+                  <div 
+                    key={item.label} 
+                    className="relative"
+                    onMouseEnter={() => setOpenDropdown(item.label)}
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
+                    <button
+                      className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-gray-700 hover:text-primary hover:bg-gray-50/80"
+                    >
+                      <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                        isScrolled ? 'scale-90' : 'scale-100'
+                      }`} />
+                      <span className="relative">{item.label}</span>
+                      <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${
+                        openDropdown === item.label ? 'rotate-180' : ''
+                      }`} />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {openDropdown === item.label && (
+                      <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                        {item.dropdown.map((subItem) => (
+                          <Link
+                            key={subItem.path}
+                            to={subItem.path}
+                            className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors"
+                            onClick={() => setOpenDropdown(null)}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
+              // Regular menu items
               return (
                 <div key={item.label} className="relative">
                   <NavLink 
@@ -218,6 +265,46 @@ const Header = () => {
                   const IconComponent = item.icon;
                   const isActive = location.pathname === item.path;
                   
+                  // Handle dropdown menus
+                  if (item.dropdown) {
+                    const isDropdownOpen = openMobileDropdown === item.label;
+                    return (
+                      <div key={item.label} className="border-b border-gray-100 last:border-b-0">
+                        <button
+                          onClick={() => setOpenMobileDropdown(isDropdownOpen ? null : item.label)}
+                          className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-gray-700 hover:text-primary hover:bg-gray-50 w-full"
+                        >
+                          <div className="p-2 rounded-lg transition-colors bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary">
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                          <span className="flex-1 text-left">{item.label}</span>
+                          {isDropdownOpen ? (
+                            <FiChevronUp className="w-5 h-5" />
+                          ) : (
+                            <FiChevronDown className="w-5 h-5" />
+                          )}
+                        </button>
+                        
+                        {/* Dropdown items */}
+                        {isDropdownOpen && (
+                          <div className="bg-gray-50 py-2">
+                            {item.dropdown.map((subItem) => (
+                              <Link
+                                key={subItem.path}
+                                to={subItem.path}
+                                onClick={closeMenu}
+                                className="flex items-center gap-4 px-6 py-3 pl-16 text-gray-600 hover:text-primary hover:bg-white transition-colors"
+                              >
+                                <span>{subItem.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  
+                  // Regular menu items
                   return (
                     <div key={item.label} className="border-b border-gray-100 last:border-b-0">
                       <NavLink 

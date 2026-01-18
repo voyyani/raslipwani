@@ -173,15 +173,15 @@ const Dashboard = () => {
   const StatCard = ({ title, value, icon, color, link }) => (
     <Link 
       to={link || '#'} 
-      className={`bg-white border border-${color}-100 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 group`}
+      className={`bg-white border border-${color}-100 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group`}
     >
       <div className="flex items-start">
-        <div className={`bg-${color}-100 p-3 rounded-lg mr-4 group-hover:bg-${color}-200 transition-colors`}>
-          {React.cloneElement(icon, { className: `text-${color}-600 text-xl` })}
+        <div className={`bg-${color}-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4 group-hover:bg-${color}-200 transition-colors flex-shrink-0`}>
+          {React.cloneElement(icon, { className: `text-${color}-600 text-lg sm:text-xl` })}
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-1">{title}</h3>
-          <p className="text-3xl font-bold text-gray-800">{value}</p>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-1 truncate">{title}</h3>
+          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">{value}</p>
         </div>
       </div>
     </Link>
@@ -215,9 +215,9 @@ const Dashboard = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             <StatCard 
               title="Total Properties" 
               value={stats.totalProperties} 
@@ -276,7 +276,7 @@ const Dashboard = () => {
           </div>
           
           {/* Data Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Recent Activity */}
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
