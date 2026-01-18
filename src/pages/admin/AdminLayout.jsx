@@ -8,7 +8,8 @@ import {
   FaUsers, 
   FaSignOutAlt, 
   FaBars,
-  FaTimes
+  FaTimes,
+  FaCog
 } from 'react-icons/fa';
 import Header from './AdminHeader';
 
@@ -36,20 +37,30 @@ const AdminLayout = ({ children }) => {
       {/* Top Header */}
       <Header />
       
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
+        {/* Mobile sidebar backdrop */}
+        {isSidebarOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity"
+            onClick={toggleSidebar}
+            aria-hidden="true"
+          />
+        )}
+
         {/* Mobile sidebar toggle */}
         <button 
-          className="lg:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg"
+          className="lg:hidden fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
         >
-          {isSidebarOpen ? <FaTimes /> : <FaBars />}
+          {isSidebarOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
         </button>
 
         {/* Sidebar */}
         <aside 
-          className={`bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 min-h-screen p-4 flex flex-col fixed lg:static z-40 transform transition-transform duration-300 ${
+          className={`bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 min-h-screen p-4 flex flex-col fixed lg:static z-40 transform transition-transform duration-300 lg:translate-x-0 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0`}
+          }`}
         >
           <div className="mb-8 mt-4 border-b border-gray-700 pb-4">
             <h2 className="text-xl font-bold text-white">Admin Dashboard</h2>
@@ -94,6 +105,18 @@ const AdminLayout = ({ children }) => {
               <span>Viewing Appointments</span>
             </Link>
             <Link 
+              to="/admin/bookings" 
+              onClick={() => setIsSidebarOpen(false)}
+              className={`flex items-center p-3 rounded-md transition-all ${
+                isActive('/bookings') 
+                  ? 'bg-blue-600 shadow-lg text-white' 
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`}
+            >
+              <FaCalendarAlt className="mr-3 text-blue-300" />
+              <span>Booking Management</span>
+            </Link>
+            <Link 
               to="/admin/clients" 
               onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center p-3 rounded-md transition-all ${
@@ -104,6 +127,18 @@ const AdminLayout = ({ children }) => {
             >
               <FaUsers className="mr-3 text-blue-300" />
               <span>Client Management</span>
+            </Link>
+            <Link 
+              to="/admin/settings" 
+              onClick={() => setIsSidebarOpen(false)}
+              className={`flex items-center p-3 rounded-md transition-all ${
+                isActive('/settings') 
+                  ? 'bg-blue-600 shadow-lg text-white' 
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`}
+            >
+              <FaCog className="mr-3 text-blue-300" />
+              <span>Settings</span>
             </Link>
           </nav>
           
@@ -142,7 +177,7 @@ const AdminLayout = ({ children }) => {
         </aside>
         
         {/* Main content area */}
-        <main className="flex-grow p-4 lg:p-6 bg-gray-50">
+        <main className="flex-grow p-3 sm:p-4 lg:p-6 bg-gray-50 w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import toast from 'react-hot-toast';
 import { supabase } from '../../utils/supabaseClient';
+import { useDebounce } from '../../hooks/useDebounce';
+import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
+import LoadingSkeleton from '../../components/LoadingSkeleton';
 import { 
   FaEdit, 
   FaTrash, 
@@ -12,7 +16,10 @@ import {
   FaDollarSign,
   FaHome,
   FaBuilding,
-  FaLandmark
+  FaLandmark,
+  FaDownload,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 
 const AdminProperties = () => {
@@ -50,10 +57,16 @@ const AdminProperties = () => {
   });
   
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounced search
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Property types based on purpose
   const propertyTypes = {
@@ -61,7 +74,7 @@ const AdminProperties = () => {
     rent: ['apartment', 'villa', 'office']
   };
 
-  // Fetch Cloudinary settings and properties
+  // Fetch Cloudinary settings and properties with pagination
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,24 +91,51 @@ const AdminProperties = () => {
           });
         }
 
-        // Fetch properties
+        // Fetch properties with pagination
         setLoading(true);
-        const { data, error } = await supabase
+        
+        // Calculate pagination
+        const from = (currentPage - 1) * itemsPerPage;
+        const to = from + itemsPerPage - 1;
+        
+        let query = supabase
           .from('properties')
-          .select('*')
+          .select('*', { count: 'exact' })
           .order(sortField, { ascending: sortDirection === 'asc' });
         
+        // Apply search filter
+        if (debouncedSearchTerm) {
+          query = query.or(`title.ilike.%${debouncedSearchTerm}%,location.ilike.%${debouncedSearchTerm}%`);
+        }
+        
+        query = query.range(from, to);
+        
+        const { data, error, count } = await query;
+        
         if (error) throw error;
-        setProperties(data);
+        setProperties(data || []);
+        setTotalCount(count || 0);
       } catch (error) {
         setError('Error fetching data: ' + error.message);
+        toast.error('Error fetching properties');
       } finally {
         setLoading(false);
       }
     };
     
     fetchData();
-  }, [sortField, sortDirection]);
+  }, [sortField, sortDirection, currentPage, debouncedSearchTerm, itemsPerPage]);
+
+  // Export properties to CSV
+  const handleExport = () => {
+    try {
+      const formattedData = formatPropertiesForExport(properties);
+      exportToCSV(formattedData, `properties-${new Date().toISOString().split('T')[0]}`);
+      toast.success(`Exported ${properties.length} properties`);
+    } catch (error) {
+      toast.error('Failed to export properties');
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -304,7 +344,7 @@ const AdminProperties = () => {
           .eq('id', currentProperty.id);
         
         if (error) throw error;
-        setSuccess('Property updated successfully!');
+        toast.success('Property updated successfully!');
       } else {
         // Create
         const { error } = await supabase
@@ -312,16 +352,16 @@ const AdminProperties = () => {
           .insert([submitData]);
         
         if (error) throw error;
-        setSuccess('Property added successfully!');
+        toast.success('Property added successfully!');
       }
       
       fetchProperties();
       setIsModalOpen(false);
       setCurrentProperty(null);
       resetForm();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Error saving property: ' + error.message);
+      toast.error('Failed to save property');
     } finally {
       setLoading(false);
     }
@@ -356,10 +396,10 @@ const AdminProperties = () => {
       
       if (error) throw error;
       setProperties(properties.filter(p => p.id !== id));
-      setSuccess('Property deleted successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Property deleted successfully!');
     } catch (error) {
       setError('Error deleting property: ' + error.message);
+      toast.error('Failed to delete property');
     } finally {
       setLoading(false);
     }
@@ -392,17 +432,8 @@ const AdminProperties = () => {
     setIsModalOpen(true);
   };
 
-  // Filter and sort properties
-  const filteredProperties = properties
-    .filter(property => {
-      return property.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-             property.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-    .sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
+  // Calculate pagination info
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <>
@@ -411,50 +442,61 @@ const AdminProperties = () => {
       </Helmet>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-          <p className="text-sm text-blue-800 font-medium">Total Properties</p>
-          <p className="text-2xl font-bold mt-1">{properties.length}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-blue-800 font-medium">Total</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1">{properties.length}</p>
         </div>
-        <div className="bg-green-50 border border-green-100 rounded-lg p-4">
-          <p className="text-sm text-green-800 font-medium">Featured</p>
-          <p className="text-2xl font-bold mt-1">
+        <div className="bg-green-50 border border-green-100 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-green-800 font-medium">Featured</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1">
             {properties.filter(p => p.featured).length}
           </p>
         </div>
-        <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
-          <p className="text-sm text-yellow-800 font-medium">Pending</p>
-          <p className="text-2xl font-bold mt-1">
+        <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-yellow-800 font-medium">Pending</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1">
             {properties.filter(p => p.status === 'pending').length}
           </p>
         </div>
-        <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
-          <p className="text-sm text-purple-800 font-medium">Sold</p>
-          <p className="text-2xl font-bold mt-1">
+        <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-purple-800 font-medium">Sold</p>
+          <p className="text-xl sm:text-2xl font-bold mt-1">
             {properties.filter(p => p.status === 'sold').length}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Manage Properties</h1>
-          <p className="text-gray-600">{properties.length} properties listed</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Manage Properties</h1>
+          <p className="text-sm sm:text-base text-gray-600">{totalCount} properties total</p>
         </div>
         
-        <div className="flex gap-3 w-full md:w-auto">
-          <div className="relative flex-grow md:flex-grow-0">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1 sm:flex-initial sm:min-w-[250px]">
             <input
               type="text"
-              placeholder="Search properties..."
+              placeholder="Search..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pl-9 sm:pl-10 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              <FaSearch />
+              <FaSearch className="text-sm" />
             </div>
           </div>
+          
+          <button
+            onClick={handleExport}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center shadow-md text-sm sm:text-base"
+            title="Export to CSV"
+          >
+            <FaDownload className="mr-2" /> <span className="hidden sm:inline">Export</span><span className="sm:hidden">CSV</span>
+          </button>
           
           <button
             onClick={() => {
@@ -470,12 +512,12 @@ const AdminProperties = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex gap-2 flex-1 sm:flex-initial">
           <select
             value={sortField}
             onChange={(e) => setSortField(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="flex-1 sm:flex-initial border border-gray-300 rounded-lg px-2 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="created_at">Date Added</option>
             <option value="price">Price</option>
@@ -484,30 +526,16 @@ const AdminProperties = () => {
           </select>
           <button
             onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-            className="bg-gray-100 border border-gray-300 hover:bg-gray-200 px-4 py-2 rounded-lg flex items-center"
+            className="bg-gray-100 border border-gray-300 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg flex items-center text-sm sm:text-base"
           >
             {sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
           </button>
         </div>
       </div>
 
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-          {success}
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-          {error}
-        </div>
-      )}
-
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : filteredProperties.length === 0 ? (
+        <LoadingSkeleton type="table" rows={5} />
+      ) : properties.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
           <h3 className="text-xl mb-4 text-gray-600">No properties found</h3>
           <button
@@ -518,86 +546,210 @@ const AdminProperties = () => {
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProperties.map(property => (
-                <tr key={property.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {property.images?.[0] ? (
-                        <img 
-                          src={property.images[0]} 
-                          alt={property.title} 
-                          className="w-16 h-16 object-cover rounded-md mr-4"
-                        />
-                      ) : (
-                        <div className="bg-gray-100 border-2 border-dashed rounded-md w-16 h-16 mr-4 flex items-center justify-center text-gray-400">
-                          <FaTimes />
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-medium text-gray-900">{property.title}</div>
-                        <div className="text-sm text-gray-500">
-                          {property.bedrooms} Beds, {property.bathrooms} Baths
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {properties.map(property => (
+                  <tr key={property.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {property.images?.[0] ? (
+                          <img 
+                            src={property.images[0]} 
+                            alt={property.title} 
+                            className="w-16 h-16 object-cover rounded-md mr-4"
+                          />
+                        ) : (
+                          <div className="bg-gray-100 border-2 border-dashed rounded-md w-16 h-16 mr-4 flex items-center justify-center text-gray-400">
+                            <FaTimes />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-medium text-gray-900">{property.title}</div>
+                          <div className="text-sm text-gray-500">
+                            {property.bedrooms} Beds, {property.bathrooms} Baths
+                          </div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-gray-900">{property.location}</div>
+                      <div className="text-sm text-gray-500">
+                        {property.address}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                      Ksh{parseFloat(property.price).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap capitalize text-gray-900">
+                      {property.property_type}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        property.status === 'available' ? 'bg-green-100 text-green-800' :
+                        property.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        property.status === 'sold' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {property.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => setupEditForm(property)}
+                          className="text-blue-600 hover:text-blue-900 transition-colors"
+                          title="Edit property"
+                        >
+                          <FaEdit className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(property.id)}
+                          className="text-red-600 hover:text-red-900 transition-colors"
+                          title="Delete property"
+                        >
+                          <FaTrash className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {properties.map(property => (
+              <div key={property.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+                <div className="p-3 sm:p-4">
+                  <div className="flex gap-3">
+                    {property.images?.[0] ? (
+                      <img 
+                        src={property.images[0]} 
+                        alt={property.title} 
+                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="bg-gray-100 border-2 border-dashed rounded-md w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center text-gray-400 flex-shrink-0">
+                        <FaHome className="text-2xl" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate mb-1">{property.title}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate mb-1">
+                        <FaLandmark className="inline mr-1" />{property.location}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                        {property.bedrooms} Beds • {property.bathrooms} Baths
+                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          property.status === 'available' ? 'bg-green-100 text-green-800' :
+                          property.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          property.status === 'sold' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {property.status}
+                        </span>
+                        <span className="text-xs text-gray-500 capitalize">{property.property_type}</span>
+                      </div>
+                      <p className="text-sm sm:text-base font-bold text-blue-600">
+                        Ksh {parseFloat(property.price).toLocaleString()}
+                      </p>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-gray-900">{property.location}</div>
-                    <div className="text-sm text-gray-500">
-                      {property.address}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                    Ksh{parseFloat(property.price).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap capitalize text-gray-900">
-                    {property.property_type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      property.status === 'available' ? 'bg-green-100 text-green-800' :
-                      property.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      property.status === 'sold' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {property.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => setupEditForm(property)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors"
-                        title="Edit property"
-                      >
-                        <FaEdit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(property.id)}
-                        className="text-red-600 hover:text-red-900 transition-colors"
-                        title="Delete property"
-                      >
-                        <FaTrash className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <button
+                      onClick={() => setupEditForm(property)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm transition-colors"
+                    >
+                      <FaEdit /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(property.id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm transition-colors"
+                    >
+                      <FaTrash /> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      
+      {/* Pagination */}
+      {!loading && totalCount > 0 && (
+        <div className="mt-4 sm:mt-6 flex flex-col gap-3 sm:flex-row items-center justify-between">
+          <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
+          </div>
+          
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg flex items-center text-xs sm:text-sm ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <FaChevronLeft className="mr-0 sm:mr-1" /> <span className="hidden xs:inline">Prev</span>
+            </button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.ceil(totalCount / itemsPerPage) }, (_, i) => i + 1)
+                .filter(page => {
+                  return page === 1 || 
+                         page === Math.ceil(totalCount / itemsPerPage) || 
+                         Math.abs(page - currentPage) <= 1;
+                })
+                .map((page, index, arr) => (
+                  <React.Fragment key={page}>
+                    {index > 0 && arr[index - 1] !== page - 1 && (
+                      <span className="px-1 text-gray-400 text-xs sm:text-sm">...</span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+            </div>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(totalCount / itemsPerPage)))}
+              disabled={currentPage === Math.ceil(totalCount / itemsPerPage)}
+              className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg flex items-center text-xs sm:text-sm ${
+                currentPage === Math.ceil(totalCount / itemsPerPage)
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <span className="hidden xs:inline">Next</span> <FaChevronRight className="ml-0 sm:ml-1" />
+            </button>
+          </div>
         </div>
       )}
       

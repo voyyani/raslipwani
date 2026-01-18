@@ -11,12 +11,26 @@ import {
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
+import './styles/admin-mobile.css'; // Import admin mobile optimizations
+
+// Create React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 // Lazy-loaded main components
 const Home = lazy(() => import('./pages/Home'));
 const Properties = lazy(() => import('./pages/Properties'));
@@ -25,6 +39,9 @@ const Services = lazy(() => import('./pages/ServicesMain')); // Updated path
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 
+// International market page
+const International = lazy(() => import('./pages/International'));
+
 // Placeholder components for new service pages
 const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
@@ -32,7 +49,10 @@ const ViewingExperience = lazy(() => import('./components/services/ViewingExperi
 import Dashboard from './pages/admin/Dashboard';
 import AdminProperties from './pages/admin/AdminProperties';
 import Bookings from './features/bookings/Bookings';
+import AdminBookings from './pages/admin/AdminBookings';
 import ClientManagement from './pages/admin/ClientManagement';
+import ClientDetail from './pages/admin/ClientDetail';
+import Settings from './pages/admin/Settings';
 import PropertyModal from './components/PropertyModal'; 
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -89,17 +109,19 @@ function App() {
   }
 
   return (
-    <ClerkProvider 
-      publishableKey={clerkPubKey}
-      appearance={{
-        baseTheme: "dark",
-        variables: {
-          colorPrimary: '#0D4B6E',
-        }
-      }}
-    >
-      <Analytics />
-      <SpeedInsights />
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider 
+        publishableKey={clerkPubKey}
+        appearance={{
+          baseTheme: "dark",
+          variables: {
+            colorPrimary: '#0D4B6E',
+          }
+        }}
+      >
+        <ToastProvider />
+        <Analytics />
+        <SpeedInsights />
       {/* Global SEO Structure */}
       <Helmet>
         <html lang="en" />
@@ -153,6 +175,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />
+            {/* International market route */}
+            <Route path="/international" element={<International />} />
+            
             
             {/* Updated services routes */}
             <Route path="/services" element={<Services />} />
@@ -180,7 +205,10 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="properties" element={<AdminProperties />} />
               <Route path="viewings" element={<Bookings />} />
+              <Route path="bookings" element={<AdminBookings />} />
               <Route path="clients" element={<ClientManagement />} />
+              <Route path="clients/:id" element={<ClientDetail />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* Enhanced 404 page */}
@@ -204,6 +232,7 @@ function App() {
         </Suspense>
       </Router>
     </ClerkProvider>
+    </QueryClientProvider>
   );
 }
 
