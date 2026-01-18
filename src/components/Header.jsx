@@ -43,7 +43,7 @@ const Header = () => {
       icon: FiTool 
     },
     { 
-      path: '/international', 
+      path: '/internationalproperties', 
       label: 'International', 
       icon: FiGrid 
     },
