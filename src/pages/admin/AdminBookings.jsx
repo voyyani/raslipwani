@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
@@ -7,7 +7,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
-import { format } from 'date-fns';
+import { format, isToday, isTomorrow, isPast } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaCalendar,
   FaList,
@@ -17,10 +18,16 @@ import {
   FaSearch,
   FaCalendarDay,
   FaCalendarWeek,
-  FaTh
+  FaTh,
+  FaPhone,
+  FaEnvelope,
+  FaTimes,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import BookingDetailModal from './BookingDetailModal';
+import MobileBookingCard from '../../components/admin/MobileBookingCard';
 import { exportToCSV } from '../../utils/exportUtils';
 import toast from 'react-hot-toast';
 
@@ -30,6 +37,17 @@ import toast from 'react-hot-toast';
  */
 const AdminBookings = () => {
   const queryClient = useQueryClient();
+  
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mobileView, setMobileView] = useState('list'); // 'list' or 'calendar'
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   const [viewType, setViewType] = useState('dayGridMonth');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -40,6 +58,7 @@ const AdminBookings = () => {
     dateRange: { start: null, end: null }
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedStats, setExpandedStats] = useState(false);
 
   // Fetch bookings
   const { data: bookings = [], isLoading } = useQuery({
@@ -97,6 +116,78 @@ const AdminBookings = () => {
       return statusCounts;
     }
   });
+
+  // Status update mutation for swipe actions
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }) => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({ 
+          status, 
+          last_modified_at: new Date().toISOString() 
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, { status }) => {
+      toast.success(`Booking ${status}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+    },
+    onError: () => toast.error('Failed to update booking')
+  });
+
+  // Group bookings by date for mobile list view
+  const groupedBookings = useMemo(() => {
+    const groups = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    bookings.forEach(booking => {
+      const date = new Date(booking.appointment_at);
+      date.setHours(0, 0, 0, 0);
+      
+      let key;
+      if (isToday(date)) {
+        key = 'Today';
+      } else if (isTomorrow(date)) {
+        key = 'Tomorrow';
+      } else if (isPast(date)) {
+        key = 'Past';
+      } else {
+        key = format(date, 'EEEE, MMMM d');
+      }
+      
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(booking);
+    });
+
+    // Sort by date within each group
+    Object.values(groups).forEach(group => {
+      group.sort((a, b) => new Date(a.appointment_at) - new Date(b.appointment_at));
+    });
+
+    // Order groups: Today, Tomorrow, future dates, Past
+    const orderedGroups = {};
+    if (groups['Today']) orderedGroups['Today'] = groups['Today'];
+    if (groups['Tomorrow']) orderedGroups['Tomorrow'] = groups['Tomorrow'];
+    
+    Object.keys(groups)
+      .filter(k => !['Today', 'Tomorrow', 'Past'].includes(k))
+      .sort((a, b) => new Date(a) - new Date(b))
+      .forEach(key => {
+        orderedGroups[key] = groups[key];
+      });
+    
+    if (groups['Past']) orderedGroups['Past'] = groups['Past'];
+
+    return orderedGroups;
+  }, [bookings]);
 
   // Reschedule booking mutation (for drag-and-drop)
   const rescheduleMutation = useMutation({
@@ -261,20 +352,84 @@ const AdminBookings = () => {
     );
   }
 
+  // Mobile booking action handlers
+  const handleCall = (phone) => {
+    if (phone) window.location.href = `tel:${phone}`;
+  };
+
+  const handleEmail = (email) => {
+    if (email) window.location.href = `mailto:${email}`;
+  };
+
+  const handleConfirmBooking = (id) => {
+    statusMutation.mutate({ id, status: 'confirmed' });
+  };
+
+  const handleCancelBooking = (id) => {
+    statusMutation.mutate({ id, status: 'cancelled' });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6 pb-20 md:pb-6">
       <Helmet>
         <title>Booking Management - Raslipwani Properties Admin</title>
       </Helmet>
 
       {/* Header */}
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Booking Management</h1>
-        <p className="text-sm sm:text-base text-gray-600">Manage appointments with drag-and-drop calendar</p>
+      <div className="mb-4">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Bookings</h1>
+        <p className="text-sm text-gray-600 hidden sm:block">Manage appointments with calendar</p>
       </div>
 
-      {/* Stats Dashboard */}
-      {stats && (
+      {/* Mobile Stats - Collapsible */}
+      {stats && isMobile && (
+        <div className="mb-4">
+          <button 
+            onClick={() => setExpandedStats(!expandedStats)}
+            className="w-full flex items-center justify-between bg-white rounded-lg shadow p-3"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-lg font-bold text-gray-900">{stats.total}</span>
+              <span className="text-sm text-gray-600">Total Bookings</span>
+              {stats.pending > 0 && (
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {stats.pending} pending
+                </span>
+              )}
+            </div>
+            {expandedStats ? <FaChevronUp className="text-gray-400" /> : <FaChevronDown className="text-gray-400" />}
+          </button>
+          
+          <AnimatePresence>
+            {expandedStats && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="bg-yellow-50 rounded-lg p-2 text-center border border-yellow-200">
+                    <div className="text-lg font-bold text-yellow-800">{stats.pending}</div>
+                    <div className="text-xs text-yellow-700">Pending</div>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-2 text-center border border-blue-200">
+                    <div className="text-lg font-bold text-blue-800">{stats.confirmed}</div>
+                    <div className="text-xs text-blue-700">Confirmed</div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-2 text-center border border-green-200">
+                    <div className="text-lg font-bold text-green-800">{stats.completed}</div>
+                    <div className="text-xs text-green-700">Completed</div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Desktop Stats Dashboard */}
+      {stats && !isMobile && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           <div className="bg-white rounded-lg shadow p-3 sm:p-4">
             <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</div>
@@ -303,7 +458,185 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Toolbar */}
+      {/* Mobile View Toggle */}
+      {isMobile && (
+        <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setMobileView('list')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+              mobileView === 'list'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600'
+            }`}
+          >
+            <FaList className="text-sm" />
+            List
+          </button>
+          <button
+            onClick={() => setMobileView('calendar')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+              mobileView === 'calendar'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600'
+            }`}
+          >
+            <FaCalendar className="text-sm" />
+            Calendar
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Search & Filter Bar */}
+      {isMobile && mobileView === 'list' && (
+        <div className="flex gap-2 mb-4">
+          <div className="flex-1 relative">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <input
+              type="text"
+              placeholder="Search bookings..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`px-3 py-2.5 rounded-lg border transition-all ${
+              showFilters || filters.status !== 'all' || filters.priority !== 'all'
+                ? 'bg-blue-50 border-blue-300 text-blue-600'
+                : 'bg-white border-gray-200 text-gray-600'
+            }`}
+          >
+            <FaFilter />
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Filters Dropdown */}
+      <AnimatePresence>
+        {isMobile && showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden mb-4"
+          >
+            <div className="bg-white rounded-lg shadow p-3 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <div className="flex flex-wrap gap-2">
+                  {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(status => (
+                    <button
+                      key={status}
+                      onClick={() => setFilters({ ...filters, status })}
+                      className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
+                        filters.status === status
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+                <div className="flex flex-wrap gap-2">
+                  {['all', 'low', 'normal', 'high', 'urgent'].map(priority => (
+                    <button
+                      key={priority}
+                      onClick={() => setFilters({ ...filters, priority })}
+                      className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
+                        filters.priority === priority
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {(filters.status !== 'all' || filters.priority !== 'all') && (
+                <button
+                  onClick={() => setFilters({ ...filters, status: 'all', priority: 'all' })}
+                  className="w-full py-2 text-sm text-red-600 font-medium"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile List View */}
+      {isMobile && mobileView === 'list' && (
+        <div className="space-y-4">
+          {Object.keys(groupedBookings).length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <FaCalendar className="mx-auto text-4xl text-gray-300 mb-3" />
+              <p className="text-gray-500">No bookings found</p>
+            </div>
+          ) : (
+            Object.entries(groupedBookings).map(([dateGroup, groupBookings]) => (
+              <div key={dateGroup}>
+                <div className="sticky top-0 z-10 bg-gray-50 py-2">
+                  <h3 className={`text-sm font-semibold ${
+                    dateGroup === 'Today' ? 'text-blue-600' :
+                    dateGroup === 'Tomorrow' ? 'text-green-600' :
+                    dateGroup === 'Past' ? 'text-gray-400' : 'text-gray-700'
+                  }`}>
+                    {dateGroup}
+                    <span className="ml-2 text-gray-400 font-normal">({groupBookings.length})</span>
+                  </h3>
+                </div>
+                <div>
+                  {groupBookings.map((booking) => (
+                    <MobileBookingCard
+                      key={booking.id}
+                      booking={booking}
+                      onView={() => {
+                        setSelectedBooking(booking);
+                        setIsDetailModalOpen(true);
+                      }}
+                      onConfirm={() => handleConfirmBooking(booking.id)}
+                      onCancel={() => handleCancelBooking(booking.id)}
+                      onCall={() => handleCall(booking.phone)}
+                      onEmail={() => handleEmail(booking.email)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Mobile Calendar View */}
+      {isMobile && mobileView === 'calendar' && (
+        <div className="bg-white rounded-lg shadow-md p-2 overflow-hidden">
+          <FullCalendar
+            plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
+            initialView="listWeek"
+            headerToolbar={{
+              left: 'prev,next',
+              center: 'title',
+              right: 'listWeek,dayGridMonth'
+            }}
+            events={events}
+            eventClick={handleEventClick}
+            height="auto"
+            contentHeight={400}
+            dayMaxEvents={2}
+            moreLinkText="+"
+          />
+        </div>
+      )}
+
+      {/* Desktop Toolbar */}
+      {!isMobile && (
       <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex flex-col gap-3 sm:gap-4">
           {/* View Switcher */}
@@ -426,8 +759,10 @@ const AdminBookings = () => {
           </div>
         )}
       </div>
+      )}
 
-      {/* Calendar */}
+      {/* Desktop Calendar */}
+      {!isMobile && (
       <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6 overflow-hidden">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
@@ -446,7 +781,7 @@ const AdminBookings = () => {
           eventContent={renderEventContent}
           height="auto"
           contentHeight="auto"
-          aspectRatio={window.innerWidth < 768 ? 1 : 1.8}
+          aspectRatio={1.8}
           slotMinTime="08:00:00"
           slotMaxTime="20:00:00"
           allDaySlot={false}
@@ -461,11 +796,12 @@ const AdminBookings = () => {
             minute: '2-digit',
             hour12: false
           }}
-          dayMaxEvents={window.innerWidth < 768 ? 2 : 3}
-          moreLinkText={window.innerWidth < 768 ? '+' : 'more'}
-          stickyHeaderDates={window.innerWidth < 768}
+          dayMaxEvents={3}
+          moreLinkText="more"
+          stickyHeaderDates={false}
         />
       </div>
+      )}
 
       {/* Booking Detail Modal */}
       {isDetailModalOpen && selectedBooking && (

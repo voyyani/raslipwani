@@ -330,6 +330,13 @@ const Header = () => {
                 })}
               </nav>
               
+              {/* Auth Section for Mobile */}
+              <div className="px-6 py-4 border-t border-gray-100 bg-primary/5">
+                <div className="flex items-center justify-center">
+                  <AuthButtons />
+                </div>
+              </div>
+              
               {/* CTA Section */}
               <div className="p-6 border-t border-gray-100 bg-gray-50">
                 <div className="space-y-3">

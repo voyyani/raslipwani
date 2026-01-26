@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -11,35 +12,26 @@ import PropertyModal from '../components/PropertyModal';
 const Home = () => {
   const servicesRef = useRef(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
-  const [featuredProperties, setFeaturedProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch featured properties from Supabase
-  useEffect(() => {
-    const fetchFeaturedProperties = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('featured', true)
-          .order('created_at', { ascending: false })
-          .limit(3);
-        
-        if (error) throw error;
-        setFeaturedProperties(data);
-      } catch (err) {
-        setError('Failed to load featured properties: ' + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchFeaturedProperties();
-  }, []);
+  // Fetch featured properties with React Query for automatic cache invalidation
+  const { data: featuredProperties = [], isLoading: loading, error } = useQuery({
+    queryKey: ['featured-properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('featured', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60, // 1 minute - refetch if data is older than 1 minute
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+  });
 
   // Handle scroll to services section
   const scrollToServices = () => {

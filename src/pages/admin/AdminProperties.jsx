@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
+import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
+import MobilePropertyCard from '../../components/admin/MobilePropertyCard';
 import { 
   FaEdit, 
   FaTrash, 
@@ -19,10 +22,17 @@ import {
   FaLandmark,
   FaDownload,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
+  FaTh,
+  FaList,
+  FaFilter,
+  FaChevronDown,
+  FaChevronUp,
+  FaStar
 } from 'react-icons/fa';
 
 const AdminProperties = () => {
+  const queryClient = useQueryClient();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,6 +77,21 @@ const AdminProperties = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Mobile state
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mobileViewMode, setMobileViewMode] = useState('grid'); // 'grid' or 'list'
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [expandedStats, setExpandedStats] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [purposeFilter, setPurposeFilter] = useState('all');
+
+  // Mobile detection
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Property types based on purpose
   const propertyTypes = {
@@ -405,6 +430,36 @@ const AdminProperties = () => {
     }
   };
 
+  // Toggle featured status
+  const handleToggleFeatured = async (property) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ featured: !property.featured })
+        .eq('id', property.id);
+      
+      if (error) throw error;
+      
+      setProperties(prev => prev.map(p => 
+        p.id === property.id ? { ...p, featured: !p.featured } : p
+      ));
+      
+      // Invalidate homepage featured properties cache
+      queryClient.invalidateQueries({ queryKey: ['featured-properties'] });
+      
+      toast.success(property.featured ? 'Removed from featured' : 'Added to featured');
+    } catch (error) {
+      toast.error('Failed to update featured status');
+    }
+  };
+
+  // Filter properties for mobile
+  const filteredProperties = properties.filter(p => {
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+    if (purposeFilter !== 'all' && p.purpose !== purposeFilter) return false;
+    return true;
+  });
+
   const setupEditForm = (property) => {
     setCurrentProperty(property);
     setFormData({
@@ -631,63 +686,160 @@ const AdminProperties = () => {
           </div>
 
           {/* Mobile Card View */}
-          <div className="lg:hidden space-y-3">
-            {properties.map(property => (
-              <div key={property.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-                <div className="p-3 sm:p-4">
-                  <div className="flex gap-3">
+          <div className="lg:hidden">
+            {/* Mobile View Toggle & Filters */}
+            <div className="flex gap-2 mb-4">
+              {/* View Mode Toggle */}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setMobileViewMode('grid')}
+                  className={`p-2 rounded-md transition-all ${
+                    mobileViewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  <FaTh />
+                </button>
+                <button
+                  onClick={() => setMobileViewMode('list')}
+                  className={`p-2 rounded-md transition-all ${
+                    mobileViewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
+                  }`}
+                >
+                  <FaList />
+                </button>
+              </div>
+              
+              {/* Filter Button */}
+              <button
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+                  showMobileFilters || statusFilter !== 'all' || purposeFilter !== 'all'
+                    ? 'bg-blue-50 border-blue-300 text-blue-600'
+                    : 'bg-white border-gray-200 text-gray-600'
+                }`}
+              >
+                <FaFilter className="text-sm" />
+                <span className="text-sm">Filter</span>
+              </button>
+            </div>
+
+            {/* Mobile Filters Dropdown */}
+            <AnimatePresence>
+              {showMobileFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mb-4"
+                >
+                  <div className="bg-white rounded-lg shadow p-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['all', 'available', 'pending', 'sold', 'rented'].map(status => (
+                          <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
+                              statusFilter === status
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['all', 'sale', 'rent'].map(purpose => (
+                          <button
+                            key={purpose}
+                            onClick={() => setPurposeFilter(purpose)}
+                            className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
+                              purposeFilter === purpose
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {purpose === 'all' ? 'All' : purpose === 'sale' ? 'For Sale' : 'For Rent'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {(statusFilter !== 'all' || purposeFilter !== 'all') && (
+                      <button
+                        onClick={() => { setStatusFilter('all'); setPurposeFilter('all'); }}
+                        className="w-full py-2 text-sm text-red-600 font-medium"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Grid View */}
+            {mobileViewMode === 'grid' && (
+              <div className="grid grid-cols-1 gap-3">
+                {filteredProperties.map(property => (
+                  <MobilePropertyCard
+                    key={property.id}
+                    property={property}
+                    onView={() => setupEditForm(property)}
+                    onEdit={() => setupEditForm(property)}
+                    onDelete={() => handleDelete(property.id)}
+                    onToggleFeatured={() => handleToggleFeatured(property)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* List View */}
+            {mobileViewMode === 'list' && (
+              <div className="space-y-2">
+                {filteredProperties.map(property => (
+                  <div 
+                    key={property.id} 
+                    className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 flex items-center gap-3"
+                    onClick={() => setupEditForm(property)}
+                  >
                     {property.images?.[0] ? (
                       <img 
                         src={property.images[0]} 
                         alt={property.title} 
-                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md flex-shrink-0"
+                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
                     ) : (
-                      <div className="bg-gray-100 border-2 border-dashed rounded-md w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center text-gray-400 flex-shrink-0">
-                        <FaHome className="text-2xl" />
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FaHome className="text-gray-400 text-xl" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate mb-1">{property.title}</h3>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate mb-1">
-                        <FaLandmark className="inline mr-1" />{property.location}
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {property.bedrooms} Beds • {property.bathrooms} Baths
-                      </p>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <h3 className="font-semibold text-gray-900 text-sm truncate">{property.title}</h3>
+                      <p className="text-xs text-gray-500 truncate">{property.location}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-bold text-blue-600">
+                          Ksh {parseFloat(property.price).toLocaleString()}
+                        </span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
                           property.status === 'available' ? 'bg-green-100 text-green-800' :
                           property.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          property.status === 'sold' ? 'bg-blue-100 text-blue-800' :
+                          property.status === 'sold' ? 'bg-red-100 text-red-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {property.status}
                         </span>
-                        <span className="text-xs text-gray-500 capitalize">{property.property_type}</span>
                       </div>
-                      <p className="text-sm sm:text-base font-bold text-blue-600">
-                        Ksh {parseFloat(property.price).toLocaleString()}
-                      </p>
                     </div>
+                    <FaChevronRight className="text-gray-300" />
                   </div>
-                  <div className="flex gap-2 mt-3 pt-3 border-t">
-                    <button
-                      onClick={() => setupEditForm(property)}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm transition-colors"
-                    >
-                      <FaEdit /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(property.id)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm transition-colors"
-                    >
-                      <FaTrash /> Delete
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </>
       )}
