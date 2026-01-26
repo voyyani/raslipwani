@@ -32,6 +32,13 @@ body {
   min-height: 100vh;
   color: #1f2937; /* Tailwind's text-gray-800 */
   background-color: #f8fafc; /* Tailwind's bg-light (use #f8fafc for light background) */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 a {

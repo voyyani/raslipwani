@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
 import { format } from 'date-fns';
 import {
@@ -15,7 +16,9 @@ import {
   FaPhone,
   FaCalendar,
   FaMapMarkerAlt,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaChevronDown,
+  FaChevronLeft
 } from 'react-icons/fa';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import toast from 'react-hot-toast';
@@ -198,68 +201,105 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white sm:rounded-lg shadow-xl w-full sm:max-w-4xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 flex justify-between items-start">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-2xl font-bold mb-2">Booking Details</h2>
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-              <BookingStatusBadge status={booking.status} className="bg-white bg-opacity-20 border-white border-opacity-30 text-xs sm:text-sm" />
-              {booking.priority && (
-                <span className={`text-xs sm:text-sm font-semibold ${getPriorityColor(booking.priority)}`}>
-                  {booking.priority.toUpperCase()} Priority
-                </span>
-              )}
-              <span className="text-xs sm:text-sm opacity-90">#{booking.id}</span>
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <motion.div 
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0, bottom: 0.5 }}
+          onDragEnd={(e, info) => {
+            if (info.offset.y > 100) {
+              onClose();
+            }
+          }}
+          className="bg-white w-full md:max-w-4xl md:rounded-lg shadow-xl 
+            h-[95vh] md:h-auto md:max-h-[90vh] 
+            overflow-hidden flex flex-col
+            rounded-t-2xl md:rounded-lg"
+        >
+          {/* Mobile Drag Handle */}
+          <div className="md:hidden flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 md:p-6 flex justify-between items-start">
+            <div className="flex-1 min-w-0">
+              {/* Mobile Back Button */}
+              <button 
+                onClick={onClose}
+                className="md:hidden flex items-center gap-1 text-white/80 text-sm mb-2"
+              >
+                <FaChevronLeft className="text-xs" />
+                Back
+              </button>
+              <h2 className="text-lg md:text-2xl font-bold mb-2">Booking Details</h2>
+              <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                <BookingStatusBadge status={booking.status} className="bg-white bg-opacity-20 border-white border-opacity-30 text-xs md:text-sm" />
+                {booking.priority && (
+                  <span className={`text-xs md:text-sm font-semibold ${getPriorityColor(booking.priority)}`}>
+                    {booking.priority.toUpperCase()} Priority
+                  </span>
+                )}
+                <span className="text-xs md:text-sm opacity-90">#{booking.id}</span>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="hidden md:block text-white hover:text-gray-200 transition p-2 flex-shrink-0"
+            >
+              <FaTimes className="text-2xl" />
+            </button>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="border-b bg-gray-50 overflow-x-auto">
+            <div className="flex gap-1 px-3 md:px-6 min-w-max">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
+                  activeTab === 'overview'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('notes')}
+                className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
+                  activeTab === 'notes'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Notes ({notes.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
+                  activeTab === 'history'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Activity Log
+              </button>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white hover:text-gray-200 transition p-2 flex-shrink-0"
-          >
-            <FaTimes className="text-lg sm:text-2xl" />
-          </button>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="border-b bg-gray-50 overflow-x-auto">
-          <div className="flex gap-1 px-3 sm:px-6 min-w-max">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`px-3 sm:px-4 py-2 sm:py-3 font-medium transition text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'overview'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab('notes')}
-              className={`px-3 sm:px-4 py-2 sm:py-3 font-medium transition text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'notes'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Notes ({notes.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-3 sm:px-4 py-2 sm:py-3 font-medium transition text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'history'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Activity Log
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
@@ -530,8 +570,40 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         </div>
 
         {/* Footer with Quick Actions */}
-        <div className="border-t bg-gray-50 p-6">
-          <div className="flex flex-wrap gap-3 justify-end">
+        <div className="border-t bg-gray-50 p-4 md:p-6 safe-area-pb">
+          {/* Mobile Actions - Full Width Buttons */}
+          <div className="md:hidden space-y-2">
+            {booking.status === 'pending' && (
+              <button
+                onClick={handleConfirm}
+                disabled={updateStatusMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium active:bg-blue-700 transition disabled:opacity-50"
+              >
+                <FaCheck /> Confirm Booking
+              </button>
+            )}
+            {booking.status === 'confirmed' && (
+              <button
+                onClick={handleComplete}
+                disabled={updateStatusMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-medium active:bg-green-700 transition disabled:opacity-50"
+              >
+                <FaCheck /> Mark Completed
+              </button>
+            )}
+            {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+              <button
+                onClick={handleCancel}
+                disabled={updateStatusMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-white text-red-600 border border-red-200 rounded-xl font-medium active:bg-red-50 transition disabled:opacity-50"
+              >
+                <FaBan /> Cancel Booking
+              </button>
+            )}
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex flex-wrap gap-3 justify-end">
             {booking.status === 'pending' && (
               <button
                 onClick={handleConfirm}
@@ -567,8 +639,9 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
