@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase, supabaseAdmin } from '../../utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -435,19 +435,29 @@ const AdminProperties = () => {
     try {
       const newFeaturedValue = !property.featured;
       
-      // Update BOTH featured columns (database has duplicate columns: 'featured' and 'is_featured')
-      const { error } = await supabase
-        .from('properties')
-        .update({ 
-          featured: newFeaturedValue,
-          is_featured: newFeaturedValue 
-        })
-        .eq('id', property.id);
+      console.log('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
       
-      if (error) throw error;
+      // Use supabaseAdmin to bypass RLS (Clerk auth not recognized by Supabase)
+      const { data, error } = await supabaseAdmin
+        .from('properties')
+        .update({ featured: newFeaturedValue })
+        .eq('id', property.id)
+        .select();
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Update result:', data);
+      
+      // Check if update actually happened
+      if (!data || data.length === 0) {
+        throw new Error('No rows updated - property may not exist');
+      }
       
       setProperties(prev => prev.map(p => 
-        p.id === property.id ? { ...p, featured: newFeaturedValue, is_featured: newFeaturedValue } : p
+        p.id === property.id ? { ...p, featured: newFeaturedValue } : p
       ));
       
       // Invalidate homepage featured properties cache
@@ -456,7 +466,7 @@ const AdminProperties = () => {
       toast.success(newFeaturedValue ? 'Added to featured' : 'Removed from featured');
     } catch (error) {
       console.error('Toggle featured error:', error);
-      toast.error('Failed to update featured status');
+      toast.error(`Failed: ${error.message || 'Unknown error'}`);
     }
   };
 
