@@ -433,22 +433,29 @@ const AdminProperties = () => {
   // Toggle featured status
   const handleToggleFeatured = async (property) => {
     try {
+      const newFeaturedValue = !property.featured;
+      
+      // Update BOTH featured columns (database has duplicate columns: 'featured' and 'is_featured')
       const { error } = await supabase
         .from('properties')
-        .update({ featured: !property.featured })
+        .update({ 
+          featured: newFeaturedValue,
+          is_featured: newFeaturedValue 
+        })
         .eq('id', property.id);
       
       if (error) throw error;
       
       setProperties(prev => prev.map(p => 
-        p.id === property.id ? { ...p, featured: !p.featured } : p
+        p.id === property.id ? { ...p, featured: newFeaturedValue, is_featured: newFeaturedValue } : p
       ));
       
       // Invalidate homepage featured properties cache
       queryClient.invalidateQueries({ queryKey: ['featured-properties'] });
       
-      toast.success(property.featured ? 'Removed from featured' : 'Added to featured');
+      toast.success(newFeaturedValue ? 'Added to featured' : 'Removed from featured');
     } catch (error) {
+      console.error('Toggle featured error:', error);
       toast.error('Failed to update featured status');
     }
   };
