@@ -1,8 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { logo, siteName, phone, email, address, socialMedia, getSetting, loading: settingsLoading } = useSettings();
+  
+  // Get service locations from settings with fallback
+  const serviceLocations = getSetting('general', 'service_locations', { locations: ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'] });
+  const locations = serviceLocations?.locations || ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'];
+  
+  // Get WhatsApp number from settings with fallback
+  const whatsappSetting = getSetting('general', 'whatsapp_number', { value: '+254758066526', enabled: true });
+  const whatsappNumber = whatsappSetting?.value?.replace(/[^0-9]/g, '') || '254758066526';
+  
+  // Build social media links from settings
+  const socialLinks = socialMedia() || {};
 
   const quickLinks = [
     { name: 'Home', path: '/' },
@@ -18,15 +31,6 @@ const Footer = () => {
     'Property Valuation',
     'Property Management',
     'Investment Consulting'
-  ];
-
-  const locations = [
-    'Nairobi',
-    'Mombasa',
-    'Kilifi',
-    'Diani',
-    'Naivasha',
-    'Malindi'
   ];
 
   return (
@@ -49,8 +53,8 @@ const Footer = () => {
             <div className="flex items-start gap-4">
               <div className="relative flex-shrink-0">
                 <img
-                  src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
-                  alt="Raslipwani Properties - Premier Real Estate in Kenya"
+                  src={logo()}
+                  alt={`${siteName()} - Premier Real Estate in Kenya`}
                   className="w-14 h-14 rounded-xl object-cover border-2 border-primary/80 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-xl"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md">
@@ -61,7 +65,7 @@ const Footer = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent leading-tight">
-                  Raslipwani Properties
+                  {siteName()}
                 </h3>
                 <p className="text-gray-300 mt-2 text-sm leading-relaxed">
                   Your premier real estate partner across Kenya. Connecting dreams with exceptional properties nationwide.
@@ -72,12 +76,12 @@ const Footer = () => {
             {/* Enhanced Social Links */}
             <div className="flex space-x-3 pt-4">
               {[
-                { icon: 'fab fa-facebook', href: 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-blue-500' },
-                { icon: 'fab fa-instagram', href: 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
-                { icon: 'fab fa-tiktok', href: 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
-                { icon: 'fab fa-linkedin', href: 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-blue-600' },
-                { icon: 'fab fa-twitter', href: 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
-              ].map((social, index) => (
+                { icon: 'fab fa-facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-blue-500' },
+                { icon: 'fab fa-instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
+                { icon: 'fab fa-tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
+                { icon: 'fab fa-linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-blue-600' },
+                { icon: 'fab fa-twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
+              ].filter(s => s.href).map((social, index) => (
                 <a 
                   key={index}
                   href={social.href}
@@ -148,27 +152,27 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">Headquarters</p>
-                  <p className="text-gray-400 text-xs mt-1">Kilifi, Kenya</p>
+                  <p className="text-gray-400 text-xs mt-1">{address()}</p>
                   <p className="text-gray-400 text-xs">Services Nationwide</p>
                 </div>
               </div>
 
-              <a href="tel:+254758066526" className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <a href={`tel:${phone()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
                   <i className="fas fa-phone text-primary text-xs"></i>
                 </div>
                 <div>
-                  <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">+254 758 066 526</p>
+                  <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{phone()}</p>
                   <p className="text-gray-400 text-xs mt-1">Mon-Fri, 8AM-6PM</p>
                 </div>
               </a>
 
-              <a href="mailto:info@raslipwani.co.ke" className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <a href={`mailto:${email()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
                   <i className="fas fa-envelope text-primary text-xs"></i>
                 </div>
                 <div>
-                  <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">info@raslipwani.co.ke</p>
+                  <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{email()}</p>
                   <p className="text-gray-400 text-xs mt-1">Quick response guaranteed</p>
                 </div>
               </a>
@@ -196,7 +200,7 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
             <div className="text-gray-400 text-sm text-center lg:text-left">
               <p>
-                &copy; {currentYear} Raslipwani Properties. All rights reserved. 
+                &copy; {currentYear} {siteName()}. All rights reserved. 
                 <span className="mx-2 hidden sm:inline">•</span>
                 <br className="sm:hidden" />
                 <span className="text-gray-500">Premier Real Estate Services Across Kenya</span>
@@ -229,7 +233,7 @@ const Footer = () => {
       {/* Enhanced Floating CTA for Mobile */}
       <div className="lg:hidden fixed bottom-6 right-6 z-50">
         <a 
-          href="https://wa.me/254758066526"
+          href={`https://wa.me/${whatsappNumber}`}
           target="_blank"
           rel="noopener noreferrer"
           className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 animate-soft-bounce"
@@ -243,7 +247,7 @@ const Footer = () => {
       {/* Enhanced Desktop CTA */}
       <div className="hidden lg:block fixed bottom-6 right-6 z-50">
         <a 
-          href="https://wa.me/254758066526"
+          href={`https://wa.me/${whatsappNumber}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
