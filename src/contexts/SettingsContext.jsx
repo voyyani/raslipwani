@@ -95,6 +95,8 @@ export const SettingsProvider = ({ children }) => {
         return;
       }
 
+      console.log('[SettingsContext] Raw data from DB:', data);
+
       // Merge fetched settings with defaults (fetched values take precedence)
       const mergedSettings = {
         ...DEFAULT_SETTINGS,
@@ -108,6 +110,7 @@ export const SettingsProvider = ({ children }) => {
         notification_settings: data.notification_settings || null,
       };
 
+      console.log('[SettingsContext] Merged settings:', mergedSettings);
       setSettings(mergedSettings);
       setLastUpdated(new Date());
       console.log('[SettingsContext] Settings loaded successfully');
