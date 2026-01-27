@@ -19,6 +19,7 @@ import {
 import Header from './AdminHeader';
 import AdminBottomNav from './AdminBottomNav';
 import AdminBreadcrumb from './AdminBreadcrumb';
+import DebugPanel from '../../components/admin/DebugPanel';
 
 /**
  * AdminLayout - World-class admin layout with mobile-first navigation
@@ -321,6 +322,9 @@ const AdminLayout = ({ children }) => {
         onOpenSidebar={openSidebar} 
         pendingBookingsCount={pendingCount}
       />
+      
+      {/* Debug Panel - Only in development */}
+      {import.meta.env.DEV && <DebugPanel />}
     </div>
   );
 };
