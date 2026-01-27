@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../utils/supabaseClient';
 import { FaSave, FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { useSettings } from '../../../hooks/useSettings';
 
 /**
  * GeneralSettings - General site configuration
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
  */
 const GeneralSettings = () => {
   const queryClient = useQueryClient();
+  const { refreshSettings } = useSettings(); // Get refreshSettings to update global context
   const [formData, setFormData] = useState({
     business_name: 'Raslipwani Properties',
     company_logo: '',
@@ -115,8 +117,11 @@ const GeneralSettings = () => {
     onSuccess: () => {
       toast.success('General settings saved successfully');
       queryClient.invalidateQueries({ queryKey: ['settings', 'general'] });
+      // Refresh global SettingsContext so all components get updated
+      refreshSettings();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Settings save error:', error);
       toast.error('Failed to save settings');
     }
   });
