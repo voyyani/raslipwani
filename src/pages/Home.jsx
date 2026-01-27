@@ -149,10 +149,10 @@ const Home = () => {
                 className="max-w-2xl text-white"
               >
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-                  Premium Properties Across Kenya
+                  Your Trusted Real Estate Partner in Kenya
                 </h1>
                 <p className="text-xl mb-8 max-w-xl">
-                  Discover your dream home, villa, or investment opportunity in Kenya's most desirable locations
+                  Buy, sell or invest in houses, land &amp; apartments across Nairobi, Mombasa, Kilifi, Diani and beyond. Expert guidance from listing to keys.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link 
@@ -174,29 +174,21 @@ const Home = () => {
             {/* Scroll indicator removed to eliminate hovering circle */}
           </section>
           
-          {/* Services Section */}
-          <section ref={servicesRef} className="py-20 bg-gray-50">
+          {/* Services Section - Minimal Icon Grid */}
+          <section ref={servicesRef} className="py-8 md:py-16 bg-gray-50">
             <div className="container mx-auto px-4">
-              <div className="text-center mb-16">
+              <div className="text-center mb-6 md:mb-10">
                 <motion.h2 
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-3xl font-bold text-primary mb-4"
+                  className="text-xl md:text-2xl font-bold text-primary"
                 >
                   Our Premium Services
                 </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-gray-600 max-w-2xl mx-auto"
-                >
-                  Comprehensive real estate solutions tailored for the Kenyan market
-                </motion.p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="flex flex-wrap justify-center gap-4 md:gap-8 max-w-3xl mx-auto">
                 {services.map((service, index) => (
                   <ServiceCard key={index} {...service} index={index} />
                 ))}
@@ -267,43 +259,34 @@ const Home = () => {
             </div>
           </section>
           
-          {/* Why Choose Us Section */}
-          <section className="py-20 bg-gray-50">
+          {/* Why Choose Us - Condensed Strip */}
+          <section className="py-8 md:py-12 bg-white border-y border-gray-100">
             <div className="container mx-auto px-4">
-              <div className="text-center mb-16">
-                <motion.h2 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-3xl font-bold text-primary mb-4"
-                >
-                  Why Choose Raslipwani
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-gray-600 max-w-2xl mx-auto"
-                >
-                  The trusted choice for real estate in Kenya
-                </motion.p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-xl shadow-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {benefits.slice(0, 4).map((benefit, index) => (
-                      <BenefitCard key={index} {...benefit} index={index} />
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-white p-8 rounded-xl shadow-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {benefits.slice(4).map((benefit, index) => (
-                      <BenefitCard key={index} {...benefit} index={index} />
-                    ))}
-                  </div>
+              <div className="flex flex-col items-center gap-4 md:gap-6">
+                <h3 className="text-lg md:text-xl font-bold text-primary">
+                  Why Raslipwani?
+                </h3>
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 md:gap-x-10">
+                  {[
+                    { icon: '👨‍💼', text: 'Expert Team' },
+                    { icon: '🤝', text: 'Client-First' },
+                    { icon: '✓', text: 'Trusted' },
+                    { icon: '🇰🇪', text: 'Nationwide' },
+                    { icon: '💰', text: 'All Budgets' },
+                    { icon: '🏠', text: 'End-to-End' },
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center gap-1.5 text-gray-700"
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      <span className="text-xs md:text-sm font-medium">{item.text}</span>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -362,25 +345,23 @@ const Home = () => {
   );
 };
 
-// Service Card Component
-const ServiceCard = ({ icon, title, description, index }) => (
+// Service Card Component - Minimal Icon + Title
+const ServiceCard = ({ icon, title, index }) => (
   <motion.div 
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, scale: 0.9 }}
+    whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
     transition={{ delay: index * 0.1 }}
-    className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col border border-gray-100"
+    whileHover={{ scale: 1.05, y: -5 }}
+    className="group flex flex-col items-center text-center cursor-pointer"
   >
-    <div className="text-primary text-4xl mb-4">
-      <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center">
-        <i className={icon}></i>
+    <div className="relative">
+      <div className="bg-gradient-to-br from-primary to-primary/80 w-14 h-14 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+        <i className={`${icon} text-white text-xl md:text-3xl`}></i>
       </div>
+      <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
     </div>
-    <h3 className="text-xl font-bold mb-3">{title}</h3>
-    <p className="text-gray-600 flex-grow">{description}</p>
-    <div className="mt-6">
-      <div className="w-10 h-1 bg-primary rounded-full"></div>
-    </div>
+    <h3 className="mt-3 text-xs md:text-sm font-semibold text-gray-800 group-hover:text-primary transition-colors">{title}</h3>
   </motion.div>
 );
 

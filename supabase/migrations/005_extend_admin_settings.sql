@@ -8,6 +8,10 @@
 -- Add new columns to the existing admin_settings table
 -- (This table uses flat columns, not key-value pairs)
 
+-- Cloudinary Extended (api_key and api_secret for full integration)
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS cloudinary_api_key TEXT;
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS cloudinary_api_secret TEXT;
+
 -- Company/Branding Extended
 ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS company_tagline TEXT DEFAULT 'Your Premier Real Estate Partner Across Kenya';
 ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS company_logo TEXT;
@@ -79,6 +83,41 @@ ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS custom_css TEXT;
 INSERT INTO admin_settings (id)
 SELECT gen_random_uuid()
 WHERE NOT EXISTS (SELECT 1 FROM admin_settings LIMIT 1);
+
+-- =============================================
+-- SET ACTUAL VALUES FOR EXISTING SETTINGS
+-- =============================================
+
+-- Cloudinary settings (your actual values)
+UPDATE admin_settings SET 
+  cloud_name = COALESCE(cloud_name, 'dzqdxosk2'),
+  upload_preset = COALESCE(upload_preset, 'raslipwani_unsigned')
+WHERE cloud_name IS NULL OR upload_preset IS NULL;
+
+-- Company/Branding settings (your actual values)
+UPDATE admin_settings SET
+  business_name = COALESCE(business_name, 'Raslipwani Properties'),
+  company_tagline = COALESCE(company_tagline, 'Your Premier Real Estate Partner Across Kenya'),
+  company_logo = COALESCE(company_logo, 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'),
+  business_email = COALESCE(business_email, 'info@raslipwani.com'),
+  business_phone = COALESCE(business_phone, '+254758066526'),
+  business_address = COALESCE(business_address, 'Kilifi, Kenya'),
+  whatsapp_number = COALESCE(whatsapp_number, '+254758066526')
+WHERE business_name IS NULL OR company_logo IS NULL;
+
+-- Social media links
+UPDATE admin_settings SET
+  social_facebook = COALESCE(social_facebook, 'https://www.facebook.com/raslipwani/'),
+  social_twitter = COALESCE(social_twitter, 'https://twitter.com/raslipwani'),
+  social_instagram = COALESCE(social_instagram, 'https://www.instagram.com/raslipwani/'),
+  social_linkedin = COALESCE(social_linkedin, 'https://linkedin.com/company/raslipwani'),
+  social_tiktok = COALESCE(social_tiktok, 'https://www.tiktok.com/@raslipwani0')
+WHERE social_facebook IS NULL;
+
+-- Service locations
+UPDATE admin_settings SET
+  service_locations = COALESCE(service_locations, '["Nairobi", "Mombasa", "Kilifi", "Diani", "Naivasha", "Malindi", "Watamu", "Lamu", "Kisumu", "Nakuru"]'::jsonb)
+WHERE service_locations IS NULL;
 
 -- Log migration
 DO $$
