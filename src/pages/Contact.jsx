@@ -9,8 +9,8 @@ import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTri
 
 const Contact = () => {
   // Get settings
-  const { phone, email, address, businessHours, getSetting, siteName } = useSettings();
-  const serviceLocations = getSetting('general', 'service_locations', { locations: ['Nairobi', 'Mombasa', 'Kilifi', 'Malindi', 'Diani', 'Watamu', 'Lamu', 'Naivasha', 'Kisumu', 'Nakuru', 'Thika', 'Countrywide'] });
+  const { phone, email, address, businessHours, serviceLocations, siteName } = useSettings();
+  // serviceLocations() returns array directly from settings
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,7 +38,8 @@ const Contact = () => {
     'Investment Properties'
   ];
   
-  const kenyaLocations = serviceLocations?.locations || [
+  // serviceLocations() returns array directly
+  const kenyaLocations = serviceLocations() || [
     'Nairobi',
     'Mombasa',
     'Kilifi',

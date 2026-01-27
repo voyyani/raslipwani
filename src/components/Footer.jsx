@@ -4,15 +4,13 @@ import { useSettings } from '../hooks/useSettings';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { logo, siteName, phone, email, address, socialMedia, getSetting, loading: settingsLoading } = useSettings();
+  const { logo, siteName, phone, email, address, socialMedia, serviceLocations, whatsapp, loading: settingsLoading } = useSettings();
   
-  // Get service locations from settings with fallback
-  const serviceLocations = getSetting('general', 'service_locations', { locations: ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'] });
-  const locations = serviceLocations?.locations || ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'];
+  // Get service locations from settings (returns array directly)
+  const locations = serviceLocations() || ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'];
   
-  // Get WhatsApp number from settings with fallback
-  const whatsappSetting = getSetting('general', 'whatsapp_number', { value: '+254758066526', enabled: true });
-  const whatsappNumber = whatsappSetting?.value?.replace(/[^0-9]/g, '') || '254758066526';
+  // Get WhatsApp number from settings
+  const whatsappNumber = (whatsapp() || '+254758066526').replace(/[^0-9]/g, '');
   
   // Build social media links from settings
   const socialLinks = socialMedia() || {};
