@@ -6,7 +6,7 @@ import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo
 import { useSettings } from '../hooks/useSettings';
 
 const Header = () => {
-  const { logo, siteName, loading: settingsLoading } = useSettings();
+  const { logo, siteName, tagline, loading: settingsLoading } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
@@ -96,7 +96,7 @@ const Header = () => {
                 {siteName()}
               </h1>
               <p className="hidden md:block text-xs text-gray-600 font-medium">
-                Premium Real Estate Across Kenya
+                {tagline() || 'Premium Real Estate Across Kenya'}
               </p>
             </div>
           </Link>

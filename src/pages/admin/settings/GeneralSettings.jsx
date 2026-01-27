@@ -32,12 +32,15 @@ const GeneralSettings = () => {
   const { isLoading } = useQuery({
     queryKey: ['settings', 'general'],
     queryFn: async () => {
+      console.log('[GeneralSettings] Fetching settings from database...');
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
         .limit(1)
         .single();
 
+      console.log('[GeneralSettings] Fetch result:', { data, error });
+      
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
@@ -49,7 +52,7 @@ const GeneralSettings = () => {
           locationsStr = data.service_locations;
         }
 
-        setFormData({
+        const newFormData = {
           business_name: data.business_name || 'Raslipwani Properties',
           company_logo: data.company_logo || '',
           company_tagline: data.company_tagline || 'Your Premier Real Estate Partner Across Kenya',
@@ -63,7 +66,9 @@ const GeneralSettings = () => {
           social_instagram: data.social_instagram || 'https://instagram.com/raslipwani',
           social_linkedin: data.social_linkedin || 'https://linkedin.com/company/raslipwani',
           social_tiktok: data.social_tiktok || ''
-        });
+        };
+        console.log('[GeneralSettings] Setting form data:', newFormData);
+        setFormData(newFormData);
       }
       return data;
     }
@@ -72,6 +77,8 @@ const GeneralSettings = () => {
   // Update settings mutation (updates the single row)
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
+      console.log('[GeneralSettings] Saving settings:', settings);
+      
       // Parse service locations from comma-separated string to array
       const locationsArray = settings.service_locations
         ? settings.service_locations.split(',').map(l => l.trim()).filter(Boolean)
@@ -94,23 +101,31 @@ const GeneralSettings = () => {
         updated_at: new Date().toISOString()
       };
 
+      console.log('[GeneralSettings] Update payload:', updateData);
+
       // Try to update existing row, or insert if none exists
-      const { data: existing } = await supabase
+      const { data: existing, error: selectError } = await supabase
         .from('admin_settings')
         .select('id')
         .limit(1)
         .single();
 
+      console.log('[GeneralSettings] Existing row:', { existing, selectError });
+
       if (existing) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('admin_settings')
           .update(updateData)
-          .eq('id', existing.id);
+          .eq('id', existing.id)
+          .select();
+        console.log('[GeneralSettings] Update result:', { data, error });
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('admin_settings')
-          .insert(updateData);
+          .insert(updateData)
+          .select();
+        console.log('[GeneralSettings] Insert result:', { data, error });
         if (error) throw error;
       }
     },
@@ -139,10 +154,11 @@ const GeneralSettings = () => {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+        <p className="text-sm text-gray-500 mb-4">These settings appear in the Header, Footer, and throughout the site.</p>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Business Name
+              Business Name <span className="text-xs text-blue-500">(Header &amp; Footer)</span>
             </label>
             <input
               type="text"
@@ -155,7 +171,7 @@ const GeneralSettings = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company Tagline
+              Company Tagline <span className="text-xs text-blue-500">(Header subtitle)</span>
             </label>
             <input
               type="text"
@@ -164,12 +180,12 @@ const GeneralSettings = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Your Premier Real Estate Partner"
             />
-            <p className="text-xs text-gray-500 mt-1">A short slogan that appears under your logo</p>
+            <p className="text-xs text-gray-500 mt-1">A short slogan that appears under your logo in the header</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company Logo URL
+              Company Logo URL <span className="text-xs text-blue-500">(Header &amp; Footer)</span>
             </label>
             <input
               type="url"
@@ -178,9 +194,17 @@ const GeneralSettings = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://example.com/logo.png"
             />
-            {formData.company_logo && (
-              <img src={formData.company_logo} alt="Logo preview" className="mt-2 h-16 object-contain" />
-            )}
+            <div className="mt-2 flex items-center gap-3">
+              <img 
+                src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'} 
+                alt="Logo preview" 
+                className="h-16 w-16 object-cover rounded-lg border-2 border-gray-200" 
+              />
+              <span className="text-xs text-gray-500">
+                {formData.company_logo ? 'Current logo' : 'Default logo (update above)'}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">This appears in the Header and Footer</p>
           </div>
         </div>
       </div>
