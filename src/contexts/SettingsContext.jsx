@@ -59,7 +59,7 @@ const SettingsContext = createContext(null);
  * SettingsProvider - Wraps the app and provides settings throughout
  */
 export const SettingsProvider = ({ children }) => {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(null); // Start with null to force fetch
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -135,6 +135,7 @@ export const SettingsProvider = ({ children }) => {
    */
   const getSetting = useCallback((key, fallback = null) => {
     try {
+      if (!settings) return fallback;
       const value = settings[key];
       if (value === undefined || value === null) return fallback;
       return value;
@@ -145,31 +146,32 @@ export const SettingsProvider = ({ children }) => {
 
   /**
    * Convenience getters for common settings
+   * Use optional chaining since settings might be null initially
    */
   const getters = {
     // Branding
-    siteName: () => settings.business_name || DEFAULT_SETTINGS.business_name,
-    logo: () => settings.company_logo || DEFAULT_SETTINGS.company_logo,
-    tagline: () => settings.company_tagline || DEFAULT_SETTINGS.company_tagline,
+    siteName: () => settings?.business_name || DEFAULT_SETTINGS.business_name,
+    logo: () => settings?.company_logo || DEFAULT_SETTINGS.company_logo,
+    tagline: () => settings?.company_tagline || DEFAULT_SETTINGS.company_tagline,
     
     // Contact
-    email: () => settings.business_email || DEFAULT_SETTINGS.business_email,
-    phone: () => settings.business_phone || DEFAULT_SETTINGS.business_phone,
-    address: () => settings.business_address || DEFAULT_SETTINGS.business_address,
-    whatsapp: () => settings.whatsapp_number || settings.business_phone || DEFAULT_SETTINGS.whatsapp_number,
+    email: () => settings?.business_email || DEFAULT_SETTINGS.business_email,
+    phone: () => settings?.business_phone || DEFAULT_SETTINGS.business_phone,
+    address: () => settings?.business_address || DEFAULT_SETTINGS.business_address,
+    whatsapp: () => settings?.whatsapp_number || settings?.business_phone || DEFAULT_SETTINGS.whatsapp_number,
     
     // Social Media
     socialMedia: () => ({
-      facebook: settings.social_facebook || DEFAULT_SETTINGS.social_facebook,
-      twitter: settings.social_twitter || DEFAULT_SETTINGS.social_twitter,
-      instagram: settings.social_instagram || DEFAULT_SETTINGS.social_instagram,
-      linkedin: settings.social_linkedin || DEFAULT_SETTINGS.social_linkedin,
-      tiktok: settings.social_tiktok || DEFAULT_SETTINGS.social_tiktok,
+      facebook: settings?.social_facebook || DEFAULT_SETTINGS.social_facebook,
+      twitter: settings?.social_twitter || DEFAULT_SETTINGS.social_twitter,
+      instagram: settings?.social_instagram || DEFAULT_SETTINGS.social_instagram,
+      linkedin: settings?.social_linkedin || DEFAULT_SETTINGS.social_linkedin,
+      tiktok: settings?.social_tiktok || DEFAULT_SETTINGS.social_tiktok,
     }),
     
     // Locations
     serviceLocations: () => {
-      const locs = settings.service_locations;
+      const locs = settings?.service_locations;
       if (Array.isArray(locs)) return locs;
       if (typeof locs === 'object' && locs !== null) return locs;
       return DEFAULT_SETTINGS.service_locations;
@@ -177,22 +179,22 @@ export const SettingsProvider = ({ children }) => {
     
     // Localization
     currency: () => ({
-      code: settings.currency || DEFAULT_SETTINGS.currency,
-      symbol: settings.currency_symbol || DEFAULT_SETTINGS.currency_symbol,
+      code: settings?.currency || DEFAULT_SETTINGS.currency,
+      symbol: settings?.currency_symbol || DEFAULT_SETTINGS.currency_symbol,
     }),
-    locale: () => settings.locale || DEFAULT_SETTINGS.locale,
-    timezone: () => settings.timezone || DEFAULT_SETTINGS.timezone,
+    locale: () => settings?.locale || DEFAULT_SETTINGS.locale,
+    timezone: () => settings?.timezone || DEFAULT_SETTINGS.timezone,
     
     // Business
-    businessHours: () => settings.business_hours || DEFAULT_SETTINGS.business_hours,
+    businessHours: () => settings?.business_hours || DEFAULT_SETTINGS.business_hours,
     
     // System
-    isMaintenanceMode: () => settings.maintenance_mode || false,
-    maintenanceMessage: () => settings.maintenance_message || '',
+    isMaintenanceMode: () => settings?.maintenance_mode || false,
+    maintenanceMessage: () => settings?.maintenance_message || '',
     
     // Features
-    features: () => settings.features || DEFAULT_SETTINGS.features,
-    featureFlags: () => settings.feature_flags || {},
+    features: () => settings?.features || DEFAULT_SETTINGS.features,
+    featureFlags: () => settings?.feature_flags || {},
   };
 
   // Fetch settings on mount

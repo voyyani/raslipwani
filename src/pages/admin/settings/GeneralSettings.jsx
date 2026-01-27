@@ -31,6 +31,8 @@ const GeneralSettings = () => {
   // Fetch settings (single row with all columns)
   const { isLoading } = useQuery({
     queryKey: ['settings', 'general'],
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: 'always', // Always refetch when component mounts
     queryFn: async () => {
       console.log('[GeneralSettings] Fetching settings from database...');
       const { data, error } = await supabase
@@ -187,24 +189,26 @@ const GeneralSettings = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Company Logo URL <span className="text-xs text-blue-500">(Header &amp; Footer)</span>
             </label>
-            <input
-              type="url"
-              value={formData.company_logo}
-              onChange={(e) => setFormData({ ...formData, company_logo: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://example.com/logo.png"
-            />
-            <div className="mt-2 flex items-center gap-3">
-              <img 
-                src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'} 
-                alt="Logo preview" 
-                className="h-16 w-16 object-cover rounded-lg border-2 border-gray-200" 
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={formData.company_logo}
+                onChange={(e) => setFormData({ ...formData, company_logo: e.target.value })}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/logo.png"
               />
-              <span className="text-xs text-gray-500">
-                {formData.company_logo ? 'Current logo' : 'Default logo (update above)'}
-              </span>
+              <div className="flex-shrink-0 w-12 h-12 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                <img 
+                  src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'} 
+                  alt="Logo preview" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'; }}
+                />
+              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">This appears in the Header and Footer</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {formData.company_logo ? '✓ Custom logo set' : 'Using default logo - paste a URL above to change'}
+            </p>
           </div>
         </div>
       </div>
