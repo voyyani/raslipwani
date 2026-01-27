@@ -3,8 +3,10 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthButtons from './AuthButtons';
 import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle } from 'react-icons/fi';
+import { useSettings } from '../hooks/useSettings';
 
 const Header = () => {
+  const { logo, siteName, loading: settingsLoading } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
@@ -79,8 +81,8 @@ const Header = () => {
           >
             <div className="relative">
               <img
-                src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
-                alt="Raslipwani Properties - Premium Real Estate in Kenya"
+                src={logo()}
+                alt={`${siteName()} - Premium Real Estate in Kenya`}
                 className={`transition-all duration-500 rounded-xl object-cover border-2 border-primary shadow-lg ${
                   isScrolled ? 'w-10 h-10' : 'w-12 h-12 md:w-14 md:h-14'
                 } group-hover:scale-105 group-hover:shadow-xl`}
@@ -91,7 +93,7 @@ const Header = () => {
               <h1 className={`font-bold text-primary transition-all duration-500 ${
                 isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'
               }`}>
-                Raslipwani Properties
+                {siteName()}
               </h1>
               <p className="hidden md:block text-xs text-gray-600 font-medium">
                 Premium Real Estate Across Kenya

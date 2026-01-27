@@ -19,6 +19,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
+import { SettingsProvider } from './contexts/SettingsContext';
+import DynamicSEO from './components/DynamicSEO';
 import './styles/admin-mobile.css'; // Import admin mobile optimizations
 
 // Create React Query client
@@ -119,51 +121,12 @@ function App() {
           }
         }}
       >
+        <SettingsProvider>
         <ToastProvider />
         <Analytics />
         <SpeedInsights />
-      {/* Global SEO Structure */}
-      <Helmet>
-        <html lang="en" />
-  <link rel="canonical" href="https://raslipwani.co.ke" />
-        
-        {/* Organization Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "Raslipwani Properties",
-            "url": "https://raslipwani.co.ke/",
-            "logo": "https://raslipwani.co.ke/logo.png",
-            "sameAs": [
-              "https://www.facebook.com/raslipwani",
-              "https://www.instagram.com/raslipwani",
-              "https://twitter.com/raslipwani"
-            ],
-            "contactPoint": [{
-              "@type": "ContactPoint",
-              "telephone": "+254758066526",
-              "contactType": "Customer Service",
-              "areaServed": "KE"
-            }]
-          })}
-        </script>
-        
-        {/* Website Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "Raslipwani Properties",
-            "url": "https://raslipwani.co.ke/",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": "https://raslipwani.co.ke/properties?search={search_term_string}",
-              "query-input": "required name=search_term_string"
-            }
-          })}
-        </script>
-      </Helmet>
+      {/* Dynamic SEO using settings */}
+      <DynamicSEO />
       
       <Router>
         <Suspense fallback={
@@ -231,6 +194,7 @@ function App() {
           </Routes>
         </Suspense>
       </Router>
+      </SettingsProvider>
     </ClerkProvider>
     </QueryClientProvider>
   );

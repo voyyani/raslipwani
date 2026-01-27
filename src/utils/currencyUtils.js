@@ -1,11 +1,49 @@
 // Currency conversion utilities for international clients
+// Note: Base currencies are defined here. For dynamic currency settings, 
+// use the SettingsContext to override the default currency.
 
+// Default currencies (can be extended via admin settings)
 export const CURRENCIES = {
   USD: { symbol: '$', name: 'US Dollar', rate: 1, locale: 'en-US' },
   EUR: { symbol: '€', name: 'Euro', rate: 0.92, locale: 'de-DE' },
   GBP: { symbol: '£', name: 'British Pound', rate: 0.79, locale: 'en-GB' },
   KES: { symbol: 'KSh', name: 'Kenyan Shilling', rate: 129.5, locale: 'en-KE' }
 };
+
+// Mutable currency config that can be updated from settings
+let currencyConfig = { ...CURRENCIES };
+
+/**
+ * Update currency configuration from admin settings
+ * @param {object} settings - Currency settings from admin_settings table
+ */
+export const updateCurrencyFromSettings = (settings) => {
+  if (settings?.currency) {
+    const { code, symbol, rate, locale } = settings.currency;
+    if (code && currencyConfig[code]) {
+      currencyConfig[code] = {
+        ...currencyConfig[code],
+        symbol: symbol || currencyConfig[code].symbol,
+        rate: rate || currencyConfig[code].rate,
+        locale: locale || currencyConfig[code].locale
+      };
+    }
+  }
+  // Update exchange rates if provided
+  if (settings?.exchange_rates) {
+    Object.entries(settings.exchange_rates).forEach(([code, rate]) => {
+      if (currencyConfig[code]) {
+        currencyConfig[code].rate = rate;
+      }
+    });
+  }
+};
+
+/**
+ * Get current currency configuration
+ * @returns {object} Current currency config
+ */
+export const getCurrencyConfig = () => currencyConfig;
 
 /**
  * Convert amount from base currency (USD) to target currency
@@ -14,7 +52,7 @@ export const CURRENCIES = {
  * @returns {number} Converted amount
  */
 export const convertCurrency = (amount, toCurrency = 'USD') => {
-  const currency = CURRENCIES[toCurrency];
+  const currency = currencyConfig[toCurrency] || CURRENCIES[toCurrency];
   if (!currency) {
     console.warn(`Currency ${toCurrency} not supported, defaulting to USD`);
     return amount;
@@ -30,7 +68,7 @@ export const convertCurrency = (amount, toCurrency = 'USD') => {
  * @returns {string} Formatted currency string
  */
 export const formatCurrency = (amount, currency = 'USD', convertFirst = true) => {
-  const currencyData = CURRENCIES[currency];
+  const currencyData = currencyConfig[currency] || CURRENCIES[currency];
   
   if (!currencyData) {
     console.warn(`Currency ${currency} not supported, defaulting to USD`);
@@ -59,8 +97,8 @@ export const formatCurrency = (amount, currency = 'USD', convertFirst = true) =>
  * @returns {object} Exchange rate information
  */
 export const getExchangeRate = (fromCurrency = 'USD', toCurrency = 'KES') => {
-  const from = CURRENCIES[fromCurrency];
-  const to = CURRENCIES[toCurrency];
+  const from = currencyConfig[fromCurrency] || CURRENCIES[fromCurrency];
+  const to = currencyConfig[toCurrency] || CURRENCIES[toCurrency];
   
   if (!from || !to) {
     return null;
@@ -107,9 +145,9 @@ export const useCurrency = () => {
   const [selectedCurrency, setSelectedCurrency] = React.useState(() => {
     // Try to get from localStorage
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('preferredCurrency') || 'USD';
+      return localStorage.getItem('preferredCurrency') || 'KES';
     }
-    return 'USD';
+    return 'KES';
   });
 
   React.useEffect(() => {
@@ -126,7 +164,7 @@ export const useCurrency = () => {
     setCurrency: setSelectedCurrency,
     convert,
     format,
-    currencies: CURRENCIES,
+    currencies: currencyConfig,
     exchangeRate: getExchangeRate('USD', selectedCurrency)
   };
 };
@@ -144,7 +182,7 @@ export const CurrencySelector = ({ value, onChange, className = '' }) => {
         onChange={(e) => onChange(e.target.value)}
         className="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm font-medium"
       >
-        {Object.entries(CURRENCIES).map(([code, curr]) => (
+        {Object.entries(currencyConfig).map(([code, curr]) => (
           <option key={code} value={code}>
             {curr.symbol} {code}
           </option>
@@ -162,5 +200,7 @@ export default {
   getExchangeRate,
   parseCurrency,
   useCurrency,
-  CurrencySelector
+  CurrencySelector,
+  updateCurrencyFromSettings,
+  getCurrencyConfig
 };

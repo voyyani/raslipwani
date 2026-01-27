@@ -6,104 +6,109 @@ import toast from 'react-hot-toast';
 
 /**
  * GeneralSettings - General site configuration
+ * Works with flat table structure (single row with columns)
  */
 const GeneralSettings = () => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
-    site_name: '',
+    business_name: 'Raslipwani Properties',
     company_logo: '',
-    contact_email: '',
-    contact_phone: '',
-    contact_address: '',
-    facebook: '',
-    twitter: '',
-    instagram: '',
-    linkedin: ''
+    company_tagline: 'Your Premier Real Estate Partner Across Kenya',
+    business_email: 'info@raslipwani.com',
+    business_phone: '+254712345678',
+    business_address: 'Kilifi, Kenya',
+    whatsapp_number: '+254712345678',
+    service_locations: 'Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi, Watamu, Lamu',
+    social_facebook: 'https://facebook.com/raslipwani',
+    social_twitter: 'https://twitter.com/raslipwani',
+    social_instagram: 'https://instagram.com/raslipwani',
+    social_linkedin: 'https://linkedin.com/company/raslipwani',
+    social_tiktok: ''
   });
 
-  // Fetch settings
+  // Fetch settings (single row with all columns)
   const { isLoading } = useQuery({
     queryKey: ['settings', 'general'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
-        .eq('setting_category', 'general');
+        .limit(1)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
 
-      // Populate form with existing settings
-      const settings = {};
-      data.forEach(setting => {
-        if (setting.setting_key === 'site_name') {
-          settings.site_name = setting.setting_value.value || '';
-        } else if (setting.setting_key === 'company_logo') {
-          settings.company_logo = setting.setting_value.value || '';
-        } else if (setting.setting_key === 'contact_email') {
-          settings.contact_email = setting.setting_value.value || '';
-        } else if (setting.setting_key === 'contact_phone') {
-          settings.contact_phone = setting.setting_value.value || '';
-        } else if (setting.setting_key === 'contact_address') {
-          settings.contact_address = setting.setting_value.value || '';
-        } else if (setting.setting_key === 'social_media') {
-          settings.facebook = setting.setting_value.facebook || '';
-          settings.twitter = setting.setting_value.twitter || '';
-          settings.instagram = setting.setting_value.instagram || '';
-          settings.linkedin = setting.setting_value.linkedin || '';
+      if (data) {
+        // Parse service_locations if it's an array
+        let locationsStr = 'Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi, Watamu, Lamu';
+        if (Array.isArray(data.service_locations) && data.service_locations.length > 0) {
+          locationsStr = data.service_locations.join(', ');
+        } else if (typeof data.service_locations === 'string' && data.service_locations) {
+          locationsStr = data.service_locations;
         }
-      });
 
-      setFormData(prev => ({ ...prev, ...settings }));
+        setFormData({
+          business_name: data.business_name || 'Raslipwani Properties',
+          company_logo: data.company_logo || '',
+          company_tagline: data.company_tagline || 'Your Premier Real Estate Partner Across Kenya',
+          business_email: data.business_email || 'info@raslipwani.com',
+          business_phone: data.business_phone || '+254712345678',
+          business_address: data.business_address || 'Kilifi, Kenya',
+          whatsapp_number: data.whatsapp_number || '+254712345678',
+          service_locations: locationsStr,
+          social_facebook: data.social_facebook || 'https://facebook.com/raslipwani',
+          social_twitter: data.social_twitter || 'https://twitter.com/raslipwani',
+          social_instagram: data.social_instagram || 'https://instagram.com/raslipwani',
+          social_linkedin: data.social_linkedin || 'https://linkedin.com/company/raslipwani',
+          social_tiktok: data.social_tiktok || ''
+        });
+      }
       return data;
     }
   });
 
-  // Update settings mutation
+  // Update settings mutation (updates the single row)
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      const updates = [
-        {
-          setting_key: 'site_name',
-          setting_value: { value: settings.site_name },
-          setting_category: 'general'
-        },
-        {
-          setting_key: 'company_logo',
-          setting_value: { value: settings.company_logo },
-          setting_category: 'general'
-        },
-        {
-          setting_key: 'contact_email',
-          setting_value: { value: settings.contact_email },
-          setting_category: 'general'
-        },
-        {
-          setting_key: 'contact_phone',
-          setting_value: { value: settings.contact_phone },
-          setting_category: 'general'
-        },
-        {
-          setting_key: 'contact_address',
-          setting_value: { value: settings.contact_address },
-          setting_category: 'general'
-        },
-        {
-          setting_key: 'social_media',
-          setting_value: {
-            facebook: settings.facebook,
-            twitter: settings.twitter,
-            instagram: settings.instagram,
-            linkedin: settings.linkedin
-          },
-          setting_category: 'general'
-        }
-      ];
+      // Parse service locations from comma-separated string to array
+      const locationsArray = settings.service_locations
+        ? settings.service_locations.split(',').map(l => l.trim()).filter(Boolean)
+        : [];
 
-      for (const update of updates) {
+      const updateData = {
+        business_name: settings.business_name,
+        company_logo: settings.company_logo,
+        company_tagline: settings.company_tagline,
+        business_email: settings.business_email,
+        business_phone: settings.business_phone,
+        business_address: settings.business_address,
+        whatsapp_number: settings.whatsapp_number,
+        service_locations: locationsArray,
+        social_facebook: settings.social_facebook,
+        social_twitter: settings.social_twitter,
+        social_instagram: settings.social_instagram,
+        social_linkedin: settings.social_linkedin,
+        social_tiktok: settings.social_tiktok,
+        updated_at: new Date().toISOString()
+      };
+
+      // Try to update existing row, or insert if none exists
+      const { data: existing } = await supabase
+        .from('admin_settings')
+        .select('id')
+        .limit(1)
+        .single();
+
+      if (existing) {
         const { error } = await supabase
           .from('admin_settings')
-          .upsert(update, { onConflict: 'setting_key' });
-
+          .update(updateData)
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('admin_settings')
+          .insert(updateData);
         if (error) throw error;
       }
     },
@@ -132,15 +137,29 @@ const GeneralSettings = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Site Name
+              Business Name
             </label>
             <input
               type="text"
-              value={formData.site_name}
-              onChange={(e) => setFormData({ ...formData, site_name: e.target.value })}
+              value={formData.business_name}
+              onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Raslipwani Properties"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Company Tagline
+            </label>
+            <input
+              type="text"
+              value={formData.company_tagline}
+              onChange={(e) => setFormData({ ...formData, company_tagline: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Your Premier Real Estate Partner"
+            />
+            <p className="text-xs text-gray-500 mt-1">A short slogan that appears under your logo</p>
           </div>
 
           <div>
@@ -166,12 +185,12 @@ const GeneralSettings = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Email
+              Business Email
             </label>
             <input
               type="email"
-              value={formData.contact_email}
-              onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+              value={formData.business_email}
+              onChange={(e) => setFormData({ ...formData, business_email: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="info@raslipwani.com"
             />
@@ -179,12 +198,12 @@ const GeneralSettings = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Phone
+              Business Phone
             </label>
             <input
               type="tel"
-              value={formData.contact_phone}
-              onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+              value={formData.business_phone}
+              onChange={(e) => setFormData({ ...formData, business_phone: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="+254712345678"
             />
@@ -192,15 +211,43 @@ const GeneralSettings = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Physical Address
+              WhatsApp Number
+            </label>
+            <input
+              type="tel"
+              value={formData.whatsapp_number}
+              onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="+254712345678"
+            />
+            <p className="text-xs text-gray-500 mt-1">Used for the WhatsApp chat button</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Business Address
             </label>
             <textarea
-              value={formData.contact_address}
-              onChange={(e) => setFormData({ ...formData, contact_address: e.target.value })}
+              value={formData.business_address}
+              onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Nairobi, Kenya"
+              placeholder="Kilifi, Kenya"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Service Locations
+            </label>
+            <textarea
+              value={formData.service_locations}
+              onChange={(e) => setFormData({ ...formData, service_locations: e.target.value })}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi"
+            />
+            <p className="text-xs text-gray-500 mt-1">Comma-separated list of locations you serve</p>
           </div>
         </div>
       </div>
@@ -214,8 +261,8 @@ const GeneralSettings = () => {
             </label>
             <input
               type="url"
-              value={formData.facebook}
-              onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+              value={formData.social_facebook}
+              onChange={(e) => setFormData({ ...formData, social_facebook: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://facebook.com/raslipwani"
             />
@@ -227,8 +274,8 @@ const GeneralSettings = () => {
             </label>
             <input
               type="url"
-              value={formData.twitter}
-              onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
+              value={formData.social_twitter}
+              onChange={(e) => setFormData({ ...formData, social_twitter: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://twitter.com/raslipwani"
             />
@@ -240,8 +287,8 @@ const GeneralSettings = () => {
             </label>
             <input
               type="url"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+              value={formData.social_instagram}
+              onChange={(e) => setFormData({ ...formData, social_instagram: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://instagram.com/raslipwani"
             />
@@ -253,10 +300,23 @@ const GeneralSettings = () => {
             </label>
             <input
               type="url"
-              value={formData.linkedin}
-              onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+              value={formData.social_linkedin}
+              onChange={(e) => setFormData({ ...formData, social_linkedin: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://linkedin.com/company/raslipwani"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              TikTok URL
+            </label>
+            <input
+              type="url"
+              value={formData.social_tiktok}
+              onChange={(e) => setFormData({ ...formData, social_tiktok: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://tiktok.com/@raslipwani"
             />
           </div>
         </div>

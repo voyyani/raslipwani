@@ -4,9 +4,13 @@ import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
+import { useSettings } from '../hooks/useSettings';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTriangle, FaBuilding, FaCity, FaHome, FaMap } from 'react-icons/fa';
 
 const Contact = () => {
+  // Get settings
+  const { phone, email, address, businessHours, getSetting, siteName } = useSettings();
+  const serviceLocations = getSetting('general', 'service_locations', { locations: ['Nairobi', 'Mombasa', 'Kilifi', 'Malindi', 'Diani', 'Watamu', 'Lamu', 'Naivasha', 'Kisumu', 'Nakuru', 'Thika', 'Countrywide'] });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,7 +38,7 @@ const Contact = () => {
     'Investment Properties'
   ];
   
-  const kenyaLocations = [
+  const kenyaLocations = serviceLocations?.locations || [
     'Nairobi',
     'Mombasa',
     'Kilifi',
@@ -576,7 +580,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Head Office Location</h3>
                           <p className="text-gray-600">
-                            Kikambala Road, Kilifi, Kenya<br />
+                            {address()}<br />
                             <span className="text-sm text-gray-500">Serving clients nationwide</span>
                           </p>
                         </div>
@@ -592,7 +596,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Phone Number</h3>
                           <p className="text-gray-600">
-                            +254758066526
+                            {phone()}
                           </p>
                         </div>
                       </motion.div>
@@ -607,7 +611,7 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800 mb-1">Email Address</h3>
                           <p className="text-gray-600">
-                            info@raslipwani.co.ke
+                            {email()}
                           </p>
                         </div>
                       </motion.div>
