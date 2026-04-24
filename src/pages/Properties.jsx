@@ -1,28 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiSearch, FiFilter, FiMapPin } from 'react-icons/fi';
+import { FiX, FiSearch, FiFilter, FiMapPin, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PropertyModal from '../components/PropertyModal';
+import RecentlyViewed from '../components/RecentlyViewed';
+import OptimizedImage from '../components/OptimizedImage';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
+
+// Pagination constants
+const PAGE_SIZE = 12;
+const DEFAULT_PAGE = 1;
 
 const Properties = () => {
   const [properties, setProperties] = useState([]);
-  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [filterOption, setFilterOption] = useState('all');
   const [purposeFilter, setPurposeFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilters, setActiveFilters] = useState([]);
   const [suggestedProperties, setSuggestedProperties] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE);
+  
+  // Recently viewed hook
+  const { 
+    recentlyViewed, 
+    addToRecentlyViewed, 
+    removeFromRecentlyViewed, 
+    clearRecentlyViewed 
+  } = useRecentlyViewed();
+  
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(DEFAULT_PAGE);
+  }, [filterOption, purposeFilter, debouncedSearch, sortOption]);
+  
+  // Calculate pagination values
+  const totalPages = useMemo(() => Math.ceil(totalCount / PAGE_SIZE), [totalCount]);
+  const indexOfFirstItem = (currentPage - 1) * PAGE_SIZE;
+  const indexOfLastItem = currentPage * PAGE_SIZE;
 
   const propertyTypeMap = {
     'house': ['house', 'apartment', 'villa'],
@@ -39,28 +74,75 @@ const Properties = () => {
   const listTitle = 'Properties for Sale & Rent Across Kenya | Raslipwani Properties';
   const listDescription = 'Browse premium properties across Kenya. Filter by type, purpose, and location. Find apartments, villas, land, and commercial listings.';
 
-  // Fetch properties from Supabase
+  // Fetch properties from Supabase with server-side pagination and filtering
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        setError('');
+        
+        // Build query with filters
+        let query = supabase
           .from('properties')
-          .select('*')
-          .order('created_at', { ascending: false });
+          .select('*', { count: 'exact' });
+        
+        // Apply property type filter
+        if (filterOption !== 'all') {
+          const mappedTypes = propertyTypeMap[filterOption] || [filterOption];
+          query = query.in('property_type', mappedTypes);
+        }
+        
+        // Apply purpose filter
+        if (purposeFilter !== 'all') {
+          query = query.eq('purpose', purposeFilter);
+        }
+        
+        // Apply search filter (on title, location, description)
+        if (debouncedSearch) {
+          query = query.or(
+            `title.ilike.%${debouncedSearch}%,location.ilike.%${debouncedSearch}%,description.ilike.%${debouncedSearch}%`
+          );
+        }
+        
+        // Apply sorting
+        switch (sortOption) {
+          case 'price-low':
+            query = query.order('price', { ascending: true });
+            break;
+          case 'price-high':
+            query = query.order('price', { ascending: false });
+            break;
+          case 'oldest':
+            query = query.order('created_at', { ascending: true });
+            break;
+          case 'newest':
+          default:
+            query = query.order('created_at', { ascending: false });
+            break;
+        }
+        
+        // Apply pagination
+        const from = (currentPage - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        query = query.range(from, to);
+        
+        const { data, count, error } = await query;
         
         if (error) throw error;
-        setProperties(data);
-        setFilteredProperties(data);
+        
+        setProperties(data || []);
+        setTotalCount(count || 0);
       } catch (err) {
         setError('Failed to load properties: ' + err.message);
+        setProperties([]);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
     };
     
     fetchProperties();
-  }, []);
+  }, [currentPage, filterOption, purposeFilter, debouncedSearch, sortOption]);
 
   // Initialize from URL params
   useEffect(() => {
@@ -86,53 +168,12 @@ const Properties = () => {
     }
   }, [searchParams]);
 
-  // Apply filters and sorting
-  useEffect(() => {
-    let result = [...properties];
-    
-    if (searchQuery) {
-      result = result.filter(property => 
-        property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    if (filterOption !== 'all') {
-      const mappedTypes = propertyTypeMap[filterOption] || [filterOption];
-      
-      result = result.filter(property => 
-        property.property_type && 
-        mappedTypes.includes(property.property_type.toLowerCase())
-      );
-    }
-    
-    if (purposeFilter !== 'all') {
-      result = result.filter(property => 
-        property.purpose && 
-        property.purpose.toLowerCase() === purposeFilter.toLowerCase()
-      );
-    }
-    
-    if (sortOption === 'price-low') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-high') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'newest') {
-      result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    } else if (sortOption === 'oldest') {
-      result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    }
-    
-    setFilteredProperties(result);
-  }, [properties, sortOption, filterOption, purposeFilter, searchQuery]);
-
   // Build ItemList JSON-LD for listings (up to 20 items)
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Property Listings",
-    "itemListElement": (filteredProperties || properties).slice(0, 20).map((p, idx) => ({
+    "itemListElement": properties.slice(0, 20).map((p, idx) => ({
       "@type": "ListItem",
       "position": idx + 1,
   "url": `https://raslipwani.co.ke/properties/${p.slug || p.id}`,
@@ -189,19 +230,30 @@ const Properties = () => {
 
   // Fetch suggested properties when no results
   useEffect(() => {
-    if (filteredProperties.length === 0 && properties.length > 0) {
-      const featured = properties
-        .filter(p => p.featured)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 4);
-      setSuggestedProperties(featured);
-    }
-  }, [filteredProperties, properties]);
+    const fetchSuggested = async () => {
+      if (properties.length === 0 && !loading && totalCount === 0) {
+        try {
+          const { data } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('featured', true)
+            .limit(4);
+          setSuggestedProperties(data || []);
+        } catch (err) {
+          console.error('Error fetching suggested properties:', err);
+        }
+      } else {
+        setSuggestedProperties([]);
+      }
+    };
+    fetchSuggested();
+  }, [properties.length, loading, totalCount]);
 
-  // Open modal function
+  // Open modal function and add to recently viewed
   const openModal = (property) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
+    addToRecentlyViewed(property); // Track viewed property
     document.body.style.overflow = 'hidden';
   };
 
@@ -460,10 +512,14 @@ const Properties = () => {
                 >
                   <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-                      {filteredProperties.length} Properties Found
+                      {totalCount} {totalCount === 1 ? 'Property' : 'Properties'} Found
                     </h2>
                     <p className="text-gray-600 mt-2">
-                      Showing {filteredProperties.length} of {properties.length} premium properties across Kenya
+                      {totalCount > 0 ? (
+                        <>Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, totalCount)} of {totalCount} premium properties across Kenya</>
+                      ) : (
+                        'No properties match your current filters'
+                      )}
                     </p>
                   </div>
                   
@@ -534,7 +590,7 @@ const Properties = () => {
                       <PropertySkeleton key={item} />
                     ))}
                   </div>
-                ) : filteredProperties.length === 0 ? (
+                ) : properties.length === 0 ? (
                   <div>
                     <motion.div 
                       className="text-center py-16 bg-white rounded-2xl shadow-lg mb-12 border border-gray-100"
@@ -583,26 +639,149 @@ const Properties = () => {
                     )}
                   </div>
                 ) : (
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ staggerChildren: 0.1 }}
-                  >
-                    {filteredProperties.map((property, index) => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property} 
-                        index={index}
-                        openModal={openModal}
-                      />
-                    ))}
-                  </motion.div>
+                  <>
+                    <motion.div 
+                      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ staggerChildren: 0.1 }}
+                    >
+                      {properties.map((property, index) => (
+                        <PropertyCard 
+                          key={property.id} 
+                          property={property} 
+                          index={index}
+                          openModal={openModal}
+                        />
+                      ))}
+                    </motion.div>
+                    
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <motion.div 
+                        className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <p className="text-sm text-gray-600">
+                          Page {currentPage} of {totalPages} • Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, totalCount)} of {totalCount} properties
+                        </p>
+                        
+                        <div className="flex items-center gap-2">
+                          {/* Previous Button */}
+                          <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                              currentPage === 1
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
+                            }`}
+                          >
+                            <FiChevronLeft className="w-4 h-4" />
+                            <span className="hidden sm:inline">Previous</span>
+                          </button>
+                          
+                          {/* Page Numbers */}
+                          <div className="flex items-center gap-1">
+                            {(() => {
+                              const pages = [];
+                              const maxVisible = 5;
+                              let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                              let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                              
+                              if (endPage - startPage < maxVisible - 1) {
+                                startPage = Math.max(1, endPage - maxVisible + 1);
+                              }
+                              
+                              if (startPage > 1) {
+                                pages.push(
+                                  <button
+                                    key={1}
+                                    onClick={() => setCurrentPage(1)}
+                                    className="w-10 h-10 rounded-xl text-sm font-medium bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition-all"
+                                  >
+                                    1
+                                  </button>
+                                );
+                                if (startPage > 2) {
+                                  pages.push(
+                                    <span key="start-ellipsis" className="px-2 text-gray-400">...</span>
+                                  );
+                                }
+                              }
+                              
+                              for (let i = startPage; i <= endPage; i++) {
+                                pages.push(
+                                  <button
+                                    key={i}
+                                    onClick={() => setCurrentPage(i)}
+                                    className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                                      currentPage === i
+                                        ? 'bg-primary text-white shadow-lg'
+                                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
+                                    }`}
+                                  >
+                                    {i}
+                                  </button>
+                                );
+                              }
+                              
+                              if (endPage < totalPages) {
+                                if (endPage < totalPages - 1) {
+                                  pages.push(
+                                    <span key="end-ellipsis" className="px-2 text-gray-400">...</span>
+                                  );
+                                }
+                                pages.push(
+                                  <button
+                                    key={totalPages}
+                                    onClick={() => setCurrentPage(totalPages)}
+                                    className="w-10 h-10 rounded-xl text-sm font-medium bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition-all"
+                                  >
+                                    {totalPages}
+                                  </button>
+                                );
+                              }
+                              
+                              return pages;
+                            })()}
+                          </div>
+                          
+                          {/* Next Button */}
+                          <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                              currentPage === totalPages
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
+                            }`}
+                          >
+                            <span className="hidden sm:inline">Next</span>
+                            <FiChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           </div>
         </main>
+        
+        {/* Recently Viewed Section */}
+        {recentlyViewed.length > 0 && (
+          <RecentlyViewed
+            properties={recentlyViewed}
+            onClear={clearRecentlyViewed}
+            onRemove={removeFromRecentlyViewed}
+            title="Recently Viewed"
+            maxDisplay={6}
+          />
+        )}
         
         <Footer />
 
@@ -642,20 +821,21 @@ const PropertyCard = ({ property, index, openModal }) => {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
       whileHover={{ y: -8 }}
       className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100"
       onClick={() => openModal(property)}
     >
       <div className="relative pb-[70%] overflow-hidden">
         {property.images?.[0] ? (
-          <img 
+          <OptimizedImage 
             src={property.images[0]} 
             alt={`${property.title} in ${property.location}`}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading={index > 2 ? "lazy" : "eager"}
-            width="400"
-            height="280"
+            containerClassName="absolute inset-0"
+            priority={index < 3}
+            width={400}
+            height={280}
           />
         ) : (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
@@ -667,7 +847,7 @@ const PropertyCard = ({ property, index, openModal }) => {
         )}
         
         {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {property.featured && (
             <div className="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
               Featured
@@ -679,7 +859,7 @@ const PropertyCard = ({ property, index, openModal }) => {
         </div>
         
         {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-500"></div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-500 z-[5]"></div>
       </div>
       
       <div className="p-5">

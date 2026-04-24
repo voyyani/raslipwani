@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../src/utils/supabaseClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import SimilarProperties from '../components/SimilarProperties';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -24,6 +26,16 @@ const PropertyDetail = () => {
   const imageRef = useRef(null);
   const lastTapRef = useRef(0);
   const touchStartRef = useRef(0);
+  
+  // Recently viewed hook
+  const { addToRecentlyViewed } = useRecentlyViewed();
+  
+  // Track property view when loaded
+  useEffect(() => {
+    if (property && !loading) {
+      addToRecentlyViewed(property);
+    }
+  }, [property, loading, addToRecentlyViewed]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
@@ -757,6 +769,16 @@ const PropertyDetail = () => {
             </div>
           </div>
         </main>
+        
+        {/* Similar Properties Section */}
+        {property && (
+          <SimilarProperties
+            currentProperty={property}
+            maxDisplay={4}
+            title="Similar Properties"
+            showViewAll={true}
+          />
+        )}
         
         <Footer />
       </div>

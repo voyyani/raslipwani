@@ -1,14 +1,14 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/clerk-react';
+import { HelmetProvider } from 'react-helmet-async';
 
 /**
  * Custom render function that wraps components with necessary providers
- * for testing (React Query, Router, Clerk)
+ * for testing (React Query, Router, Helmet)
  */
-export function renderWithProviders(
+function render(
   ui,
   {
     queryClient = new QueryClient({
@@ -30,20 +30,24 @@ export function renderWithProviders(
 
   function Wrapper({ children }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
-      </QueryClientProvider>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            {children}
+          </BrowserRouter>
+        </QueryClientProvider>
+      </HelmetProvider>
     );
   }
 
   return {
-    ...render(ui, { wrapper: Wrapper, ...renderOptions }),
+    ...rtlRender(ui, { wrapper: Wrapper, ...renderOptions }),
     queryClient
   };
 }
 
-// Re-export everything from testing library
+// Re-export everything from testing library except render
 export * from '@testing-library/react';
+// Export our custom render
+export { render };
 export { default as userEvent } from '@testing-library/user-event';
