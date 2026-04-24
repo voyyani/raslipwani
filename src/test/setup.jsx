@@ -1,11 +1,18 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import React from 'react';
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
 });
+
+// Mock react-helmet-async
+vi.mock('react-helmet-async', () => ({
+  Helmet: ({ children }) => <>{children}</>,
+  HelmetProvider: ({ children }) => <>{children}</>,
+}));
 
 // Mock Clerk
 vi.mock('@clerk/clerk-react', () => ({

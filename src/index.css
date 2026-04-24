@@ -115,6 +115,31 @@ button:focus-visible {
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Shimmer animation for image loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+.skeleton-shine {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* --- Defensive UI fixes ---------------------------------------------- */
 /*
   Hide any stray circular "scroll indicator" buttons that might slip in

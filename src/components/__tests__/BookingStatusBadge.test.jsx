@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '../../../test/utils/renderWithProviders';
+import { render, screen } from '../../test/utils/renderWithProviders';
 import BookingStatusBadge from '../BookingStatusBadge';
 
 describe('BookingStatusBadge', () => {
