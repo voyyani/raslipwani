@@ -255,6 +255,7 @@ const EmailSettings = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Body</label>
                 <ReactQuill
+                  theme="snow"
                   value={templateContent.body}
                   onChange={(value) => setTemplateContent({ ...templateContent, body: value })}
                   modules={modules}

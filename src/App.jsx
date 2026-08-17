@@ -21,9 +21,8 @@ import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
 import { SettingsProvider } from './contexts/SettingsContext';
 import DynamicSEO from './components/DynamicSEO';
+import MaintenancePage from './pages/MaintenancePage';
 import './styles/admin-mobile.css'; // Import admin mobile optimizations
-
-// Create React Query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -58,6 +57,26 @@ import Settings from './pages/admin/Settings';
 import PropertyModal from './components/PropertyModal'; 
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const defaultBrandLogo = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg';
+
+const getMaintenanceConfig = () => {
+  const isEnabled =
+    import.meta.env.VITE_MAINTENANCE_MODE === 'true' ||
+    import.meta.env.VITE_MAINTENANCE_MODE === '1';
+
+  const durationDays = Number(import.meta.env.VITE_MAINTENANCE_DAYS ?? 7);
+
+  return {
+    enabled: isEnabled,
+    durationDays: Number.isFinite(durationDays) && durationDays > 0 ? durationDays : 7,
+    message:
+      import.meta.env.VITE_MAINTENANCE_MESSAGE ||
+      'We are refining the experience behind the scenes to bring you a faster, smoother, and more secure platform.',
+    brandName: import.meta.env.VITE_SITE_NAME || 'Raslipwani Properties',
+    brandLogo: import.meta.env.VITE_SITE_LOGO || defaultBrandLogo,
+    tagline: import.meta.env.VITE_SITE_TAGLINE || 'Your Premier Real Estate Partner Across Kenya',
+  };
+};
 
 const ProtectedRoute = ({ children }) => {
   const { isLoaded, isSignedIn } = useUser();
@@ -78,6 +97,20 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const maintenanceConfig = getMaintenanceConfig();
+
+  if (maintenanceConfig.enabled) {
+    return (
+      <MaintenancePage
+        durationDays={maintenanceConfig.durationDays}
+        message={maintenanceConfig.message}
+        brandName={maintenanceConfig.brandName}
+        brandLogo={maintenanceConfig.brandLogo}
+        tagline={maintenanceConfig.tagline}
+      />
+    );
+  }
+
   if (!clerkPubKey) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -154,7 +187,19 @@ function App() {
             <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
             
             <Route path="/property/:id" element={<PropertyModalRoute />} />
-            
+            <Route
+              path="/maintenance"
+              element={
+                <MaintenancePage
+                  durationDays={maintenanceConfig.durationDays}
+                  message={maintenanceConfig.message}
+                  brandName={maintenanceConfig.brandName}
+                  brandLogo={maintenanceConfig.brandLogo}
+                  tagline={maintenanceConfig.tagline}
+                />
+              }
+            />
+             
             <Route 
               path="/admin" 
               element={
