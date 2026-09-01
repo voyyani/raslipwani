@@ -93,13 +93,69 @@ describe('AuthContext', () => {
     expect(result.error.message).toBe('Invalid login credentials');
   });
 
-  it('signOut calls supabase and clears the session', async () => {
+  it('signOut calls supabase and clears an established session', async () => {
+    // Seed a REAL signed-in admin session first. Asserting "email is none" against
+    // the default null-session baseline would pass even if signOut were a no-op —
+    // the assertion has to start from a state it can actually observe changing.
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('admin@raslipwani.co.ke') }, error: null
+    });
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'user-uuid-1' }, error: null })
+    });
+
     renderProbe();
     await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+
+    // Guard: the precondition must hold, or the assertions below prove nothing.
+    expect(screen.getByTestId('email')).toHaveTextContent('admin@raslipwani.co.ke');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('true');
 
     await act(async () => { screen.getByText('out').click(); });
 
     expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+  });
+
+  it('ignores a stale admin lookup that resolves after a newer one', async () => {
+    // Reproduces the race: getSession() and onAuthStateChange both trigger an async
+    // admin lookup. If the FIRST (admin=true) resolves after the SECOND (signed out),
+    // an unguarded implementation would restore isAdmin=true for a signed-out user.
+    let releaseStaleLookup;
+    const staleLookup = new Promise((resolve) => { releaseStaleLookup = resolve; });
+
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('admin@raslipwani.co.ke') }, error: null
+    });
+    supabase.from
+      .mockReturnValueOnce({          // first lookup — admin, deliberately slow
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnValue(staleLookup)
+      })
+      .mockReturnValue({              // any later lookup — resolves immediately
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+      });
+
+    let emitAuthChange;
+    supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+      emitAuthChange = cb;
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+
+    renderProbe();
+
+    // A sign-out arrives and settles while the first lookup is still in flight.
+    await act(async () => { emitAuthChange('SIGNED_OUT', null); });
+    // Now let the stale admin lookup finish. It must NOT win.
+    await act(async () => { releaseStaleLookup({ data: { id: 'user-uuid-1' }, error: null }); });
+
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
     expect(screen.getByTestId('email')).toHaveTextContent('none');
   });
 
