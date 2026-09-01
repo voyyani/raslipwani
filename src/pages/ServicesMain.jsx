@@ -136,14 +136,23 @@ const ServicesMain = () => {
       const { error } = await supabase
         .from('bookings')
         .insert([{
+          // `type` is NOT NULL with no default, and the form previously omitted it
+          // entirely — so every service booking submitted here failed to save.
+          // The form offers four service kinds; the bookings table records three.
+          type: bookingData.serviceType === 'viewing' ? 'viewing' : 'consultation',
           name: bookingData.name,
           email: bookingData.email,
           phone: bookingData.phone,
-          service_type: bookingData.serviceType,
-          property_id: bookingData.propertyId,
+          // Column is `service`, not `service_type`. Keeps the finer-grained choice
+          // (valuation / consultation / management) that `type` collapses.
+          service: bookingData.serviceType,
+          property_id: bookingData.propertyId || null,
           viewing_type: bookingData.viewingType,
-          preferred_date: bookingData.date,
-          preferred_time: bookingData.time,
+          // There are no preferred_date / preferred_time columns; the schema has a
+          // single appointment_at timestamp.
+          appointment_at: bookingData.date
+            ? new Date(`${bookingData.date}T${bookingData.time || '00:00'}`).toISOString()
+            : null,
           notes: bookingData.notes,
           status: 'pending',
           created_at: new Date().toISOString()
