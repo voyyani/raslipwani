@@ -12,7 +12,6 @@ export default defineConfig({
           // Split vendor libraries into separate chunks
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': ['framer-motion', '@headlessui/react', 'react-calendar'],
-          'vendor-clerk': ['@clerk/clerk-react'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-icons': ['react-icons', '@fortawesome/fontawesome-free'],
         }
@@ -35,7 +34,6 @@ export default defineConfig({
       'react-dom',
       'react-router-dom',
       'framer-motion',
-      '@clerk/clerk-react',
       '@supabase/supabase-js',
     ]
   }

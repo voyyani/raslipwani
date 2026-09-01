@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase, supabaseAdmin } from '../../utils/supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -437,8 +437,9 @@ const AdminProperties = () => {
       
       console.log('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
       
-      // Use supabaseAdmin to bypass RLS (Clerk auth not recognized by Supabase)
-      const { data, error } = await supabaseAdmin
+      // Plain client: the Supabase Auth session carries admin identity, and the
+      // "admins manage properties" policy in 009 authorises this write.
+      const { data, error } = await supabase
         .from('properties')
         .update({ featured: newFeaturedValue })
         .eq('id', property.id)

@@ -7,34 +7,6 @@ afterEach(() => {
   cleanup();
 });
 
-// Mock Clerk
-vi.mock('@clerk/clerk-react', () => ({
-  useClerk: () => ({
-    user: {
-      id: 'test-user-id',
-      firstName: 'Test',
-      lastName: 'User',
-      emailAddresses: [{ emailAddress: 'test@example.com' }]
-    },
-    signOut: vi.fn()
-  }),
-  UserButton: () => null,
-  useUser: () => ({
-    user: {
-      id: 'test-user-id',
-      firstName: 'Test',
-      lastName: 'User',
-      emailAddresses: [{ emailAddress: 'test@example.com' }]
-    },
-    isLoaded: true,
-    isSignedIn: true
-  }),
-  ClerkProvider: ({ children }) => children,
-  SignedIn: ({ children }) => children,
-  SignedOut: () => null,
-  RedirectToSignIn: () => null
-}));
-
 // Mock React Router
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
