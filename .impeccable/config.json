@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/App.jsx"
+        ],
+        "createdAt": "2026-09-01T20:19:51.137Z",
+        "reason": "Claude: all hits are animate-spin rounded-full border-t-2 border-b-2 loading spinners; the partial border IS the rotating arc and rounded-full makes it circular, so removing either breaks the spinner. Standard CSS spinner idiom, pre-existing."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/pages/admin/AdminProperties.jsx"
+        ],
+        "createdAt": "2026-09-01T20:19:51.423Z",
+        "reason": "Claude: same animate-spin rounded-full border-t-2 spinner idiom (image-upload and save buttons). Partial border is the spinner arc, not a decorative accent border."
+      }
+    ]
+  }
+}
