@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useClerk, UserButton } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   FaHome, 
   FaBuilding, 
@@ -34,7 +34,7 @@ import DebugPanel from '../../components/admin/DebugPanel';
 const AdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut, user } = useClerk();
+  const { signOut, user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
@@ -99,8 +99,10 @@ const AdminLayout = ({ children }) => {
     return location.pathname === `/admin${path}`;
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    // Await the sign-out before navigating: the previous Clerk version navigated
+    // while the request was still in flight, which could leave a stale session.
+    await signOut();
     navigate('/');
   };
 
@@ -268,25 +270,20 @@ const AdminLayout = ({ children }) => {
           {/* User section */}
           <div className={`mt-auto p-4 border-t border-gray-700/50 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
             <div className={`flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'gap-3'} mb-3`}>
-              <UserButton 
-                appearance={{
-                  elements: {
-                    avatarBox: "w-10 h-10 border-2 border-blue-400",
-                    userButtonPopoverCard: "bg-white text-gray-800 rounded-xl shadow-xl",
-                    userButtonPopoverActionButton: "hover:bg-gray-100 rounded-lg",
-                    userButtonPopoverActionButtonText: "text-gray-700",
-                    userButtonPopoverFooter: "hidden"
-                  }
-                }}
-              />
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-blue-400 bg-primary text-sm font-bold uppercase text-white"
+                aria-hidden="true"
+              >
+                {(user?.email?.[0] ?? '?')}
+              </div>
               
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-white text-sm truncate">
-                    {user?.fullName || 'Admin'}
+                    {user?.email?.split('@')[0] ?? 'Admin'}
                   </p>
                   <p className="text-xs text-blue-300 truncate">
-                    {user?.primaryEmailAddress?.emailAddress}
+                    {user?.email ?? ''}
                   </p>
                 </div>
               )}
