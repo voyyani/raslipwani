@@ -167,3 +167,41 @@ These are still open from Phase 0 and are **not** fixed by this branch:
 - `admin_users` + `is_admin()`, and RLS policies that reference real identity
 - **Test suite resurrected**: it executed *zero* tests before this branch; it now runs 40
 - 11 commits, all reviewed
+
+---
+
+## Post-review addendum (2026-09-01)
+
+A whole-branch review found 10 issues. Seven are fixed on this branch
+(commits `0f5af19`, `8cf007c`). Three remain open and are recorded here.
+
+### Fixed
+
+| # | Severity | What |
+|---|---|---|
+| 1 | Critical (latent) | `009` now gates `booking_notes` / `email_templates` **if they exist**. They do **not** exist today — `003`/`004` abort on invalid `CREATE POLICY IF NOT EXISTS` — so this was never a live hole, but it stops them reappearing ungated. |
+| 2 | Important | `signOut()` bypassed both AuthContext concurrency guards; they were closure-local. Now refs, and `signOut` claims a ticket. |
+| 3 | Important | `009` revoked all on `settings`, which would have broken admin image upload silently. Admins now get a scoped SELECT. |
+| 4 | Important | The `/services` booking form could never save — see `8cf007c`. |
+| 6 | Minor | `getSession()` rejection left `loading` true forever. Now fails closed. |
+| 7 | Minor | anon booking INSERT now locks `client_id`. |
+
+### Still open
+
+- **The `signOut` race fix is not covered by a test.** I wrote one; it passed
+  with the fix removed, so it discriminated nothing and I deleted it rather than
+  leave a green test that proves nothing. The code fix is correct and cheap, but
+  treat it as unverified. Reproducing it needs finer promise-ordering control
+  than the current global Supabase mock allows.
+- **`AdminBookings.test.jsx:133,151,165` contain three assertion-free tests**
+  ("would check … in real implementation"). Pre-existing; this branch edited
+  those files and left them vacuous. → ROADMAP Phase 3.
+- **Coverage thresholds were lowered 90 → 0** and `@vitest/coverage-v8` is not
+  installed, so the "ratcheting floor" is currently unenforceable. → Phase 3.
+
+### Discovered, out of scope for this branch
+
+`003_enhance_bookings_admin.sql` and `004_create_admin_settings.sql` never
+applied, so `booking_notes` and `email_templates` **do not exist in production**.
+`BookingDetailModal.jsx` and `settings/EmailSettings.jsx` reference them, so
+those two admin features are broken right now. → ROADMAP Phase 2.2.
