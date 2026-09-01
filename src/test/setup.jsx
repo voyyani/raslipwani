@@ -53,22 +53,38 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock Supabase
-vi.mock('../utils/supabaseClient', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockReturnThis(),
-      single: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockReturnThis()
-    }))
-  }
-}));
+// Mock Supabase — auth methods are configurable per test via
+//   import { supabase } from '@/utils/supabaseClient';
+//   supabase.auth.signInWithPassword.mockResolvedValue({ data: {}, error: null });
+vi.mock('@/utils/supabaseClient', () => {
+  const queryBuilder = () => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+  });
+
+  return {
+    supabase: {
+      from: vi.fn(queryBuilder),
+      rpc: vi.fn().mockResolvedValue({ data: false, error: null }),
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        signInWithPassword: vi.fn().mockResolvedValue({ data: { session: null, user: null }, error: null }),
+        signOut: vi.fn().mockResolvedValue({ error: null }),
+        resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
+        onAuthStateChange: vi.fn(() => ({
+          data: { subscription: { unsubscribe: vi.fn() } }
+        }))
+      }
+    }
+  };
+});
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

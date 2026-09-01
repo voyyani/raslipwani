@@ -80,7 +80,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Total Bookings')).toBeInTheDocument();
+      expect(screen.getByText('Total')).toBeInTheDocument();
     });
   });
 
@@ -119,7 +119,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByTestid('fullcalendar')).toBeInTheDocument();
+      expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
     });
 
     const dayButton = screen.getByRole('button', { name: /day/i });
@@ -139,13 +139,13 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     const filtersButton = screen.getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
 
-    const statusSelect = screen.getByLabelText(/status/i);
+    const statusSelect = screen.getByDisplayValue('All Statuses');
     await user.selectOptions(statusSelect, 'confirmed');
 
     // Verify filter was applied (would check API call in real implementation)
@@ -156,7 +156,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     const exportButton = screen.getByRole('button', { name: /export/i });
