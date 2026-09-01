@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
 const AuthContext = createContext(null);
@@ -28,51 +28,57 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Two independent sources feed this state — the one-shot getSession() and the
+  // onAuthStateChange stream — and each awaits an async admin lookup before it can
+  // commit. Two guards are needed, because they fail differently:
+  //
+  //  1. `sawAuthEventRef`: onAuthStateChange is authoritative. Once any auth event
+  //     has arrived, the initial getSession() result is stale by definition and must
+  //     never be applied, even if it started first and resolves later. An invocation
+  //     counter alone is NOT sufficient here: getSession() can begin after a sign-out
+  //     and would then hold the higher ticket, restoring isAdmin=true.
+  //  2. `latestRef`: among auth events, only the newest may commit, so a slow admin
+  //     lookup cannot overwrite fresher state.
+  //
+  // These are refs rather than useEffect-local variables so that signOut() can bump
+  // the ticket too. As closure variables they were unreachable from signOut, which
+  // let an in-flight lookup re-commit the old session right after signOut cleared it.
+  const activeRef = useRef(true);
+  const sawAuthEventRef = useRef(false);
+  const latestRef = useRef(0);
+
   useEffect(() => {
-    let active = true;
-    // Two independent sources feed this state — the one-shot getSession() and the
-    // onAuthStateChange stream — and each awaits an async admin lookup before it
-    // can commit. Two separate guards are needed, because they fail differently:
-    //
-    //  1. `sawAuthEvent`: onAuthStateChange is authoritative. Once any auth event
-    //     has arrived, the initial getSession() result is stale by definition and
-    //     must never be applied — even if it started first and resolves later.
-    //  2. `latest`: among auth events, only the newest may commit, so a slow admin
-    //     lookup cannot overwrite fresher state.
-    //
-    // An invocation counter alone is NOT sufficient: getSession() can begin after
-    // a sign-out event and would then hold the higher ticket, restoring
-    // isAdmin=true for a signed-out user.
-    let sawAuthEvent = false;
-    let latest = 0;
+    activeRef.current = true;
 
     const applySession = async (nextSession, { fromAuthEvent }) => {
-      if (!active) return;
-      if (!fromAuthEvent && sawAuthEvent) return;
-      if (fromAuthEvent) sawAuthEvent = true;
+      if (!activeRef.current) return;
+      if (!fromAuthEvent && sawAuthEventRef.current) return;
+      if (fromAuthEvent) sawAuthEventRef.current = true;
 
-      const ticket = ++latest;
+      const ticket = ++latestRef.current;
       const nextIsAdmin = await fetchIsAdmin(nextSession?.user?.id);
 
       // Commit session and isAdmin together. Setting session before the await
       // would let a stale call publish a session that disagrees with the
       // isAdmin the newest call goes on to set.
-      if (!active || ticket !== latest) return;
+      if (!activeRef.current || ticket !== latestRef.current) return;
       setSession(nextSession);
       setIsAdmin(nextIsAdmin);
       setLoading(false);
     };
 
-    supabase.auth.getSession().then(({ data }) =>
-      applySession(data?.session ?? null, { fromAuthEvent: false })
-    );
+    supabase.auth.getSession()
+      .then(({ data }) => applySession(data?.session ?? null, { fromAuthEvent: false }))
+      // Without this, a rejected getSession leaves loading=true forever and
+      // ProtectedRoute spins with no way out. Fail closed: treat it as no session.
+      .catch(() => applySession(null, { fromAuthEvent: false }));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => { applySession(nextSession ?? null, { fromAuthEvent: true }); }
     );
 
     return () => {
-      active = false;
+      activeRef.current = false;
       subscription?.unsubscribe();
     };
   }, []);
@@ -84,6 +90,13 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
+
+    // Claim a fresh ticket so any admin lookup still in flight — e.g. from a
+    // TOKEN_REFRESHED event that fired just before this click — loses its race
+    // and cannot re-commit the old session after we clear it. Without this,
+    // the admin shell can reappear for a signed-out user until SIGNED_OUT lands.
+    latestRef.current += 1;
+
     setSession(null);
     setIsAdmin(false);
     return { error: error ?? null };

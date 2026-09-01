@@ -75,6 +75,9 @@ CREATE POLICY "public may submit a booking"
     AND confirmed_at      IS NULL
     AND confirmed_by      IS NULL
     AND assigned_agent_id IS NULL
+    -- client_id links a booking to a CRM record. A submitter who learns or guesses
+    -- a client uuid could otherwise attach their booking to someone else's record.
+    AND client_id         IS NULL
   );
 
 CREATE POLICY "admins manage bookings"
@@ -140,7 +143,62 @@ GRANT SELECT, INSERT, UPDATE ON public.admin_settings TO authenticated;
 --     A secret living in a PostgREST-exposed table is a published secret,
 --     whatever the policy says. See ROADMAP Phase 0.2.
 -- -----------------------------------------------------------------------------
-REVOKE ALL ON public.settings FROM anon, authenticated;
+REVOKE ALL ON public.settings FROM anon;
+
+-- Admins DO need to read this table: AdminProperties.jsx:107-110 reads
+-- cloud_name and upload_preset to configure Cloudinary image upload, and it
+-- discards the error (`const { data: settings } = ...`). A blanket revoke here
+-- would break admin image upload silently, with no diagnostic.
+-- So: admins may read, nobody may write from the app, anon has no access at all.
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "admins read settings" ON public.settings;
+CREATE POLICY "admins read settings"
+  ON public.settings FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+GRANT SELECT ON public.settings TO authenticated;
+
+-- -----------------------------------------------------------------------------
+-- booking_notes / email_templates: gate them IF they exist.
+--
+-- Verified 2026-09-01: neither table exists in the live database, because
+-- migrations 003 and 004 abort on `CREATE POLICY IF NOT EXISTS` (invalid
+-- PostgreSQL in every version) before reaching their CREATE TABLE statements.
+-- The admin UI references them anyway — BookingDetailModal.jsx:43,93,120 and
+-- settings/EmailSettings.jsx:54,102 — so those features are currently broken.
+--
+-- This block is defensive: whenever 003/004 are repaired and applied, these two
+-- tables must NOT come back with their original `USING (true)` no-TO-clause
+-- policies, which would let any signed-in non-admin read every internal note on
+-- every customer booking. Gating them here means the fix cannot be forgotten.
+-- -----------------------------------------------------------------------------
+DO $$
+DECLARE t text; p text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['booking_notes', 'email_templates']
+  LOOP
+    IF to_regclass('public.' || t) IS NULL THEN
+      RAISE NOTICE 'skipping %: table does not exist', t;
+      CONTINUE;
+    END IF;
+
+    FOR p IN SELECT policyname FROM pg_policies
+             WHERE schemaname = 'public' AND tablename = t
+    LOOP
+      EXECUTE format('DROP POLICY %I ON public.%I', p, t);
+    END LOOP;
+
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format(
+      'CREATE POLICY "admins manage %1$s" ON public.%1$I FOR ALL TO authenticated '
+      'USING (public.is_admin()) WITH CHECK (public.is_admin())', t);
+
+    EXECUTE format('REVOKE ALL ON public.%I FROM anon', t);
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', t);
+  END LOOP;
+END $$;
 
 COMMIT;
 

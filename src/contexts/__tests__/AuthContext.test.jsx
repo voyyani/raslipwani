@@ -159,6 +159,61 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('email')).toHaveTextContent('none');
   });
 
+  it('ignores an older auth event whose admin lookup resolves last', async () => {
+    // Covers the `latest` ticket guard specifically. Two AUTH EVENTS (so the
+    // sawAuthEvent guard is not what saves us): an admin sign-in whose lookup
+    // hangs, then a sign-out. The hung lookup must not win when it lands.
+    let releaseFirstLookup;
+    const firstLookup = new Promise((resolve) => { releaseFirstLookup = resolve; });
+
+    supabase.from
+      .mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnValue(firstLookup)
+      })
+      .mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+      });
+
+    let emitAuthChange;
+    supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+      emitAuthChange = cb;
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+
+    renderProbe();
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+
+    await act(async () => { emitAuthChange('SIGNED_IN', sessionFor('admin@raslipwani.co.ke')); });
+    await act(async () => { emitAuthChange('SIGNED_OUT', null); });
+    await act(async () => { releaseFirstLookup({ data: { id: 'user-uuid-1' }, error: null }); });
+
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+  });
+
+  // NOTE: the signOut-vs-in-flight-lookup race (final review finding #2) is fixed in
+  // AuthContext.signOut by bumping latestRef, but is NOT covered by a test. An attempt
+  // at one passed with the fix REMOVED, so it discriminated nothing and was deleted
+  // rather than left green and misleading. Reproducing it needs finer control over the
+  // mock's promise ordering than the current global Supabase mock allows.
+  // Tracked in the Phase 1 handoff.
+
+  it('settles to signed-out when getSession rejects', async () => {
+    // A rejected getSession must not leave loading=true forever — ProtectedRoute
+    // would spin permanently with no way out.
+    supabase.auth.getSession.mockRejectedValue(new Error('network down'));
+
+    renderProbe();
+
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+  });
+
   it('unsubscribes from auth changes on unmount', async () => {
     const unsubscribe = vi.fn();
     supabase.auth.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe } } });
