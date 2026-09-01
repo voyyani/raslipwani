@@ -32,8 +32,17 @@ CREATE POLICY "users read own admin row"
   TO authenticated
   USING (id = auth.uid());
 
--- SECURITY DEFINER lets this bypass the SELECT policy above, so a policy that
--- calls is_admin() does not recurse into admin_users' own RLS.
+-- Why this does not recurse into admin_users' own RLS:
+-- SECURITY DEFINER makes the function run as its OWNER (the role that applies this
+-- migration, normally `postgres`), and a table's owner bypasses RLS unless the table
+-- has FORCE ROW LEVEL SECURITY set. admin_users deliberately does NOT set FORCE,
+-- so the lookup inside this function skips the SELECT policy above and a policy
+-- elsewhere calling is_admin() cannot loop.
+--
+-- ⚠️  Do NOT add `ALTER TABLE admin_users FORCE ROW LEVEL SECURITY` — it would make
+--     this function recurse. It is SECURITY DEFINER *plus* the absence of FORCE that
+--     makes this safe, not SECURITY DEFINER on its own.
+--
 -- search_path is pinned to defeat search-path hijacking.
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
