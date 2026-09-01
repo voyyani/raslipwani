@@ -44,6 +44,11 @@ const Contact = lazy(() => import('./pages/Contact'));
 // International market page
 const International = lazy(() => import('./pages/International'));
 
+// Statutory pages. Mandatory for a business processing personal data under the
+// Kenyan Data Protection Act, 2019 — the footer has linked to them all along.
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+
 // Placeholder components for new service pages
 const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
@@ -126,6 +131,10 @@ function App() {
             
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+
+            {/* Statutory pages linked from the footer on every page */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             
             {/* SEO-friendly redirects */}
             <Route path="/listings" element={<Navigate to="/properties" replace />} />
