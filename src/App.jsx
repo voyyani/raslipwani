@@ -10,7 +10,8 @@ import {
   Link
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -46,6 +47,9 @@ const International = lazy(() => import('./pages/International'));
 // Placeholder components for new service pages
 const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
+// Admin sign-in (Supabase Auth)
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+
 // Admin components
 import Dashboard from './pages/admin/Dashboard';
 import AdminProperties from './pages/admin/AdminProperties';
@@ -56,7 +60,6 @@ import ClientDetail from './pages/admin/ClientDetail';
 import Settings from './pages/admin/Settings';
 import PropertyModal from './components/PropertyModal'; 
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const defaultBrandLogo = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg';
 
 const getMaintenanceConfig = () => {
@@ -78,24 +81,6 @@ const getMaintenanceConfig = () => {
   };
 };
 
-const ProtectedRoute = ({ children }) => {
-  const { isLoaded, isSignedIn } = useUser();
-  
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (!isSignedIn) {
-    return <RedirectToSignIn />;
-  }
-  
-  return children;
-};
-
 function App() {
   const maintenanceConfig = getMaintenanceConfig();
 
@@ -111,49 +96,9 @@ function App() {
     );
   }
 
-  if (!clerkPubKey) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h1>
-          <p className="mb-4">
-            Clerk publishable key is missing. Please set up your environment variables:
-          </p>
-          <ol className="list-decimal pl-5 mb-4 space-y-2">
-            <li>Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in project root</li>
-            <li>Add <code className="bg-gray-100 px-1 rounded">VITE_CLERK_PUBLISHABLE_KEY=your_key_here</code></li>
-            <li>Restart the development server</li>
-          </ol>
-          <p className="mb-2">
-            Get your keys from{' '}
-            <a 
-              href="https://dashboard.clerk.com" 
-              className="text-blue-600 hover:underline font-medium"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Clerk Dashboard
-            </a>
-          </p>
-          <p className="text-sm text-gray-600 mt-4">
-            If you've already added the key, make sure you've restarted the server.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
-      <ClerkProvider 
-        publishableKey={clerkPubKey}
-        appearance={{
-          baseTheme: "dark",
-          variables: {
-            colorPrimary: '#0D4B6E',
-          }
-        }}
-      >
+      <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
         <Analytics />
@@ -200,8 +145,11 @@ function App() {
               }
             />
              
-            <Route 
-              path="/admin" 
+            {/* Must precede /admin so the protected branch does not swallow it */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            <Route
+              path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminLayout>
@@ -240,7 +188,7 @@ function App() {
         </Suspense>
       </Router>
       </SettingsProvider>
-    </ClerkProvider>
+    </AuthProvider>
     </QueryClientProvider>
   );
 }
