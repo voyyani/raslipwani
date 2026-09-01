@@ -20,8 +20,13 @@ vi.mock('react-router-dom', async () => {
       state: null
     }),
     useParams: () => ({}),
-    BrowserRouter: ({ children }) => children,
-    Link: ({ children, to }) => <a href={to}>{children}</a>
+    // Substitute an in-memory router rather than dropping the router entirely.
+    // A passthrough leaves NavLink (and anything else reading router context
+    // directly rather than through the mocked hooks above) with a null context,
+    // which crashes the render — Header could not be tested at all.
+    BrowserRouter: ({ children }) => <actual.MemoryRouter>{children}</actual.MemoryRouter>
+    // Link is deliberately NOT stubbed: with real router context the genuine
+    // component renders the same anchor and resolves `to` correctly.
   };
 });
 
