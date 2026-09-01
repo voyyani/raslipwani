@@ -112,7 +112,7 @@ create policy "admins manage bookings" on bookings
 | # | Phase | Duration | Ships |
 |---|---|---|---|
 | **0** | 🚨 Emergency Lockdown | **Today** | Destruction vector closed, secrets rotated |
-| **1** | Supabase Auth Migration | 1 week | Clerk deleted, `auth.uid()` RLS, one identity system |
+| **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete** (branch `feat/supabase-auth-migration`); migrations 008/009 authored but **NOT applied** |
 | **2** | Revenue & Data Integrity | 1 week | Resend emails, reproducible schema, fixed nav |
 | **3** | Safety Net | 1 week | Live test suite, CI, error boundaries |
 | **4** | Structure & International IA | 2 weeks | Data layer, layout routes, International section |
