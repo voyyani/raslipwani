@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
+import { notifyBookingReceived } from '../utils/bookingNotifications';
 
 const ServicesMain = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -132,24 +133,36 @@ const ServicesMain = () => {
     setIsSubmitting(true);
     
     try {
-      // Save booking to Supabase
-      const { error } = await supabase
-        .from('bookings')
-        .insert([{
-          name: bookingData.name,
-          email: bookingData.email,
-          phone: bookingData.phone,
-          service_type: bookingData.serviceType,
-          property_id: bookingData.propertyId,
-          viewing_type: bookingData.viewingType,
-          preferred_date: bookingData.date,
-          preferred_time: bookingData.time,
-          notes: bookingData.notes,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
+      const record = {
+        // `type` is NOT NULL with no default, and the form previously omitted it
+        // entirely — so every service booking submitted here failed to save.
+        // The form offers four service kinds; the bookings table records three.
+        type: bookingData.serviceType === 'viewing' ? 'viewing' : 'consultation',
+        name: bookingData.name,
+        email: bookingData.email,
+        phone: bookingData.phone,
+        // Column is `service`, not `service_type`. Keeps the finer-grained choice
+        // (valuation / consultation / management) that `type` collapses.
+        service: bookingData.serviceType,
+        property_id: bookingData.propertyId || null,
+        viewing_type: bookingData.viewingType,
+        // There are no preferred_date / preferred_time columns; the schema has a
+        // single appointment_at timestamp.
+        appointment_at: bookingData.date
+          ? new Date(`${bookingData.date}T${bookingData.time || '00:00'}`).toISOString()
+          : null,
+        notes: bookingData.notes,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase.from('bookings').insert([record]);
 
       if (error) throw error;
+
+      // Notification is best-effort and never blocks the confirmation: the
+      // booking is already saved, so a mail outage must not read as a failure.
+      await notifyBookingReceived(record);
 
       alert("Thank you for your booking! Our team will contact you within 2 hours to confirm.");
       

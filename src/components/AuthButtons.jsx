@@ -1,25 +1,40 @@
 import React from 'react';
-import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
 const AuthButtons = () => {
+  const { user, isAdmin, signOut } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-4">
+        <Link
+          to="/admin/login"
+          className="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-secondary"
+        >
+          Admin Login
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-4">
-      <SignedOut>
-        <SignInButton mode="modal">
-          <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-secondary transition-colors">
-            Admin Login
-          </button>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <UserButton afterSignOutUrl="/" />
-        <Link 
-          to="/admin" 
-          className="bg-secondary text-white px-4 py-2 rounded-md hover:bg-primary transition-colors"
+      {isAdmin && (
+        <Link
+          to="/admin"
+          className="rounded-md bg-secondary px-4 py-2 text-white transition-colors hover:bg-primary"
         >
           Dashboard
         </Link>
-      </SignedIn>
+      )}
+      <button
+        type="button"
+        onClick={() => signOut()}
+        className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+      >
+        Sign out
+      </button>
     </div>
   );
 };

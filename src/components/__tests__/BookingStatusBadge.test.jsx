@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '../../../test/utils/renderWithProviders';
+import { render, screen } from '../../test/utils/renderWithProviders';
 import BookingStatusBadge from '../BookingStatusBadge';
 
 describe('BookingStatusBadge', () => {
@@ -8,7 +8,7 @@ describe('BookingStatusBadge', () => {
 
     const badge = screen.getByText('Pending');
     expect(badge).toBeInTheDocument();
-    expect(badge.parentElement).toHaveClass('bg-yellow-100', 'text-yellow-800');
+    expect(badge).toHaveClass('bg-yellow-100', 'text-yellow-800');
   });
 
   it('renders confirmed status correctly', () => {
@@ -16,7 +16,7 @@ describe('BookingStatusBadge', () => {
 
     const badge = screen.getByText('Confirmed');
     expect(badge).toBeInTheDocument();
-    expect(badge.parentElement).toHaveClass('bg-blue-100', 'text-blue-800');
+    expect(badge).toHaveClass('bg-blue-100', 'text-blue-800');
   });
 
   it('renders completed status correctly', () => {
@@ -24,7 +24,7 @@ describe('BookingStatusBadge', () => {
 
     const badge = screen.getByText('Completed');
     expect(badge).toBeInTheDocument();
-    expect(badge.parentElement).toHaveClass('bg-green-100', 'text-green-800');
+    expect(badge).toHaveClass('bg-green-100', 'text-green-800');
   });
 
   it('renders cancelled status correctly', () => {
@@ -32,27 +32,27 @@ describe('BookingStatusBadge', () => {
 
     const badge = screen.getByText('Cancelled');
     expect(badge).toBeInTheDocument();
-    expect(badge.parentElement).toHaveClass('bg-red-100', 'text-red-800');
+    expect(badge).toHaveClass('bg-red-100', 'text-red-800');
   });
 
   it('displays appropriate icon for each status', () => {
     const { rerender } = render(<BookingStatusBadge status="pending" />);
-    expect(screen.getByText('Pending').previousSibling).toBeTruthy();
+    expect(screen.getByText('Pending').querySelector('svg')).toBeTruthy();
 
     rerender(<BookingStatusBadge status="confirmed" />);
-    expect(screen.getByText('Confirmed').previousSibling).toBeTruthy();
+    expect(screen.getByText('Confirmed').querySelector('svg')).toBeTruthy();
 
     rerender(<BookingStatusBadge status="completed" />);
-    expect(screen.getByText('Completed').previousSibling).toBeTruthy();
+    expect(screen.getByText('Completed').querySelector('svg')).toBeTruthy();
 
     rerender(<BookingStatusBadge status="cancelled" />);
-    expect(screen.getByText('Cancelled').previousSibling).toBeTruthy();
+    expect(screen.getByText('Cancelled').querySelector('svg')).toBeTruthy();
   });
 
   it('applies custom className', () => {
     render(<BookingStatusBadge status="pending" className="custom-class" />);
 
-    const badge = screen.getByText('Pending').parentElement;
+    const badge = screen.getByText('Pending');
     expect(badge).toHaveClass('custom-class');
   });
 });

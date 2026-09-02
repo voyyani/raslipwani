@@ -3,15 +3,16 @@ import { render, screen, waitFor } from '../../../test/utils/renderWithProviders
 import userEvent from '@testing-library/user-event';
 import AdminBookings from '../AdminBookings';
 import { supabase } from '../../../utils/supabaseClient';
+import { exportToCSV } from '../../../utils/exportUtils';
 
 // Mock Supabase
 vi.mock('../../../utils/supabaseClient');
 
 // Mock FullCalendar
 vi.mock('@fullcalendar/react', () => ({
-  default: ({ events, eventClick }) => (
-    <div data-testid="fullcalendar">
-      {events.map((event, index) => (
+  default: ({ events, eventClick, initialView }) => (
+    <div data-testid="fullcalendar" data-view={initialView}>
+      {events.map((event) => (
         <div
           key={event.id}
           data-testid={`event-${event.id}`}
@@ -22,6 +23,12 @@ vi.mock('@fullcalendar/react', () => ({
       ))}
     </div>
   )
+}));
+
+// Exporting is a side effect on the download; assert the call, not the file.
+vi.mock('../../../utils/exportUtils', () => ({
+  exportToCSV: vi.fn(),
+  formatBookingsForExport: vi.fn((rows) => rows)
 }));
 
 describe('AdminBookings', () => {
@@ -52,15 +59,6 @@ describe('AdminBookings', () => {
     }
   ];
 
-  const mockStats = {
-    total: 10,
-    pending: 3,
-    confirmed: 4,
-    completed: 2,
-    cancelled: 1,
-    high_priority: 2
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -80,7 +78,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
@@ -110,7 +108,7 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Total Bookings')).toBeInTheDocument();
+      expect(screen.getByText('Total')).toBeInTheDocument();
     });
   });
 
@@ -119,19 +117,23 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByTestid('fullcalendar')).toBeInTheDocument();
+      expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
     });
 
-    const dayButton = screen.getByRole('button', { name: /day/i });
-    const weekButton = screen.getByRole('button', { name: /week/i });
-    const monthButton = screen.getByRole('button', { name: /month/i });
+    // The calendar opens on the month grid.
+    expect(screen.getByTestId('fullcalendar')).toHaveAttribute('data-view', 'dayGridMonth');
 
-    expect(dayButton).toBeInTheDocument();
-    expect(weekButton).toBeInTheDocument();
-    expect(monthButton).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /week/i }));
 
-    await user.click(weekButton);
-    // View should change (would check calendar props in real implementation)
+    await waitFor(() => {
+      expect(screen.getByTestId('fullcalendar')).toHaveAttribute('data-view', 'timeGridWeek');
+    });
+
+    await user.click(screen.getByRole('button', { name: /day/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('fullcalendar')).toHaveAttribute('data-view', 'timeGridDay');
+    });
   });
 
   it('filters bookings by status', async () => {
@@ -139,16 +141,18 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     const filtersButton = screen.getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
 
-    const statusSelect = screen.getByLabelText(/status/i);
+    const statusSelect = screen.getByDisplayValue('All Statuses');
     await user.selectOptions(statusSelect, 'confirmed');
 
-    // Verify filter was applied (would check API call in real implementation)
+    await waitFor(() => {
+      expect(statusSelect).toHaveValue('confirmed');
+    });
   });
 
   it('exports bookings to CSV', async () => {
@@ -156,13 +160,20 @@ describe('AdminBookings', () => {
     render(<AdminBookings />);
 
     await waitFor(() => {
-      expect(screen.getByText('Booking Management')).toBeInTheDocument();
+      expect(screen.getByText('Bookings')).toBeInTheDocument();
     });
 
     const exportButton = screen.getByRole('button', { name: /export/i });
     await user.click(exportButton);
 
-    // Would verify CSV download in real implementation
+    await waitFor(() => {
+      expect(exportToCSV).toHaveBeenCalledTimes(1);
+    });
+
+    const [rows, filename] = exportToCSV.mock.calls[0];
+    expect(rows).toHaveLength(mockBookings.length);
+    expect(rows[0]).toMatchObject({ Name: 'John Doe', Email: 'john@example.com' });
+    expect(filename).toMatch(/^bookings-\d{4}-\d{2}-\d{2}\.csv$/);
   });
 
   it('opens booking detail modal on event click', async () => {
@@ -177,6 +188,9 @@ describe('AdminBookings', () => {
     const event = screen.getByTestId('event-1');
     await user.click(event);
 
-    // Modal should open (would verify modal content in real implementation)
+    // The detail modal renders the booking it was handed, not a placeholder.
+    await waitFor(() => {
+      expect(screen.getAllByText('john@example.com').length).toBeGreaterThan(0);
+    });
   });
 });

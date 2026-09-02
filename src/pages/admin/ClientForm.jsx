@@ -5,7 +5,6 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
 import toast from 'react-hot-toast';
 import { X, Save } from 'lucide-react';
-import { useEffect } from 'react';
 
 // Validation schema
 const clientSchema = z.object({
@@ -33,7 +32,6 @@ const ClientForm = ({ client, onClose, onSuccess }) => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: zodResolver(clientSchema),
     defaultValues: client ? {

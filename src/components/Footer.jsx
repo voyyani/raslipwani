@@ -4,7 +4,7 @@ import { useSettings } from '../hooks/useSettings';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { logo, siteName, phone, email, address, socialMedia, serviceLocations, whatsapp, loading: settingsLoading } = useSettings();
+  const { logo, siteName, phone, email, address, socialMedia, serviceLocations, whatsapp } = useSettings();
   
   // Get service locations from settings (returns array directly)
   const locations = serviceLocations() || ['Nairobi', 'Mombasa', 'Kilifi', 'Diani', 'Naivasha', 'Malindi'];

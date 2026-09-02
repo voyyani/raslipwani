@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -128,24 +128,6 @@ const PropertyModal = ({ property, closeModal }) => {
     navigate('/services', { state: { openViewingModal: true } });
   };
 
-  // Zoom functionality
-  const handleZoom = (direction) => {
-    const zoomStep = 0.5;
-    let newZoom;
-    
-    if (direction === 'in') {
-      newZoom = Math.min(zoomLevel + zoomStep, 3);
-    } else {
-      newZoom = Math.max(zoomLevel - zoomStep, 1);
-    }
-    
-    setZoomLevel(newZoom);
-    
-    if (newZoom <= 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
   // Handle double tap for zoom on mobile
   const handleDoubleTap = () => {
     if (zoomLevel === 1) {
@@ -159,7 +141,7 @@ const PropertyModal = ({ property, closeModal }) => {
   };
 
   // Handle drag start for panning
-  const handleDragStart = (e, info) => {
+  const handleDragStart = () => {
     if (zoomLevel > 1) {
       setIsDragging(true);
       setStartPosition(position);

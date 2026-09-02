@@ -37,7 +37,6 @@ const MobileBookingCard = ({
   // Get appointment date info
   const appointmentDate = new Date(booking.appointment_at);
   const isPastAppointment = isPast(appointmentDate);
-  const isUpcoming = !isPastAppointment;
   const isAppointmentToday = isToday(appointmentDate);
   const isAppointmentTomorrow = isTomorrow(appointmentDate);
 

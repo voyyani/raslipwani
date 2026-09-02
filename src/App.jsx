@@ -10,11 +10,12 @@ import {
   Link
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ClerkProvider, useUser, RedirectToSignIn } from '@clerk/clerk-react';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ToastProvider from './components/Toast';
@@ -43,20 +44,31 @@ const Contact = lazy(() => import('./pages/Contact'));
 // International market page
 const International = lazy(() => import('./pages/International'));
 
+// Statutory pages. Mandatory for a business processing personal data under the
+// Kenyan Data Protection Act, 2019 — the footer has linked to them all along.
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+
 // Placeholder components for new service pages
 const ViewingExperience = lazy(() => import('./components/services/ViewingExperience'));
 
-// Admin components
-import Dashboard from './pages/admin/Dashboard';
-import AdminProperties from './pages/admin/AdminProperties';
-import Bookings from './features/bookings/Bookings';
-import AdminBookings from './pages/admin/AdminBookings';
-import ClientManagement from './pages/admin/ClientManagement';
-import ClientDetail from './pages/admin/ClientDetail';
-import Settings from './pages/admin/Settings';
-import PropertyModal from './components/PropertyModal'; 
+// Admin sign-in (Supabase Auth)
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Admin components. Lazy-loaded: the admin console is reachable only by a
+// signed-in admin, so none of it belongs in the bundle a first-time visitor
+// downloads.
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminProperties = lazy(() => import('./pages/admin/AdminProperties'));
+const Bookings = lazy(() => import('./features/bookings/Bookings'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const ClientManagement = lazy(() => import('./pages/admin/ClientManagement'));
+const ClientDetail = lazy(() => import('./pages/admin/ClientDetail'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+
+const PropertyModal = lazy(() => import('./components/PropertyModal'));
+
 const defaultBrandLogo = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg';
 
 const getMaintenanceConfig = () => {
@@ -78,24 +90,6 @@ const getMaintenanceConfig = () => {
   };
 };
 
-const ProtectedRoute = ({ children }) => {
-  const { isLoaded, isSignedIn } = useUser();
-  
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (!isSignedIn) {
-    return <RedirectToSignIn />;
-  }
-  
-  return children;
-};
-
 function App() {
   const maintenanceConfig = getMaintenanceConfig();
 
@@ -111,49 +105,10 @@ function App() {
     );
   }
 
-  if (!clerkPubKey) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h1>
-          <p className="mb-4">
-            Clerk publishable key is missing. Please set up your environment variables:
-          </p>
-          <ol className="list-decimal pl-5 mb-4 space-y-2">
-            <li>Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in project root</li>
-            <li>Add <code className="bg-gray-100 px-1 rounded">VITE_CLERK_PUBLISHABLE_KEY=your_key_here</code></li>
-            <li>Restart the development server</li>
-          </ol>
-          <p className="mb-2">
-            Get your keys from{' '}
-            <a 
-              href="https://dashboard.clerk.com" 
-              className="text-blue-600 hover:underline font-medium"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Clerk Dashboard
-            </a>
-          </p>
-          <p className="text-sm text-gray-600 mt-4">
-            If you've already added the key, make sure you've restarted the server.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <ClerkProvider 
-        publishableKey={clerkPubKey}
-        appearance={{
-          baseTheme: "dark",
-          variables: {
-            colorPrimary: '#0D4B6E',
-          }
-        }}
-      >
+    <ErrorBoundary name="root">
+      <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
         <Analytics />
@@ -167,6 +122,7 @@ function App() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         }>
+          <ErrorBoundary name="route">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
@@ -181,6 +137,10 @@ function App() {
             
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+
+            {/* Statutory pages linked from the footer on every page */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             
             {/* SEO-friendly redirects */}
             <Route path="/listings" element={<Navigate to="/properties" replace />} />
@@ -200,12 +160,17 @@ function App() {
               }
             />
              
-            <Route 
-              path="/admin" 
+            {/* Must precede /admin so the protected branch does not swallow it */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            <Route
+              path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminLayout>
-                    <Outlet />
+                    <ErrorBoundary name="admin">
+                      <Outlet />
+                    </ErrorBoundary>
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -237,11 +202,13 @@ function App() {
               </div>
             } />
           </Routes>
+          </ErrorBoundary>
         </Suspense>
       </Router>
       </SettingsProvider>
-    </ClerkProvider>
-    </QueryClientProvider>
+    </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

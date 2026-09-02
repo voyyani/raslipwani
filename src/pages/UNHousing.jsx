@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -22,8 +22,6 @@ import {
 } from 'lucide-react';
 
 const UNHousing = () => {
-  const [selectedProperty, setSelectedProperty] = useState(null);
-
   const unProperties = [
     {
       id: 1,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase, supabaseAdmin } from '../../utils/supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -70,8 +70,6 @@ const AdminProperties = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounced search
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,19 +77,10 @@ const AdminProperties = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   // Mobile state
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileViewMode, setMobileViewMode] = useState('grid'); // 'grid' or 'list'
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [expandedStats, setExpandedStats] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [purposeFilter, setPurposeFilter] = useState('all');
-
-  // Mobile detection
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Property types based on purpose
   const propertyTypes = {
@@ -103,9 +92,11 @@ const AdminProperties = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Cloudinary settings
+        // Fetch Cloudinary settings. `admin_settings` is the single source
+        // of truth since 010; the legacy `settings` table it replaced also
+        // held the Cloudinary api_secret in a browser-readable row.
         const { data: settings } = await supabase
-          .from('settings')
+          .from('admin_settings')
           .select('cloud_name, upload_preset')
           .single();
         
@@ -141,8 +132,7 @@ const AdminProperties = () => {
         setProperties(data || []);
         setTotalCount(count || 0);
       } catch (error) {
-        setError('Error fetching data: ' + error.message);
-        toast.error('Error fetching properties');
+        toast.error('Error fetching properties: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -157,7 +147,7 @@ const AdminProperties = () => {
       const formattedData = formatPropertiesForExport(properties);
       exportToCSV(formattedData, `properties-${new Date().toISOString().split('T')[0]}`);
       toast.success(`Exported ${properties.length} properties`);
-    } catch (error) {
+    } catch {
       toast.error('Failed to export properties');
     }
   };
@@ -328,7 +318,7 @@ const AdminProperties = () => {
       return results.map(result => result.secure_url);
     } catch (err) {
       console.error('Image upload error:', err);
-      setError('Failed to upload images. Please check Cloudinary settings.');
+      toast.error('Failed to upload images. Please check Cloudinary settings.');
       return [];
     } finally {
       setLoading(false);
@@ -340,7 +330,6 @@ const AdminProperties = () => {
     
     try {
       setLoading(true);
-      setError('');
       
       // Upload new images if selected
       let cloudinaryUrls = [...formData.images];
@@ -385,7 +374,7 @@ const AdminProperties = () => {
       setCurrentProperty(null);
       resetForm();
     } catch (error) {
-      setError('Error saving property: ' + error.message);
+      toast.error('Error saving property: ' + error.message);
       toast.error('Failed to save property');
     } finally {
       setLoading(false);
@@ -403,7 +392,7 @@ const AdminProperties = () => {
       if (error) throw error;
       setProperties(data);
     } catch (error) {
-      setError('Error fetching properties: ' + error.message);
+      toast.error('Error fetching properties: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -423,7 +412,7 @@ const AdminProperties = () => {
       setProperties(properties.filter(p => p.id !== id));
       toast.success('Property deleted successfully!');
     } catch (error) {
-      setError('Error deleting property: ' + error.message);
+      toast.error('Error deleting property: ' + error.message);
       toast.error('Failed to delete property');
     } finally {
       setLoading(false);
@@ -437,8 +426,9 @@ const AdminProperties = () => {
       
       console.log('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
       
-      // Use supabaseAdmin to bypass RLS (Clerk auth not recognized by Supabase)
-      const { data, error } = await supabaseAdmin
+      // Plain client: the Supabase Auth session carries admin identity, and the
+      // "admins manage properties" policy in 009 authorises this write.
+      const { data, error } = await supabase
         .from('properties')
         .update({ featured: newFeaturedValue })
         .eq('id', property.id)
@@ -503,9 +493,6 @@ const AdminProperties = () => {
     setNewAmenity('');
     setIsModalOpen(true);
   };
-
-  // Calculate pagination info
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <>

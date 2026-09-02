@@ -64,7 +64,7 @@ const DebugPanel = ({ hidden = true }) => {
         // Save to localStorage
         try {
           localStorage.setItem('debug_logs', JSON.stringify(newLogs));
-        } catch (e) {
+        } catch {
           // localStorage full, clear old logs
           localStorage.removeItem('debug_logs');
         }
@@ -93,7 +93,10 @@ const DebugPanel = ({ hidden = true }) => {
       if (savedLogs) {
         setLogs(JSON.parse(savedLogs));
       }
-    } catch (e) {}
+    } catch {
+      // A corrupt or oversized debug_logs entry is not worth surfacing;
+      // the panel simply starts empty.
+    }
 
     return () => {
       console.log = originalLog;

@@ -18,8 +18,7 @@ import {
 } from 'lucide-react';
 
 const DiasporaPortal = () => {
-  const [activeProperty, setActiveProperty] = useState(null);
-  const [viewTab, setViewTab] = useState('overview');
+  const [, setActiveProperty] = useState(null);
 
   // Mock data - would come from API
   const myProperties = [

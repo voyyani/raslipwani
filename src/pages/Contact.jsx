@@ -5,11 +5,12 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { useSettings } from '../hooks/useSettings';
+import { notifyBookingReceived } from '../utils/bookingNotifications';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTriangle, FaBuilding, FaCity, FaHome, FaMap } from 'react-icons/fa';
 
 const Contact = () => {
   // Get settings
-  const { phone, email, address, businessHours, serviceLocations, siteName } = useSettings();
+  const { phone, email, address, serviceLocations } = useSettings();
   // serviceLocations() returns array directly from settings
   const [formData, setFormData] = useState({
     name: '',
@@ -92,25 +93,29 @@ const Contact = () => {
     
     try {
       // Save to bookings table
-      const { error } = await supabase
-        .from('bookings')
-        .insert([{
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          notes: formData.message,
-          property_type: formData.propertyType,
-          location: formData.location,
-          budget: formData.budget,
-          type: 'contact',
-          inquiry_type: activeTab,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
-      
+      const record = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        notes: formData.message,
+        property_type: formData.propertyType,
+        location: formData.location,
+        budget: formData.budget,
+        type: 'contact',
+        inquiry_type: activeTab,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase.from('bookings').insert([record]);
+
       if (error) throw error;
-      
+
+      // Best-effort: the enquiry is already saved, so a mail outage must not
+      // turn a successful submission into an error for the customer.
+      await notifyBookingReceived(record);
+
       setSuccess('Thank you for your message! Our Kenya real estate experts will contact you within 24 hours.');
       setFormData({ 
         name: '', 

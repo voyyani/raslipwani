@@ -1,0 +1,233 @@
+import React from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import { supabase } from '@/utils/supabaseClient';
+import { AuthProvider, useAuth } from '../AuthContext';
+
+function Probe() {
+  const { loading, user, isAdmin, signIn, signOut } = useAuth();
+  return (
+    <div>
+      <span data-testid="loading">{String(loading)}</span>
+      <span data-testid="email">{user?.email ?? 'none'}</span>
+      <span data-testid="isAdmin">{String(isAdmin)}</span>
+      <button onClick={() => signIn('a@b.com', 'pw')}>in</button>
+      <button onClick={() => signOut()}>out</button>
+    </div>
+  );
+}
+
+const renderProbe = () => render(<AuthProvider><Probe /></AuthProvider>);
+
+const sessionFor = (email) => ({
+  user: { id: 'user-uuid-1', email },
+  access_token: 'token'
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  supabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
+  supabase.auth.onAuthStateChange.mockReturnValue({
+    data: { subscription: { unsubscribe: vi.fn() } }
+  });
+});
+
+describe('AuthContext', () => {
+  it('starts loading, then settles to no user when there is no session', async () => {
+    renderProbe();
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+  });
+
+  it('exposes the user and sets isAdmin true when an admin_users row exists', async () => {
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('admin@raslipwani.co.ke') }, error: null
+    });
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'user-uuid-1' }, error: null })
+    });
+
+    renderProbe();
+
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('email')).toHaveTextContent('admin@raslipwani.co.ke');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('true');
+  });
+
+  it('sets isAdmin false when the user has no admin_users row', async () => {
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('nobody@example.com') }, error: null
+    });
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+    });
+
+    renderProbe();
+
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('email')).toHaveTextContent('nobody@example.com');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+  });
+
+  it('signIn forwards credentials to supabase and returns the error on failure', async () => {
+    supabase.auth.signInWithPassword.mockResolvedValue({
+      data: { session: null }, error: { message: 'Invalid login credentials' }
+    });
+
+    let result;
+    function Caller() {
+      const { signIn } = useAuth();
+      return <button onClick={async () => { result = await signIn('a@b.com', 'pw'); }}>go</button>;
+    }
+    render(<AuthProvider><Caller /></AuthProvider>);
+
+    await act(async () => { screen.getByText('go').click(); });
+
+    expect(supabase.auth.signInWithPassword)
+      .toHaveBeenCalledWith({ email: 'a@b.com', password: 'pw' });
+    expect(result.error.message).toBe('Invalid login credentials');
+  });
+
+  it('signOut calls supabase and clears an established session', async () => {
+    // Seed a REAL signed-in admin session first. Asserting "email is none" against
+    // the default null-session baseline would pass even if signOut were a no-op —
+    // the assertion has to start from a state it can actually observe changing.
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('admin@raslipwani.co.ke') }, error: null
+    });
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'user-uuid-1' }, error: null })
+    });
+
+    renderProbe();
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+
+    // Guard: the precondition must hold, or the assertions below prove nothing.
+    expect(screen.getByTestId('email')).toHaveTextContent('admin@raslipwani.co.ke');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('true');
+
+    await act(async () => { screen.getByText('out').click(); });
+
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+  });
+
+  it('ignores a stale admin lookup that resolves after a newer one', async () => {
+    // Reproduces the race: getSession() and onAuthStateChange both trigger an async
+    // admin lookup. If the FIRST (admin=true) resolves after the SECOND (signed out),
+    // an unguarded implementation would restore isAdmin=true for a signed-out user.
+    let releaseStaleLookup;
+    const staleLookup = new Promise((resolve) => { releaseStaleLookup = resolve; });
+
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: sessionFor('admin@raslipwani.co.ke') }, error: null
+    });
+    supabase.from
+      .mockReturnValueOnce({          // first lookup — admin, deliberately slow
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnValue(staleLookup)
+      })
+      .mockReturnValue({              // any later lookup — resolves immediately
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+      });
+
+    let emitAuthChange;
+    supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+      emitAuthChange = cb;
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+
+    renderProbe();
+
+    // A sign-out arrives and settles while the first lookup is still in flight.
+    await act(async () => { emitAuthChange('SIGNED_OUT', null); });
+    // Now let the stale admin lookup finish. It must NOT win.
+    await act(async () => { releaseStaleLookup({ data: { id: 'user-uuid-1' }, error: null }); });
+
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+  });
+
+  it('ignores an older auth event whose admin lookup resolves last', async () => {
+    // Covers the `latest` ticket guard specifically. Two AUTH EVENTS (so the
+    // sawAuthEvent guard is not what saves us): an admin sign-in whose lookup
+    // hangs, then a sign-out. The hung lookup must not win when it lands.
+    let releaseFirstLookup;
+    const firstLookup = new Promise((resolve) => { releaseFirstLookup = resolve; });
+
+    supabase.from
+      .mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnValue(firstLookup)
+      })
+      .mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+      });
+
+    let emitAuthChange;
+    supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+      emitAuthChange = cb;
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+
+    renderProbe();
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+
+    await act(async () => { emitAuthChange('SIGNED_IN', sessionFor('admin@raslipwani.co.ke')); });
+    await act(async () => { emitAuthChange('SIGNED_OUT', null); });
+    await act(async () => { releaseFirstLookup({ data: { id: 'user-uuid-1' }, error: null }); });
+
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+  });
+
+  // NOTE: the signOut-vs-in-flight-lookup race (final review finding #2) is fixed in
+  // AuthContext.signOut by bumping latestRef, but is NOT covered by a test. An attempt
+  // at one passed with the fix REMOVED, so it discriminated nothing and was deleted
+  // rather than left green and misleading. Reproducing it needs finer control over the
+  // mock's promise ordering than the current global Supabase mock allows.
+  // Tracked in the Phase 1 handoff.
+
+  it('settles to signed-out when getSession rejects', async () => {
+    // A rejected getSession must not leave loading=true forever — ProtectedRoute
+    // would spin permanently with no way out.
+    supabase.auth.getSession.mockRejectedValue(new Error('network down'));
+
+    renderProbe();
+
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('isAdmin')).toHaveTextContent('false');
+    expect(screen.getByTestId('email')).toHaveTextContent('none');
+  });
+
+  it('unsubscribes from auth changes on unmount', async () => {
+    const unsubscribe = vi.fn();
+    supabase.auth.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe } } });
+
+    const { unmount } = renderProbe();
+    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    unmount();
+
+    expect(unsubscribe).toHaveBeenCalled();
+  });
+
+  it('throws a helpful error when useAuth is used outside AuthProvider', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<Probe />)).toThrow(/useAuth must be used within an AuthProvider/);
+    spy.mockRestore();
+  });
+});

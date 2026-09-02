@@ -49,22 +49,25 @@ CREATE INDEX IF NOT EXISTS idx_booking_notes_created_by ON booking_notes(created
 -- Enable RLS on booking_notes
 ALTER TABLE booking_notes ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies for booking_notes (admin only)
-CREATE POLICY IF NOT EXISTS "Admin can view all booking notes"
-  ON booking_notes FOR SELECT
-  USING (true); -- In production, add proper admin check
-
-CREATE POLICY IF NOT EXISTS "Admin can insert booking notes"
-  ON booking_notes FOR INSERT
-  WITH CHECK (true); -- In production, add proper admin check
-
-CREATE POLICY IF NOT EXISTS "Admin can update own booking notes"
-  ON booking_notes FOR UPDATE
-  USING (true); -- In production, add proper admin check
-
-CREATE POLICY IF NOT EXISTS "Admin can delete own booking notes"
-  ON booking_notes FOR DELETE
-  USING (true); -- In production, add proper admin check
+-- RLS policies for booking_notes.
+--
+-- This block previously read `CREATE POLICY IF NOT EXISTS ... USING (true)`,
+-- four times over. Two separate defects:
+--
+--   1. PostgreSQL has never supported IF NOT EXISTS on CREATE POLICY, in any
+--      version through 17. The statement is a syntax error, so this migration
+--      aborted here and rolled back — which is why `booking_notes` does not
+--      exist in production and why BookingDetailModal queries a missing table.
+--   2. `USING (true)` is not "admin only". It is the same everyone-can-do-
+--      everything policy that Phase 0 was written to remove.
+--
+-- Both are fixed by leaving RLS enabled with no permissive policy: with RLS on
+-- and no policy, PostgreSQL denies every non-superuser row, and `service_role`
+-- still bypasses it. The real admin-only policies, which need the `is_admin()`
+-- helper that 008 introduces, are attached in 010.
+--
+-- Deny-by-default until then. A table waiting for its policy is safe; a table
+-- with USING (true) is not.
 
 -- Update existing bookings to have default status_history
 UPDATE bookings 

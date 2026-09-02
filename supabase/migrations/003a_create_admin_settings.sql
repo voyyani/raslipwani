@@ -1,6 +1,14 @@
--- Migration: Create admin settings table
+-- Migration: 003a_create_admin_settings.sql
 -- Description: Centralized settings for admin panel configuration
 -- Date: 2026-01-18
+--
+-- Renamed 2026-09-02 from `003_create_admin_settings_table.sql`. Two files
+-- claimed the `003_` prefix, so their relative order was undefined; the `a`/`b`
+-- suffixes make the sequence total without renumbering applied history.
+--
+-- This is the migration that actually created the live `admin_settings` — a
+-- wide, single-row table. `004` once declared a contradictory key/value table
+-- of the same name; see that file's header.
 
 -- =============================================
 -- 1. ADMIN SETTINGS TABLE
@@ -80,7 +88,9 @@ CREATE TABLE IF NOT EXISTS admin_settings (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_single_settings_row 
   ON admin_settings ((id IS NOT NULL));
 
--- Create trigger for updated_at
+-- Create trigger for updated_at. `update_updated_at_column()` is defined in
+-- 000_baseline.sql; the DROP makes this file re-runnable.
+DROP TRIGGER IF EXISTS update_admin_settings_updated_at ON admin_settings;
 CREATE TRIGGER update_admin_settings_updated_at BEFORE UPDATE ON admin_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

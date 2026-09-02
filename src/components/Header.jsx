@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthButtons from './AuthButtons';
-import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle } from 'react-icons/fi';
+import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle, FiExternalLink } from 'react-icons/fi';
 import { useSettings } from '../hooks/useSettings';
 
 const Header = () => {
-  const { logo, siteName, tagline, loading: settingsLoading } = useSettings();
+  const { logo, siteName, tagline } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
@@ -44,20 +44,23 @@ const Header = () => {
       label: 'Services', 
       icon: FiTool 
     },
-    { 
-      path: '/internationalproperties', 
-      label: 'International', 
-      icon: FiGrid 
+    {
+      path: '/international',
+      label: 'International',
+      icon: FiGrid
     },
-    { 
-      path: '/about', 
-      label: 'About', 
-      icon: FiInfo 
+    {
+      path: '/about',
+      label: 'About',
+      icon: FiInfo
     },
-    { 
-      path: '/construction-support', 
-      label: 'Construction', 
-      icon: FiHelpCircle 
+    {
+      // Construction support was shelved here and shipped as its own brand.
+      // The route never existed, so this link 404'd on every page.
+      path: 'https://nairobuild.co.ke',
+      label: 'Construction',
+      icon: FiHelpCircle,
+      external: true,
     },
   ];
 
@@ -146,10 +149,34 @@ const Header = () => {
                 );
               }
               
+              // Links that leave the site render as plain anchors — NavLink would
+              // treat the URL as an in-app route and never navigate.
+              if (item.external) {
+                return (
+                  <div key={item.label} className="relative">
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-gray-700 hover:text-primary hover:bg-gray-50/80"
+                    >
+                      <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                        isScrolled ? 'scale-90' : 'scale-100'
+                      }`} />
+                      <span className="relative">
+                        {item.label}
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                      </span>
+                      <FiExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-primary transition-colors" aria-hidden="true" />
+                    </a>
+                  </div>
+                );
+              }
+
               // Regular menu items
               return (
                 <div key={item.label} className="relative">
-                  <NavLink 
+                  <NavLink
                     to={item.path}
                     className={({ isActive }) => 
                       `relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group
@@ -306,10 +333,30 @@ const Header = () => {
                     );
                   }
                   
+                  if (item.external) {
+                    return (
+                      <div key={item.label} className="border-b border-gray-100 last:border-b-0">
+                        <a
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={closeMenu}
+                          className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-gray-700 hover:text-primary hover:bg-gray-50"
+                        >
+                          <div className="p-2 rounded-lg transition-colors bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary">
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                          <span className="flex-1">{item.label}</span>
+                          <FiExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" aria-hidden="true" />
+                        </a>
+                      </div>
+                    );
+                  }
+
                   // Regular menu items
                   return (
                     <div key={item.label} className="border-b border-gray-100 last:border-b-0">
-                      <NavLink 
+                      <NavLink
                         to={item.path}
                         onClick={closeMenu}
                         className={`flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group

@@ -157,7 +157,7 @@ const Services = () => {
       delete bookingRecord.time;
       delete bookingRecord.viewingType;
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('bookings')
         .insert([bookingRecord]);
 
