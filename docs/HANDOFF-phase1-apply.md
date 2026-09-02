@@ -48,7 +48,7 @@ In the Supabase SQL editor, in this order:
 
 | # | File | What it does |
 |---|---|---|
-| 1 | `supabase/migrations/007_emergency_lockdown.sql` | Revokes `anon`'s DELETE/TRUNCATE/UPDATE, enables RLS on the 4 unprotected tables |
+| 1 | `supabase/m igrations/007_emergency_lockdown.sql` | Revokes `anon`'s DELETE/TRUNCATE/UPDATE, enables RLS on the 4 unprotected tables |
 | 2 | `supabase/migrations/008_admin_users.sql` | `admin_users` table + `is_admin()` |
 | 3 | `supabase/migrations/009_auth_rls_policies.sql` | Real policies on `auth.uid()`, identity columns → `uuid` |
 
