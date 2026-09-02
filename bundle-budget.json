@@ -1,0 +1,4 @@
+{
+  "firstLoadGzipKb": 235,
+  "note": "Measured 229.8 kB gzip on 2026-09-02 after Phase 6.1 lazy-loaded the admin console (the regression peaked near 446 kB). The budget carries ~5 kB of headroom so ordinary work does not trip CI, while a new top-level vendor import does. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
+}

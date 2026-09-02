@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/guard-env-names.mjs",
     "build": "vite build",
+    "bundle:report": "node scripts/bundle-report.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",

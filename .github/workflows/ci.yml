@@ -1,0 +1,135 @@
+name: CI
+
+# Every pull request, plus the branches we deploy from. A check that only runs
+# on PRs cannot protect a direct push to main.
+on:
+  pull_request:
+  push:
+    branches: [main, staging]
+
+# A superseded run tells you about code nobody is going to merge.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `ci`, not `install`: it installs the lockfile exactly and fails if
+      # package.json and the lockfile disagree, which is itself worth catching.
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # Coverage rather than a plain run, because vitest.config.js carries a
+      # ratcheting coverage floor and only this command enforces it.
+      - name: Test
+        run: npm run test:coverage
+
+      # `prebuild` runs the secret-shaped-env-name guard automatically.
+      - name: Build
+        run: npm run build
+
+      # Advisory in the log, blocking through the budget file. Phase 6.1's
+      # gains are only durable if exceeding them fails something.
+      - name: Bundle size
+        run: npm run bundle:report
+
+      # A rendered app is easier to argue about than a stack trace.
+      - name: Upload build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Full history: a leak is not fixed by a later commit that removes it,
+      # so the scan has to see every commit the branch introduces.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL \
+            https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+        env:
+          GITLEAKS_VERSION: 8.30.1
+
+      # Scans the commits this change introduces, not the entire history.
+      #
+      # That is deliberate. The historical exposure this project already knows
+      # about (ROADMAP.md Phase 0) is closed by rotation, not by rewriting
+      # history, and a permanently-red job for a leak that is already dead
+      # teaches everyone to ignore the job. What must never happen again is a
+      # *new* secret landing — so that is what blocks the merge.
+      #
+      # A full-history sweep is worth running once by hand:
+      #   gitleaks detect --source . --redact
+      - name: Scan for new secrets
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            BEFORE="${{ github.event.before }}"
+            # A branch's first push reports an all-zero "before", and a force
+            # push can report a commit this checkout does not contain. Either
+            # way there is no usable range, so fall back to the head commit
+            # alone rather than silently scanning nothing.
+            if [ -z "$BEFORE" ] \
+              || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+              || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              RANGE="${{ github.sha }}~1..${{ github.sha }}"
+            else
+              RANGE="$BEFORE..${{ github.sha }}"
+            fi
+          fi
+          # gitleaks exits 0 when the underlying `git log` fails — it reports
+          # "0 commits scanned" and "no leaks found" in the same breath. A
+          # secret scanner that passes because it scanned nothing is worse
+          # than no scanner, so resolve the range ourselves first and fail
+          # loudly if git cannot.
+          if ! COUNT=$(git rev-list --count "$RANGE" 2>&1); then
+            echo "::error::Cannot resolve commit range $RANGE: $COUNT"
+            exit 1
+          fi
+
+          echo "Scanning $RANGE ($COUNT commit(s))"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No new commits to scan."
+            exit 0
+          fi
+
+          gitleaks detect \
+            --source . \
+            --log-opts "$RANGE" \
+            --redact \
+            --verbose
