@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
+import { logger } from '../../utils/logger';
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalProperties: 0,
@@ -160,7 +161,7 @@ const Dashboard = () => {
         
         setRecentActivities(allActivities);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        logger.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }

@@ -2,8 +2,6 @@ import React, { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import InvestmentCalculator from '../components/InvestmentCalculator';
 import { 
   Globe, 
@@ -249,8 +247,7 @@ const International = () => {
         <meta name="keywords" content="Nairobi international property, Kenya diaspora investment, expat housing Nairobi, international real estate Kenya, African diaspora property" />
       </Helmet>
 
-      <Header />
-
+      <main className="flex-grow">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
@@ -757,7 +754,7 @@ const International = () => {
         </div>
       </section>
 
-      <Footer />
+      </main>
     </>
   );
 };

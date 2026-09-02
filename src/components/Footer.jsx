@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
 
+import Icon from './Icon';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { logo, siteName, phone, email, address, socialMedia, serviceLocations, whatsapp } = useSettings();
@@ -74,11 +75,11 @@ const Footer = () => {
             {/* Enhanced Social Links */}
             <div className="flex space-x-3 pt-4">
               {[
-                { icon: 'fab fa-facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-blue-500' },
-                { icon: 'fab fa-instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
-                { icon: 'fab fa-tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
-                { icon: 'fab fa-linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-blue-600' },
-                { icon: 'fab fa-twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
+                { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-blue-500' },
+                { icon: 'instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
+                { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
+                { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-blue-600' },
+                { icon: 'twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
               ].filter(s => s.href).map((social, index) => (
                 <a 
                   key={index}
@@ -88,7 +89,7 @@ const Footer = () => {
                   className="w-9 h-9 bg-gray-700/80 hover:bg-primary rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:shadow-lg backdrop-blur-sm"
                   aria-label={social.label}
                 >
-                  <i className={`${social.icon} text-white text-sm`}></i>
+                  <Icon name={social.icon} size={14} className="text-white" />
                 </a>
               ))}
             </div>
@@ -146,7 +147,7 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
-                  <i className="fas fa-map-marker-alt text-primary text-xs"></i>
+                  <Icon name="map-marker-alt" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">Headquarters</p>
@@ -157,7 +158,7 @@ const Footer = () => {
 
               <a href={`tel:${phone()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
-                  <i className="fas fa-phone text-primary text-xs"></i>
+                  <Icon name="phone" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{phone()}</p>
@@ -167,7 +168,7 @@ const Footer = () => {
 
               <a href={`mailto:${email()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
-                  <i className="fas fa-envelope text-primary text-xs"></i>
+                  <Icon name="envelope" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{email()}</p>
@@ -237,7 +238,7 @@ const Footer = () => {
           className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 animate-soft-bounce"
           aria-label="Chat on WhatsApp"
         >
-          <i className="fab fa-whatsapp text-white text-xl"></i>
+          <Icon name="whatsapp" size={20} className="text-white" />
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
         </a>
       </div>
@@ -251,7 +252,7 @@ const Footer = () => {
           className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
           aria-label="Chat on WhatsApp"
         >
-          <i className="fab fa-whatsapp text-white text-lg group-hover:scale-110 transition-transform"></i>
+          <Icon name="whatsapp" size={18} className="text-white group-hover:scale-110 transition-transform" />
           <span className="text-sm font-semibold">Chat with us</span>
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
         </a>

@@ -5,10 +5,9 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../src/utils/supabaseClient';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import PropertyModal from '../components/PropertyModal';
 
+import Icon from '../components/Icon';
 const Home = () => {
   const servicesRef = useRef(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
@@ -66,7 +65,6 @@ const Home = () => {
         <meta property="og:title" content="Kenyan Real Estate Experts | Raslipwani Properties" />
         <meta property="og:description" content="Find your perfect property with Kenya's leading real estate specialists" />
   <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" />
-  <link rel="canonical" href="https://www.raslipwani.co.ke" />
         
         {/* Local Business Schema */}
         <script type="application/ld+json">
@@ -105,9 +103,7 @@ const Home = () => {
         </script>
       </Helmet>
       
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        
+      <>
         <main className="flex-grow">
           {/* Hero Section */}
           <section className="relative bg-cover bg-center min-h-screen flex items-center">
@@ -329,8 +325,6 @@ const Home = () => {
           </section>
         </main>
         
-        <Footer />
-
         {/* Property Modal */}
         <AnimatePresence>
           {isModalOpen && selectedProperty && (
@@ -340,7 +334,7 @@ const Home = () => {
             />
           )}
         </AnimatePresence>
-      </div>
+      </>
     </>
   );
 };
@@ -357,7 +351,10 @@ const ServiceCard = ({ icon, title, index }) => (
   >
     <div className="relative">
       <div className="bg-gradient-to-br from-primary to-primary/80 w-14 h-14 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-        <i className={`${icon} text-white text-xl md:text-3xl`}></i>
+        {/* Sized by class, not the `size` prop: this is the only icon on the site
+            that grows at the `md` breakpoint, and a prop cannot be responsive.
+            Tailwind's w/h override the width/height attributes the prop sets. */}
+        <Icon name={icon} className="w-5 h-5 md:w-8 md:h-8 text-white" />
       </div>
       <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
     </div>
@@ -497,22 +494,22 @@ const BenefitCard = ({ title, description, index }) => (
 // Data for services
 const services = [
   {
-    icon: "fas fa-home",
+    icon: "home",
     title: "Property Sales",
     description: "Strategic marketing to sell your property at optimal market value across Kenya"
   },
   {
-    icon: "fas fa-search-dollar",
+    icon: "search-dollar",
     title: "Property Acquisition",
     description: "Expert guidance through the entire buying process nationwide"
   },
   {
-    icon: "fas fa-chart-line",
+    icon: "chart-line",
     title: "Property Valuation",
     description: "Accurate assessments to inform your investment decisions"
   },
   {
-    icon: "fas fa-tasks",
+    icon: "tasks",
     title: "Property Management",
     description: "Comprehensive services to maximize your investment returns"
   }

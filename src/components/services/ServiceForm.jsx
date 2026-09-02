@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+import Icon from '../Icon';
 // NOTE: this component is not rendered by any route and its field list is
 // still a placeholder. See ROADMAP.md Release 3 (dead-code sweep).
 const ServiceForm = ({ 
@@ -17,7 +18,7 @@ const ServiceForm = ({
         onClick={closeModal}
         className="text-gray-500 hover:text-primary transition-colors"
       >
-        <i className="fas fa-times text-xl"></i>
+        <Icon name="times" size={20} />
       </button>
     </div>
     
@@ -45,7 +46,7 @@ const ServiceForm = ({
         >
           {isSubmitting ? (
             <span className="flex items-center justify-center">
-              <i className="fas fa-spinner fa-spin mr-2"></i> Submitting...
+              <Icon name="spinner" className="animate-spin mr-2" /> Submitting...
             </span>
           ) : "Confirm Booking"}
         </motion.button>

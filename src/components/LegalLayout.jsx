@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet-async';
-import Header from './Header';
-import Footer from './Footer';
 
 /**
  * Shared chrome for the statutory pages (privacy, terms). They share a layout,
@@ -22,10 +20,8 @@ const LegalLayout = ({ title, description, updatedOn, children }) => {
         <meta name="robots" content="index, follow" />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header />
-
-        <main className="flex-grow">
+      <>
+        <main className="flex-grow bg-gray-50">
           <div className="bg-primary text-white py-14 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl">
               <h1 className="text-3xl md:text-4xl font-bold">{title}</h1>
@@ -50,8 +46,7 @@ const LegalLayout = ({ title, description, updatedOn, children }) => {
           </div>
         </main>
 
-        <Footer />
-      </div>
+      </>
     </>
   );
 };

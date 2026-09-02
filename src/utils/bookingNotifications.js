@@ -1,3 +1,4 @@
+import { logger } from './logger';
 /**
  * Client-side trigger for booking notification email.
  *
@@ -15,12 +16,12 @@ export async function notifyBookingReceived(booking) {
     });
 
     if (!response.ok) {
-      console.error('Booking notification failed with status', response.status);
+      logger.error('Booking notification failed with status', response.status);
       return false;
     }
     return true;
   } catch (error) {
-    console.error('Booking notification could not be sent', error);
+    logger.error('Booking notification could not be sent', error);
     return false;
   }
 }

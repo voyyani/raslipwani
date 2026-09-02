@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { logger } from '../utils/logger';
 /**
  * Catches render-time exceptions and shows a branded recovery screen instead
  * of React's default: an empty white page with no explanation and no way back.
@@ -26,7 +27,7 @@ class ErrorBoundary extends React.Component {
     // Somewhere real, once a reporter exists. Until then the console is the
     // only record, and a silent boundary is worse than no boundary: the page
     // recovers and nobody ever learns the page was broken.
-    console.error(
+    logger.error(
       `[ErrorBoundary${this.props.name ? `: ${this.props.name}` : ''}]`,
       error,
       errorInfo?.componentStack

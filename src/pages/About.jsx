@@ -2,9 +2,8 @@ import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
+import Icon from '../components/Icon';
 const About = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -19,22 +18,22 @@ const About = () => {
 
   const values = [
     {
-      icon: 'fas fa-shield-alt',
+      icon: 'shield-alt',
       title: 'Integrity',
       description: 'Honest and transparent dealings in all our transactions'
     },
     {
-      icon: 'fas fa-users',
+      icon: 'users',
       title: 'Client-First',
       description: 'Your goals and satisfaction are our top priority'
     },
     {
-      icon: 'fas fa-chart-line',
+      icon: 'chart-line',
       title: 'Expertise',
       description: 'Deep market knowledge and professional guidance'
     },
     {
-      icon: 'fas fa-bolt',
+      icon: 'bolt',
       title: 'Innovation',
       description: 'Leveraging technology for better real estate solutions'
     }
@@ -69,10 +68,8 @@ const About = () => {
         </script>
       </Helmet>
       
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-        <Header />
-        
-        <main className="flex-grow">
+      <>
+        <main className="flex-grow bg-gradient-to-b from-white to-gray-50">
           {/* Hero Section */}
           <section className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-primary py-24 md:py-32 overflow-hidden">
             {/* Background Pattern */}
@@ -138,7 +135,7 @@ const About = () => {
                   transition={{ duration: 0.7 }}
                 >
                   <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-                    <i className="fas fa-history text-sm"></i>
+                    <Icon name="history" size={14} />
                     Our Journey
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Building Dreams Across Kenya</h1>
@@ -164,19 +161,19 @@ const About = () => {
                     <h2 className="text-xl font-semibold text-primary mb-3">Why Invest in Kenya?</h2>
                     <ul className="space-y-2 text-gray-700">
                       <li className="flex items-center gap-3">
-                        <i className="fas fa-chart-line text-primary text-sm"></i>
+                        <Icon name="chart-line" size={14} className="text-primary" />
                         <span>Consistent property value appreciation averaging 8-12% annually</span>
                       </li>
                       <li className="flex items-center gap-3">
-                        <i className="fas fa-gem text-primary text-sm"></i>
+                        <Icon name="gem" size={14} className="text-primary" />
                         <span>Growing middle class driving real estate demand</span>
                       </li>
                       <li className="flex items-center gap-3">
-                        <i className="fas fa-city text-primary text-sm"></i>
+                        <Icon name="city" size={14} className="text-primary" />
                         <span>Urban development and infrastructure expansion</span>
                       </li>
                       <li className="flex items-center gap-3">
-                        <i className="fas fa-globe-africa text-primary text-sm"></i>
+                        <Icon name="globe-africa" size={14} className="text-primary" />
                         <span>Strategic location as East Africa's economic hub</span>
                       </li>
                     </ul>
@@ -196,7 +193,7 @@ const About = () => {
                         <div className="text-center w-full">
                           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mx-auto max-w-md">
                             <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                              <i className="fas fa-home text-3xl text-primary"></i>
+                              <Icon name="home" size={30} className="text-primary" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-3">Nationwide Coverage</h3>
                             <p className="text-gray-600 mb-6">
@@ -234,7 +231,7 @@ const About = () => {
                 transition={{ duration: 0.6 }}
               >
                 <div className="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
-                  <i className="fas fa-bullseye text-sm"></i>
+                  <Icon name="bullseye" size={14} />
                   Our Purpose
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mission & Vision</h1>
@@ -252,7 +249,7 @@ const About = () => {
                   transition={{ duration: 0.6, delay: 0.1 }}
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <i className="fas fa-rocket text-white text-xl"></i>
+                    <Icon name="rocket" size={20} className="text-white" />
                   </div>
                   <h2 className="text-2xl font-bold mb-4 text-gray-900">Our Mission</h2>
                   <p className="text-gray-700 leading-relaxed">
@@ -270,7 +267,7 @@ const About = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <i className="fas fa-eye text-white text-xl"></i>
+                    <Icon name="eye" size={20} className="text-white" />
                   </div>
                   <h2 className="text-2xl font-bold mb-4 text-gray-900">Our Vision</h2>
                   <p className="text-gray-700 leading-relaxed">
@@ -294,7 +291,7 @@ const About = () => {
                 transition={{ duration: 0.6 }}
               >
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
-                  <i className="fas fa-star text-sm"></i>
+                  <Icon name="star" size={14} />
                   Our Values
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What We Stand For</h1>
@@ -314,7 +311,7 @@ const About = () => {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
                     <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                      <i className={`${value.icon} text-primary group-hover:text-white text-lg`}></i>
+                      <Icon name={value.icon} size={18} className="text-primary group-hover:text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">{value.title}</h3>
                     <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
@@ -344,14 +341,14 @@ const About = () => {
                     to="/properties" 
                     className="inline-flex items-center gap-2 bg-white text-primary font-semibold py-3 px-8 rounded-full hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
-                    <i className="fas fa-search"></i>
+                    <Icon name="search" />
                     Browse Properties
                   </Link>
                   <Link 
                     to="/contact" 
                     className="inline-flex items-center gap-2 bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-full hover:bg-white hover:text-primary transition-all duration-300"
                   >
-                    <i className="fas fa-envelope"></i>
+                    <Icon name="envelope" />
                     Get In Touch
                   </Link>
                 </div>
@@ -360,8 +357,7 @@ const About = () => {
           </section>
         </main>
         
-        <Footer />
-      </div>
+      </>
     </>
   );
 };

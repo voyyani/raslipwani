@@ -51,6 +51,13 @@ jobs:
       - name: Bundle size
         run: npm run bundle:report
 
+      # `vite.config.js` drops console output at build time; this asserts it on
+      # the artifact. A config option is a claim until something checks it, and
+      # console output is not a private channel — the call this replaced printed
+      # Supabase error objects into every visitor's console.
+      - name: No console output in the bundle
+        run: npm run check:console
+
       # A rendered app is easier to argue about than a stack trace.
       - name: Upload build
         if: always()

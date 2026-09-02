@@ -5,6 +5,7 @@ import { FaSave, FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../../hooks/useSettings';
 
+import { logger } from '../../../utils/logger';
 /**
  * GeneralSettings - General site configuration
  * Works with flat table structure (single row with columns)
@@ -34,14 +35,14 @@ const GeneralSettings = () => {
     staleTime: 0, // Always consider data stale
     refetchOnMount: 'always', // Always refetch when component mounts
     queryFn: async () => {
-      console.log('[GeneralSettings] Fetching settings from database...');
+      logger.debug('[GeneralSettings] Fetching settings from database...');
       const { data, error } = await supabase
         .from('admin_settings')
         .select('*')
         .limit(1)
         .single();
 
-      console.log('[GeneralSettings] Fetch result:', { data, error });
+      logger.debug('[GeneralSettings] Fetch result:', { data, error });
       
       if (error && error.code !== 'PGRST116') throw error;
 
@@ -69,7 +70,7 @@ const GeneralSettings = () => {
           social_linkedin: data.social_linkedin || 'https://linkedin.com/company/raslipwani',
           social_tiktok: data.social_tiktok || ''
         };
-        console.log('[GeneralSettings] Setting form data:', newFormData);
+        logger.debug('[GeneralSettings] Setting form data:', newFormData);
         setFormData(newFormData);
       }
       return data;
@@ -79,7 +80,7 @@ const GeneralSettings = () => {
   // Update settings mutation (updates the single row)
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      console.log('[GeneralSettings] Saving settings:', settings);
+      logger.debug('[GeneralSettings] Saving settings:', settings);
       
       // Parse service locations from comma-separated string to array
       const locationsArray = settings.service_locations
@@ -103,7 +104,7 @@ const GeneralSettings = () => {
         updated_at: new Date().toISOString()
       };
 
-      console.log('[GeneralSettings] Update payload:', updateData);
+      logger.debug('[GeneralSettings] Update payload:', updateData);
 
       // Try to update existing row, or insert if none exists
       const { data: existing, error: selectError } = await supabase
@@ -112,7 +113,7 @@ const GeneralSettings = () => {
         .limit(1)
         .single();
 
-      console.log('[GeneralSettings] Existing row:', { existing, selectError });
+      logger.debug('[GeneralSettings] Existing row:', { existing, selectError });
 
       if (existing) {
         const { data, error } = await supabase
@@ -120,14 +121,14 @@ const GeneralSettings = () => {
           .update(updateData)
           .eq('id', existing.id)
           .select();
-        console.log('[GeneralSettings] Update result:', { data, error });
+        logger.debug('[GeneralSettings] Update result:', { data, error });
         if (error) throw error;
       } else {
         const { data, error } = await supabase
           .from('admin_settings')
           .insert(updateData)
           .select();
-        console.log('[GeneralSettings] Insert result:', { data, error });
+        logger.debug('[GeneralSettings] Insert result:', { data, error });
         if (error) throw error;
       }
     },
@@ -138,7 +139,7 @@ const GeneralSettings = () => {
       refreshSettings();
     },
     onError: (error) => {
-      console.error('Settings save error:', error);
+      logger.error('Settings save error:', error);
       toast.error('Failed to save settings');
     }
   });

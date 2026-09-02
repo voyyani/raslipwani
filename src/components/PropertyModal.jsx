@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
+import { logger } from '../utils/logger';
 const PropertyModal = ({ property, closeModal }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
@@ -180,7 +181,7 @@ const PropertyModal = ({ property, closeModal }) => {
   // Handle image error
   const handleImageError = () => {
     setIsImageLoading(false);
-    console.error('Error loading image:', property.images[currentImageIndex]);
+    logger.error('Error loading image:', property.images[currentImageIndex]);
   };
 
   // Tap gestures

@@ -21,6 +21,13 @@ import AdminBottomNav from './AdminBottomNav';
 import AdminBreadcrumb from './AdminBreadcrumb';
 import DebugPanel from '../../components/admin/DebugPanel';
 
+// Imported here rather than in App.jsx so it rides the lazy admin chunk. As a
+// top-level App import it was in the stylesheet every public visitor blocks on,
+// which is 328 lines of console styling for an audience of one. Its two global
+// rules were redundant: `index.css` already sets `overflow-x: hidden` on html
+// and body, and Tailwind's preflight already sets `box-sizing: border-box`.
+import '../../styles/admin-mobile.css';
+
 /**
  * AdminLayout - World-class admin layout with mobile-first navigation
  * Features:
