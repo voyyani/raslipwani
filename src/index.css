@@ -1,5 +1,5 @@
-/* Optimized font loading with display=swap for better performance */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+/* Poppins is linked from index.html so the browser discovers it in the initial
+   HTML rather than after this bundle parses. Do not re-add an @import here. */
 
 /* Tailwind layers */
 @tailwind base;
@@ -55,20 +55,9 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #0D4B6E;
-}
+/* Keep only the focus ring. The rest of the Vite scaffold's button block
+   (dark background, padding, radius) was overridden by Tailwind on every real
+   button and only ever showed up on ones that had not been styled yet. */
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -115,18 +104,7 @@ button:focus-visible {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* --- Defensive UI fixes ---------------------------------------------- */
-/*
-  Hide any stray circular "scroll indicator" buttons that might slip in
-  from older markup or external snippets. This targets the pattern seen
-  in DevTools (rounded-full absolute button with an aria-label containing
-  "Scroll") without affecting normal buttons or badges.
-*/
-[aria-label="Scroll to learn more"],
-button[aria-label*="Scroll"][aria-label*="learn"],
-.absolute.bottom-6.left-1\/2.rounded-full[aria-label*="Scroll"] {
-  display: none !important;
-}
+
 
 .maintenance-shell {
   position: relative;

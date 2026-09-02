@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthButtons from './AuthButtons';
-import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle, FiExternalLink } from 'react-icons/fi';
+import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle, FiExternalLink, FiGlobe } from 'react-icons/fi';
 import { useSettings } from '../hooks/useSettings';
 
 const Header = () => {
@@ -47,7 +47,11 @@ const Header = () => {
     {
       path: '/international',
       label: 'International',
-      icon: FiGrid
+      icon: FiGlobe,
+      dropdown: [
+        { path: '/international', label: 'Overview' },
+        { path: '/international/un-housing', label: 'UN & Diplomatic Housing' },
+      ],
     },
     {
       path: '/about',

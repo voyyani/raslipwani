@@ -41,8 +41,10 @@ const Services = lazy(() => import('./pages/ServicesMain')); // Updated path
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 
-// International market page
+// International section. The hub triages three audiences; UN & diplomatic
+// housing is the one that needs a page of its own.
 const International = lazy(() => import('./pages/International'));
+const UNHousing = lazy(() => import('./pages/UNHousing'));
 
 // Statutory pages. Mandatory for a business processing personal data under the
 // Kenyan Data Protection Act, 2019 — the footer has linked to them all along.
@@ -127,9 +129,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />
-            {/* International market route */}
+            {/* International section */}
             <Route path="/international" element={<International />} />
-            
+            <Route path="/international/un-housing" element={<UNHousing />} />
+
             
             {/* Updated services routes */}
             <Route path="/services" element={<Services />} />

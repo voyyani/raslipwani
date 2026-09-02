@@ -155,6 +155,14 @@ const UNHousing = () => {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <nav aria-label="Breadcrumb" className="mb-8">
+            <Link
+              to="/international"
+              className="text-sm text-blue-200 hover:text-white transition-colors"
+            >
+              &larr; International
+            </Link>
+          </nav>
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-white/20">
               <Building className="w-5 h-5" />

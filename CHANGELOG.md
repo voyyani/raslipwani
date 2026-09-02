@@ -5,19 +5,83 @@ All notable changes to Raslipwani Properties.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Phase and Release
 numbers refer to [`ROADMAP.md`](ROADMAP.md).
 
-> **⚠️ Nothing in `[Unreleased]` is live.** Every entry below sits on the branch
-> `feat/phase2-revenue-data-integrity` and has never been deployed. The security fixes in
+> **⚠️ Nothing in `[Unreleased]` is live.** Every entry below sits on `main` (Releases 1–2)
+> and the branch `feat/release-3-coherent`, and has never been deployed. The security fixes in
 > particular are **written but not applied** — the three migrations that close the data
 > exposure require an owner to run them. See
 > [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 
 ---
 
-## [Unreleased] — branch `feat/phase2-revenue-data-integrity`
+## [Unreleased]
 
-Verified 2026-09-02 (end of Release 2): **84 tests passing across 13 files**,
-**0 ESLint errors**, coverage 61.7% lines behind an enforced ratcheting floor,
-production build clean, **first-load bundle 229.8 kB gzip** under a 235 kB CI budget.
+Verified 2026-09-02 (end of Release 3): **85 tests passing across 14 files**,
+**0 ESLint errors** (374 warnings), coverage 61.83% lines behind an enforced ratcheting
+floor, production build clean, **first-load bundle 229.8 kB gzip** under a 235 kB CI budget.
+
+### Release 3 — "Coherent" · branch `feat/release-3-coherent`
+
+#### Added
+
+- **`/international/un-housing`.** `UNHousing.jsx` was a finished 472-line page that had
+  never been routed. It is now reachable, carries a breadcrumb back to the hub, and
+  appears in the header dropdown and `sitemap.xml`.
+- **Audience triage on `/international`.** Three routed paths — UN staff and diplomats,
+  African diaspora, international professionals — under the framing *"Capturing the UN
+  Nairobi Opportunity"*, merged in from the page it replaced.
+- **`src/pages/__tests__/pages.routed.test.js`.** Walks `App.jsx`'s import graph and
+  fails if any module under `src/pages` becomes unreachable. This is the roadmap's
+  "route or delete — never orphan" principle made enforceable rather than aspirational;
+  2,074 lines had accumulated in its absence. Confirmed to fail on a deliberately
+  orphaned file.
+
+#### Changed
+
+- **Resolved the two-hub conflict.** `International.jsx` and `InternationalHub.jsx` were
+  two pages covering the same three audiences, and both claimed `/international`.
+  `International.jsx` kept (multi-currency, investment calculator, six sections);
+  `InternationalHub.jsx`'s audience segmentation merged into it and the file deleted.
+  Its old `targetMarkets` grid went with it — it named the same three audiences and
+  linked to none of them.
+- **Design tokens now compile.** `primary`, `secondary` and `accent` are objects with
+  `DEFAULT`/`dark`/`light`. `bg-primary-dark` was used 18 times and `text-primary-dark`
+  twice against a flat string token, which Tailwind silently resolved to **nothing** —
+  every primary CTA on the site had a hover state that emitted no CSS. Verified against
+  compiled output: `.hover\:bg-primary-dark:hover` now emits `#0A3A56`.
+- **Font loading fixed at both ends.** `index.html` preloaded Inter while `index.css`
+  `@import`-ed Poppins — the deployed HTML preloaded a font the deployed CSS never
+  fetched, and the font that was used blocked late behind the CSS bundle. Poppins now
+  loads from a `<link rel="stylesheet">` in the HTML, with a `fonts.gstatic.com`
+  preconnect.
+
+#### Removed
+
+- **`src/pages/Services.jsx`** (800 lines) — a near-duplicate of the live
+  `ServicesMain.jsx`, imported by nothing, and the source of an earlier email bug.
+- **`src/pages/InternationalHub.jsx`** (425 lines) — merged into `International.jsx`.
+- **`src/pages/DiasporaPortal.jsx`** (339 lines) — a mock-data dashboard with two
+  hardcoded properties and invented rent, portfolio value and ROI figures, with no
+  `owner_properties` model behind it. Routing it behind auth at `/portal` would have
+  presented fabricated financials to a signed-in user as their own. Deleted rather than
+  routed; re-entered as a Phase 10 roadmap item, with the prototype recoverable from git
+  history.
+- **`user-scalable=no` and `maximum-scale=1.0`** from the viewport meta — a direct
+  **WCAG 2.1 SC 1.4.4 (AA)** failure that Android honours. `viewport-fit=cover` kept.
+- **The Vite scaffold `button { … }` block** from `index.css`; only its focus ring
+  remains. Every real button already overrode it with Tailwind.
+- **A `display: none !important` hack** targeting `aria-label="Scroll to learn more"`.
+  The markup it suppressed no longer exists anywhere in `src/` — it was hiding nothing.
+
+#### Known, carried forward
+
+- `UNHousing.jsx` still ships a hardcoded `unProperties` array with Unsplash
+  placeholders, fixed prices and dates in the past. Moving it into the database needs a
+  migration, and **no migration can be applied until Release 1 is done by the owner.**
+  Treat the page's inventory as placeholder, not live.
+
+---
+
+### Releases 1–2
 
 ### Security
 

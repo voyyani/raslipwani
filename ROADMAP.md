@@ -1,6 +1,6 @@
 # Raslipwani Properties — Master Roadmap (Final)
 
-> **Version 4 — status-verified 2026-09-02. Supersedes all prior iterations.**
+> **Version 5 — status-verified 2026-09-02, end of Release 3. Supersedes all prior iterations.**
 >
 > **Source:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md), plus **live database introspection** performed 2026-09-01 against project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1).
 >
@@ -18,18 +18,21 @@ done*. Where a task's outcome lives in the database or in Vercel, an agent canno
 it — those are marked 🔑 **owner-verify** and are listed in
 [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 
-| | Verified 2026-09-02 (end of Release 2) |
+| | Verified 2026-09-02 (end of Release 3) |
 |---|---|
-| Tests | ✅ **84 passing, 13 files** — the suite executed 0 tests at baseline |
+| Tests | ✅ **85 passing, 14 files** — the suite executed 0 tests at baseline |
 | Coverage | ✅ **60.6% statements / 61.7% lines**, enforced by a ratcheting floor |
 | Build | ✅ clean |
-| Lint | ✅ **0 errors** (baseline 77) — 418 warnings remain, mostly `jsx-a11y`, deferred to Phase 7 |
+| Lint | ✅ **0 errors** (baseline 77) — 374 warnings remain (was 418; the deleted pages carried 44), mostly `jsx-a11y`, deferred to Phase 7 |
 | Bundle | ✅ **229.8 kB gzip first load** — below the 275 kB pre-regression baseline; budget 235 kB |
 | CI | ✅ lint · test · coverage floor · build · bundle budget · secret scan, on every PR |
 | Clerk | ✅ gone from runtime code and from `package.json` |
 | Privileged keys in bundle | ✅ zero JWT-shaped strings in `dist/`, now enforced at build time |
 | Error boundaries | ✅ root, route and admin |
-| Unreachable lines | 🔴 **2,074** — `Services.jsx` (835) + 3 unrouted International pages (1,239) → Release 3 |
+| Unreachable lines | ✅ **0** — `Services.jsx`, `InternationalHub.jsx` and `DiasporaPortal.jsx` deleted, `UNHousing.jsx` routed. A test now fails if a page is orphaned again |
+| Design tokens | ✅ `bg-primary-dark` emits rules for the first time — 20 previously-inert hover states now render |
+| Fonts | ✅ Poppins is preloaded and loaded. The HTML no longer preloads a font the CSS never fetched |
+| Zoom | ✅ `user-scalable=no` removed — WCAG 1.4.4 (AA) no longer failed at the viewport tag |
 
 **The single most important fact on this page:** *no database migration has been applied.*
 `007`, `008`, and `009` are authored, reviewed, and committed — and inert. Until an owner
@@ -149,10 +152,10 @@ create policy "admins manage bookings" on bookings
 | **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete & tested.** `008`/`009` authored, **not applied** |
 | **2** | Revenue & Data Integrity | 1 week | 🟢 **2.1 done** (needs keys 🔑) · **2.2 done** · **2.3 done** |
 | **3** | Safety Net | 1 week | ✅ **Complete** — 3.1 (84 tests + coverage floor), 3.2 (0 lint errors), 3.3, 3.4 |
-| **4** | Structure & International IA | 2 weeks | ⬜ Not started |
-| **5** | Design System + Dark Mode | 2 weeks | ⬜ Not started |
+| **4** | Structure & International IA | 2 weeks | 🟢 **4.1 done** · 4.2–4.4 not started |
+| **5** | Design System + Dark Mode | 2 weeks | 🟢 **5.1 done · 5.4 done** · 5.2–5.3, 5.5–5.6 not started |
 | **6** | Performance | 1 week | 🟡 **6.1 done** (bundle recovered) · 6.2–6.4 not started |
-| **7** | Accessibility | 1 week | ⬜ Not started |
+| **7** | Accessibility | 1 week | 🟢 **7.1 (zoom) done** · rest not started |
 | **8** | SEO & Cross-Brand | 1 week | ⬜ Not started (8.5 partially shipped pre-roadmap) |
 | **9** | Client-Side UI Revamp | 3 weeks | ⬜ Not started |
 | **10** | Platform Maturity | Ongoing | ⬜ Not started |
@@ -230,26 +233,62 @@ keeps both true.
 > anyone with the anon key.** It remains the highest-value work available, and no amount
 > of further code changes that.
 
-### Release 3 — "Coherent" · ~2 weeks
+### ✅ Release 3 — "Coherent" · **COMPLETE 2026-09-02**
 
-- [ ] **4.1 International section** — resolve the `International` / `InternationalHub`
-      conflict, route `UNHousing`, decide `DiasporaPortal`'s fate, **delete
-      `Services.jsx`**. This alone retires all 2,074 unreachable lines and is the highest
-      value-per-hour work remaining: three finished pages are sitting unrouted.
-- [ ] **5.1 + 5.4** — fix the broken Tailwind token and the Poppins/Inter mismatch
-      (`index.html` preloads a font the CSS never loads). Both are small and both are
-      currently costing real page-load time.
-- [ ] **7.1** — remove `user-scalable=no` from the viewport. One line; a direct WCAG
-      1.4.4 AA failure.
+- [x] **4.1 International section** — the hub conflict is resolved, `UNHousing` is
+      routed, `DiasporaPortal`'s fate is decided, and `Services.jsx` is gone. All
+      **2,074 unreachable lines** retired.
+      - `International.jsx` won the hub contest on completeness (multi-currency,
+        investment calculator, six sections). `InternationalHub.jsx`'s genuine
+        contribution — audience segmentation and the *"Capturing the UN Nairobi
+        Opportunity"* framing — was merged in as a triage section directly under the
+        hero, and the file deleted. Its three cards now go somewhere: UN staff →
+        `/international/un-housing`, diaspora → the on-page diaspora section,
+        international professionals → `/properties`. The old `targetMarkets` grid was
+        removed as a duplicate: it named the same three audiences and linked to none
+        of them.
+      - `UNHousing.jsx` routed at `/international/un-housing`, with a breadcrumb back
+        to the hub, plus nav dropdown and `sitemap.xml` entries.
+      - **`DiasporaPortal.jsx` deleted, not routed.** It is a mock-data prototype —
+        two hardcoded properties, fabricated rent, portfolio value and ROI — with no
+        `owner_properties` model behind it. Routing it at `/portal` would have shown
+        signed-in users invented figures about their own money. The IA intent survives
+        as a Phase 10 item; the design is recoverable from git history.
+      - **`Services.jsx` deleted** (800 lines) — a near-duplicate of the live
+        `ServicesMain.jsx` and the source of the earlier email bug. Nothing imported it.
+      - A test enforces principle 5 from here on: `src/pages/__tests__/pages.routed.test.js`
+        walks App.jsx's import graph and fails if any module in `src/pages` is
+        unreachable. Verified to fail on a deliberately orphaned file.
+- [x] **5.1 Broken token fixed** — `primary`, `secondary` and `accent` are now objects
+      with `DEFAULT`/`dark`/`light`. `bg-primary-dark` (18 uses) and `text-primary-dark`
+      (2) compiled to **zero rules** before this; confirmed against compiled CSS that
+      `.hover\:bg-primary-dark:hover` now emits `#0A3A56` and `.bg-primary` still emits
+      `#0D4B6E`. Every primary CTA has hover feedback for the first time.
+- [x] **5.4 Global CSS cleaned** — the Poppins/Inter mismatch is fixed at both ends:
+      `index.html` preloaded Inter while `index.css` `@import`-ed Poppins. Poppins is now
+      a `<link rel="stylesheet">` in the HTML (discovered in the initial document rather
+      than after the CSS bundle parses) and the `@import` is gone, with a
+      `fonts.gstatic.com` preconnect added. The Vite scaffold `button { … }` block was
+      removed — only its focus ring is kept. The `!important` `aria-label` hiding hack
+      was removed outright: the markup it suppressed no longer exists anywhere in `src/`.
+- [x] **7.1 Zoom re-enabled** — `maximum-scale=1.0, user-scalable=no` removed from the
+      viewport; `viewport-fit=cover` kept. A direct WCAG 2.1 SC 1.4.4 (AA) failure closed.
 
-**Ships:** every page written is a page reachable, on a correct type foundation.
+**Shipped:** every page written is a page reachable, on a type and token foundation that
+actually compiles, and pinch-zoom works.
+
+> ⚠️ Release 3, like Release 2, changes nothing in production. **Release 1 remains one day
+> of owner time and remains the only thing standing between the live database and anyone
+> with the anon key.**
 
 ### Later — deliberately deferred
 
 Phases 4.2–4.4, 5.2–5.6, 6.2–6.4, the rest of 7, all of 8, 9, and 10 remain valuable and
-remain documented in full below. They are deferred because none of them block a safe,
+remain documented in full below. They were deferred because none of them block a safe,
 earning deployment, and because **Phase 9 (the UI revamp — the original request) should
-be built on the structure Release 3 establishes, not before it.**
+be built on the structure Release 3 establishes, not before it.** Release 3 has now
+established it, so 5.2–5.3, 5.5 and the rest of Phase 7 move into Release 4 — see
+[Execution](#execution).
 
 ---
 
@@ -456,12 +495,13 @@ UN Housing, Diaspora, and International Hub were **planned upgrades**, so this i
 /portal                       → Diaspora owner dashboard (authenticated)
 ```
 
-- [ ] **Resolve the hub conflict.** `International.jsx` is more complete (multi-currency, investment calculator, 6 sections); `InternationalHub.jsx` has sharper audience segmentation and a stronger "Capturing the UN Nairobi Opportunity" narrative. Merge the best of both; delete the loser.
-- [ ] Route `UNHousing.jsx` at `/international/un-housing`.
-- [ ] `DiasporaPortal.jsx` is **structurally different** — no marketing sections, `h1` at line 90. It reads as an authenticated dashboard, not a landing page. Decide: authenticated `/portal` behind Supabase Auth (now trivial, post-Phase 1), or rewrite as marketing. Do not route it as-is beside marketing pages.
-- [ ] **Move hardcoded data to the database.** `UNHousing.jsx:27+` embeds a literal `unProperties` array with Unsplash placeholders, hardcoded prices, and fixed dates (`2026-02-01`) that will silently go stale. Model as `properties` rows with a segment tag so the admin CRM manages them.
-- [ ] **Delete `src/pages/Services.jsx`** (800 lines) — a near-duplicate of the live `ServicesMain.jsx` and an active hazard that already caused the email bug. Port anything of value first.
-- [ ] Add to nav and sitemap.
+- [x] **Resolve the hub conflict.** `International.jsx` kept and extended; `InternationalHub.jsx`'s audience triage and *"Capturing the UN Nairobi Opportunity"* framing merged into it as a routed triage section; the file deleted. The duplicate `targetMarkets` grid was dropped in the same pass.
+- [x] Route `UNHousing.jsx` at `/international/un-housing`, with a breadcrumb back to `/international`.
+- [x] `DiasporaPortal.jsx` — **decided: deleted.** It is a mock-data dashboard (two hardcoded properties, invented rent/ROI) with no data model behind it. Behind auth at `/portal` it would present fabricated financials as a user's own. Re-enters scope as a Phase 10 item once an owner-property model exists.
+- [ ] **Move hardcoded data to the database.** `UNHousing.jsx:27+` embeds a literal `unProperties` array with Unsplash placeholders, hardcoded prices, and fixed dates (`2026-02-01`) that will silently go stale. Model as `properties` rows with a segment tag so the admin CRM manages them. **Deferred past Release 3:** it needs a migration, and no migration can be applied until Release 1 is done. The page ships with placeholder inventory in the meantime — treat that as a known, temporary defect, not a finished state.
+- [x] **Deleted `src/pages/Services.jsx`** (800 lines). Nothing imported it; `ServicesMain.jsx` is the live page.
+- [x] Added to nav (an `/international` dropdown) and to `public/sitemap.xml`.
+- [x] **New:** `src/pages/__tests__/pages.routed.test.js` fails the build if any page module becomes unreachable from `App.jsx` again.
 
 This is your most defensible position — UN/diplomatic housing and diaspora investment are things a generic listings site cannot copy — and it is currently invisible. **Likely the highest-return product change here.**
 
@@ -503,7 +543,7 @@ Nine files exceed 700 lines; `AdminProperties.jsx` is 1,297.
 
 **Your primary CTAs have no hover feedback.**
 
-- [ ] Restructure `primary`/`secondary` as objects with `DEFAULT`, `dark`, `light`. Verify all 19 render.
+- [x] `primary`, `secondary` and `accent` restructured as objects with `DEFAULT`/`dark`/`light`. Verified against compiled Tailwind output: `.hover\:bg-primary-dark:hover` → `#0A3A56`, `.group-hover\:text-primary-dark` present, `.bg-primary` unchanged at `#0D4B6E`.
 
 ### 5.2 — Dual-theme token layer
 
@@ -525,9 +565,9 @@ Because dark mode is in scope, build tokens **semantically** (`surface`, `conten
 
 ### 5.4 — Clean global CSS
 
-- [ ] **Font mismatch:** `index.css:2` imports **Poppins**; `index.html:15` preloads **Inter**. Verified in the build — deployed HTML preloads a font the deployed CSS never loads, while Poppins isn't preloaded and blocks late. Fix both ends.
-- [ ] Remove the Vite scaffold `button { background-color: #1a1a1a; … }` (lines 62-74) that every Tailwind button overrides.
-- [ ] Remove the `!important` `aria-label` hiding hack (118-127) and fix the markup it suppresses.
+- [x] **Font mismatch fixed at both ends.** The Inter preload is gone; Poppins now loads from a `<link rel="stylesheet">` in `index.html` instead of an `@import` inside the CSS bundle, so the browser discovers it in the initial document. `fonts.gstatic.com` preconnect added.
+- [x] Vite scaffold `button { … }` block removed; only `button:focus-visible`'s outline kept.
+- [x] `!important` `aria-label` hiding hack removed. The markup it suppressed (`aria-label="Scroll to learn more"`) no longer exists in `src/` — the hack was suppressing nothing.
 
 ### 5.5 — Primitives
 
@@ -597,7 +637,7 @@ Supabase split above; both remain open.
 
 Better start than typical: **alt text complete (22/22)**, 239 focus declarations, only 1 `onClick` on a non-interactive `div`.
 
-- [ ] **Re-enable zoom.** `index.html:6` sets `maximum-scale=1.0, user-scalable=no` — a direct **SC 1.4.4 (AA)** failure that Android honours, disproportionately affecting low-vision users browsing photos and price figures. Remove both; keep `viewport-fit=cover`.
+- [x] **Zoom re-enabled.** `maximum-scale=1.0, user-scalable=no` removed from `index.html`; `viewport-fit=cover` kept. SC 1.4.4 (AA) no longer failed at the viewport tag.
 - [ ] Focus trapping and `aria-modal` on `PropertyModal`, `BookingModal`, `BookingDetailModal`, `ClientForm`; focus restoration on close.
 - [ ] `aria-expanded`/`aria-controls` on header dropdowns and mobile menu. Only 27 `aria-*` and **1** `role=` exist across 96 files.
 - [ ] Verify `htmlFor`/`id` pairing across all 98 inputs.
@@ -692,6 +732,7 @@ Construction is now a separate business (`nairobuild.co.ke`) with genuinely adja
 - [ ] **Error tracking** (Sentry) wired into the Phase 3.3 boundaries.
 - [ ] **Documentation hygiene** — 15 status docs in `src/Docs/` plus three at root. `README.md` advertises React 18.2.0 / Vite 4.4.5 against actual 18.3.1 / 6.4.3.
 - [ ] **Staging environment**, possible once Phase 2.2 makes the schema reproducible.
+- [ ] **Diaspora owner portal** (`/portal`). `DiasporaPortal.jsx` was deleted in Release 3 rather than routed, because it rendered fabricated portfolio figures from a hardcoded array. Rebuilding it needs, in order: an `owner_properties` model linking `auth.users` to `properties` with RLS scoping a signer to their own rows; real income, expense and maintenance records; and a session-only (non-admin) route guard. The deleted prototype is the design reference — recover it from git history at the Release 3 commit.
 
 ---
 
@@ -700,31 +741,33 @@ Construction is now a separate business (`nairobuild.co.ke`) with genuinely adja
 Three columns now: where this started, where it actually is today, and where it is going.
 "Verified 2026-09-02" means measured, not asserted.
 
-| Metric | Baseline (2026-09-01) | **Verified 2026-09-02** | Target |
+| Metric | Baseline (2026-09-01) | **Verified 2026-09-02 (end of Release 3)** | Target |
 |---|---|---|---|
 | Tables where anon can `DELETE`/`TRUNCATE` | **7 of 7** | **7 of 7** 🔑 *(fix written, not applied)* | 0 |
 | Tables with RLS actually enabled | **3 of 7** | **3 of 7** 🔑 *(fix written, not applied)* | 7 of 7 |
 | Policies that are `USING (true)` | **19 of 19** | **19 of 19** 🔑 *(fix written, not applied)* | 0 |
 | Secrets reachable from the browser | **3** | **1** — service key gone from code; Cloudinary secret + anon over-grant remain 🔑 | 0 |
 | Identity systems | 2 (Clerk + Supabase) | ✅ **1** | **1** |
-| Executing tests | **0** | ✅ **74** | Full critical-path |
-| Test coverage | 0% | not measured — `@vitest/coverage-v8` not installed | ≥ 70% |
-| ESLint errors | 77 | 🔴 **78** | 0 |
-| Unreachable lines | 2,039 | 🔴 **2,074** | 0 |
+| Executing tests | **0** | ✅ **85** (14 files) | Full critical-path |
+| Test coverage | 0% | **60.76% statements / 61.83% lines**, ratcheting floor enforced in CI | ≥ 70% |
+| ESLint errors | 77 | ✅ **0** (374 warnings, almost all `jsx-a11y`) | 0 |
+| Unreachable lines | 2,039 | ✅ **0** — guarded by `pages.routed.test.js` | 0 |
 | Broken navigation links | 4 | ✅ **0** | 0 |
-| First-load JS (gzip) | ~275 kB | 🔴 **~446 kB** *(regression)* | < 100 kB |
-| Largest single chunk | 379 kB raw | 🔴 **1,059 kB raw / 283 kB gzip** | — |
-| CSS bundle | 175 kB | **175 kB** (39.8 kB gzip) | < 50 kB |
-| Font payload | ~914 kB | ~914 kB — still preloading Inter while importing Poppins | < 100 kB |
+| Inert design tokens (`*-dark` compiling to nothing) | 20 | ✅ **0** | 0 |
+| First-load JS (gzip) | ~275 kB | **229.8 kB**, budget 235 kB, enforced in CI | < 100 kB |
+| Largest single chunk | 379 kB raw | 309 kB raw / 87 kB gzip (`AdminBookings`, lazy) | — |
+| CSS bundle | 175 kB | 146 kB (35.1 kB gzip) | < 50 kB |
+| Font payload | ~914 kB | Poppins only, preloaded and loaded — the Inter/Poppins mismatch is closed | < 100 kB |
 | Lighthouse Performance (mobile) | not measured | not measured | ≥ 90 |
 | axe violations | not measured | not measured | 0 |
 | Largest component | 1,297 lines | 1,297 lines | < 300 |
 | Components querying Supabase directly | 16 | 16 | 0 |
-| `bg-blue-*` usages | 165 | **165** | 0 |
-| Themes | 1 (broken partial dark) | 1 (broken partial dark) | 2, both AA |
+| `bg-blue-*` usages | 165 | **165** — Release 4 (5.2) | 0 |
+| Themes | 1 (broken partial dark) | 1 (broken partial dark) — Release 4 (5.3) | 2, both AA |
+| Viewport blocks pinch-zoom (SC 1.4.4) | **yes** | ✅ **no** | no |
 | Booking notification delivery | **0%** (8 leads stranded) | **0%** — pipeline built and tested, 🔑 awaiting keys | 100% |
-| Error boundaries | 0 | **0** | Root + per-route + admin |
-| CI | none | **none** | lint + test + build + gitleaks |
+| Error boundaries | 0 | ✅ Root + per-route + admin | Root + per-route + admin |
+| CI | none | ✅ lint · test · coverage floor · build · bundle budget · gitleaks | lint + test + build + gitleaks |
 | Overall audit score | **3.8 / 10** | ~**5.5 / 10** *(code-side gains real; security gains not yet live)* | **9 / 10** |
 
 **Read the table honestly.** Six metrics improved, three regressed, and the three that
@@ -754,20 +797,34 @@ That produces a bite-sized, TDD-structured plan at `docs/superpowers/plans/YYYY-
 **Where to start today:** not with a plan — with
 [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md). Release 1 is entirely
 owner actions against Supabase and Vercel, and every line of code it needs is already
-written and tested. **Release 2 is now complete, which makes this more urgent, not less:
-the codebase is hardened and the database is still untouched.**
+written and tested. **Releases 2 and 3 are now both complete, which makes this more
+urgent, not less: the codebase is hardened, coherent, and the database is still
+untouched.** Three releases of agent-executable work have been consumed; the fourth
+cannot be, because it is not code.
 
-The next agent-executable block is Release 3, and its highest value-per-hour item is
-`4.1` — three finished International pages are sitting unrouted, and retiring
-`Services.jsx` alone clears 2,074 unreachable lines:
+**Release 4 — the next agent-executable block.** With structure settled, the design
+system is what the remaining phases depend on, and it is what Phase 9 (the original UI
+revamp request) was always meant to be built on:
+
+- **5.2 + 5.3** — the dual-theme semantic token layer and dark mode. `bg-blue-*` still
+  outnumbers `bg-primary` 165 to 116, and `index.css` still carries the broken bare
+  `:root` dark block that 5.3 must delete rather than build on.
+- **5.5** — primitives, and with them the 12 native `alert()`/`confirm()` calls,
+  including the live booking confirmation in `ServicesMain.jsx:154`.
+- **The rest of Phase 7** — focus trapping, `aria-*` on menus, and `axe-core` in CI.
+  374 lint warnings are almost entirely `jsx-a11y`, so this is measurable from day one.
 
 ```
-/superpowers:writing-plans Release 3 of ROADMAP.md — starting with 4.1 International section
+/superpowers:writing-plans Release 4 of ROADMAP.md — starting with 5.2 dual-theme token layer
 ```
+
+One item is deliberately carried out of Release 3 and **blocked on Release 1**: moving
+`UNHousing.jsx`'s hardcoded `unProperties` array into the database (4.1). It needs a
+migration, and no migration can be applied until the owner runs Release 1.
 
 A per-release changelog is maintained in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
-*Version 4.1 — Release 2 completed and re-verified against the working tree, `npm run lint` (0 errors), `npm run test:coverage` (84 passing), `npm run build`, and `npm run bundle:report` (229.8 kB) on 2026-09-02.
+*Version 5 — Release 3 completed and verified against the working tree, `npm run lint` (0 errors, 374 warnings), `npm run test:coverage` (85 passing, 14 files, 60.76% statements), `npm run build` (clean, 14.5s), and `npm run bundle:report` (229.8 kB, within the 235 kB budget) on 2026-09-02.
 Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*

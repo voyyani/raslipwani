@@ -1,5 +1,13 @@
 # 🌍 International Market Features - Quick Reference
 
+> **Status note (Release 3, 2026-09-02):** the IA described here has been implemented,
+> but not with the files this document names. `InternationalHub.jsx` was merged into
+> `International.jsx` (the audience-triage section) and deleted; `UNHousing.jsx` is now
+> routed at `/international/un-housing`; `DiasporaPortal.jsx` was deleted — it was a
+> mock-data prototype with no backing data model, and is tracked as a Phase 10 item in
+> `ROADMAP.md`. Treat the file paths below as historical. See `ROADMAP.md` § Release 3.
+
+
 ## What Was Built
 
 ### 1. Landing Pages

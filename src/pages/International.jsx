@@ -64,27 +64,34 @@ const International = () => {
     return `${curr.symbol}${convertedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
-  const targetMarkets = [
+  // Merged in from the former InternationalHub.jsx. That page's real contribution
+  // was audience segmentation — three distinct people arrive at /international and
+  // each needs a different next page. Every path here resolves to a real route or
+  // a real section; a triage card that goes nowhere is worse than no triage at all.
+  const audiencePaths = [
     {
       icon: Building,
-      title: 'International Organizations',
-      description: 'UN agencies, embassies, and global NGOs expanding operations in East Africa',
-      stats: '40+ Organizations',
-      highlight: 'Growing demand for premium housing'
+      title: 'UN Staff & Diplomats',
+      description: 'Housing near the UN complex in Gigiri and Runda, with fast-track viewings and furnished options.',
+      benefits: ['Fast-track viewings', 'Furnished options', 'Diplomatic services support'],
+      cta: 'View UN & diplomatic housing',
+      to: '/international/un-housing'
     },
     {
       icon: Globe,
       title: 'African Diaspora',
-      description: 'Africans abroad investing in real estate back home for wealth building',
-      stats: '$5B+ Annual Remittances',
-      highlight: 'Build passive income from anywhere'
+      description: 'Own and manage Nairobi property from abroad, with monthly USD returns and full remote reporting.',
+      benefits: ['Remote property management', 'Monthly USD returns', 'Full transparency'],
+      cta: 'See diaspora investment',
+      section: 'diaspora'
     },
     {
       icon: Briefcase,
-      title: 'Global Investors',
-      description: 'International investors seeking emerging market opportunities',
-      stats: '12-15% Annual ROI',
-      highlight: 'Attractive returns with professional management'
+      title: 'International Professionals',
+      description: 'Premium homes for expatriates and relocating professionals, with flexible leases and relocation help.',
+      benefits: ['Corporate housing', 'Flexible leases', 'Relocation assistance'],
+      cta: 'Browse listings',
+      to: '/properties'
     }
   ];
 
@@ -333,6 +340,66 @@ const International = () => {
         </div>
       </section>
 
+      {/* Audience triage — the first decision a visitor has to make */}
+      <section className="py-16 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Capturing the UN Nairobi Opportunity
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Nairobi is the UN&apos;s only headquarters city in the global south. Three
+              groups of people buy and rent here for very different reasons — start with
+              the one that describes you.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {audiencePaths.map((audience) => {
+              const Icon = audience.icon;
+              const body = (
+                <>
+                  <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{audience.title}</h3>
+                  <p className="text-gray-600 mb-6">{audience.description}</p>
+                  <ul className="space-y-2 mb-6">
+                    {audience.benefits.map((benefit) => (
+                      <li key={benefit} className="flex items-center text-sm text-gray-700">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full mr-3" aria-hidden="true" />
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="inline-flex items-center gap-2 font-semibold text-blue-600">
+                    {audience.cta}
+                    <ChevronRight className="w-4 h-4" />
+                  </span>
+                </>
+              );
+              const cardClass =
+                'group block text-left w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border-2 border-blue-100 hover:border-blue-300 transition-all hover:shadow-xl';
+
+              return audience.to ? (
+                <Link key={audience.title} to={audience.to} className={cardClass}>
+                  {body}
+                </Link>
+              ) : (
+                <button
+                  key={audience.title}
+                  type="button"
+                  onClick={() => scrollToSection(diasporaRef, audience.section)}
+                  className={cardClass}
+                >
+                  {body}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Investment Calculator Modal */}
       {showCalculator && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -381,32 +448,6 @@ const International = () => {
             ))}
           </div>
 
-          {/* Target Markets */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {targetMarkets.map((market, index) => {
-              const Icon = market.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border-2 border-blue-100 hover:border-blue-300 transition-all hover:shadow-xl group"
-                >
-                  <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{market.title}</h3>
-                  <p className="text-gray-600 mb-4">{market.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-blue-600">{market.stats}</span>
-                    <span className="text-xs text-gray-500">{market.highlight}</span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
         </div>
       </section>
 
