@@ -1,12 +1,12 @@
 # Raslipwani Properties — Master Roadmap (Final)
 
-> **Version 5 — status-verified 2026-09-02, end of Release 3. Supersedes all prior iterations.**
+> **Version 6 — status-verified 2026-09-02, end of Release 3, with Release 4 scoped and measured. Supersedes all prior iterations.**
 >
 > **Source:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md), plus **live database introspection** performed 2026-09-01 against project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1).
 >
 > **Goal:** Take a functional prototype (audited **3.8/10**) to a world-class production system (**target 9/10**) on a single, coherent identity stack.
 >
-> **Baseline commit:** `c1c8656` · **Current head:** `feat/phase2-revenue-data-integrity`
+> **Baseline commit:** `c1c8656` · **Current head:** `main` @ `ace04b7` (Releases 1–3 merged)
 
 ---
 
@@ -33,6 +33,7 @@ it — those are marked 🔑 **owner-verify** and are listed in
 | Design tokens | ✅ `bg-primary-dark` emits rules for the first time — 20 previously-inert hover states now render |
 | Fonts | ✅ Poppins is preloaded and loaded. The HTML no longer preloads a font the CSS never fetched |
 | Zoom | ✅ `user-scalable=no` removed — WCAG 1.4.4 (AA) no longer failed at the viewport tag |
+| Release 4 | 📐 **Scoped and measured, not started** — four mergeable slices, ~15 days. See [Release 4 — "Themed"](#-release-4--themed--scoped-2026-09-02-not-started) |
 
 **The single most important fact on this page:** *no database migration has been applied.*
 `007`, `008`, and `009` are authored, reviewed, and committed — and inert. Until an owner
@@ -152,10 +153,10 @@ create policy "admins manage bookings" on bookings
 | **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete & tested.** `008`/`009` authored, **not applied** |
 | **2** | Revenue & Data Integrity | 1 week | 🟢 **2.1 done** (needs keys 🔑) · **2.2 done** · **2.3 done** |
 | **3** | Safety Net | 1 week | ✅ **Complete** — 3.1 (84 tests + coverage floor), 3.2 (0 lint errors), 3.3, 3.4 |
-| **4** | Structure & International IA | 2 weeks | 🟢 **4.1 done** · 4.2–4.4 not started |
-| **5** | Design System + Dark Mode | 2 weeks | 🟢 **5.1 done · 5.4 done** · 5.2–5.3, 5.5–5.6 not started |
-| **6** | Performance | 1 week | 🟡 **6.1 done** (bundle recovered) · 6.2–6.4 not started |
-| **7** | Accessibility | 1 week | 🟢 **7.1 (zoom) done** · rest not started |
+| **4** | Structure & International IA | 2 weeks | 🟢 **4.1 done** · **4.3 → Release 4 (4A)** · 4.2, 4.4 → Release 5 |
+| **5** | Design System + Dark Mode | 2 weeks | 🟢 **5.1 done · 5.4 done** · **5.2, 5.3, 5.5, 5.6 → Release 4** |
+| **6** | Performance | 1 week | 🟡 **6.1 mostly done** (bundle recovered) · **6.2, 6.3 → Release 4 (4A)** · 6.1 client split, 6.4 → Release 5 |
+| **7** | Accessibility | 1 week | 🟢 **7.1 (zoom) done** · **rest → Release 4 (4D)** |
 | **8** | SEO & Cross-Brand | 1 week | ⬜ Not started (8.5 partially shipped pre-roadmap) |
 | **9** | Client-Side UI Revamp | 3 weeks | ⬜ Not started |
 | **10** | Platform Maturity | Ongoing | ⬜ Not started |
@@ -281,14 +282,187 @@ actually compiles, and pinch-zoom works.
 > of owner time and remains the only thing standing between the live database and anyone
 > with the anon key.**
 
+### 🎨 Release 4 — "Themed" · **SCOPED 2026-09-02, not started**
+
+The design-system release. It is the last block of work Phase 9 (the original UI-revamp
+request) is waiting on, and the first block whose value the visitor can see.
+
+**Everything in this section was measured on 2026-09-02, not inherited from an earlier
+draft.** Three numbers the roadmap carried turned out to be wrong, and the corrections
+change the scope — they are called out where they land.
+
+#### Why this shape, and why this order
+
+The obvious Release 4 — "do 5.2, then 5.3, then 5.5, then Phase 7" — is the wrong order,
+and it is worth saying why before committing to a different one.
+
+1. **Migrating call sites before primitives exist means migrating them twice.** There are
+   ~1,784 raw palette classes in `src/` (see the table below). If tokens are swapped in
+   first, every `<button className="bg-blue-600 px-4 py-2 rounded">` is edited once for
+   the token and again when `<Button>` replaces it. Build the primitive first and the
+   call site collapses to `<Button>` — the token debt leaves as a side effect of markup
+   that shrinks rather than an edit pass of its own.
+2. **Deleting markup beats theming markup.** 4.3 (layout routes) removes 11 duplicated
+   `<Header />`/`<Footer />` render sites, and 6.2 (FontAwesome) rewrites 67 icon call
+   sites that would otherwise need theming twice. Both are cheap, both shrink the surface
+   5.2 has to cross, and 4.3 additionally fixes a live bug. They go first.
+3. **A ~1,784-site colour migration cannot be verified by a test suite.** No assertion
+   catches "this surface now renders dark text on a dark card." So the release ships its
+   own guard rails — a lint rule that bans raw palette classes with a ratcheting count, a
+   contrast test over the token layer itself, and `axe-core` in CI — and those land
+   *before* the migration they police, not after.
+
+Four slices, each independently mergeable and independently valuable. **Every slice ends
+deployable** — principle 6 applies inside a release, not only between them.
+
+#### Slice 4A — Shrink the surface *(≈2 days)*
+
+- [ ] **4.3 Layout routes.** `<PublicLayout>` with `<Outlet />`; remove `<Header />` and
+      `<Footer />` from all 11 pages. This is not tidying: `Header.jsx:18-23` attaches a
+      scroll listener on mount, and the header currently unmounts and remounts on every
+      navigation, tearing that listener down and resetting sticky state each time.
+      Consolidate the per-page `<Helmet>` blocks through the existing `DynamicSEO` in the
+      same pass.
+- [ ] **6.2 + 5.6 Remove FontAwesome; standardise on `lucide-react`.**
+      🔧 **Correction — this phase was scoped from a wrong number.** The roadmap records
+      *"actual usage: four icons in one file."* Measured today: **67 `fa-` usages across
+      10 files** (`About.jsx` alone has 26), plus `react-icons` imported in **31 places**
+      and `lucide-react` in 11. Three icon libraries ship. The payoff is unchanged and
+      still the cheapest large win available — `main.jsx:6` imports the whole FontAwesome
+      CSS, emitting **~914 kB of fonts** for icons a single `lucide-react` import tree
+      already covers — but this is a day of mechanical rewriting, not an afternoon.
+- [ ] **6.3 Strip console output.** 66 `console.*` calls across `src/`. esbuild
+      `drop: ['console','debugger']` (no terser needed, contrary to the comment at
+      `vite.config.js:26`) plus a `logger` that no-ops outside development.
+- [ ] Fix `index.html:19` — the `<title>` reads **`Rasilpwani Properties`**. The brand is
+      spelled `Raslipwani` in all 174 other occurrences. It is the pre-JS title every
+      crawler and every browser tab sees first.
+
+**Exit:** first-load CSS under 50 kB · font payload under 100 kB · one icon library ·
+zero `console.*` in `dist/` · Header mounts once per session.
+
+#### Slice 4B — Build the layer *(≈4 days)*
+
+- [ ] **5.2 Semantic dual-theme tokens.** Define them *semantically* — `surface`,
+      `surface-raised`, `content`, `content-muted`, `border`, plus
+      `success`/`warning`/`danger`/`info` — as CSS custom properties consumed by Tailwind,
+      with `darkMode: 'class'`. Literal tokens (`bg-white`, `text-gray-800`) cannot theme;
+      naming them literally now means touching every component twice.
+      🔧 **Correction — the debt is larger than recorded.** The roadmap counts 165
+      `bg-blue-*`. Measured today: **151 `bg-blue-*`, 188 `text-blue-*`, and 1,445 raw
+      `gray`/`slate`/`zinc`/`neutral` classes** — ~1,784 raw palette usages against 121
+      `bg-primary`. The greys, not the blues, are the bulk of the dark-mode problem, and
+      they were never counted.
+- [ ] **Status colours become tokens, not opinions.** `BookingStatusBadge`,
+      `MobileBookingCard` and `AdminBookings` each decide independently what "confirmed"
+      looks like. One `status` token map, consumed by all three.
+- [ ] **The guard rail lands with the layer, not after it.** An ESLint rule banning raw
+      Tailwind palette classes in `src/`, set to `warn` with a **ratcheting ceiling** in
+      CI exactly like the coverage floor — so the count can only fall. Without a ratchet,
+      a migration this size regresses silently between PRs.
+- [ ] **Contrast is asserted, not eyeballed.** A test computes WCAG contrast for every
+      `content`-on-`surface` token pair in both themes and fails below 4.5:1. This is the
+      one part of a theme migration a test *can* verify, so it should.
+
+**Exit:** token layer complete in both themes, every pair AA by test, ratchet in CI,
+zero call sites migrated yet — the layer is provably correct before anything depends on it.
+
+#### Slice 4C — Primitives, and the migration they carry *(≈5 days)*
+
+- [ ] **5.5 Primitives on the token layer:** `Button`, `Input`, `Select`, `Card`, `Badge`,
+      `Modal`, `Toast`, and a `ConfirmDialog`. Both themes, keyboard-complete, from the
+      first commit — an inaccessible primitive multiplies by every call site.
+- [ ] **Retire the 10 native browser dialogs.** 🔧 **Correction: 10, not 12** — 5 `alert()`
+      and 5 `confirm()` across 8 files. Two of them are not admin conveniences:
+      `ServicesMain.jsx:167` and `ViewingExperience.jsx:208` are both **live booking
+      confirmations** — the highest-value moment in the customer journey — delivered as an
+      unstyled, thread-blocking browser dialog. `react-hot-toast` is already a dependency
+      in 16 files. The four destructive `confirm()` calls become a `ConfirmDialog` that
+      names what is being deleted.
+- [ ] **Migrate surfaces through the primitives**, highest-traffic first: Home →
+      Properties → PropertyDetail → booking flow → Contact/About → admin. Each surface is
+      its own PR, and each drops the ratchet ceiling. Admin last: it is the surface with
+      one user, and it is where a mistake costs the least.
+- [ ] `Modal` absorbs `PropertyModal`, `BookingModal`, `BookingDetailModal` and
+      `ClientForm` — which is also how Phase 7's focus-trap requirement gets satisfied
+      once instead of four times.
+
+**Exit:** raw-palette ratchet below 400 · zero `alert()`/`confirm()` in `src/` · every
+modal rendered by one primitive.
+
+#### Slice 4D — Ship the theme, and the accessibility it exposes *(≈4 days)*
+
+- [ ] **5.3 Dark mode.** Theme provider (`light`/`dark`/`system`), persisted, respecting
+      `prefers-color-scheme`, toggle in the header and the admin shell.
+- [ ] **Delete the broken dark block at `index.css:78-88` — do not build on it.** It flips
+      bare `:root` to `#242424` under `prefers-color-scheme: dark` with no token layer
+      beneath, so dark backgrounds already leak behind light components today. It is a
+      hazard, and it has been shipping.
+- [ ] Audit every surface in both themes, including property imagery, FullCalendar, Quill,
+      and the four hardcoded hex values in the `.custom-calendar` block.
+- [ ] **7.x Accessibility — the part that is genuinely broken.** 374 lint warnings sound
+      like the measure; they are not. 134 of them come from `jsx-a11y/label-has-for`, a
+      **deprecated rule double-counting** `label-has-associated-control`. The real defect
+      is simpler and worse: **134 `<label>` elements, 11 `htmlFor` attributes, 134 form
+      controls.** Roughly 123 labels are associated with nothing, which is a screen reader
+      announcing an unlabelled input on every form on the site.
+  - [ ] Pair `htmlFor`/`id` across all 134 controls.
+  - [ ] Focus trapping, `aria-modal`, and focus restoration — once, in the `Modal`
+        primitive from 4C.
+  - [ ] `aria-expanded`/`aria-controls` on header dropdowns and mobile menu. **33
+        `aria-*` attributes and 4 `role=` exist across 96 files**, of which only 2 are
+        `aria-expanded`.
+  - [ ] Skip-to-content link; live regions for async status and toasts.
+  - [ ] **`axe-core` in CI**, failing the build on violations, plus a keyboard-only pass
+        over the booking flow in both themes.
+
+**Exit:** two themes, both AA by contrast test and by axe · zero axe violations in CI ·
+every public flow completable by keyboard in both themes.
+
+#### What Release 4 deliberately does not do
+
+- **4.2 (data-access layer) and 4.4 (component decomposition).** Both are real, and 4.2
+  gates 4.4. Neither is visible to a user, and neither blocks Phase 9. Release 5.
+- **Phase 8 (SEO).** 8.3's SPA-rendering constraint is likely the largest single limit on
+  organic acquisition and deserves its own investigation — possibly its own project. It
+  does not belong bolted to a design release.
+- **Phase 9 itself.** Release 4 builds the system; Phase 9 is the redesign that spends it.
+  Conflating them produces a redesign with no reusable layer underneath, which is how this
+  codebase acquired 1,784 raw palette classes in the first place.
+- **The Supabase client split (remaining 6.1).** `vendor-supabase` is 56 kB gzip and the
+  largest item in first load, but the sub-100 kB target needs it *and* 6.2 *and* route-level
+  work. 6.2 lands here; the rest is Release 5, measured against what 4A actually recovers.
+
+#### Release 4 exit criteria — numeric, and checkable
+
+| | Today (measured 2026-09-02) | Release 4 exit |
+|---|---|---|
+| Raw palette classes in `src/` | **1,784** | **< 400**, ratcheting in CI |
+| Themes | 1 (broken partial dark) | **2, both AA by test** |
+| Native `alert()`/`confirm()` | **10** | **0** |
+| Icon libraries | **3** | **1** |
+| Font payload | ~914 kB | **< 100 kB** |
+| CSS bundle | 146 kB (35.1 kB gzip) | **< 50 kB raw** |
+| `<label>` without `htmlFor` | **~123 of 134** | **0** |
+| axe violations | not measured | **0, enforced in CI** |
+| `console.*` in `src/` | **66** | **0 in `dist/`** |
+| Header remounts per navigation | **1** (tearing down its scroll listener each time) | **0** — mounted once by the layout route |
+| First-load JS (gzip) | 229.8 kB | **≤ 229.8 kB** — no regression |
+| Tests | 85 passing, 60.76% statements | **≥ 100 passing, floor ratchets up** |
+
+> ⚠️ Release 4, like Releases 2 and 3, **changes nothing in production**. It is the fourth
+> consecutive release of agent-executable work stacked on top of a database that is still
+> untouched. **Release 1 is still one day of owner time, and it is still the only thing
+> standing between the live database and anyone holding the anon key.** A beautifully
+> themed, fully accessible front end over a table anyone can `TRUNCATE` is not a
+> world-class product.
+
 ### Later — deliberately deferred
 
-Phases 4.2–4.4, 5.2–5.6, 6.2–6.4, the rest of 7, all of 8, 9, and 10 remain valuable and
-remain documented in full below. They were deferred because none of them block a safe,
-earning deployment, and because **Phase 9 (the UI revamp — the original request) should
-be built on the structure Release 3 establishes, not before it.** Release 3 has now
-established it, so 5.2–5.3, 5.5 and the rest of Phase 7 move into Release 4 — see
-[Execution](#execution).
+Phases 4.2, 4.4, the remainder of 6, all of 8, 9, and 10 remain valuable and remain
+documented in full below. **Phase 9 (the UI revamp — the original request) should be built
+on the design system Release 4 establishes, not before it** — for the same reason Release 3
+had to precede Release 4. See [Execution](#execution).
 
 ---
 
@@ -547,13 +721,13 @@ Nine files exceed 700 lines; `AdminProperties.jsx` is 1,297.
 
 ### 5.2 — Dual-theme token layer
 
-The system is bypassed: **`bg-blue-*` 165 times vs `bg-primary` 116** — raw Tailwind blue outnumbers your brand colour. `bg-secondary` appears **twice** in 96 files; `accent` never as a background.
+The system is bypassed. **Re-measured 2026-09-02, and the earlier count understated it:** **151 `bg-blue-*` + 188 `text-blue-*` + 1,445 raw `gray`/`slate`/`zinc`/`neutral` classes = ~1,784 raw palette usages, against 121 `bg-primary`.** Raw Tailwind outnumbers the brand token roughly 15 to 1. The greys were never counted before and are the bulk of the dark-mode problem — a blue that stays blue in dark mode is a design flaw; a `bg-gray-50` card that stays white is an unreadable page. `bg-secondary` appears **twice** in 96 files; `accent` never as a background.
 
 Because dark mode is in scope, build tokens **semantically** (`surface`, `content`, `border`) rather than literally (`bg-white`, `text-gray-800`). Literal tokens cannot theme; retrofitting means touching every component twice.
 
 - [ ] Full 50–900 scales; semantic `success`/`warning`/`danger`/`info` so status colours stop being invented per component (`BookingStatusBadge`, `MobileBookingCard`, and `AdminBookings` each decide "confirmed" independently today).
 - [ ] CSS custom properties; Tailwind `darkMode: 'class'`.
-- [ ] Migrate all 165 `bg-blue-*` usages.
+- [ ] Migrate all ~1,784 raw palette usages, highest-traffic surface first, through the primitives from 5.5 rather than class-by-class (see Release 4, Slice 4C).
 - [ ] ESLint rule banning raw Tailwind palette colours in `src/`.
 
 ### 5.3 — Ship dark mode
@@ -572,13 +746,13 @@ Because dark mode is in scope, build tokens **semantically** (`surface`, `conten
 ### 5.5 — Primitives
 
 - [ ] `Button`, `Input`, `Select`, `Card`, `Badge`, `Modal`, `Toast` — both themes.
-- [ ] **Replace all 12 native `alert()`/`confirm()` calls.** `react-hot-toast` is already used in 15 files. The critical one: `ServicesMain.jsx:154` is the **live booking confirmation** — the highest-value moment in the customer journey — delivered as an unstyled, thread-blocking browser dialog.
+- [ ] **Replace all 10 native `alert()`/`confirm()` calls** — re-counted 2026-09-02: **5 `alert()` and 5 `confirm()` across 8 files** (recorded as 12 previously). `react-hot-toast` is already used in 16 files. **Two are customer-facing, not admin conveniences:** `ServicesMain.jsx:167` *and* `ViewingExperience.jsx:208` are both **live booking confirmations** — the highest-value moment in the customer journey — delivered as an unstyled, thread-blocking browser dialog.
 - [ ] Replace the four destructive `window.confirm()` calls with a dialog naming what is being deleted, offering undo.
 - [ ] Storybook or equivalent.
 
 ### 5.6 — One icon library
 
-Three ship today: `react-icons` (30 files), `lucide-react` (12), FontAwesome (1). Plus two calendar libraries.
+Three ship today: `react-icons` (imported in **31 places** across 30 files), `lucide-react` (11 files), FontAwesome (**67 `fa-` usages across 10 files** — see the 6.2 correction). Plus two calendar libraries.
 
 - [ ] Standardise on `lucide-react`; migrate `react-icons`; remove FontAwesome (payoff in 6.2).
 
@@ -610,11 +784,13 @@ Supabase split above; both remain open.
 
 ### 6.2 — Remove FontAwesome
 
-`main.jsx:6` imports the whole library, emitting **~914 kB of fonts** (`fa-solid-900.ttf` 426 kB, `fa-brands-400.ttf` 211 kB, plus woff2). Actual usage: **four icons in one file**.
+`main.jsx:6` imports the whole library, emitting **~914 kB of fonts** (`fa-solid-900.ttf` 426 kB, `fa-brands-400.ttf` 211 kB, plus woff2).
 
-- [ ] Redraw in `lucide-react`; delete import and dependency.
+🔧 **Scope correction, 2026-09-02.** This phase previously read *"actual usage: four icons in one file."* That is wrong. Measured: **67 `fa-` usages across 10 files** — `About.jsx` (26), `Home.jsx`, `PropertyDetail.jsx`, `Header.jsx`, `Footer.jsx`, `AdminHeader.jsx`, and four `services/` components. Several are data-driven (`icon: "fas fa-home"` strings in config arrays), so the rewrite has to replace the string-keyed indirection with component references, not just swap tags. The payoff is unchanged and still the best ratio available in the codebase; the cost is a day, not an afternoon.
 
-**Expected:** ~914 kB of fonts gone; CSS 175 kB → ~40 kB. **The cheapest large win available.**
+- [ ] Redraw all 67 in `lucide-react`; replace string-keyed icon config with component references; delete the import and the dependency.
+
+**Expected:** ~914 kB of fonts gone; CSS 146 kB → under 50 kB. **Still the cheapest large win available.**
 
 ### 6.3 — Strip console output
 
@@ -638,9 +814,12 @@ Supabase split above; both remain open.
 Better start than typical: **alt text complete (22/22)**, 239 focus declarations, only 1 `onClick` on a non-interactive `div`.
 
 - [x] **Zoom re-enabled.** `maximum-scale=1.0, user-scalable=no` removed from `index.html`; `viewport-fit=cover` kept. SC 1.4.4 (AA) no longer failed at the viewport tag.
-- [ ] Focus trapping and `aria-modal` on `PropertyModal`, `BookingModal`, `BookingDetailModal`, `ClientForm`; focus restoration on close.
-- [ ] `aria-expanded`/`aria-controls` on header dropdowns and mobile menu. Only 27 `aria-*` and **1** `role=` exist across 96 files.
-- [ ] Verify `htmlFor`/`id` pairing across all 98 inputs.
+**Read the warning count carefully — it is not the measure.** ESLint reports 374 warnings, of which **351 are three label/control rules**, and **134 of those come from `jsx-a11y/label-has-for`, a deprecated rule that double-counts `label-has-associated-control`**. Turning it off drops the number by a third and fixes nothing. The honest measure is below.
+
+- [ ] **Pair `htmlFor`/`id` across all 134 form controls.** Measured 2026-09-02: **134 `<label>` elements, 11 `htmlFor` attributes, 134 `input`/`select`/`textarea`.** Roughly **123 labels are associated with nothing** — a screen reader announces an unlabelled control on effectively every form on the site. This is the single largest real accessibility defect in the codebase, and it is invisible behind the inflated warning count.
+- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` once the pairing lands, so the remaining count means something.
+- [ ] Focus trapping, `aria-modal` and focus restoration on `PropertyModal`, `BookingModal`, `BookingDetailModal`, `ClientForm` — implemented **once in the `Modal` primitive** from 5.5, not four times.
+- [ ] `aria-expanded`/`aria-controls` on header dropdowns and mobile menu. Measured: **33 `aria-*` attributes and 4 `role=` across 96 files**, of which exactly **2** are `aria-expanded` — both in `Header.jsx`, on the mobile toggle only. The `/international` dropdown added in Release 3 announces nothing.
 - [ ] Live regions for async status and toasts; skip-to-content link.
 - [ ] Keyboard-only pass over every public flow including booking; screen-reader pass on booking and search; contrast audit **both themes**; `axe-core` in CI.
 
@@ -757,24 +936,37 @@ Three columns now: where this started, where it actually is today, and where it 
 | First-load JS (gzip) | ~275 kB | **229.8 kB**, budget 235 kB, enforced in CI | < 100 kB |
 | Largest single chunk | 379 kB raw | 309 kB raw / 87 kB gzip (`AdminBookings`, lazy) | — |
 | CSS bundle | 175 kB | 146 kB (35.1 kB gzip) | < 50 kB |
-| Font payload | ~914 kB | Poppins only, preloaded and loaded — the Inter/Poppins mismatch is closed | < 100 kB |
+| Font payload | ~914 kB | **~914 kB still** — Poppins is fixed, but FontAwesome's ~914 kB of icon fonts still ship. Release 4 (4A) | < 100 kB |
 | Lighthouse Performance (mobile) | not measured | not measured | ≥ 90 |
 | axe violations | not measured | not measured | 0 |
-| Largest component | 1,297 lines | 1,297 lines | < 300 |
-| Components querying Supabase directly | 16 | 16 | 0 |
-| `bg-blue-*` usages | 165 | **165** — Release 4 (5.2) | 0 |
-| Themes | 1 (broken partial dark) | 1 (broken partial dark) — Release 4 (5.3) | 2, both AA |
+| Largest component | 1,297 lines | **1,284 lines** (`AdminProperties.jsx`) — Release 5 (4.4) | < 300 |
+| Components querying Supabase directly | 16 | **24 files** *(re-measured)* — Release 5 (4.2) | 0 |
+| Raw palette classes (`blue`/`gray`/`slate`/…) | ~1,784 *(re-measured; 165 was blues only)* | **~1,784** — Release 4 (4B/4C) | < 400 ratcheting → 0 |
+| Themes | 1 (broken partial dark) | 1 (broken partial dark) — Release 4 (4D) | 2, both AA by contrast test |
+| Native `alert()`/`confirm()` | 10 *(re-counted; 12 was wrong)* | **10**, 2 of them customer-facing — Release 4 (4C) | 0 |
+| Icon libraries | 3 | **3** — Release 4 (4A) | 1 |
+| `<label>` without an associated control | ~123 of 134 | **~123 of 134** — Release 4 (4D) | 0 |
+| `console.*` calls in `src/` | 66 | **66** — Release 4 (4A) | 0 in `dist/` |
 | Viewport blocks pinch-zoom (SC 1.4.4) | **yes** | ✅ **no** | no |
 | Booking notification delivery | **0%** (8 leads stranded) | **0%** — pipeline built and tested, 🔑 awaiting keys | 100% |
 | Error boundaries | 0 | ✅ Root + per-route + admin | Root + per-route + admin |
 | CI | none | ✅ lint · test · coverage floor · build · bundle budget · gitleaks | lint + test + build + gitleaks |
 | Overall audit score | **3.8 / 10** | ~**5.5 / 10** *(code-side gains real; security gains not yet live)* | **9 / 10** |
 
-**Read the table honestly.** Six metrics improved, three regressed, and the three that
-matter most for security are unchanged — because the migrations that fix them have not
-been applied. The audit score moves to roughly 5.5 only on the strength of code quality
-and a live test suite. **It does not move past 6 until Release 1 is executed**, and no
-amount of further coding will move it.
+**Read the table honestly.** Nine metrics improved, and the three that matter most for
+security are unchanged — because the migrations that fix them have not been applied. The
+audit score moves to roughly 5.5 only on the strength of code quality and a live test
+suite. **It does not move past 6 until Release 1 is executed**, and no amount of further
+coding will move it.
+
+**Four rows are worse than previously recorded, and none of them regressed** — they were
+measured properly for the first time on 2026-09-02: the raw-palette count (165 → ~1,784,
+because only blues had been counted), the font payload (FontAwesome's ~914 kB is still
+shipping; only the Poppins/Inter mismatch was closed), components querying Supabase
+directly (16 → 24 files), and the label-association defect, which was hidden behind an
+inflated lint warning count. Release 4 is scoped against these numbers. A roadmap that
+gets more accurate is working; one whose numbers only ever improve is being marked by the
+person who wrote it.
 
 ---
 
@@ -802,21 +994,31 @@ urgent, not less: the codebase is hardened, coherent, and the database is still
 untouched.** Three releases of agent-executable work have been consumed; the fourth
 cannot be, because it is not code.
 
-**Release 4 — the next agent-executable block.** With structure settled, the design
-system is what the remaining phases depend on, and it is what Phase 9 (the original UI
-revamp request) was always meant to be built on:
+**Release 4 — the next agent-executable block — is now scoped and measured** in
+[Release 4 — "Themed"](#-release-4--themed--scoped-2026-09-02-not-started). It is the
+design system: the thing every remaining phase depends on, and the thing Phase 9 (the
+original UI-revamp request) was always meant to be built on.
 
-- **5.2 + 5.3** — the dual-theme semantic token layer and dark mode. `bg-blue-*` still
-  outnumbers `bg-primary` 165 to 116, and `index.css` still carries the broken bare
-  `:root` dark block that 5.3 must delete rather than build on.
-- **5.5** — primitives, and with them the 12 native `alert()`/`confirm()` calls,
-  including the live booking confirmation in `ServicesMain.jsx:154`.
-- **The rest of Phase 7** — focus trapping, `aria-*` on menus, and `axe-core` in CI.
-  374 lint warnings are almost entirely `jsx-a11y`, so this is measurable from day one.
+It runs in **four independently mergeable slices**, ordered so each one shrinks the next:
+
+| Slice | Work | Why here | Size |
+|---|---|---|---|
+| **4A** | 4.3 layout routes · 6.2 FontAwesome · 5.6 one icon library · 6.3 console strip | Deleting markup beats theming markup. Removes 11 duplicate Header/Footer sites and 67 icon call sites *before* the token migration has to cross them, and fixes the Header remount bug on the way | ~2 days |
+| **4B** | 5.2 semantic dual-theme tokens · raw-palette ESLint ratchet · contrast test | Build and **prove** the layer before anything consumes it. The ratchet and the contrast test land *with* the layer, because a ~1,784-site colour migration cannot be verified after the fact | ~4 days |
+| **4C** | 5.5 primitives · retire the 10 native dialogs · migrate surfaces through the primitives | A call site replaced by `<Button>` sheds its token debt as a side effect. Migrating classes first means editing the same markup twice | ~5 days |
+| **4D** | 5.3 dark mode shipped · the rest of Phase 7 · `axe-core` in CI | The theme and the accessibility work touch the same markup; splitting them means two passes over every surface | ~4 days |
+
+Start with 4A. Each slice ends deployable.
 
 ```
-/superpowers:writing-plans Release 4 of ROADMAP.md — starting with 5.2 dual-theme token layer
+/superpowers:writing-plans Release 4 Slice 4A of ROADMAP.md — layout routes, FontAwesome removal, one icon library
 ```
+
+**Three numbers in this roadmap were wrong and are corrected in the Release 4 section:**
+FontAwesome is 67 usages across 10 files (not "four icons in one file"); the raw-palette
+debt is ~1,784 classes (not 165), because the 1,445 raw greys were never counted; and
+there are 10 native dialogs, not 12 — two of them customer-facing. Scope Release 4 from
+the corrected numbers, not from the phase text those corrections replaced.
 
 One item is deliberately carried out of Release 3 and **blocked on Release 1**: moving
 `UNHousing.jsx`'s hardcoded `unProperties` array into the database (4.1). It needs a
@@ -826,5 +1028,5 @@ A per-release changelog is maintained in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
-*Version 5 — Release 3 completed and verified against the working tree, `npm run lint` (0 errors, 374 warnings), `npm run test:coverage` (85 passing, 14 files, 60.76% statements), `npm run build` (clean, 14.5s), and `npm run bundle:report` (229.8 kB, within the 235 kB budget) on 2026-09-02.
+*Version 6 — Release 3 completed and verified, and Release 4 scoped from fresh measurement, against the working tree, `npm run lint` (0 errors, 374 warnings, of which 351 are three label/control rules and 134 come from a deprecated one), `npm run test:coverage` (85 passing, 14 files, 60.76% statements / 61.83% lines), `npm run build` (clean), and `npm run bundle:report` (229.8 kB, within the 235 kB budget) on 2026-09-02. Release 4's scope numbers — 1,784 raw palette classes, 67 FontAwesome usages across 10 files, 10 native dialogs, 134 labels against 11 `htmlFor`, 66 `console.*` — were each counted against `src/` on the same day and supersede the earlier figures they contradict.
 Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*

@@ -5,11 +5,13 @@ All notable changes to Raslipwani Properties.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Phase and Release
 numbers refer to [`ROADMAP.md`](ROADMAP.md).
 
-> **⚠️ Nothing in `[Unreleased]` is live.** Every entry below sits on `main` (Releases 1–2)
-> and the branch `feat/release-3-coherent`, and has never been deployed. The security fixes in
-> particular are **written but not applied** — the three migrations that close the data
-> exposure require an owner to run them. See
-> [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
+> **⚠️ Nothing in `[Unreleased]` is live.** Every entry below sits on `main` (Releases 1–3,
+> merged at `ace04b7`) and has never been deployed. The security fixes in particular are
+> **written but not applied** — the three migrations that close the data exposure require an
+> owner to run them. See [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
+>
+> **Release 4 ("Themed" — design system, dark mode, accessibility) is scoped but not started.**
+> Its four slices and measured exit criteria live in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
