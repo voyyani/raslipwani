@@ -1,4 +1,6 @@
 import React from 'react';
+
+import { statusClasses, statusLabel } from '../design/status';
 import { 
   FaCheck, 
   FaTimes, 
@@ -130,13 +132,11 @@ const BookingList = ({
                         <div className="font-medium text-gray-900">{booking.name}</div>
                         <div className="text-sm text-gray-500">{booking.service || booking.viewing_type}</div>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {booking.status}
-                      </span>
+                      <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
+                    </span>
                     </div>
                     
                     <div className="mt-3 text-sm">
@@ -154,7 +154,7 @@ const BookingList = ({
                         {booking.status !== 'confirmed' && (
                           <button
                             onClick={() => updateStatus(booking.id, 'confirmed')}
-                            className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center"
+                            className={`px-3 py-1 rounded-full text-xs flex items-center border ${statusClasses('confirmed')}`}
                             title="Confirm appointment"
                           >
                             <FaCheck className="mr-1" /> Confirm
@@ -163,7 +163,7 @@ const BookingList = ({
                         {booking.status !== 'cancelled' && (
                           <button
                             onClick={() => updateStatus(booking.id, 'cancelled')}
-                            className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs flex items-center"
+                            className={`px-3 py-1 rounded-full text-xs flex items-center border ${statusClasses('cancelled')}`}
                             title="Cancel appointment"
                           >
                             <FaTimes className="mr-1" /> Cancel
@@ -243,12 +243,10 @@ const BookingList = ({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {booking.status}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -319,13 +317,11 @@ const BookingList = ({
                     <div className="text-sm text-gray-500">{booking.email}</div>
                     <div className="text-sm text-gray-500">{booking.phone}</div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                    booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {booking.status}
-                  </span>
+                  <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
+                    </span>
                 </div>
                 
                 <div className="mt-3">

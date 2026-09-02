@@ -42,7 +42,18 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
-      # `prebuild` runs the secret-shaped-env-name guard automatically.
+      # A colour migration is the one kind of work no assertion can verify —
+      # nothing catches "this card renders dark text on a dark ground". What can
+      # be enforced is that the debt only shrinks, so the count of literal
+      # Tailwind palette classes is a ceiling that CI refuses to let rise.
+      # Lowering it is a deliberate commit; see palette-budget.json.
+      - name: Palette ratchet
+        run: npm run palette:ratchet
+
+      # `prebuild` runs the secret-shaped-env-name guard and asserts that
+      # src/styles/tokens.css is still what src/design/tokens.js generates. A
+      # build that paints from a stale stylesheet is worse than one that fails,
+      # because the contrast test would then be proving a palette nobody sees.
       - name: Build
         run: npm run build
 

@@ -11,17 +11,105 @@ numbers refer to [`ROADMAP.md`](ROADMAP.md).
 > owner to run them. See [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 >
 > **Release 4 ("Themed" — design system, dark mode, accessibility) is in progress.**
-> **Slice 4A is complete**; 4B, 4C and 4D are scoped and not started. The four slices and
+> **Slices 4A and 4B are complete**; 4C and 4D are scoped and not started. The four slices and
 > their measured exit criteria live in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
 ## [Unreleased]
 
-Verified 2026-09-02 (end of Release 4 Slice 4A): **98 tests passing across 16 files**,
-**0 ESLint errors** (365 warnings), coverage 62.59% lines behind an enforced ratcheting
-floor, production build clean, **first-load bundle 213.2 kB gzip** under a newly ratcheted
-219 kB CI budget, and **zero `console.*` in the built application chunks**.
+Verified 2026-09-02 (end of Release 4 Slice 4B): **227 tests passing across 19 files**,
+**0 ESLint errors** (3,370 warnings — 365 `jsx-a11y`, plus 3,005 literal palette classes
+the new design rule makes visible for the first time), coverage 63.26% lines behind an
+enforced ratcheting floor, production build clean, **first-load bundle 213.9 kB gzip**
+under a 219 kB CI budget, **zero `console.*` in the built application chunks**, and a
+**live palette ratchet at 3,005** that CI refuses to let rise.
+
+### Release 4, Slice 4B — "Build the layer" · branch `worktree-release4-slice-4a`
+
+The design system's colour layer, built and proven before anything is migrated onto it.
+That ordering is the slice: a colour system is the one part of a design system a test can
+actually verify, so it is verified first and spent second.
+
+#### Added
+
+- **`src/design/tokens.js`** — the single source of truth for colour. 32 semantic role
+  tokens (`surface`, `surface-raised`, `surface-sunken`, `surface-overlay`,
+  `surface-inverse`, `content`, `content-muted`, `content-subtle`, `content-inverse`,
+  `border`, `border-strong`, `brand` and its variants, `accent`, `focus-ring`) plus a
+  `surface`/`content`/`border` triple for each of `success`/`warning`/`danger`/`info` —
+  defined in **both** themes. Roles, not values: `surface-raised` survives a theme swap,
+  `bg-white` cannot.
+- **`src/design/contrast.js`** — WCAG 2.1 relative luminance and contrast ratio, owned
+  outright so no dependency can quietly change the answer between CI runs.
+- **`src/design/status.js`** — one map deciding what a booking status looks like.
+- **`scripts/generate-tokens.mjs`** → **`src/styles/tokens.css`** — the same palette has
+  to exist as CSS the browser paints, as Tailwind names components write, and as hex the
+  contrast formula reads. Three hand-kept copies drift, usually in the theme nobody has
+  open; this generates two of them from one. `--check` mode runs in `prebuild`, so a
+  build against a stale stylesheet fails rather than shipping a palette the tests are not
+  actually proving.
+- **`eslint-rules/no-raw-palette-classes.js`** — flags every literal Tailwind colour in
+  `src/` with a message naming the token to use instead. It scans string literals
+  generally, not just `className` attributes, because half the debt here lives in
+  configuration objects like `{ color: 'bg-yellow-100 text-yellow-800' }`.
+- **`scripts/palette-ratchet.mjs`** + **`palette-budget.json`**, wired into CI — a
+  ceiling that only falls, like the coverage floor. It counts by running the real ESLint
+  rule rather than a second regex: two definitions of "a palette class" eventually
+  disagree, and the one CI trusts is the one nobody reads.
+- **129 tests** across three new suites — 102 contrast assertions covering every text
+  role on every ground, brand-as-link, button and accent labels, each status colour both
+  on its own tint and directly on a card, control boundaries at WCAG 1.4.11's 3:1, and
+  the focus ring; plus generated-CSS sync, token completeness, and the status map.
+
+#### Changed
+
+- **`tailwind.config.js` is bound to the token layer, not to hexes**, with
+  `darkMode: 'class'`. Custom properties hold space-separated RGB channels so
+  Tailwind's `<alpha-value>` slot works and `bg-surface/80` behaves like a built-in
+  colour. `primary` and `accent` are now theme-aware: the brand hex is **2.1:1 on a dark
+  ground**, so leaving it literal would have meant shipping an unreadable button the
+  moment 4D turns dark mode on.
+- **`src/index.css` paints from tokens** — `--surface`, `--content`, `--brand` — and its
+  focus ring from `--focus-ring` rather than `-webkit-focus-ring-color`, which is
+  invisible in dark mode.
+- **The coverage floor rises to 62 lines / 61 statements / 48 functions / 48 branches**
+  (from 60/59/45/46).
+
+#### Fixed
+
+- 🟠 **The same booking changed colour depending on which screen you were on.**
+  `BookingStatusBadge` rendered *confirmed* in blue; `BookingList` and `BookingRow`
+  rendered it in green. Each site was unit-tested against its own opinion, so nothing
+  failed. All four now read one map.
+- 🟠 **Completed bookings read as still-outstanding.** `BookingList` and `BookingRow`
+  used a two-branch ternary — confirmed, cancelled, else — so *completed* fell through to
+  the **pending** colour. `confirmed` is now `info` and `completed` is `success`, and a
+  test asserts they cannot be equal: confirmed means "on the calendar", completed means
+  "done", and that is the distinction the admin acts on.
+- 🟠 **Deleted the broken partial dark mode at `index.css:78-88`** — inherited from the
+  Vite scaffold, it flipped bare `:root` to `#242424` under `prefers-color-scheme: dark`
+  with **no token layer beneath it**, so a visitor on a dark OS got dark ground leaking
+  behind components still painting themselves light. It had been shipping. Scheduled for
+  4D, done here: leaving it would have meant a token layer and a media query asserting
+  different things about the same page.
+- A `\w` inside a plain template literal in the new lint rule resolved to a bare `w`,
+  quietly narrowing a boundary check to a two-character class. Rebuilt from `String.raw`
+  segments.
+
+#### Verified, not asserted
+
+- The contrast suite was **proven able to fail**: lightening `content-subtle` four steps
+  turns four assertions red.
+- The ratchet was **proven able to block**: three added literal classes take the check to
+  exit 1, and `--update` refuses to raise the ceiling.
+
+🔧 **Correction — the raw-palette count was low, and the definition was why.** The
+roadmap recorded ~1,784; the rule counts **3,005**. The earlier figure looked only at
+`bg-`/`text-` for a subset of hues, and did not count variant chains (`hover:`, `md:`),
+bare `white`/`black`, the other fifteen colour utilities (`border-`, `ring-`, `divide-`,
+`from-`/`via-`/`to-`, …), or configuration objects. All of those are surface a theme has
+to cross. **The debt did not grow — it stopped being invisible.**
 
 ### Release 4, Slice 4A — "Shrink the surface" · branch `worktree-release4-slice-4a`
 

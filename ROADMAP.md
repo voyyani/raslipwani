@@ -1,6 +1,6 @@
 # Raslipwani Properties — Master Roadmap (Final)
 
-> **Version 7 — status-verified 2026-09-02, end of Release 4 Slice 4A. Supersedes all prior iterations.**
+> **Version 8 — status-verified 2026-09-02, end of Release 4 Slice 4B. Supersedes all prior iterations.**
 >
 > **Source:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md), plus **live database introspection** performed 2026-09-01 against project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1).
 >
@@ -18,27 +18,29 @@ done*. Where a task's outcome lives in the database or in Vercel, an agent canno
 it — those are marked 🔑 **owner-verify** and are listed in
 [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 
-| | Verified 2026-09-02 (end of Release 4 Slice 4A) |
+| | Verified 2026-09-02 (end of Release 4 Slice 4B) |
 |---|---|
-| Tests | ✅ **98 passing, 16 files** — the suite executed 0 tests at baseline |
-| Coverage | ✅ **61.5% statements / 62.6% lines**, enforced by a ratcheting floor (raised in 4A) |
+| Tests | ✅ **227 passing, 19 files** — the suite executed 0 tests at baseline |
+| Coverage | ✅ **62.4% statements / 63.3% lines**, enforced by a ratcheting floor (raised again in 4B) |
 | Build | ✅ clean |
-| Lint | ✅ **0 errors** (baseline 77) — **365** warnings remain (was 374), mostly `jsx-a11y`, deferred to Slice 4D |
-| Bundle | ✅ **213.2 kB gzip first load** — below the 275 kB pre-regression baseline; budget ratcheted 235 → **219 kB** |
-| CI | ✅ lint · test · coverage floor · build · bundle budget · **no-console-in-dist** · secret scan, on every PR |
+| Lint | ✅ **0 errors** (baseline 77) — **3,370** warnings: 365 `jsx-a11y` (deferred to 4D) plus **3,005 newly-visible** literal palette classes the 4B rule now counts. The debt did not grow; it stopped being invisible |
+| Bundle | ✅ **213.9 kB gzip first load** — below the 275 kB pre-regression baseline; budget **219 kB**, 5.1 kB of headroom |
+| CI | ✅ lint · test · coverage floor · **palette ratchet** · **generated-token freshness** · build · bundle budget · no-console-in-dist · secret scan, on every PR |
 | Clerk | ✅ gone from runtime code and from `package.json` |
 | Privileged keys in bundle | ✅ zero JWT-shaped strings in `dist/`, now enforced at build time |
 | Error boundaries | ✅ root, route and admin |
 | Unreachable lines | ✅ **0** — `Services.jsx`, `InternationalHub.jsx` and `DiasporaPortal.jsx` deleted, `UNHousing.jsx` routed. A test now fails if a page is orphaned again |
-| Design tokens | ✅ `bg-primary-dark` emits rules for the first time — 20 previously-inert hover states now render |
+| Design tokens | ✅ **32 semantic role tokens in both themes**, generated from one source, every content-on-surface pair AA by 102 assertions. `bg-primary-dark` also emits rules for the first time — 20 previously-inert hover states now render |
 | Fonts | ✅ Poppins is preloaded and loaded. The HTML no longer preloads a font the CSS never fetched |
 | Zoom | ✅ `user-scalable=no` removed — WCAG 1.4.4 (AA) no longer failed at the viewport tag |
 | Icon fonts | ✅ **0 bytes** — FontAwesome removed in 4A; it had been emitting **999 kB** of `.woff2`/`.ttf` for ~40 glyphs |
 | CSS bundle | ✅ **74.4 kB raw / 12.7 kB gzip** (was 146.1 kB / 35.1 kB) |
 | Console output in `dist/` | ✅ **0**, asserted on the artifact by `scripts/check-dist-console.mjs` in CI |
 | Header remounts | ✅ **0 per navigation** — one layout route replaced 11 per-page render sites |
+| Broken partial dark mode | ✅ **deleted** — the scaffold block flipped `:root` to `#242424` on an OS preference with no token layer beneath it, leaking dark ground behind light cards. It had been shipping |
+| Status colours | ✅ **one map**. Four components each had their own; *confirmed* was blue in one and green in three, and *completed* rendered as pending in two |
 | Canonical URLs | ✅ route-aware. Every page previously declared the **homepage** as its canonical |
-| Release 4 | 🟢 **Slice 4A complete and verified.** 4B, 4C, 4D scoped and not started. See [Release 4 — "Themed"](#-release-4--themed--4a-complete-2026-09-02) |
+| Release 4 | 🟢 **Slices 4A and 4B complete and verified.** 4C and 4D scoped and not started. See [Release 4 — "Themed"](#-release-4--themed--4a-complete-2026-09-02) |
 
 **Status of the migrations — re-verified by live introspection 2026-09-02:**
 
@@ -450,31 +452,98 @@ above would have been invisible to its own test. `PublicLayout.test.jsx` undoes
 it locally. **Any route-aware component tested from here on must do the same**,
 or the global mock should be narrowed to the suites that need it.
 
-#### Slice 4B — Build the layer *(≈4 days)*
+#### Slice 4B — Build the layer · ✅ **COMPLETE**
 
-- [ ] **5.2 Semantic dual-theme tokens.** Define them *semantically* — `surface`,
-      `surface-raised`, `content`, `content-muted`, `border`, plus
-      `success`/`warning`/`danger`/`info` — as CSS custom properties consumed by Tailwind,
-      with `darkMode: 'class'`. Literal tokens (`bg-white`, `text-gray-800`) cannot theme;
-      naming them literally now means touching every component twice.
-      🔧 **Correction — the debt is larger than recorded.** The roadmap counts 165
-      `bg-blue-*`. Measured today: **151 `bg-blue-*`, 188 `text-blue-*`, and 1,445 raw
-      `gray`/`slate`/`zinc`/`neutral` classes** — ~1,784 raw palette usages against 121
-      `bg-primary`. The greys, not the blues, are the bulk of the dark-mode problem, and
-      they were never counted.
-- [ ] **Status colours become tokens, not opinions.** `BookingStatusBadge`,
-      `MobileBookingCard` and `AdminBookings` each decide independently what "confirmed"
-      looks like. One `status` token map, consumed by all three.
-- [ ] **The guard rail lands with the layer, not after it.** An ESLint rule banning raw
-      Tailwind palette classes in `src/`, set to `warn` with a **ratcheting ceiling** in
-      CI exactly like the coverage floor — so the count can only fall. Without a ratchet,
-      a migration this size regresses silently between PRs.
-- [ ] **Contrast is asserted, not eyeballed.** A test computes WCAG contrast for every
-      `content`-on-`surface` token pair in both themes and fails below 4.5:1. This is the
-      one part of a theme migration a test *can* verify, so it should.
+The layer is built and proven before anything is migrated onto it. That ordering is
+the whole slice: a colour system is the one part of a design system a test can
+actually verify, so it is verified first and migrated second.
 
-**Exit:** token layer complete in both themes, every pair AA by test, ratchet in CI,
-zero call sites migrated yet — the layer is provably correct before anything depends on it.
+- [x] **5.2 Semantic dual-theme tokens.** 32 role tokens — `surface`,
+      `surface-raised`, `surface-sunken`, `surface-overlay`, `surface-inverse`,
+      `content`, `content-muted`, `content-subtle`, `content-inverse`, `border`,
+      `border-strong`, `brand`/`brand-hover`/`brand-subtle`/`brand-content`,
+      `content-on-brand`, `accent`/`accent-hover`/`content-on-accent`,
+      `focus-ring`, plus a `surface`/`content`/`border` triple for each of
+      `success`/`warning`/`danger`/`info` — defined in both themes in
+      `src/design/tokens.js`, emitted as CSS custom properties, consumed by
+      Tailwind with `darkMode: 'class'`.
+      **The values are generated, not copied.** The same palette has to exist as
+      CSS the browser paints, as Tailwind names components write, and as hex the
+      contrast formula reads. Three hand-kept copies drift — usually in the theme
+      nobody has open — so `scripts/generate-tokens.mjs` writes
+      `src/styles/tokens.css` from the one source, `npm run build` refuses to
+      build against a stale copy, and a test fails if it is out of date.
+      Channels are emitted space-separated (`245 249 252`) rather than as hex so
+      Tailwind's `<alpha-value>` slot works and `bg-surface/80` behaves like a
+      built-in colour.
+- [x] **Status colours become tokens, not opinions.** One map in
+      `src/design/status.js`, read by `BookingStatusBadge`, `BookingList`,
+      `BookingRow` and `AdminBookings`. **Two real defects fell out of doing it:**
+  1. **The same booking changed colour depending on the screen.**
+     `BookingStatusBadge` rendered *confirmed* in blue; `BookingList` and
+     `BookingRow` rendered it in green. Each site was unit-tested against its own
+     opinion, so nothing failed.
+  2. **Completed bookings read as still-outstanding.** `BookingList` and
+     `BookingRow` used a two-branch ternary — confirmed, cancelled, else — so
+     *completed* fell through to the pending colour. `confirmed` is now `info`
+     and `completed` is `success`, and a test asserts they cannot be equal:
+     confirmed means "on the calendar", completed means "done", and that is the
+     distinction the admin acts on.
+- [x] **The guard rail lands with the layer, not after it.**
+      `eslint-rules/no-raw-palette-classes.js` flags every literal Tailwind colour
+      in `src/` as a warning with an actionable message naming the token to use
+      instead; `scripts/palette-ratchet.mjs` enforces `palette-budget.json` in CI,
+      and refuses to raise the ceiling even when asked. Verified by regression
+      probe: adding three literal classes takes the check to exit 1 and `--update`
+      to a refusal.
+      It counts from ESLint running the real rule rather than from a second regex,
+      because two definitions of "a palette class" eventually disagree and the one
+      CI trusts is the one nobody reads. It also scans configuration objects, not
+      only `className` attributes — half the debt here lives in maps like
+      `{ color: 'bg-yellow-100 text-yellow-800' }`.
+- [x] **Contrast is asserted, not eyeballed.** 102 assertions across both themes:
+      every text role on every ground, brand-as-link on every ground, button and
+      accent labels on their fills, each status colour both on its own tint *and*
+      directly on a card, control boundaries at WCAG 1.4.11's 3:1, and the focus
+      ring against the page. Verified to fail: lightening `content-subtle` by four
+      steps turns four assertions red.
+
+**Two things done here that the slice did not ask for, with reasons:**
+
+1. **The broken dark block at `index.css:78-88` was deleted here rather than in
+   4D.** It flipped bare `:root` to `#242424` under `prefers-color-scheme: dark`
+   with no token layer beneath it, so dark ground leaked behind light components —
+   and it has been shipping. Leaving it in place for one more slice would have
+   meant a token layer and a media query asserting different things about the same
+   page. The global stylesheet now paints from `--surface`/`--content`, and the
+   focus ring from `--focus-ring` instead of `-webkit-focus-ring-color`, which is
+   invisible in dark mode.
+2. **`primary` and `accent` became theme-aware.** ~470 call sites use them and
+   4C is where those move, but the brand hex is **2.1:1 on a dark ground** —
+   leaving it literal would have meant shipping an unreadable button the moment
+   4D turns dark mode on. Dark mode now resolves a lighter brand.
+
+🔧 **Correction — the raw-palette count was low, and the definition was the
+reason.** The roadmap recorded **~1,784**. The rule counts **3,005**. The earlier
+figure looked only at `bg-`/`text-` for a subset of hues; it did not count variant
+chains (`hover:`, `md:`, `dark:`), bare `white`/`black`, the other fifteen colour
+utilities (`border-`, `ring-`, `divide-`, `from-`/`via-`/`to-`, …), or the
+configuration objects. All of those are surface a theme has to cross. **3,005 is
+the number 4C is scoped against**, and `palette-budget.json` is where it lives.
+
+**Exit criteria — measured, not asserted:**
+
+| | Target | Result |
+|---|---|---|
+| Token layer, both themes | complete | ✅ **32 tokens × 2 themes**, name-for-name identical by test |
+| Every pair AA by test | 4.5:1 text / 3:1 non-text | ✅ **102 assertions**, all passing, proven able to fail |
+| Ratchet in CI | present | ✅ **3,005 ceiling**, blocking, refuses to rise |
+| Generated CSS cannot drift | — | ✅ enforced by `prebuild` **and** by a test |
+| Tests | ≥ 100 | ✅ **227 passing** (was 98), 19 files |
+| Coverage floor | ratchets up | ✅ **62 lines / 61 statements / 48 functions / 48 branches** (was 60/59/45/46) |
+| First-load JS | ≤ 213.2 kB | ✅ **213.9 kB** — +0.7 kB, the token declarations themselves |
+| Lint errors | 0 | ✅ **0** |
+| Call sites migrated | 0 | ⚠️ **8** — the status pills above, which are the slice's own deliverable |
 
 #### Slice 4C — Primitives, and the migration they carry *(≈5 days)*
 
@@ -544,25 +613,25 @@ every public flow completable by keyboard in both themes.
 
 #### Release 4 exit criteria — numeric, and checkable
 
-| | Release 4 start (2026-09-02) | **After 4A** | Release 4 exit | Slice |
-|---|---|---|---|---|
-| Raw palette classes in `src/` | 1,784 | 1,784 | **< 400**, ratcheting in CI | 4B/4C |
-| Themes | 1 (broken partial dark) | 1 | **2, both AA by test** | 4D |
-| Native `alert()`/`confirm()` | 10 | 10 | **0** | 4C |
-| Icon libraries | 3 | ✅ **2** | **2** *(revised — see 4A)* | 4A ✅ |
-| Font payload | 999 kB *(re-measured; ~914 was low)* | ✅ **0 bytes** | **< 100 kB** | 4A ✅ |
-| CSS bundle | 146.1 kB raw / 35.1 kB gzip | ✅ **74.4 kB / 12.7 kB** | **< 50 kB raw** *(moved to 4C)* | 4A + 4C |
-| `<label>` without `htmlFor` | ~123 of 134 | ~123 of 134 | **0** | 4D |
-| axe violations | not measured | not measured | **0, enforced in CI** | 4D |
-| `console.*` in `dist/` | present | ✅ **0**, enforced in CI | **0** | 4A ✅ |
-| Header remounts per navigation | 1 (scroll listener rebuilt each time) | ✅ **0** | **0** | 4A ✅ |
-| Canonical URL per page | homepage on every route 🔴 | ✅ route-aware | correct | 4A ✅ |
-| First-load JS+CSS (gzip) | 229.8 kB | ✅ **213.2 kB**, budget 219 kB | **≤ 229.8 kB** | 4A ✅ |
-| Tests | 86 passing, 60.76% statements | ✅ **98 passing, 61.51%** | **≥ 100 passing, floor ratchets up** | all |
+| | Release 4 start (2026-09-02) | After 4A | **After 4B** | Release 4 exit | Slice |
+|---|---|---|---|---|---|
+| Raw palette classes in `src/` | 1,784 *(under-counted)* | 1,784 | **3,005 counted, ceiling live** | **< 400**, ratcheting in CI | 4B ✅ / 4C |
+| Themes | 1 (broken partial dark) | 1 | **layer for 2, AA by test; provider pending** | **2, both AA by test** | 4B ✅ / 4D |
+| Native `alert()`/`confirm()` | 10 | 10 | 10 | **0** | 4C |
+| Icon libraries | 3 | ✅ **2** | 2 | **2** *(revised — see 4A)* | 4A ✅ |
+| Font payload | 999 kB *(re-measured; ~914 was low)* | ✅ **0 bytes** | 0 bytes | **< 100 kB** | 4A ✅ |
+| CSS bundle | 146.1 kB raw / 35.1 kB gzip | ✅ **74.4 kB / 12.7 kB** | 76.7 kB / 13.3 kB *(+2.3 kB: the token declarations)* | **< 50 kB raw** *(moved to 4C)* | 4A + 4C |
+| `<label>` without `htmlFor` | ~123 of 134 | ~123 of 134 | ~123 of 134 | **0** | 4D |
+| axe violations | not measured | not measured | not measured | **0, enforced in CI** | 4D |
+| `console.*` in `dist/` | present | ✅ **0**, enforced in CI | 0 | **0** | 4A ✅ |
+| Header remounts per navigation | 1 (scroll listener rebuilt each time) | ✅ **0** | 0 | **0** | 4A ✅ |
+| Canonical URL per page | homepage on every route 🔴 | ✅ route-aware | route-aware | correct | 4A ✅ |
+| First-load JS+CSS (gzip) | 229.8 kB | ✅ **213.2 kB**, budget 219 kB | ✅ **213.9 kB** | **≤ 229.8 kB** | 4A ✅ |
+| Tests | 86 passing, 60.76% statements | ✅ **98 passing, 61.51%** | ✅ **227 passing, 62.38%** | **≥ 100 passing, floor ratchets up** | 4B ✅ |
 
-> ⚠️ Release 4, like Releases 2 and 3, **changes nothing in production**. Slice 4A is
-> merged and verified, and not one byte of it has reached a visitor — it sits on a branch,
-> like everything before it. This is now the *fifth* consecutive block of agent-executable
+> ⚠️ Release 4, like Releases 2 and 3, **changes nothing in production**. Slices 4A and
+> 4B are merged and verified, and not one byte of either has reached a visitor — it sits on a branch,
+> like everything before it. This is now the *sixth* consecutive block of agent-executable
 > work stacked on top of a database that is still untouched. **Release 1 is still one day
 > of owner time, and it is still the only thing standing between the live database and
 > anyone holding the anon key.** A beautifully themed, fully accessible front end that
@@ -1053,9 +1122,10 @@ Three columns now: where this started, where it actually is today, and where it 
 | axe violations | not measured | not measured | 0 |
 | Largest component | 1,297 lines | **1,284 lines** (`AdminProperties.jsx`) — Release 5 (4.4) | < 300 |
 | Components querying Supabase directly | 16 | **24 files** *(re-measured)* — Release 5 (4.2) | 0 |
-| Raw palette classes (`blue`/`gray`/`slate`/…) | ~1,784 *(re-measured; 165 was blues only)* | **~1,784** — Release 4 (4B/4C) | < 400 ratcheting → 0 |
-| Themes | 1 (broken partial dark) | 1 (broken partial dark) — Release 4 (4D) | 2, both AA by contrast test |
+| Raw palette classes (`blue`/`gray`/`slate`/…) | **3,005** *(re-measured by the 4B lint rule; 1,784 and 165 were both narrower definitions)* | **3,005, ceiling live in CI** — Release 4 (4C spends it) | < 400 ratcheting → 0 |
+| Themes | 1 (broken partial dark) | **token layer for 2, every pair AA by test** (4B); the broken partial dark is deleted; provider — Release 4 (4D) | 2, both AA by contrast test |
 | Native `alert()`/`confirm()` | 10 *(re-counted; 12 was wrong)* | **10**, 2 of them customer-facing — Release 4 (4C) | 0 |
+| Components deciding status colour independently | 4, disagreeing | ✅ **1 map** (4B) — `confirmed` was blue in one and green in three; `completed` rendered as pending in two | 1 |
 | Icon libraries | 3 | ✅ **2** — FontAwesome gone (4A); `react-icons` folds into 4C | 2 *(revised: lucide has no TikTok/WhatsApp/Pinterest mark)* |
 | `<label>` without an associated control | ~123 of 134 | **~123 of 134** — Release 4 (4D) | 0 |
 | `console.*` calls in `src/` | 68 *(re-counted)* | ✅ **0 in `dist/`**, enforced in CI; source routes through `logger` | 0 in `dist/` |
@@ -1138,7 +1208,7 @@ ratchet and the WCAG contrast test land *with* the layer, not after the migratio
 police. Each slice ends deployable.
 
 ```
-/superpowers:writing-plans Release 4 Slice 4B of ROADMAP.md — semantic dual-theme tokens, palette ratchet, contrast test
+/superpowers:writing-plans Release 4 Slice 4C of ROADMAP.md — primitives on the token layer, retire the 10 native dialogs, migrate surfaces and lower the palette ratchet
 ```
 
 **Two things 4A learned that 4B should carry in:**
@@ -1173,5 +1243,4 @@ A per-release changelog is maintained in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
-*Version 7 — Release 4 Slice 4A completed and verified against the working tree at `1e1b357`: `npx eslint .` (0 errors, 365 warnings), `npm run test:coverage` (98 passing, 16 files, 61.51% statements / 62.59% lines, ratcheting floor raised), `npm run build` (clean), `npm run bundle:report` (213.2 kB, within the newly ratcheted 219 kB budget), and `npm run check:console` (0 console calls in 33 application chunks) on 2026-09-02. The font measurement — 1,022,976 bytes of FontAwesome `.woff2`/`.ttf` before, 0 after — was taken by summing `dist/` directly, not inferred. Release 4's remaining scope numbers — 1,784 raw palette classes, 10 native dialogs, 134 labels against 11 `htmlFor` — were counted against `src/` on 2026-09-02 and supersede the earlier figures they contradict.
-Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*
+*Version 8 — Release 4 Slice 4B completed and verified against the working tree: `npm run lint` (**0 errors**, 3,370 warnings — 365 `jsx-a11y` plus 3,005 literal palette classes the new rule makes visible for the first time), `npm run test:coverage` (**227 passing, 19 files**, 62.38% statements / 63.26% lines, floor ratcheted to 61/62/48/48), `npm run build` (clean, with `prebuild` asserting the generated `tokens.css` is current), `npm run bundle:report` (**213.9 kB**, within the 219 kB budget), and `npm run palette:ratchet` (**3,005**, ceiling live) on 2026-09-02. The contrast figures are not estimates: 102 assertions compute WCAG 2.1 relative luminance for every content-on-surface pair in both themes, and the suite was proven able to fail by lightening `content-subtle` four steps and watching four of them go red. The ratchet was proven able to block by adding three literal classes and watching the check exit 1 and `--update` refuse. Release 4's remaining scope numbers — 3,005 raw palette classes, 10 native dialogs, 134 labels against 11 `htmlFor` — were counted against `src/` on 2026-09-02 and supersede the earlier figures they contradict.*
