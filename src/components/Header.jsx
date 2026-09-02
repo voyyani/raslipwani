@@ -6,7 +6,7 @@ import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo
 import { useSettings } from '../hooks/useSettings';
 
 const Header = () => {
-  const { logo, siteName, tagline, loading: settingsLoading } = useSettings();
+  const { logo, siteName, tagline } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);

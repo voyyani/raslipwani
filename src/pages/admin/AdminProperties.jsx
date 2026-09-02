@@ -70,8 +70,6 @@ const AdminProperties = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounced search
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,19 +77,10 @@ const AdminProperties = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   // Mobile state
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileViewMode, setMobileViewMode] = useState('grid'); // 'grid' or 'list'
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [expandedStats, setExpandedStats] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [purposeFilter, setPurposeFilter] = useState('all');
-
-  // Mobile detection
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Property types based on purpose
   const propertyTypes = {
@@ -143,8 +132,7 @@ const AdminProperties = () => {
         setProperties(data || []);
         setTotalCount(count || 0);
       } catch (error) {
-        setError('Error fetching data: ' + error.message);
-        toast.error('Error fetching properties');
+        toast.error('Error fetching properties: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -159,7 +147,7 @@ const AdminProperties = () => {
       const formattedData = formatPropertiesForExport(properties);
       exportToCSV(formattedData, `properties-${new Date().toISOString().split('T')[0]}`);
       toast.success(`Exported ${properties.length} properties`);
-    } catch (error) {
+    } catch {
       toast.error('Failed to export properties');
     }
   };
@@ -330,7 +318,7 @@ const AdminProperties = () => {
       return results.map(result => result.secure_url);
     } catch (err) {
       console.error('Image upload error:', err);
-      setError('Failed to upload images. Please check Cloudinary settings.');
+      toast.error('Failed to upload images. Please check Cloudinary settings.');
       return [];
     } finally {
       setLoading(false);
@@ -342,7 +330,6 @@ const AdminProperties = () => {
     
     try {
       setLoading(true);
-      setError('');
       
       // Upload new images if selected
       let cloudinaryUrls = [...formData.images];
@@ -387,7 +374,7 @@ const AdminProperties = () => {
       setCurrentProperty(null);
       resetForm();
     } catch (error) {
-      setError('Error saving property: ' + error.message);
+      toast.error('Error saving property: ' + error.message);
       toast.error('Failed to save property');
     } finally {
       setLoading(false);
@@ -405,7 +392,7 @@ const AdminProperties = () => {
       if (error) throw error;
       setProperties(data);
     } catch (error) {
-      setError('Error fetching properties: ' + error.message);
+      toast.error('Error fetching properties: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -425,7 +412,7 @@ const AdminProperties = () => {
       setProperties(properties.filter(p => p.id !== id));
       toast.success('Property deleted successfully!');
     } catch (error) {
-      setError('Error deleting property: ' + error.message);
+      toast.error('Error deleting property: ' + error.message);
       toast.error('Failed to delete property');
     } finally {
       setLoading(false);
@@ -506,9 +493,6 @@ const AdminProperties = () => {
     setNewAmenity('');
     setIsModalOpen(true);
   };
-
-  // Calculate pagination info
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <>

@@ -60,11 +60,9 @@ const BookingList = ({
   toggleArchive,
   openBookingModal,
   formatDate,
-  bookingsPerPage,
   indexOfFirstBooking,
   indexOfLastBooking,
-  dateRange,
-  selectedDate
+  dateRange
 }) => {
   if (loading) {
     return (

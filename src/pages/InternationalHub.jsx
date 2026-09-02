@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const InternationalHub = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [, setActiveTab] = useState('overview');
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
   const currencies = [

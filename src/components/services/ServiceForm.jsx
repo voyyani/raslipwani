@@ -2,9 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+// NOTE: this component is not rendered by any route and its field list is
+// still a placeholder. See ROADMAP.md Release 3 (dead-code sweep).
 const ServiceForm = ({ 
   bookingData, 
-  handleInputChange, 
   handleSubmit, 
   closeModal,
   isSubmitting
@@ -55,7 +56,6 @@ const ServiceForm = ({
 
 ServiceForm.propTypes = {
   bookingData: PropTypes.object.isRequired,
-  handleInputChange: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   closeModal: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired

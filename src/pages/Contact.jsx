@@ -10,7 +10,7 @@ import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTri
 
 const Contact = () => {
   // Get settings
-  const { phone, email, address, businessHours, serviceLocations, siteName } = useSettings();
+  const { phone, email, address, serviceLocations } = useSettings();
   // serviceLocations() returns array directly from settings
   const [formData, setFormData] = useState({
     name: '',

@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
-import { formatDate, formatDateTime } from '../../utils/dateUtils';
+import { formatDate } from '../../utils/dateUtils';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
-import toast from 'react-hot-toast';
 import { 
   ArrowLeft, Edit2, Mail, Phone, MapPin, Calendar, 
   Building2, DollarSign, Tag, Clock, MessageSquare,

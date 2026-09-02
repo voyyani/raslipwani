@@ -29,11 +29,16 @@ export default defineConfig({
       ],
       // Ratcheting floor: raise these as coverage grows, never lower them.
       // Phase 3 of ROADMAP.md targets 70%.
+      //
+      // Set from the real measurement on 2026-09-02 (61.00 lines / 59.92
+      // statements / 46.21 functions / 47.06 branches), a couple of points
+      // below each so ordinary refactoring does not trip CI while a genuine
+      // regression does. They sat at 0 until now, and 0 enforces nothing.
       thresholds: {
-        lines: 0,
-        functions: 0,
-        branches: 0,
-        statements: 0
+        lines: 58,
+        functions: 44,
+        branches: 45,
+        statements: 57
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

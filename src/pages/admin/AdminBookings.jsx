@@ -191,7 +191,7 @@ const AdminBookings = () => {
 
   // Reschedule booking mutation (for drag-and-drop)
   const rescheduleMutation = useMutation({
-    mutationFn: async ({ id, newDate, newEndDate }) => {
+    mutationFn: async ({ id, newDate }) => {
       const { data, error } = await supabase
         .from('bookings')
         .update({
@@ -329,7 +329,7 @@ const AdminBookings = () => {
 
   // Custom event content renderer
   const renderEventContent = (eventInfo) => {
-    const { status, priority } = eventInfo.event.extendedProps;
+    const { priority } = eventInfo.event.extendedProps;
     
     return (
       <div className="p-1 overflow-hidden">

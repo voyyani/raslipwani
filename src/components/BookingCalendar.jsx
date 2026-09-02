@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { 
@@ -22,8 +22,6 @@ const BookingCalendar = ({
   viewMode,
   updateStatus
 }) => {
-  const [calendarView, setCalendarView] = useState('month');
-  
   // Date highlighting for calendar
   const tileClassName = ({ date, view }) => {
     if (view !== 'month') return null;

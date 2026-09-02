@@ -518,40 +518,5 @@ const services = [
   }
 ];
 
-// Data for benefits
-const benefits = [
-  {
-    title: "Expert Team",
-    description: "Professionals with deep knowledge of Kenyan real estate markets"
-  },
-  {
-    title: "Client-Centric Approach",
-    description: "We prioritize your needs and goals throughout Kenya"
-  },
-  {
-    title: "Integrity & Transparency",
-    description: "Highest ethical standards in all transactions nationwide"
-  },
-  {
-    title: "Nationwide Coverage",
-    description: "Properties available across all major Kenyan regions"
-  },
-  {
-    title: "Strategic Alliances",
-    description: "Collaborations for seamless transactions countrywide"
-  },
-  {
-    title: "Affordable Options",
-    description: "Solutions for all budget levels throughout Kenya"
-  },
-  {
-    title: "End-to-End Service",
-    description: "Support from search to closing and beyond"
-  },
-  {
-    title: "Technology Driven",
-    description: "Modern tools for efficient property search across Kenya"
-  }
-];
 
 export default Home;

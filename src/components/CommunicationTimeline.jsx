@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../utils/supabaseClient';
-import { formatDateTime, formatDate } from '../utils/dateUtils';
+import { formatDateTime } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 import { 
   Phone, Mail, Video, MessageSquare, Calendar, 

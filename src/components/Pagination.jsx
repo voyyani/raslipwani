@@ -4,7 +4,6 @@ const Pagination = ({
   currentPage, 
   totalPages, 
   onPageChange,
-  itemsPerPage,
   totalItems,
   indexOfFirstItem,
   indexOfLastItem
