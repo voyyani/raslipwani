@@ -6,7 +6,10 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 export default [
-  { ignores: ['dist'] },
+  // 'coverage' and the agent worktree root are generated or foreign trees.
+  // Linting them reports thousands of errors in minified vendor output and in
+  // a second copy of this same source, which is how a clean run turns noisy.
+  { ignores: ['dist', 'coverage', '.claude/'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

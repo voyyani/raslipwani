@@ -42,7 +42,11 @@ export default defineConfig({
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],
-    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache']
+    // '.claude' matters: agent worktrees are checked out at
+    // .claude/worktrees/<name>, and each is a full copy of this source. Without
+    // it, a developer with a worktree open runs every suite twice — against two
+    // different revisions — and the second copy's failures look like real ones.
+    exclude: ['node_modules', 'dist', 'coverage', '.claude', '.idea', '.git', '.cache']
   },
   resolve: {
     alias: {
