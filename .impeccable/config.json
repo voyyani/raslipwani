@@ -29,6 +29,15 @@
         ],
         "createdAt": "2026-09-01T20:30:24.401Z",
         "reason": "Claude: animate-spin rounded-full border-b-2 loading spinner (properties list). The partial border is the rotating arc and rounded-full makes it circular; removing either breaks the spinner. Same idiom already scoped for App.jsx and AdminProperties.jsx."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/components/services/ViewingExperience.jsx"
+        ],
+        "createdAt": "2026-09-02T21:32:16.373Z",
+        "reason": "Claude: the flagged element is a CSS loading spinner (animate-spin rounded-full border-t-4 border-b-4) — the partial thick border on a circle is the spinner idiom itself, not an accent border clashing with a radius. Pre-existing; untouched by Slice 4A."
       }
     ]
   }
