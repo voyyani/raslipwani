@@ -53,7 +53,14 @@
 --      `assigned_agent_id` arrives with its own inline FK under a different
 --      name.
 --
---   5. Missing prerequisites produced confusing failures deep in the file.
+--   5. It retyped columns that a policy depends on, while that policy was
+--      still in place. Applying it failed at the first ALTER with
+--      `0A000: cannot alter type of a column used in a policy definition` —
+--      007's INSERT policy guards `assigned_agent_id IS NULL`, and PostgreSQL
+--      tracks that as a dependency on the policy text. The policies are now
+--      dropped before the conversion and recreated after it.
+--
+--   6. Missing prerequisites produced confusing failures deep in the file.
 --      There is now a preflight block that fails immediately with a sentence
 --      telling you which migration to apply first.
 --
@@ -114,6 +121,44 @@ RETURNS boolean LANGUAGE sql STABLE AS $$
     WHERE table_schema = 'public' AND table_name = tbl AND column_name = col
   );
 $$;
+
+-- -----------------------------------------------------------------------------
+-- Drop the bookings policies BEFORE retyping the columns they reference
+-- -----------------------------------------------------------------------------
+-- PostgreSQL refuses to change the type of a column that a policy expression
+-- mentions:
+--
+--   ERROR: 0A000: cannot alter type of a column used in a policy definition
+--   DETAIL: policy public may submit a booking on table bookings
+--           depends on column "assigned_agent_id"
+--
+-- 007's INSERT policy guards `assigned_agent_id IS NULL` and
+-- `confirmed_by IS NULL`, which is exactly the pair this file converts to uuid.
+-- The dependency is on the policy TEXT, not on the data, so the only way
+-- through is to drop the policies first and recreate them afterwards — which
+-- this file does anyway, further down.
+--
+-- Every policy on the table is dropped rather than the two by name, so a policy
+-- added by hand in the dashboard cannot block the conversion either. The full
+-- intended end state for `bookings` is recreated below; nothing is left off.
+--
+-- ⚠️  Between this block and the CREATE POLICY statements below, `bookings` has
+--     RLS enabled and no policies, which denies all access. That window is
+--     inside this transaction, so no other session ever observes it — but it is
+--     also why this file must be run as a single transaction, not statement by
+--     statement.
+-- -----------------------------------------------------------------------------
+DO $dropbookings$
+DECLARE p text;
+BEGIN
+  FOR p IN SELECT policyname FROM pg_policies
+           WHERE schemaname = 'public' AND tablename = 'bookings'
+  LOOP
+    EXECUTE format('DROP POLICY %I ON public.bookings', p);
+    RAISE NOTICE 'dropped bookings policy % (recreated below)', p;
+  END LOOP;
+END
+$dropbookings$;
 
 -- -----------------------------------------------------------------------------
 -- Identity columns: text (Clerk IDs) -> uuid (auth.users)
@@ -225,6 +270,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.properties TO authenticated;
 -- because PostgreSQL validates it at CREATE POLICY time and one absent column
 -- aborts the entire migration. Every omission raises a NOTICE.
 -- -----------------------------------------------------------------------------
+-- Already dropped above, before the column retype. Kept as a no-op so this
+-- section still states its own preconditions if it is ever read in isolation.
 DROP POLICY IF EXISTS "public may submit a booking" ON public.bookings;
 DROP POLICY IF EXISTS "admins manage bookings"      ON public.bookings;
 
@@ -238,23 +285,23 @@ DECLARE
 BEGIN
   -- What kind of booking this is.
   IF pg_temp.col_exists('bookings', 'type') THEN
-    checks := checks || $c$type IN ('viewing', 'consultation', 'contact')$c$;
+    checks := array_append(checks, $c$type IN ('viewing', 'consultation', 'contact')$c$);
   ELSE
     RAISE NOTICE 'bookings.type missing — booking type is unconstrained';
   END IF;
 
   -- Contact details must be present and sanely bounded.
   IF pg_temp.col_exists('bookings', 'name') THEN
-    checks := checks || $c$name IS NOT NULL AND length(trim(name)) BETWEEN 1 AND 200$c$;
+    checks := array_append(checks, $c$name IS NOT NULL AND length(trim(name)) BETWEEN 1 AND 200$c$);
   END IF;
 
   IF pg_temp.col_exists('bookings', 'email') THEN
-    checks := checks || $c$email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320$c$;
+    checks := array_append(checks, $c$email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320$c$);
   END IF;
 
   -- A submitter may not self-confirm.
   IF pg_temp.col_exists('bookings', 'status') THEN
-    checks := checks || $c$(status IS NULL OR status = 'pending')$c$;
+    checks := array_append(checks, $c$(status IS NULL OR status = 'pending')$c$);
   ELSE
     RAISE NOTICE 'bookings.status missing — submitters cannot be held to pending';
   END IF;
@@ -264,7 +311,7 @@ BEGIN
   -- 2026-09-02; still conditional, because it is absent from every migration
   -- older than the 2026-09-02 baseline rewrite.
   IF pg_temp.col_exists('bookings', 'is_archived') THEN
-    checks := checks || $c$is_archived IS NOT TRUE$c$;
+    checks := array_append(checks, $c$is_archived IS NOT TRUE$c$);
   ELSE
     RAISE NOTICE 'bookings.is_archived missing — archived-on-arrival is possible';
   END IF;
@@ -275,7 +322,7 @@ BEGIN
   FOREACH col IN ARRAY admin_only
   LOOP
     IF pg_temp.col_exists('bookings', col) THEN
-      checks := checks || format('%I IS NULL', col);
+      checks := array_append(checks, format('%I IS NULL', col));
     ELSE
       RAISE NOTICE 'bookings.% missing — no submitter guard needed for it', col;
     END IF;
