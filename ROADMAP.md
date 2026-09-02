@@ -1,12 +1,43 @@
 # Raslipwani Properties — Master Roadmap (Final)
 
-> **Version 3 — supersedes all prior iterations.**
+> **Version 4 — status-verified 2026-09-02. Supersedes all prior iterations.**
 >
 > **Source:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md), plus **live database introspection** performed 2026-09-01 against project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1).
 >
 > **Goal:** Take a functional prototype (audited **3.8/10**) to a world-class production system (**target 9/10**) on a single, coherent identity stack.
 >
-> **Baseline commit:** `c1c8656`
+> **Baseline commit:** `c1c8656` · **Current head:** `feat/phase2-revenue-data-integrity`
+
+---
+
+## 📍 Status — verified 2026-09-02
+
+Everything below was re-checked against the working tree, a full `npm test` run, a
+production build, and `npx eslint`. Checked boxes mean *verified today*, not *believed
+done*. Where a task's outcome lives in the database or in Vercel, an agent cannot verify
+it — those are marked 🔑 **owner-verify** and are listed in
+[`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
+
+| | Verified today |
+|---|---|
+| Tests | **74 passing, 11 files** — the suite executed 0 tests at baseline |
+| Build | ✅ clean |
+| Lint | 🔴 **78 errors** (baseline 77 — unchanged) |
+| Bundle | 🔴 **~446 kB gzip first load** — a *regression* from the 275 kB baseline |
+| Clerk | ✅ gone from runtime code and from `package.json` |
+| Privileged keys in bundle | ✅ zero JWT-shaped strings in `dist/` |
+| Unreachable lines | 🔴 **2,074** — `Services.jsx` (835) + 3 unrouted International pages (1,239) |
+
+**The single most important fact on this page:** *no database migration has been applied.*
+`007`, `008`, and `009` are authored, reviewed, and committed — and inert. Until an owner
+runs them, **every exposure described in the section below is still open in production.**
+The code is ready; the database is untouched.
+
+**The most important new fact:** the first-load bundle got *worse*, not better. Removing
+Clerk's `manualChunks` entry let Rollup pull FullCalendar and Quill into the main chunk,
+which is now **1,059 kB raw / 283 kB gzip on its own**. This was accepted as a deferred
+trade during Phase 1; it is no longer acceptable to defer to Phase 6, and has been
+promoted — see the re-scoped plan.
 
 ---
 
@@ -109,21 +140,100 @@ create policy "admins manage bookings" on bookings
 
 ## Phase Map
 
-| # | Phase | Duration | Ships |
+| # | Phase | Duration | Status (2026-09-02) |
 |---|---|---|---|
-| **0** | 🚨 Emergency Lockdown | **Today** | Destruction vector closed, secrets rotated |
-| **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete** (branch `feat/supabase-auth-migration`); migrations 008/009 authored but **NOT applied** |
-| **2** | Revenue & Data Integrity | 1 week | Resend emails, reproducible schema, fixed nav |
-| **3** | Safety Net | 1 week | Live test suite, CI, error boundaries |
-| **4** | Structure & International IA | 2 weeks | Data layer, layout routes, International section |
-| **5** | Design System + Dark Mode | 2 weeks | Dual-theme tokens, primitives, working hover states |
-| **6** | Performance | 1 week | −70% first-load JS, Lighthouse ≥ 90 |
-| **7** | Accessibility | 1 week | WCAG 2.1 AA |
-| **8** | SEO & Cross-Brand | 1 week | Canonical domain, dynamic sitemap, Nairobuild |
-| **9** | Client-Side UI Revamp | 3 weeks | World-class public experience |
-| **10** | Platform Maturity | Ongoing | TypeScript, observability, docs |
+| **0** | 🚨 Emergency Lockdown | **Today** | 🟡 **Code done, NOT applied.** `007` written; rotations 🔑 owner |
+| **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete & tested.** `008`/`009` authored, **not applied** |
+| **2** | Revenue & Data Integrity | 1 week | 🟡 **2.1 done** (needs keys 🔑) · **2.3 done** · **2.2 not started** |
+| **3** | Safety Net | 1 week | 🟡 **3.1 mostly done** (74 tests) · 3.2/3.3/3.4 not started |
+| **4** | Structure & International IA | 2 weeks | ⬜ Not started |
+| **5** | Design System + Dark Mode | 2 weeks | ⬜ Not started |
+| **6** | Performance | 1 week | 🔴 **6.1 promoted — regression, see below** |
+| **7** | Accessibility | 1 week | ⬜ Not started |
+| **8** | SEO & Cross-Brand | 1 week | ⬜ Not started (8.5 partially shipped pre-roadmap) |
+| **9** | Client-Side UI Revamp | 3 weeks | ⬜ Not started |
+| **10** | Platform Maturity | Ongoing | ⬜ Not started |
 
 **Safe to operate: Phases 0 → 3 (~3 weeks).** Phases 0–4 are sequential; 5–8 largely parallelise.
+
+---
+
+## 🎯 Re-scoped Delivery Plan
+
+The phase map above is the *complete* picture — roughly fifteen weeks of work. That is a
+map, not a plan. What follows is the plan: what to do next, sized so each block ends with
+something shipped.
+
+The re-scope is driven by three facts established on 2026-09-02:
+
+1. **Everything already built is blocked behind one owner action.** Phases 0, 1, and 2.1
+   are code-complete and tested, and deliver *nothing* until migrations are applied and
+   two secrets are set. Writing more code before that does not move the product forward.
+2. **The bundle regressed.** First-load JS went from ~275 kB gzip to ~446 kB. Phase 6.1
+   is a half-day of `lazy()` calls that recovers it, and it now sits in the critical path
+   rather than eight phases away.
+3. **The big phases are not the bottleneck.** Phases 4, 5, and 9 total seven weeks of
+   restructuring. None of them are what stands between this codebase and a safe,
+   revenue-generating deployment.
+
+### 🔑 Release 1 — "Safe and earning" · *blocked on owner, ~1 day of owner time*
+
+Nothing here is code. All of it is already written and waiting.
+
+- [ ] Back up the database, then apply `007` → `008` → `009` **in order**
+- [ ] Create the admin account; disable public signup
+- [ ] Verify the lockdown from outside with the anon key — *a control you have not tested
+      is a control you do not have*
+- [ ] Rotate the Supabase `service_role` key and the Cloudinary `api_secret`
+- [ ] Set `RESEND_API_KEY` + `BOOKING_NOTIFICATION_EMAIL` in Vercel; verify the sending
+      domain (SPF/DKIM/DMARC)
+- [ ] Triage the 8 stranded `pending` bookings by hand *before* automation goes live
+
+Full instructions: [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
+
+**Ships:** the destruction vector closed, secrets rotated, and — for the first time — a
+booking that actually notifies someone.
+
+### Release 2 — "Trustworthy" · ~1 week
+
+The smallest set of work that makes the codebase safe to change quickly.
+
+- [ ] **6.1 Lazy-load admin** *(promoted)* — recover the bundle regression. Half a day.
+- [ ] **2.2 Reproducible schema** — `000_baseline.sql`, fix the invalid
+      `CREATE POLICY IF NOT EXISTS`, resolve the duplicate `003_` prefix. This also
+      repairs `BookingDetailModal` and `EmailSettings`, both of which reference tables
+      (`booking_notes`, `email_templates`) that **do not exist in production** because
+      `003`/`004` silently aborted.
+- [ ] **3.4 CI** — `install → lint → test → build` on every PR, plus `gitleaks` and a
+      bundle-size report. Without this, Release 2's gains regress the way Phase 1's did.
+- [ ] **3.2 Lint to zero** — 78 errors today. Real bugs first.
+- [ ] **3.3 Error boundaries** — none exist; any render exception blanks the entire app.
+- [ ] Finish 3.1: install `@vitest/coverage-v8`, raise the ratcheting floor off `0`, and
+      replace the three assertion-free tests in `AdminBookings.test.jsx`.
+
+**Ships:** a bundle back under control, a schema that rebuilds, and a pipeline that keeps
+both true.
+
+### Release 3 — "Coherent" · ~2 weeks
+
+- [ ] **4.1 International section** — resolve the `International` / `InternationalHub`
+      conflict, route `UNHousing`, decide `DiasporaPortal`'s fate, **delete
+      `Services.jsx`**. This alone retires all 2,074 unreachable lines and is the highest
+      value-per-hour work remaining: three finished pages are sitting unrouted.
+- [ ] **5.1 + 5.4** — fix the broken Tailwind token and the Poppins/Inter mismatch
+      (`index.html` preloads a font the CSS never loads). Both are small and both are
+      currently costing real page-load time.
+- [ ] **7.1** — remove `user-scalable=no` from the viewport. One line; a direct WCAG
+      1.4.4 AA failure.
+
+**Ships:** every page written is a page reachable, on a correct type foundation.
+
+### Later — deliberately deferred
+
+Phases 4.2–4.4, 5.2–5.6, 6.2–6.4, the rest of 7, all of 8, 9, and 10 remain valuable and
+remain documented in full below. They are deferred because none of them block a safe,
+earning deployment, and because **Phase 9 (the UI revamp — the original request) should
+be built on the structure Release 3 establishes, not before it.**
 
 ---
 
@@ -135,41 +245,41 @@ create policy "admins manage bookings" on bookings
 
 `anon` holds `DELETE`, `UPDATE`, `INSERT`, and `TRUNCATE` on every public table, and RLS is off on four of them. Revoke the grants **before** anything else — this is the change that stops data loss, and it takes one migration.
 
-- [ ] Write and apply `007_emergency_lockdown.sql`:
+- [x] **Write** `007_emergency_lockdown.sql` — authored, reviewed, committed. 🔴 **NOT APPLIED.** 🔑
   - `revoke all on all tables in public from anon;`
   - Re-grant only what the public site genuinely needs: `select` on `properties`, `select` on `admin_settings`, `insert` on `bookings`.
   - `alter table … enable row level security` on **`bookings`, `clients`, `properties`, `settings`** — the four currently unprotected.
   - Interim policies: public `SELECT` on published `properties`; anon `INSERT`-only on `bookings`; **zero anon access to `settings` and `clients`**.
-- [ ] **Verify by attempting it.** Confirm with the anon key that `DELETE` on `bookings` is rejected and `settings` returns `401`/empty. A control you have not tested is a control you do not have.
-- [ ] Take a full database backup **before** applying, so a mistake here is reversible.
+- [ ] 🔑 **Verify by attempting it.** Confirm with the anon key that `DELETE` on `bookings` is rejected and `settings` returns `401`/empty. A control you have not tested is a control you do not have.
+- [ ] 🔑 Take a full database backup **before** applying, so a mistake here is reversible.
 
 ### 0.2 — Rotate the Cloudinary secret 🔴 **NEW**
 
 The `settings` table holds a **non-null `api_secret`** with RLS off and 0 policies, reachable by anon (`HTTP 206`). A Cloudinary `api_secret` permits signed uploads, deletions, and account operations against your entire media library — which is every property photo you have.
 
-- [ ] Rotate the Cloudinary API secret in the Cloudinary console.
-- [ ] Review the Cloudinary activity log for unfamiliar uploads or deletions.
-- [ ] **Stop storing it in a browser-reachable table.** Move it to a Vercel environment variable used only by server-side code. A secret in a PostgREST-exposed table is a published secret, regardless of policy.
-- [ ] Once migrated, `alter table settings drop column api_secret;`. Also review the duplicate-looking `settings` vs `admin_settings` tables and consolidate.
+- [ ] 🔑 Rotate the Cloudinary API secret in the Cloudinary console.
+- [ ] 🔑 Review the Cloudinary activity log for unfamiliar uploads or deletions.
+- [ ] 🔑 **Stop storing it in a browser-reachable table.** Move it to a Vercel environment variable used only by server-side code. A secret in a PostgREST-exposed table is a published secret, regardless of policy.
+- [ ] 🔑 Once migrated, `alter table settings drop column api_secret;`. Also review the duplicate-looking `settings` vs `admin_settings` tables and consolidate.
 
 ### 0.3 — Rotate the Supabase service key 🔴
 
 `VITE_SUPABASE_SERVICE_KEY` is set in Vercel production. Vite inlines every `VITE_*` variable into the bundle as a string literal, so the `service_role` JWT has been publicly downloadable from your CDN.
 
-- [ ] **Rotate first:** Supabase → Settings → API → `service_role` → Reset. Deleting the Vercel variable does **not** invalidate keys already in bundles you have served.
-- [ ] Delete `VITE_SUPABASE_SERVICE_KEY` from all Vercel environments; redeploy.
-- [ ] Verify: `curl -s https://raslipwani.co.ke/assets/index-*.js | grep -c eyJ` → `0`.
-- [ ] Remove the `supabaseAdmin` export from `src/utils/supabaseClient.js` and update `AdminProperties.jsx:441`.
-- [ ] Add a build-time guard failing the build if any `VITE_*` name matches `SERVICE|SECRET|PRIVATE|PASSWORD`.
+- [ ] 🔑 **Rotate first:** Supabase → Settings → API → `service_role` → Reset. Deleting the Vercel variable does **not** invalidate keys already in bundles you have served.
+- [ ] 🔑 Delete `VITE_SUPABASE_SERVICE_KEY` from all Vercel environments; redeploy.
+- [x] Verify no privileged key ships. **Confirmed 2026-09-02:** zero JWT-shaped strings in `dist/`. Re-verify against production after redeploy. 🔑
+- [x] Remove the `supabaseAdmin` export and update `AdminProperties.jsx`. **Done** — the service-key client no longer exists in the codebase.
+- [ ] Add a build-time guard failing the build if any `VITE_*` name matches `SERVICE|SECRET|PRIVATE|PASSWORD`. *(Not done — fold into Release 2 CI.)*
 
 ### 0.4 — Assess and document
 
-- [ ] Supabase → Logs → API: review the full retention window for anomalous `anon` and `service_role` activity — bulk `SELECT` on `bookings`, unexpected `DELETE`, unfamiliar IPs.
-- [ ] Verify the 12 bookings and 12 properties are intact and unmodified.
-- [ ] Check `admin_settings` against known-good values (phone, email, WhatsApp, logo) — the lead-hijack target.
-- [ ] **`clients` has 0 rows, so no client PII was exposed.** `bookings` did expose 12 customers' names, emails, and phones. Assess whether that meets the notification threshold under the Kenyan Data Protection Act 2019 (72-hour ODPC window). That is a legal question — get counsel, do not decide it in-house.
+- [ ] 🔑 Supabase → Logs → API: review the full retention window for anomalous `anon` and `service_role` activity — bulk `SELECT` on `bookings`, unexpected `DELETE`, unfamiliar IPs.
+- [ ] 🔑 Verify the 12 bookings and 12 properties are intact and unmodified.
+- [ ] 🔑 Check `admin_settings` against known-good values (phone, email, WhatsApp, logo) — the lead-hijack target.
+- [ ] 🔑 **`clients` has 0 rows, so no client PII was exposed.** `bookings` did expose 12 customers' names, emails, and phones. Assess whether that meets the notification threshold under the Kenyan Data Protection Act 2019 (72-hour ODPC window). That is a legal question — get counsel, do not decide it in-house.
 - [ ] Document in `docs/audit/2026-09-01-incident.md`.
-- [ ] **Revoke the `sbp_` introspection token** when this phase closes.
+- [ ] 🔑 **Revoke the `sbp_` introspection token** when this phase closes.
 
 **Exit criteria:** anon cannot delete, update, or truncate anything. RLS enabled on all 7 tables. Cloudinary and service keys rotated. Logs reviewed.
 
@@ -183,47 +293,47 @@ The `settings` table holds a **non-null `api_secret`** with RLS off and 0 polici
 
 ### 1.1 — Model admin identity
 
-- [ ] Create `admin_users`: `id uuid primary key references auth.users(id) on delete cascade`, `email text not null`, `role text not null default 'admin'`, `created_at timestamptz default now()`.
-- [ ] RLS on `admin_users`: a user may read their own row; only `service_role` writes. **No self-service signup** — an admin table anyone can insert into is not an admin table.
-- [ ] Helper: `create function is_admin() returns boolean language sql security definer stable as $$ select exists (select 1 from admin_users where id = auth.uid()) $$;`
-- [ ] Seed the initial admin account through the Supabase dashboard.
-- [ ] Disable public signup in Auth settings. Admin accounts are provisioned, never registered.
+- [x] Create `admin_users` — authored in `008_admin_users.sql`: `id uuid primary key references auth.users(id) on delete cascade`, `email text not null`, `role text not null default 'admin'`, `created_at timestamptz default now()`.
+- [x] RLS on `admin_users`: a user may read their own row; only `service_role` writes. **No self-service signup** — an admin table anyone can insert into is not an admin table.
+- [x] Helper: `create function is_admin() returns boolean language sql security definer stable as $$ select exists (select 1 from admin_users where id = auth.uid()) $$;`
+- [ ] 🔑 Seed the initial admin account through the Supabase dashboard.
+- [ ] 🔑 Disable public signup in Auth settings. Admin accounts are provisioned, never registered.
 
 ### 1.2 — Replace the client-side auth layer
 
-- [ ] Enable Email/Password in Supabase Auth. Enforce a strong password policy; enable MFA if available on your plan — this login guards all customer data.
-- [ ] Build `src/contexts/AuthContext.jsx` around `supabase.auth`: `signIn`, `signOut`, `session`, `user`, `isAdmin`, with `onAuthStateChange` subscribed and cleaned up.
-- [ ] Build `src/pages/AdminLogin.jsx` — branded, replacing Clerk's hosted UI.
-- [ ] Rewrite `ProtectedRoute` (`App.jsx:80-97`) against the Supabase session, checking `is_admin()` rather than mere authentication. **Signed in ≠ admin.**
-- [ ] Replace `src/components/AuthButtons.jsx` (Clerk `SignedIn`/`SignedOut`).
-- [ ] Remove `ClerkProvider` from `App.jsx:150` and the `clerkPubKey` guard at `App.jsx:59`.
-- [ ] Add password reset and session-expiry handling — a redirect to login, not a white screen.
+- [ ] 🔑 Enable Email/Password in Supabase Auth. Enforce a strong password policy; enable MFA if available on your plan — this login guards all customer data.
+- [x] Build `src/contexts/AuthContext.jsx` around `supabase.auth`: `signIn`, `signOut`, `session`, `user`, `isAdmin`, with `onAuthStateChange` subscribed and cleaned up.
+- [x] Build `src/pages/AdminLogin.jsx` — branded, replacing Clerk's hosted UI.
+- [x] Rewrite `ProtectedRoute` (`App.jsx:80-97`) against the Supabase session, checking `is_admin()` rather than mere authentication. **Signed in ≠ admin.**
+- [x] Replace `src/components/AuthButtons.jsx` (Clerk `SignedIn`/`SignedOut`).
+- [x] Remove `ClerkProvider` from `App.jsx:150` and the `clerkPubKey` guard at `App.jsx:59`.
+- [x] Session-expiry handling — a redirect to login, not a white screen. *(Password reset is still outstanding.)*
 
 ### 1.3 — Simplify the Supabase client
 
-- [ ] With Supabase Auth, the client attaches the session automatically. Delete the entire `supabaseAdmin` concept — it existed only to bypass RLS that Clerk could not satisfy.
-- [ ] One client, one key, one code path.
+- [x] With Supabase Auth, the client attaches the session automatically. Delete the entire `supabaseAdmin` concept — it existed only to bypass RLS that Clerk could not satisfy.
+- [x] One client, one key, one code path.
 
 ### 1.4 — Real RLS on `auth.uid()`
 
 Now that identity is native, policies can express rules instead of `true`.
 
-- [ ] `properties` — public `SELECT` limited to published/available; writes `using (is_admin())`.
-- [ ] `bookings` — anon `INSERT` only, with column constraints; `SELECT`/`UPDATE`/`DELETE` admin-only. **A prospect must never read another prospect's booking.**
-- [ ] `clients`, `client_communications`, `client_property_interests` — admin-only, all operations. This is PII.
-- [ ] `admin_settings` — public `SELECT`; writes admin-only.
-- [ ] `settings` — no anon access at all; secrets already removed in Phase 0.2.
-- [ ] Delete every `USING (true)` policy.
-- [ ] **Migrate identity columns:** `bookings.assigned_agent_id` and `bookings.confirmed_by` are `text` (Clerk IDs). Convert to `uuid references auth.users(id)`. Existing rows hold Clerk IDs or nulls — with 12 bookings, backfill by hand.
-- [ ] Tests: anon **cannot** read `clients`; anon **cannot** delete `bookings`; admin **can** do both.
+- [x] `properties` — public `SELECT` limited to published/available; writes `using (is_admin())`.
+- [x] `bookings` — anon `INSERT` only, with column constraints; `SELECT`/`UPDATE`/`DELETE` admin-only. **A prospect must never read another prospect's booking.**
+- [x] `clients`, `client_communications`, `client_property_interests` — admin-only, all operations. This is PII.
+- [x] `admin_settings` — public `SELECT`; writes admin-only.
+- [x] `settings` — no anon access at all; secrets already removed in Phase 0.2.
+- [x] Delete every `USING (true)` policy.
+- [x] **Migrate identity columns:** `bookings.assigned_agent_id` and `bookings.confirmed_by` are `text` (Clerk IDs). Convert to `uuid references auth.users(id)`. Existing rows hold Clerk IDs or nulls — with 12 bookings, backfill by hand.
+- [ ] 🔑 Tests: anon **cannot** read `clients`; anon **cannot** delete `bookings`; admin **can** do both. *(Policies are written and reviewed; the outside-in anon probe is a Release 1 step — it cannot pass until the migrations are applied.)*
 
 ### 1.5 — Remove Clerk entirely
 
-- [ ] `npm uninstall @clerk/clerk-react` — removes 72 kB from the bundle.
-- [ ] Delete `VITE_CLERK_PUBLISHABLE_KEY` from `.env` and Vercel.
-- [ ] Remove `vendor-clerk` from `vite.config.js` `manualChunks`.
-- [ ] `grep -ri clerk src/` returns nothing.
-- [ ] Delete the Clerk application once the new login is verified in production.
+- [x] `npm uninstall @clerk/clerk-react` — removes 72 kB from the bundle.
+- [x] Deleted from `.env`. 🔑 Still present in Vercel. 🔑
+- [x] Remove `vendor-clerk` from `vite.config.js` `manualChunks`. ⚠️ **This caused the bundle regression** — see 6.1.
+- [x] `grep -ri clerk src/` returns only one code comment and stale files in `src/Docs/`. No runtime references.
+- [ ] 🔑 Delete the Clerk application once the new login is verified in production.
 
 **Exit criteria:** zero Clerk references. Admin login works via Supabase. Every policy references `auth.uid()`. Anon can read published properties and insert a booking — nothing else, proven by test.
 
@@ -237,16 +347,16 @@ Now that identity is native, policies can express rules instead of `true`.
 
 **Four stacked breakages mean no booking has ever produced an email.** Introspection makes the cost concrete: **8 bookings sit in `pending`** — real people who enquired and were never contacted.
 
-- [ ] Add `resend`; set `RESEND_API_KEY` in Vercel **server-side only — no `VITE_` prefix**.
-- [ ] Verify `raslipwani.co.ke` as a Resend sending domain (SPF + DKIM + DMARC). Unverified mail lands in spam, which is indistinguishable from not sending.
-- [ ] **Move the handler** from `src/pages/api/send-email.js` to root-level `/api/send-email.js`. Vercel serves functions only from a root `api/` directory; nothing under `src/` is ever deployed.
-- [ ] **Fix `vercel.json`:** the catch-all rewrite `"/(.*)"` → `"/"` swallows `/api/*`. Change source to `"/((?!api/).*)"`.
-- [ ] Replace the Mailtrap sandbox stub and its literal `"your-mailtrap-user"` placeholders with the Resend SDK.
-- [ ] Replace `require('nodemailer')` — a CommonJS call in an ESM file, for a package not in `package.json`.
-- [ ] **Wire into the live path:** `ServicesMain.jsx:137` and `Contact.jsx:96`. The existing `fetch('/api/send-email')` sits in `Services.jsx:198`, which is unreachable code — the integration was written into the dead copy.
-- [ ] Admin notification **and** customer confirmation. Escape all interpolated values.
-- [ ] Fail safe: if email fails, the booking still saves and the customer still sees success.
-- [ ] **Triage the 8 pending bookings manually.** Some may be weeks old; contact them before automation goes live, and expect that some have moved on.
+- [x] Add `resend`. 🔑 Still to set `RESEND_API_KEY` in Vercel 🔑 **server-side only — no `VITE_` prefix**.
+- [ ] 🔑 Verify `raslipwani.co.ke` as a Resend sending domain (SPF + DKIM + DMARC). Unverified mail lands in spam, which is indistinguishable from not sending.
+- [x] **Move the handler** from `src/pages/api/send-email.js` to root-level `/api/send-email.js`. Vercel serves functions only from a root `api/` directory; nothing under `src/` is ever deployed.
+- [x] **Fix `vercel.json`:** the catch-all rewrite `"/(.*)"` → `"/"` swallows `/api/*`. Change source to `"/((?!api/).*)"`.
+- [x] Replace the Mailtrap sandbox stub and its literal `"your-mailtrap-user"` placeholders with the Resend SDK.
+- [x] Replace `require('nodemailer')` — a CommonJS call in an ESM file, for a package not in `package.json`.
+- [x] **Wire into the live path:** `ServicesMain.jsx:137` and `Contact.jsx:96`. The existing `fetch('/api/send-email')` sits in `Services.jsx:198`, which is unreachable code — the integration was written into the dead copy.
+- [x] Admin notification **and** customer confirmation. Escape all interpolated values. *(Also hardened: the endpoint no longer accepts caller-supplied `to`/`subject` — that was an open relay.)*
+- [x] Fail safe: if email fails, the booking still saves and the customer still sees success.
+- [ ] 🔑 **Triage the 8 pending bookings manually.** Some may be weeks old; contact them before automation goes live, and expect that some have moved on.
 
 ### 2.2 — Make the schema reproducible
 
@@ -262,10 +372,10 @@ The repo cannot rebuild the database — which is why Phase 0 required live intr
 
 Four persistent, every-page links 404.
 
-- [ ] `Header.jsx:48` — `/internationalproperties` → `/international`.
-- [ ] `Header.jsx:58` — `/construction-support` is shelved; became **Nairobuild**. Link out to `https://nairobuild.co.ke` (`target="_blank" rel="noopener"`) or move to the footer. See Phase 8.4.
-- [ ] `Footer.jsx:209,212` — `/privacy` and `/terms` have no routes. **Both are mandatory** for a business processing PII under the Kenyan DPA.
-- [ ] Test asserting every `Header`/`Footer` link resolves to a route or an intentional external URL.
+- [x] `Header.jsx:48` — `/internationalproperties` → `/international`.
+- [x] `Header.jsx:58` — `/construction-support` is shelved; became **Nairobuild**. Link out to `https://nairobuild.co.ke` (`target="_blank" rel="noopener"`) or move to the footer. See Phase 8.4.
+- [x] `Footer.jsx:209,212` — `/privacy` and `/terms` now have routes and pages (Kenyan DPA 2019 compliant). **Both are mandatory** for a business processing PII under the Kenyan DPA.
+- [x] Test asserting every `Header`/`Footer` link resolves to a route or an intentional external URL.
 
 ---
 
@@ -277,11 +387,11 @@ Four persistent, every-page links 404.
 
 3 test files exist; **0 tests execute.** `src/test/setup.js` holds JSX with a `.js` extension, so esbuild refuses it — and as the global `setupFiles` entry, it takes every suite down with it.
 
-- [ ] Rename `src/test/setup.js` → `setup.jsx`; update `vitest.config.js`. **One line.**
-- [ ] Confirm the 3 existing suites pass.
+- [x] Rename `src/test/setup.js` → `setup.jsx`; update `vitest.config.js`. **One line.**
+- [x] Confirm the existing suites pass. **74 tests across 11 files, all green (2026-09-02).**
 - [ ] Conventions: MSW for Supabase, the existing `renderWithProviders`, `user-event` over `fireEvent`.
-- [ ] Highest-risk paths first: booking submission, admin login, **RLS denial for anon**, settings load with a failed fetch.
-- [ ] Coverage with a ratcheting floor.
+- [ ] Highest-risk paths first. *(Admin login, auth context, protected routes, navigation, and the booking-email builder are covered. Still missing: booking submission end-to-end, RLS denial for anon, settings load with a failed fetch.)*
+- [ ] Coverage with a ratcheting floor. 🔴 **Currently unenforceable** — `@vitest/coverage-v8` is not installed and the thresholds sit at `0`. Also: three assertion-free tests in `AdminBookings.test.jsx` are green and prove nothing.
 
 The rename is trivial; that it went unnoticed is not. Fix the loop, not just the file.
 
@@ -430,7 +540,13 @@ Two costs: visitors pay for what they cannot use, and minified admin source publ
 
 - [ ] Convert all seven to `lazy()`; lazy-load `AdminLayout`.
 - [ ] Split the Supabase client so public pages load a smaller surface (220 kB currently eager).
-- [ ] **Clerk's 72 kB is already gone** as of Phase 1.5.
+- [x] **Clerk's 72 kB is already gone** as of Phase 1.5.
+
+> 🔴 **PROMOTED to Release 2.** Measured 2026-09-02: the main chunk is **1,059 kB raw / 283 kB
+> gzip**, and first-load JS is **~446 kB gzip** against a 275 kB baseline and a 100 kB target.
+> Removing `vendor-clerk` from `manualChunks` let Rollup fold FullCalendar and Quill into the
+> main chunk. The seven admin pages are still statically imported. This is the regression, and
+> `lazy()` on those imports is the fix.
 
 **Expected:** main chunk 379 kB → under 120 kB.
 
@@ -563,29 +679,41 @@ Construction is now a separate business (`nairobuild.co.ke`) with genuinely adja
 
 ## Success Metrics
 
-| Metric | Baseline (verified 2026-09-01) | Target |
-|---|---|---|
-| Tables where anon can `DELETE`/`TRUNCATE` | **7 of 7** | 0 |
-| Tables with RLS actually enabled | **3 of 7** | 7 of 7 |
-| Policies that are `USING (true)` | **19 of 19** | 0 |
-| Secrets reachable from the browser | **3** (service key, Cloudinary secret, anon over-grant) | 0 |
-| Identity systems | 2 (Clerk + Supabase) | **1** |
-| Executing tests | **0** | Full critical-path |
-| Test coverage | 0% | ≥ 70% |
-| ESLint errors | 77 | 0 |
-| Unreachable lines | 2,039 | 0 |
-| Broken navigation links | 4 | 0 |
-| First-load JS (gzip) | ~275 kB | < 100 kB |
-| CSS bundle | 175 kB | < 50 kB |
-| Font payload | ~914 kB | < 100 kB |
-| Lighthouse Performance (mobile) | not measured | ≥ 90 |
-| axe violations | not measured | 0 |
-| Largest component | 1,297 lines | < 300 |
-| Components querying Supabase directly | 16 | 0 |
-| `bg-blue-*` usages | 165 | 0 |
-| Themes | 1 (broken partial dark) | 2, both AA |
-| Booking notification delivery | **0%** (8 leads stranded) | 100% |
-| Overall audit score | **3.8 / 10** | **9 / 10** |
+Three columns now: where this started, where it actually is today, and where it is going.
+"Verified 2026-09-02" means measured, not asserted.
+
+| Metric | Baseline (2026-09-01) | **Verified 2026-09-02** | Target |
+|---|---|---|---|
+| Tables where anon can `DELETE`/`TRUNCATE` | **7 of 7** | **7 of 7** 🔑 *(fix written, not applied)* | 0 |
+| Tables with RLS actually enabled | **3 of 7** | **3 of 7** 🔑 *(fix written, not applied)* | 7 of 7 |
+| Policies that are `USING (true)` | **19 of 19** | **19 of 19** 🔑 *(fix written, not applied)* | 0 |
+| Secrets reachable from the browser | **3** | **1** — service key gone from code; Cloudinary secret + anon over-grant remain 🔑 | 0 |
+| Identity systems | 2 (Clerk + Supabase) | ✅ **1** | **1** |
+| Executing tests | **0** | ✅ **74** | Full critical-path |
+| Test coverage | 0% | not measured — `@vitest/coverage-v8` not installed | ≥ 70% |
+| ESLint errors | 77 | 🔴 **78** | 0 |
+| Unreachable lines | 2,039 | 🔴 **2,074** | 0 |
+| Broken navigation links | 4 | ✅ **0** | 0 |
+| First-load JS (gzip) | ~275 kB | 🔴 **~446 kB** *(regression)* | < 100 kB |
+| Largest single chunk | 379 kB raw | 🔴 **1,059 kB raw / 283 kB gzip** | — |
+| CSS bundle | 175 kB | **175 kB** (39.8 kB gzip) | < 50 kB |
+| Font payload | ~914 kB | ~914 kB — still preloading Inter while importing Poppins | < 100 kB |
+| Lighthouse Performance (mobile) | not measured | not measured | ≥ 90 |
+| axe violations | not measured | not measured | 0 |
+| Largest component | 1,297 lines | 1,297 lines | < 300 |
+| Components querying Supabase directly | 16 | 16 | 0 |
+| `bg-blue-*` usages | 165 | **165** | 0 |
+| Themes | 1 (broken partial dark) | 1 (broken partial dark) | 2, both AA |
+| Booking notification delivery | **0%** (8 leads stranded) | **0%** — pipeline built and tested, 🔑 awaiting keys | 100% |
+| Error boundaries | 0 | **0** | Root + per-route + admin |
+| CI | none | **none** | lint + test + build + gitleaks |
+| Overall audit score | **3.8 / 10** | ~**5.5 / 10** *(code-side gains real; security gains not yet live)* | **9 / 10** |
+
+**Read the table honestly.** Six metrics improved, three regressed, and the three that
+matter most for security are unchanged — because the migrations that fix them have not
+been applied. The audit score moves to roughly 5.5 only on the strength of code quality
+and a live test suite. **It does not move past 6 until Release 1 is executed**, and no
+amount of further coding will move it.
 
 ---
 
@@ -605,6 +733,19 @@ That produces a bite-sized, TDD-structured plan at `docs/superpowers/plans/YYYY-
 
 **Phase 0 needs no plan. It is same-day work, and the destruction vector is open until it is done.**
 
+**Where to start today:** not with a plan — with
+[`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md). Release 1 is entirely
+owner actions against Supabase and Vercel, and every line of code it needs is already
+written and tested. The next agent-executable block is Release 2, and the first item in
+it is `6.1`:
+
+```
+/superpowers:writing-plans Release 2 of ROADMAP.md — starting with 6.1 lazy-load admin
+```
+
+A per-release changelog is maintained in [`CHANGELOG.md`](CHANGELOG.md).
+
 ---
 
-*Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*
+*Version 4 re-verified against the working tree, `npm test`, `npm run build`, and `npx eslint` on 2026-09-02.
+Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*
