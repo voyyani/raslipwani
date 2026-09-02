@@ -1,12 +1,12 @@
 # Raslipwani Properties — Master Roadmap (Final)
 
-> **Version 6 — status-verified 2026-09-02, end of Release 3, with Release 4 scoped and measured. Supersedes all prior iterations.**
+> **Version 7 — status-verified 2026-09-02, end of Release 4 Slice 4A. Supersedes all prior iterations.**
 >
 > **Source:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md), plus **live database introspection** performed 2026-09-01 against project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1).
 >
 > **Goal:** Take a functional prototype (audited **3.8/10**) to a world-class production system (**target 9/10**) on a single, coherent identity stack.
 >
-> **Baseline commit:** `c1c8656` · **Current head:** `main` @ `ace04b7` (Releases 1–3 merged)
+> **Baseline commit:** `c1c8656` · **Current head:** `worktree-release4-slice-4a` @ `1e1b357` (Releases 1–3 merged; Release 4 Slice 4A complete)
 
 ---
 
@@ -18,14 +18,14 @@ done*. Where a task's outcome lives in the database or in Vercel, an agent canno
 it — those are marked 🔑 **owner-verify** and are listed in
 [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 
-| | Verified 2026-09-02 (end of Release 3) |
+| | Verified 2026-09-02 (end of Release 4 Slice 4A) |
 |---|---|
-| Tests | ✅ **85 passing, 14 files** — the suite executed 0 tests at baseline |
-| Coverage | ✅ **60.6% statements / 61.7% lines**, enforced by a ratcheting floor |
+| Tests | ✅ **98 passing, 16 files** — the suite executed 0 tests at baseline |
+| Coverage | ✅ **61.5% statements / 62.6% lines**, enforced by a ratcheting floor (raised in 4A) |
 | Build | ✅ clean |
-| Lint | ✅ **0 errors** (baseline 77) — 374 warnings remain (was 418; the deleted pages carried 44), mostly `jsx-a11y`, deferred to Phase 7 |
-| Bundle | ✅ **229.8 kB gzip first load** — below the 275 kB pre-regression baseline; budget 235 kB |
-| CI | ✅ lint · test · coverage floor · build · bundle budget · secret scan, on every PR |
+| Lint | ✅ **0 errors** (baseline 77) — **365** warnings remain (was 374), mostly `jsx-a11y`, deferred to Slice 4D |
+| Bundle | ✅ **213.2 kB gzip first load** — below the 275 kB pre-regression baseline; budget ratcheted 235 → **219 kB** |
+| CI | ✅ lint · test · coverage floor · build · bundle budget · **no-console-in-dist** · secret scan, on every PR |
 | Clerk | ✅ gone from runtime code and from `package.json` |
 | Privileged keys in bundle | ✅ zero JWT-shaped strings in `dist/`, now enforced at build time |
 | Error boundaries | ✅ root, route and admin |
@@ -33,7 +33,12 @@ it — those are marked 🔑 **owner-verify** and are listed in
 | Design tokens | ✅ `bg-primary-dark` emits rules for the first time — 20 previously-inert hover states now render |
 | Fonts | ✅ Poppins is preloaded and loaded. The HTML no longer preloads a font the CSS never fetched |
 | Zoom | ✅ `user-scalable=no` removed — WCAG 1.4.4 (AA) no longer failed at the viewport tag |
-| Release 4 | 📐 **Scoped and measured, not started** — four mergeable slices, ~15 days. See [Release 4 — "Themed"](#-release-4--themed--scoped-2026-09-02-not-started) |
+| Icon fonts | ✅ **0 bytes** — FontAwesome removed in 4A; it had been emitting **999 kB** of `.woff2`/`.ttf` for ~40 glyphs |
+| CSS bundle | ✅ **74.4 kB raw / 12.7 kB gzip** (was 146.1 kB / 35.1 kB) |
+| Console output in `dist/` | ✅ **0**, asserted on the artifact by `scripts/check-dist-console.mjs` in CI |
+| Header remounts | ✅ **0 per navigation** — one layout route replaced 11 per-page render sites |
+| Canonical URLs | ✅ route-aware. Every page previously declared the **homepage** as its canonical |
+| Release 4 | 🟢 **Slice 4A complete and verified.** 4B, 4C, 4D scoped and not started. See [Release 4 — "Themed"](#-release-4--themed--4a-complete-2026-09-02) |
 
 **Status of the migrations — re-verified by live introspection 2026-09-02:**
 
@@ -183,10 +188,10 @@ create policy "admins manage bookings" on bookings
 | **1** | Supabase Auth Migration | 1 week | 🟡 **Code complete & tested.** `008`/`009` authored, **not applied** |
 | **2** | Revenue & Data Integrity | 1 week | 🟢 **2.1 done** (needs keys 🔑) · **2.2 done** · **2.3 done** |
 | **3** | Safety Net | 1 week | ✅ **Complete** — 3.1 (84 tests + coverage floor), 3.2 (0 lint errors), 3.3, 3.4 |
-| **4** | Structure & International IA | 2 weeks | 🟢 **4.1 done** · **4.3 → Release 4 (4A)** · 4.2, 4.4 → Release 5 |
-| **5** | Design System + Dark Mode | 2 weeks | 🟢 **5.1 done · 5.4 done** · **5.2, 5.3, 5.5, 5.6 → Release 4** |
-| **6** | Performance | 1 week | 🟡 **6.1 mostly done** (bundle recovered) · **6.2, 6.3 → Release 4 (4A)** · 6.1 client split, 6.4 → Release 5 |
-| **7** | Accessibility | 1 week | 🟢 **7.1 (zoom) done** · **rest → Release 4 (4D)** |
+| **4** | Structure & International IA | 2 weeks | 🟢 **4.1 done · 4.3 done (4A)** · 4.2, 4.4 → Release 5 |
+| **5** | Design System + Dark Mode | 2 weeks | 🟢 **5.1 done · 5.4 done · 5.6 mostly done (4A)** · **5.2, 5.3, 5.5 → Release 4 (4B/4C/4D)** |
+| **6** | Performance | 1 week | 🟢 **6.1 mostly done · 6.2 done · 6.3 done (4A)** · 6.1 client split, 6.4 → Release 5 |
+| **7** | Accessibility | 1 week | 🟢 **7.1 (zoom) done · icon a11y contract landed (4A)** · **rest → Release 4 (4D)** |
 | **8** | SEO & Cross-Brand | 1 week | ⬜ Not started (8.5 partially shipped pre-roadmap) |
 | **9** | Client-Side UI Revamp | 3 weeks | ⬜ Not started |
 | **10** | Platform Maturity | Ongoing | ⬜ Not started |
@@ -312,7 +317,7 @@ actually compiles, and pinch-zoom works.
 > of owner time and remains the only thing standing between the live database and anyone
 > with the anon key.**
 
-### 🎨 Release 4 — "Themed" · **SCOPED 2026-09-02, not started**
+### 🎨 Release 4 — "Themed" · **4A COMPLETE 2026-09-02**
 
 The design-system release. It is the last block of work Phase 9 (the original UI-revamp
 request) is waiting on, and the first block whose value the visitor can see.
@@ -345,31 +350,105 @@ and it is worth saying why before committing to a different one.
 Four slices, each independently mergeable and independently valuable. **Every slice ends
 deployable** — principle 6 applies inside a release, not only between them.
 
-#### Slice 4A — Shrink the surface *(≈2 days)*
+#### Slice 4A — Shrink the surface · ✅ **COMPLETE** (`1e1b357`)
 
-- [ ] **4.3 Layout routes.** `<PublicLayout>` with `<Outlet />`; remove `<Header />` and
-      `<Footer />` from all 11 pages. This is not tidying: `Header.jsx:18-23` attaches a
-      scroll listener on mount, and the header currently unmounts and remounts on every
-      navigation, tearing that listener down and resetting sticky state each time.
-      Consolidate the per-page `<Helmet>` blocks through the existing `DynamicSEO` in the
-      same pass.
-- [ ] **6.2 + 5.6 Remove FontAwesome; standardise on `lucide-react`.**
-      🔧 **Correction — this phase was scoped from a wrong number.** The roadmap records
-      *"actual usage: four icons in one file."* Measured today: **67 `fa-` usages across
-      10 files** (`About.jsx` alone has 26), plus `react-icons` imported in **31 places**
-      and `lucide-react` in 11. Three icon libraries ship. The payoff is unchanged and
-      still the cheapest large win available — `main.jsx:6` imports the whole FontAwesome
-      CSS, emitting **~914 kB of fonts** for icons a single `lucide-react` import tree
-      already covers — but this is a day of mechanical rewriting, not an afternoon.
-- [ ] **6.3 Strip console output.** 66 `console.*` calls across `src/`. esbuild
-      `drop: ['console','debugger']` (no terser needed, contrary to the comment at
-      `vite.config.js:26`) plus a `logger` that no-ops outside development.
-- [ ] Fix `index.html:19` — the `<title>` reads **`Rasilpwani Properties`**. The brand is
-      spelled `Raslipwani` in all 174 other occurrences. It is the pre-JS title every
-      crawler and every browser tab sees first.
+Everything here removed weight or removed duplication, so the theming work in
+4B/4C crosses a smaller surface. All four items shipped, plus three defects found
+on the way in.
 
-**Exit:** first-load CSS under 50 kB · font payload under 100 kB · one icon library ·
-zero `console.*` in `dist/` · Header mounts once per session.
+- [x] **4.3 Layout routes.** `<PublicLayout>` renders the chrome once above an
+      `<Outlet />`; all 11 per-page `<Header />`/`<Footer />` render sites are
+      gone. This was not tidying: `Header.jsx:18-23` attaches a scroll listener
+      on mount, and the header was unmounting and remounting on every
+      navigation, tearing that listener down and resetting sticky state each
+      time. Pages keep their own `<main>`; `International.jsx` and
+      `UNHousing.jsx` gained the `<main>` landmark they never had. The 404 moved
+      inside the layout, so a mistyped URL keeps its navigation.
+- [x] **6.2 + 5.6 FontAwesome removed.** All **67 `fa-` usages across 10 files**
+      now route through one `<Icon>` registry backed by `lucide-react`.
+      **`dist/` went from 1,022,976 bytes of icon fonts to zero**, and the CSS
+      bundle from 146.1 kB to 74.4 kB raw (35.1 → 12.7 kB gzip).
+- [x] **6.3 Console output stripped.** 55 `console.*` calls became `logger.*`,
+      which no-ops outside development; `esbuild.drop` removes the rest at build
+      time — scoped to `command === 'build'`, because Vite applies `esbuild` to
+      the dev transform too and dropping `console` there would silence the very
+      diagnostics the logger exists to keep. No terser needed, contrary to the
+      comment at the old `vite.config.js:26`.
+- [x] **Fixed `index.html`'s `<title>`** — it read `Rasilpwani Properties`
+      against `Raslipwani` in all 174 other occurrences.
+
+**Three defects found while doing the above, each fixed here:**
+
+1. 🔴 **Every page declared the homepage as its canonical URL.** `DynamicSEO`
+   renders once above the router and emitted
+   `<link rel="canonical" href="https://raslipwani.co.ke">` on *every* route.
+   A canonical naming a different URL than the page it sits on tells crawlers
+   that page is a duplicate and should not be indexed in its own right — so
+   every listing, service page and statutory page was asking to be dropped from
+   the index. `PublicLayout` now emits a route-aware canonical; `Properties`
+   (query-stripped) and `PropertyDetail` (slug-based) still override it with
+   their better answers. Home separately declared a `www.` canonical — a
+   different host from the rest of the site — which is also gone.
+2. 🟠 **`admin-mobile.css` was a top-level `App.jsx` import**: 328 lines of admin
+   console styling in the stylesheet every public visitor blocks on, for an
+   audience of one. Moved into the lazy admin chunk. Its two global rules were
+   redundant — `index.css` already sets `overflow-x: hidden` and Tailwind
+   preflight already sets `box-sizing`.
+3. 🟠 **`console.error` was leaking Supabase internals to visitors.**
+   `App.jsx` printed error objects — table names, column names, sometimes row
+   contents — into the console of anyone who hit a missing listing. Console
+   output is not a private channel. Now dropped from the build and asserted
+   absent from the artifact.
+
+**Guard rails landed with the slice, not after it:**
+
+- `scripts/check-dist-console.mjs`, wired into CI — asserts zero `console.*` in
+  the built application chunks. A config option is a claim until something
+  checks the artifact.
+- Tests asserting: no `fa-` classes in `src/`, no `@fortawesome` dependency, no
+  `console.*` outside the logger and DebugPanel, no `<Header />`/`<Footer />`
+  outside the layout route, and a `<main>` landmark on every public page.
+- The `<Icon>` registry test renders all 45 names and checks the a11y contract
+  (decorative by default, `role="img"` + `aria-label` on request).
+- Bundle budget ratcheted **235 → 219 kB**; coverage floor raised to 60 lines /
+  59 statements / 45 functions / 46 branches.
+
+**Exit criteria — measured, not asserted:**
+
+| | Target | Result |
+|---|---|---|
+| Font payload | < 100 kB | ✅ **0 bytes** (was 999 kB) |
+| One icon library | 1 | ⚠️ **2** — see correction below |
+| `console.*` in `dist/` | 0 | ✅ **0**, enforced in CI |
+| Header mounts per navigation | 0 | ✅ **0** |
+| First-load CSS | < 50 kB | ⚠️ **74.4 kB raw** (12.7 kB gzip) — see correction below |
+
+🔧 **Correction — "one icon library" is not reachable as scoped.**
+`lucide-react` has **no mark for TikTok, WhatsApp or Pinterest**, all three of
+which the site uses. Those come from `react-icons/si`, already a dependency and
+already shipping as tree-shaken SVG, so the count is **3 → 2, not 3 → 1**. The
+payload goal was met in full regardless — FontAwesome was the only *font*-based
+library, and it accounted for 100% of the 999 kB. Reaching literal parity would
+mean hand-drawing three brand marks, which is a trademark question, not an
+engineering one. The remaining `react-icons` usage (30 files, mostly `Fi`/`Fa`
+sets) costs no fonts and is folded into **Slice 4C**, where the primitives
+standardise icon usage anyway.
+
+🔧 **Correction — the sub-50 kB CSS target belongs to 4C, not 4A.**
+Removing FontAwesome took the CSS bundle from 146.1 kB to 74.4 kB raw — roughly
+half, and all of the vendor half. The remaining 74.4 kB is Tailwind utility
+output driven by the app's own class usage, which *is* the ~1,784 raw palette
+classes Slice 4C collapses into primitives. No further 4A-shaped work reduces
+it. Gzipped it is already **12.7 kB**, so the criterion is met on the wire and
+missed on disk; the target moves to 4C where the work that reaches it lives.
+
+⚠️ **A trap for later slices, found here:** `src/test/setup.jsx` mocks
+`useLocation` **globally** to a fixed `/admin`. That is right for the admin
+components it was written for and wrong for anything route-aware — with it in
+place, `PublicLayout` reported the same canonical on every route and the bug
+above would have been invisible to its own test. `PublicLayout.test.jsx` undoes
+it locally. **Any route-aware component tested from here on must do the same**,
+or the global mock should be narrowed to the suites that need it.
 
 #### Slice 4B — Build the layer *(≈4 days)*
 
@@ -465,27 +544,30 @@ every public flow completable by keyboard in both themes.
 
 #### Release 4 exit criteria — numeric, and checkable
 
-| | Today (measured 2026-09-02) | Release 4 exit |
-|---|---|---|
-| Raw palette classes in `src/` | **1,784** | **< 400**, ratcheting in CI |
-| Themes | 1 (broken partial dark) | **2, both AA by test** |
-| Native `alert()`/`confirm()` | **10** | **0** |
-| Icon libraries | **3** | **1** |
-| Font payload | ~914 kB | **< 100 kB** |
-| CSS bundle | 146 kB (35.1 kB gzip) | **< 50 kB raw** |
-| `<label>` without `htmlFor` | **~123 of 134** | **0** |
-| axe violations | not measured | **0, enforced in CI** |
-| `console.*` in `src/` | **66** | **0 in `dist/`** |
-| Header remounts per navigation | **1** (tearing down its scroll listener each time) | **0** — mounted once by the layout route |
-| First-load JS (gzip) | 229.8 kB | **≤ 229.8 kB** — no regression |
-| Tests | 85 passing, 60.76% statements | **≥ 100 passing, floor ratchets up** |
+| | Release 4 start (2026-09-02) | **After 4A** | Release 4 exit | Slice |
+|---|---|---|---|---|
+| Raw palette classes in `src/` | 1,784 | 1,784 | **< 400**, ratcheting in CI | 4B/4C |
+| Themes | 1 (broken partial dark) | 1 | **2, both AA by test** | 4D |
+| Native `alert()`/`confirm()` | 10 | 10 | **0** | 4C |
+| Icon libraries | 3 | ✅ **2** | **2** *(revised — see 4A)* | 4A ✅ |
+| Font payload | 999 kB *(re-measured; ~914 was low)* | ✅ **0 bytes** | **< 100 kB** | 4A ✅ |
+| CSS bundle | 146.1 kB raw / 35.1 kB gzip | ✅ **74.4 kB / 12.7 kB** | **< 50 kB raw** *(moved to 4C)* | 4A + 4C |
+| `<label>` without `htmlFor` | ~123 of 134 | ~123 of 134 | **0** | 4D |
+| axe violations | not measured | not measured | **0, enforced in CI** | 4D |
+| `console.*` in `dist/` | present | ✅ **0**, enforced in CI | **0** | 4A ✅ |
+| Header remounts per navigation | 1 (scroll listener rebuilt each time) | ✅ **0** | **0** | 4A ✅ |
+| Canonical URL per page | homepage on every route 🔴 | ✅ route-aware | correct | 4A ✅ |
+| First-load JS+CSS (gzip) | 229.8 kB | ✅ **213.2 kB**, budget 219 kB | **≤ 229.8 kB** | 4A ✅ |
+| Tests | 86 passing, 60.76% statements | ✅ **98 passing, 61.51%** | **≥ 100 passing, floor ratchets up** | all |
 
-> ⚠️ Release 4, like Releases 2 and 3, **changes nothing in production**. It is the fourth
-> consecutive release of agent-executable work stacked on top of a database that is still
-> untouched. **Release 1 is still one day of owner time, and it is still the only thing
-> standing between the live database and anyone holding the anon key.** A beautifully
-> themed, fully accessible front end over a table anyone can `TRUNCATE` is not a
-> world-class product.
+> ⚠️ Release 4, like Releases 2 and 3, **changes nothing in production**. Slice 4A is
+> merged and verified, and not one byte of it has reached a visitor — it sits on a branch,
+> like everything before it. This is now the *fifth* consecutive block of agent-executable
+> work stacked on top of a database that is still untouched. **Release 1 is still one day
+> of owner time, and it is still the only thing standing between the live database and
+> anyone holding the anon key.** A beautifully themed, fully accessible front end that
+> loads 999 kB faster over a table anyone can `TRUNCATE` is not a world-class product —
+> it is a faster way to reach the same exposure.
 
 ### Later — deliberately deferred
 
@@ -957,16 +1039,16 @@ Three columns now: where this started, where it actually is today, and where it 
 | Policies that are `USING (true)` | **19 of 19** | **19 of 19** 🔑 *(fix written, not applied)* | 0 |
 | Secrets reachable from the browser | **3** | **1** — service key gone from code; Cloudinary secret + anon over-grant remain 🔑 | 0 |
 | Identity systems | 2 (Clerk + Supabase) | ✅ **1** | **1** |
-| Executing tests | **0** | ✅ **85** (14 files) | Full critical-path |
-| Test coverage | 0% | **60.76% statements / 61.83% lines**, ratcheting floor enforced in CI | ≥ 70% |
-| ESLint errors | 77 | ✅ **0** (374 warnings, almost all `jsx-a11y`) | 0 |
+| Executing tests | **0** | ✅ **98** (16 files) | Full critical-path |
+| Test coverage | 0% | **61.51% statements / 62.59% lines**, ratcheting floor enforced in CI | ≥ 70% |
+| ESLint errors | 77 | ✅ **0** (**365** warnings, almost all `jsx-a11y`) | 0 |
 | Unreachable lines | 2,039 | ✅ **0** — guarded by `pages.routed.test.js` | 0 |
 | Broken navigation links | 4 | ✅ **0** | 0 |
 | Inert design tokens (`*-dark` compiling to nothing) | 20 | ✅ **0** | 0 |
-| First-load JS (gzip) | ~275 kB | **229.8 kB**, budget 235 kB, enforced in CI | < 100 kB |
+| First-load JS+CSS (gzip) | ~275 kB | **213.2 kB**, budget **219 kB**, enforced in CI | < 100 kB |
 | Largest single chunk | 379 kB raw | 309 kB raw / 87 kB gzip (`AdminBookings`, lazy) | — |
-| CSS bundle | 175 kB | 146 kB (35.1 kB gzip) | < 50 kB |
-| Font payload | ~914 kB | **~914 kB still** — Poppins is fixed, but FontAwesome's ~914 kB of icon fonts still ship. Release 4 (4A) | < 100 kB |
+| CSS bundle | 175 kB | ✅ **74.4 kB (12.7 kB gzip)** — FontAwesome gone; the rest is the palette debt 4C removes | < 50 kB |
+| Font payload | **999 kB** *(re-measured; ~914 was low)* | ✅ **0 bytes** — FontAwesome removed in 4A; Poppins loads from Google Fonts | < 100 kB |
 | Lighthouse Performance (mobile) | not measured | not measured | ≥ 90 |
 | axe violations | not measured | not measured | 0 |
 | Largest component | 1,297 lines | **1,284 lines** (`AdminProperties.jsx`) — Release 5 (4.4) | < 300 |
@@ -974,29 +1056,39 @@ Three columns now: where this started, where it actually is today, and where it 
 | Raw palette classes (`blue`/`gray`/`slate`/…) | ~1,784 *(re-measured; 165 was blues only)* | **~1,784** — Release 4 (4B/4C) | < 400 ratcheting → 0 |
 | Themes | 1 (broken partial dark) | 1 (broken partial dark) — Release 4 (4D) | 2, both AA by contrast test |
 | Native `alert()`/`confirm()` | 10 *(re-counted; 12 was wrong)* | **10**, 2 of them customer-facing — Release 4 (4C) | 0 |
-| Icon libraries | 3 | **3** — Release 4 (4A) | 1 |
+| Icon libraries | 3 | ✅ **2** — FontAwesome gone (4A); `react-icons` folds into 4C | 2 *(revised: lucide has no TikTok/WhatsApp/Pinterest mark)* |
 | `<label>` without an associated control | ~123 of 134 | **~123 of 134** — Release 4 (4D) | 0 |
-| `console.*` calls in `src/` | 66 | **66** — Release 4 (4A) | 0 in `dist/` |
+| `console.*` calls in `src/` | 68 *(re-counted)* | ✅ **0 in `dist/`**, enforced in CI; source routes through `logger` | 0 in `dist/` |
 | Viewport blocks pinch-zoom (SC 1.4.4) | **yes** | ✅ **no** | no |
 | Booking notification delivery | **0%** (8 leads stranded) | **0%** — pipeline built and tested, 🔑 awaiting keys | 100% |
 | Error boundaries | 0 | ✅ Root + per-route + admin | Root + per-route + admin |
-| CI | none | ✅ lint · test · coverage floor · build · bundle budget · gitleaks | lint + test + build + gitleaks |
-| Overall audit score | **3.8 / 10** | ~**5.5 / 10** *(code-side gains real; security gains not yet live)* | **9 / 10** |
+| CI | none | ✅ lint · test · coverage floor · build · bundle budget · no-console-in-dist · gitleaks | lint + test + build + gitleaks |
+| Header remounts per navigation | 1 (scroll listener rebuilt each time) | ✅ **0** — one layout route (4A) | 0 |
+| Pages declaring the homepage as canonical | **all of them** 🔴 | ✅ **0** — route-aware canonical (4A) | 0 |
+| Overall audit score | **3.8 / 10** | ~**5.8 / 10** *(code-side gains real; security gains still not live)* | **9 / 10** |
 
-**Read the table honestly.** Nine metrics improved, and the three that matter most for
-security are unchanged — because the migrations that fix them have not been applied. The
-audit score moves to roughly 5.5 only on the strength of code quality and a live test
-suite. **It does not move past 6 until Release 1 is executed**, and no amount of further
-coding will move it.
+**Read the table honestly.** Sixteen metrics have improved, and the three that matter
+most for security are **still unchanged** — because the migrations that fix them have not
+been applied. The audit score moves to roughly 5.8 only on the strength of code quality,
+a live test suite, and now a materially faster first load. **It does not move past 6
+until Release 1 is executed**, and no amount of further coding will move it. Slice 4A is
+the fifth consecutive block of agent-executable work stacked on a database anyone holding
+the anon key can still `TRUNCATE`.
 
-**Four rows are worse than previously recorded, and none of them regressed** — they were
-measured properly for the first time on 2026-09-02: the raw-palette count (165 → ~1,784,
-because only blues had been counted), the font payload (FontAwesome's ~914 kB is still
-shipping; only the Poppins/Inter mismatch was closed), components querying Supabase
-directly (16 → 24 files), and the label-association defect, which was hidden behind an
-inflated lint warning count. Release 4 is scoped against these numbers. A roadmap that
-gets more accurate is working; one whose numbers only ever improve is being marked by the
-person who wrote it.
+**On numbers that got worse without regressing.** Version 6 recorded four such rows. 4A
+adds two more, both found by measuring rather than reading: the font payload was **999 kB,
+not ~914 kB**, and there were **68** `console.*` calls in `src/`, not 66. Both are now
+zero. Against that, three counts in the Version 6 scope proved wrong in the *other*
+direction once the work was done — "one icon library" is unreachable (lucide has no
+TikTok, WhatsApp or Pinterest mark), and the sub-50 kB raw CSS target cannot be hit by
+4A-shaped work because the remaining CSS *is* the palette debt 4C removes.
+
+Both corrections are recorded in [Slice 4A](#slice-4a--shrink-the-surface--complete-1e1b357)
+with the reasoning, and the exit-criteria table now carries the revised targets rather
+than quietly keeping targets that cannot be met. A roadmap that gets more accurate is
+working; one whose numbers only ever improve is being marked by the person who wrote it —
+and one that keeps an unreachable target to look ambitious is doing the same thing more
+politely.
 
 ---
 
@@ -1019,36 +1111,59 @@ That produces a bite-sized, TDD-structured plan at `docs/superpowers/plans/YYYY-
 **Where to start today:** not with a plan — with
 [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md). Release 1 is entirely
 owner actions against Supabase and Vercel, and every line of code it needs is already
-written and tested. **Releases 2 and 3 are now both complete, which makes this more
-urgent, not less: the codebase is hardened, coherent, and the database is still
-untouched.** Three releases of agent-executable work have been consumed; the fourth
-cannot be, because it is not code.
+written and tested. **Releases 2 and 3 are complete, and Release 4's first slice is now complete
+too, which makes this more urgent, not less: the codebase is hardened, coherent, fast,
+and the database is still untouched.** Four blocks of agent-executable work have been
+consumed; Release 1 cannot be, because it is not code.
 
-**Release 4 — the next agent-executable block — is now scoped and measured** in
-[Release 4 — "Themed"](#-release-4--themed--scoped-2026-09-02-not-started). It is the
-design system: the thing every remaining phase depends on, and the thing Phase 9 (the
-original UI-revamp request) was always meant to be built on.
+**Release 4 — the current block — is in progress** in
+[Release 4 — "Themed"](#-release-4--themed--4a-complete-2026-09-02). It is the design
+system: the thing every remaining phase depends on, and the thing Phase 9 (the original
+UI-revamp request) was always meant to be built on. **Slice 4A is done and verified;
+4B is next.**
 
 It runs in **four independently mergeable slices**, ordered so each one shrinks the next:
 
 | Slice | Work | Why here | Size |
 |---|---|---|---|
-| **4A** | 4.3 layout routes · 6.2 FontAwesome · 5.6 one icon library · 6.3 console strip | Deleting markup beats theming markup. Removes 11 duplicate Header/Footer sites and 67 icon call sites *before* the token migration has to cross them, and fixes the Header remount bug on the way | ~2 days |
+| **4A** ✅ | 4.3 layout routes · 6.2 FontAwesome · 5.6 icon consolidation · 6.3 console strip | Deleting markup beats theming markup. Removed 11 duplicate Header/Footer sites and 67 icon call sites *before* the token migration has to cross them; fixed the Header remount bug, a site-wide canonical defect, and 999 kB of fonts on the way | **done** (`1e1b357`) |
 | **4B** | 5.2 semantic dual-theme tokens · raw-palette ESLint ratchet · contrast test | Build and **prove** the layer before anything consumes it. The ratchet and the contrast test land *with* the layer, because a ~1,784-site colour migration cannot be verified after the fact | ~4 days |
 | **4C** | 5.5 primitives · retire the 10 native dialogs · migrate surfaces through the primitives | A call site replaced by `<Button>` sheds its token debt as a side effect. Migrating classes first means editing the same markup twice | ~5 days |
 | **4D** | 5.3 dark mode shipped · the rest of Phase 7 · `axe-core` in CI | The theme and the accessibility work touch the same markup; splitting them means two passes over every surface | ~4 days |
 
-Start with 4A. Each slice ends deployable.
+**4A is complete.** Next is 4B — and its ordering rationale is unchanged and worth
+restating: build and *prove* the token layer with **zero call sites migrated**, so the
+layer is verifiably correct before ~1,784 of them depend on it. The ESLint palette
+ratchet and the WCAG contrast test land *with* the layer, not after the migration they
+police. Each slice ends deployable.
 
 ```
-/superpowers:writing-plans Release 4 Slice 4A of ROADMAP.md — layout routes, FontAwesome removal, one icon library
+/superpowers:writing-plans Release 4 Slice 4B of ROADMAP.md — semantic dual-theme tokens, palette ratchet, contrast test
 ```
 
-**Three numbers in this roadmap were wrong and are corrected in the Release 4 section:**
-FontAwesome is 67 usages across 10 files (not "four icons in one file"); the raw-palette
-debt is ~1,784 classes (not 165), because the 1,445 raw greys were never counted; and
-there are 10 native dialogs, not 12 — two of them customer-facing. Scope Release 4 from
-the corrected numbers, not from the phase text those corrections replaced.
+**Two things 4A learned that 4B should carry in:**
+
+1. **`src/test/setup.jsx` mocks `useLocation` globally to `/admin`.** Any route-aware
+   component will test green against the wrong route until a suite overrides it locally,
+   the way `PublicLayout.test.jsx` does. The theme provider in 4D is route-aware in
+   spirit; the token work in 4B is not, but the trap is cheap to remember and expensive
+   to rediscover.
+2. **Measure the thing, not the config.** 4A's console strip was a two-line Vite change
+   that would have been trivially wrong and invisible — `esbuild.drop` applies to the dev
+   transform too, and scoping it to `command === 'build'` was the difference between
+   working and silently breaking local debugging. What caught it was checking the
+   artifact. 4B's contrast assertions should read computed token values, not the
+   stylesheet that declares them.
+
+**Numbers this roadmap has had to correct, and where.** FontAwesome was 67 usages across
+10 files, not "four icons in one file" — **now zero** (4A). The raw-palette debt is ~1,784
+classes, not 165, because the 1,445 raw greys were never counted — still outstanding
+(4B/4C). There are 10 native dialogs, not 12, two of them customer-facing — still
+outstanding (4C). The font payload was 999 kB, not ~914 kB — **now zero** (4A). There
+were 68 `console.*` calls, not 66 — **now zero in `dist/`** (4A). And two Release 4 exit
+targets were themselves wrong: "one icon library" is unreachable, and sub-50 kB raw CSS
+is 4C's to hit, not 4A's; both are revised in place with reasons. Scope from the
+corrected numbers, never from the phase text those corrections replaced.
 
 One item is deliberately carried out of Release 3 and **blocked on Release 1**: moving
 `UNHousing.jsx`'s hardcoded `unProperties` array into the database (4.1). It needs a
@@ -1058,5 +1173,5 @@ A per-release changelog is maintained in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
-*Version 6 — Release 3 completed and verified, and Release 4 scoped from fresh measurement, against the working tree, `npm run lint` (0 errors, 374 warnings, of which 351 are three label/control rules and 134 come from a deprecated one), `npm run test:coverage` (85 passing, 14 files, 60.76% statements / 61.83% lines), `npm run build` (clean), and `npm run bundle:report` (229.8 kB, within the 235 kB budget) on 2026-09-02. Release 4's scope numbers — 1,784 raw palette classes, 67 FontAwesome usages across 10 files, 10 native dialogs, 134 labels against 11 `htmlFor`, 66 `console.*` — were each counted against `src/` on the same day and supersede the earlier figures they contradict.
+*Version 7 — Release 4 Slice 4A completed and verified against the working tree at `1e1b357`: `npx eslint .` (0 errors, 365 warnings), `npm run test:coverage` (98 passing, 16 files, 61.51% statements / 62.59% lines, ratcheting floor raised), `npm run build` (clean), `npm run bundle:report` (213.2 kB, within the newly ratcheted 219 kB budget), and `npm run check:console` (0 console calls in 33 application chunks) on 2026-09-02. The font measurement — 1,022,976 bytes of FontAwesome `.woff2`/`.ttf` before, 0 after — was taken by summing `dist/` directly, not inferred. Release 4's remaining scope numbers — 1,784 raw palette classes, 10 native dialogs, 134 labels against 11 `htmlFor` — were counted against `src/` on 2026-09-02 and supersede the earlier figures they contradict.
 Derived from the codebase audit of commit `c1c8656` and live database introspection of project `gihgdouvltxlpynpuyde`, both 2026-09-01. Owner decisions incorporated: Supabase Auth replaces Clerk; canonical `raslipwani.co.ke`; Nairobuild cross-link; dark mode; Resend; International section routed.*
