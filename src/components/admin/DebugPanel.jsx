@@ -25,6 +25,9 @@ const DebugPanel = ({ hidden = true }) => {
       tapTimerRef.current = setTimeout(() => {
         if (tapCountRef.current >= 5) {
           setIsVisible(prev => !prev);
+          // Deliberately `console.log`, not `logger`: this panel exists to capture
+          // console output, and it patches `log`/`error`/`warn` below. Routing its
+          // own message through `logger` would be the one line it cannot show.
           console.log('Debug panel ' + (isVisible ? 'hidden' : 'shown'));
         }
         tapCountRef.current = 0;

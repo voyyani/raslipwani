@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+import Icon from '../Icon';
 const ServiceCard = ({ service, onBook, index }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
@@ -12,7 +13,7 @@ const ServiceCard = ({ service, onBook, index }) => (
     <div className="p-8">
       <div className="flex items-start mb-6">
         <div className={`bg-gradient-to-r ${service.color} p-4 rounded-xl mr-5 text-white`}>
-          <i className={`${service.icon} text-3xl`}></i>
+          <Icon name={service.icon} size={30} />
         </div>
         <div>
           <h3 className="text-2xl font-bold text-gray-800 mb-2">{service.title}</h3>
@@ -31,7 +32,7 @@ const ServiceCard = ({ service, onBook, index }) => (
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * idx }}
             >
-              <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+              <Icon name="check-circle" className="text-green-500 mt-1 mr-2" />
               <span>{feature}</span>
             </motion.li>
           ))}

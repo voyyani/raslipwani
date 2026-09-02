@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/guard-env-names.mjs",
+    "prebuild": "node scripts/guard-env-names.mjs && node scripts/generate-tokens.mjs --check",
     "build": "vite build",
     "bundle:report": "node scripts/bundle-report.mjs",
     "lint": "eslint .",
@@ -13,10 +13,13 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "check:console": "node scripts/check-dist-console.mjs",
+    "tokens": "node scripts/generate-tokens.mjs",
+    "tokens:check": "node scripts/generate-tokens.mjs --check",
+    "palette:ratchet": "node scripts/palette-ratchet.mjs"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.7.2",
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/list": "^6.1.20",

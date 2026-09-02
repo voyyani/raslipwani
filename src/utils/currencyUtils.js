@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 // Currency conversion utilities for international clients
 // Note: Base currencies are defined here. For dynamic currency settings, 
 // use the SettingsContext to override the default currency.
@@ -54,7 +56,7 @@ export const getCurrencyConfig = () => currencyConfig;
 export const convertCurrency = (amount, toCurrency = 'USD') => {
   const currency = currencyConfig[toCurrency] || CURRENCIES[toCurrency];
   if (!currency) {
-    console.warn(`Currency ${toCurrency} not supported, defaulting to USD`);
+    logger.warn(`Currency ${toCurrency} not supported, defaulting to USD`);
     return amount;
   }
   return amount * currency.rate;
@@ -71,7 +73,7 @@ export const formatCurrency = (amount, currency = 'USD', convertFirst = true) =>
   const currencyData = currencyConfig[currency] || CURRENCIES[currency];
   
   if (!currencyData) {
-    console.warn(`Currency ${currency} not supported, defaulting to USD`);
+    logger.warn(`Currency ${currency} not supported, defaulting to USD`);
     return `$${amount.toLocaleString('en-US')}`;
   }
 

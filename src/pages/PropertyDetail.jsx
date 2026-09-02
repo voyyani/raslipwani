@@ -3,9 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../src/utils/supabaseClient';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
+import Icon from '../components/Icon';
 const PropertyDetail = () => {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
@@ -338,21 +337,18 @@ const PropertyDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
+      <>
         <main className="flex-grow container mx-auto px-4 py-12 flex justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </main>
-        <Footer />
-      </div>
+      </>
     );
   }
 
   // Error state
   if (!property) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
+      <>
         <main className="flex-grow container mx-auto px-4 py-8">
           {error ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -368,8 +364,7 @@ const PropertyDetail = () => {
             &larr; Back to Properties
           </Link>
         </main>
-        <Footer />
-      </div>
+      </>
     );
   }
 
@@ -398,9 +393,7 @@ const PropertyDetail = () => {
         )}
       </Helmet>
       
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        
+      <>
         <main className="flex-grow container mx-auto px-4 py-8">
           {/* Breadcrumbs with schema for SEO */}
           <nav className="text-sm mb-4" aria-label="Breadcrumb">
@@ -741,16 +734,16 @@ const PropertyDetail = () => {
                 <h3 className="font-semibold mb-3">Share This Property</h3>
                 <div className="flex space-x-4">
                   <button className="text-gray-600 hover:text-blue-600">
-                    <i className="fab fa-facebook text-xl"></i>
+                    <Icon name="facebook" size={20} />
                   </button>
                   <button className="text-gray-600 hover:text-blue-400">
-                    <i className="fab fa-twitter text-xl"></i>
+                    <Icon name="twitter" size={20} />
                   </button>
                   <button className="text-gray-600 hover:text-red-600">
-                    <i className="fab fa-pinterest text-xl"></i>
+                    <Icon name="pinterest" size={20} />
                   </button>
                   <button className="text-gray-600 hover:text-blue-400">
-                    <i className="fab fa-linkedin text-xl"></i>
+                    <Icon name="linkedin" size={20} />
                   </button>
                 </div>
               </div>
@@ -758,8 +751,7 @@ const PropertyDetail = () => {
           </div>
         </main>
         
-        <Footer />
-      </div>
+      </>
     </>
   );
 };

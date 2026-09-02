@@ -10,16 +10,185 @@ numbers refer to [`ROADMAP.md`](ROADMAP.md).
 > **written but not applied** — the three migrations that close the data exposure require an
 > owner to run them. See [`docs/HANDOFF-phase1-apply.md`](docs/HANDOFF-phase1-apply.md).
 >
-> **Release 4 ("Themed" — design system, dark mode, accessibility) is scoped but not started.**
-> Its four slices and measured exit criteria live in [`ROADMAP.md`](ROADMAP.md).
+> **Release 4 ("Themed" — design system, dark mode, accessibility) is in progress.**
+> **Slices 4A and 4B are complete**; 4C and 4D are scoped and not started. The four slices and
+> their measured exit criteria live in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
 ## [Unreleased]
 
-Verified 2026-09-02 (end of Release 3): **85 tests passing across 14 files**,
-**0 ESLint errors** (374 warnings), coverage 61.83% lines behind an enforced ratcheting
-floor, production build clean, **first-load bundle 229.8 kB gzip** under a 235 kB CI budget.
+Verified 2026-09-02 (end of Release 4 Slice 4B): **227 tests passing across 19 files**,
+**0 ESLint errors** (3,370 warnings — 365 `jsx-a11y`, plus 3,005 literal palette classes
+the new design rule makes visible for the first time), coverage 63.26% lines behind an
+enforced ratcheting floor, production build clean, **first-load bundle 213.9 kB gzip**
+under a 219 kB CI budget, **zero `console.*` in the built application chunks**, and a
+**live palette ratchet at 3,005** that CI refuses to let rise.
+
+### Release 4, Slice 4B — "Build the layer" · branch `worktree-release4-slice-4a`
+
+The design system's colour layer, built and proven before anything is migrated onto it.
+That ordering is the slice: a colour system is the one part of a design system a test can
+actually verify, so it is verified first and spent second.
+
+#### Added
+
+- **`src/design/tokens.js`** — the single source of truth for colour. 32 semantic role
+  tokens (`surface`, `surface-raised`, `surface-sunken`, `surface-overlay`,
+  `surface-inverse`, `content`, `content-muted`, `content-subtle`, `content-inverse`,
+  `border`, `border-strong`, `brand` and its variants, `accent`, `focus-ring`) plus a
+  `surface`/`content`/`border` triple for each of `success`/`warning`/`danger`/`info` —
+  defined in **both** themes. Roles, not values: `surface-raised` survives a theme swap,
+  `bg-white` cannot.
+- **`src/design/contrast.js`** — WCAG 2.1 relative luminance and contrast ratio, owned
+  outright so no dependency can quietly change the answer between CI runs.
+- **`src/design/status.js`** — one map deciding what a booking status looks like.
+- **`scripts/generate-tokens.mjs`** → **`src/styles/tokens.css`** — the same palette has
+  to exist as CSS the browser paints, as Tailwind names components write, and as hex the
+  contrast formula reads. Three hand-kept copies drift, usually in the theme nobody has
+  open; this generates two of them from one. `--check` mode runs in `prebuild`, so a
+  build against a stale stylesheet fails rather than shipping a palette the tests are not
+  actually proving.
+- **`eslint-rules/no-raw-palette-classes.js`** — flags every literal Tailwind colour in
+  `src/` with a message naming the token to use instead. It scans string literals
+  generally, not just `className` attributes, because half the debt here lives in
+  configuration objects like `{ color: 'bg-yellow-100 text-yellow-800' }`.
+- **`scripts/palette-ratchet.mjs`** + **`palette-budget.json`**, wired into CI — a
+  ceiling that only falls, like the coverage floor. It counts by running the real ESLint
+  rule rather than a second regex: two definitions of "a palette class" eventually
+  disagree, and the one CI trusts is the one nobody reads.
+- **129 tests** across three new suites — 102 contrast assertions covering every text
+  role on every ground, brand-as-link, button and accent labels, each status colour both
+  on its own tint and directly on a card, control boundaries at WCAG 1.4.11's 3:1, and
+  the focus ring; plus generated-CSS sync, token completeness, and the status map.
+
+#### Changed
+
+- **`tailwind.config.js` is bound to the token layer, not to hexes**, with
+  `darkMode: 'class'`. Custom properties hold space-separated RGB channels so
+  Tailwind's `<alpha-value>` slot works and `bg-surface/80` behaves like a built-in
+  colour. `primary` and `accent` are now theme-aware: the brand hex is **2.1:1 on a dark
+  ground**, so leaving it literal would have meant shipping an unreadable button the
+  moment 4D turns dark mode on.
+- **`src/index.css` paints from tokens** — `--surface`, `--content`, `--brand` — and its
+  focus ring from `--focus-ring` rather than `-webkit-focus-ring-color`, which is
+  invisible in dark mode.
+- **The coverage floor rises to 62 lines / 61 statements / 48 functions / 48 branches**
+  (from 60/59/45/46).
+
+#### Fixed
+
+- 🟠 **The same booking changed colour depending on which screen you were on.**
+  `BookingStatusBadge` rendered *confirmed* in blue; `BookingList` and `BookingRow`
+  rendered it in green. Each site was unit-tested against its own opinion, so nothing
+  failed. All four now read one map.
+- 🟠 **Completed bookings read as still-outstanding.** `BookingList` and `BookingRow`
+  used a two-branch ternary — confirmed, cancelled, else — so *completed* fell through to
+  the **pending** colour. `confirmed` is now `info` and `completed` is `success`, and a
+  test asserts they cannot be equal: confirmed means "on the calendar", completed means
+  "done", and that is the distinction the admin acts on.
+- 🟠 **Deleted the broken partial dark mode at `index.css:78-88`** — inherited from the
+  Vite scaffold, it flipped bare `:root` to `#242424` under `prefers-color-scheme: dark`
+  with **no token layer beneath it**, so a visitor on a dark OS got dark ground leaking
+  behind components still painting themselves light. It had been shipping. Scheduled for
+  4D, done here: leaving it would have meant a token layer and a media query asserting
+  different things about the same page.
+- A `\w` inside a plain template literal in the new lint rule resolved to a bare `w`,
+  quietly narrowing a boundary check to a two-character class. Rebuilt from `String.raw`
+  segments.
+
+#### Verified, not asserted
+
+- The contrast suite was **proven able to fail**: lightening `content-subtle` four steps
+  turns four assertions red.
+- The ratchet was **proven able to block**: three added literal classes take the check to
+  exit 1, and `--update` refuses to raise the ceiling.
+
+🔧 **Correction — the raw-palette count was low, and the definition was why.** The
+roadmap recorded ~1,784; the rule counts **3,005**. The earlier figure looked only at
+`bg-`/`text-` for a subset of hues, and did not count variant chains (`hover:`, `md:`),
+bare `white`/`black`, the other fifteen colour utilities (`border-`, `ring-`, `divide-`,
+`from-`/`via-`/`to-`, …), or configuration objects. All of those are surface a theme has
+to cross. **The debt did not grow — it stopped being invisible.**
+
+### Release 4, Slice 4A — "Shrink the surface" · branch `worktree-release4-slice-4a`
+
+Everything in this slice removed weight or removed duplication, so the theming work in
+4B/4C crosses a smaller surface.
+
+#### Added
+
+- **`src/components/Icon.jsx`** — one icon registry for the whole application, backed by
+  `lucide-react`, keeping FontAwesome's *names* so the several call sites that store an
+  icon as a string in a data array stay serialisable. Icons are `aria-hidden` by default,
+  with an opt-in `label` for the rare icon that is a control's only accessible content.
+- **`src/components/PublicLayout.jsx`** — the layout route that renders the public chrome
+  once, above an `<Outlet />`, plus a route-aware canonical URL.
+- **`src/utils/logger.js`** — a console that only speaks in development.
+- **`scripts/check-dist-console.mjs`**, wired into CI — asserts zero `console.*` in the
+  built application chunks. `vite.config.js` claims to drop them; this checks the artifact.
+- **`Icon.test.jsx` and `PublicLayout.test.jsx`** (12 new tests) — the registry's a11y
+  contract and all 45 names, plus structural guards: no `fa-` classes in `src/`, no
+  `@fortawesome` dependency, no `console.*` outside the logger and DebugPanel, no
+  `<Header />`/`<Footer />` outside the layout route, and a `<main>` landmark on every
+  public page.
+- **`<main>` landmarks on `International.jsx` and `UNHousing.jsx`**, which never had one.
+
+#### Changed
+
+- **All 67 `fa-` call sites across 10 files** now render through `<Icon>`. Lucide has no
+  mark for TikTok, WhatsApp or Pinterest, so those three come from `react-icons/si`,
+  already a dependency — the icon-library count is **3 → 2**, not 3 → 1, and the roadmap
+  now records why 1 is unreachable.
+- **The public chrome moved into one layout route**, replacing 11 per-page `<Header />` /
+  `<Footer />` render sites. The 404 moved inside it too, so a mistyped URL keeps the
+  navigation that gets the visitor somewhere real.
+- **55 `console.*` calls became `logger.*`.** `esbuild.drop` removes what remains at build
+  time, scoped to `command === 'build'` — Vite applies `esbuild` to the dev transform as
+  well, and dropping `console` there would silence the diagnostics the logger exists to
+  keep.
+- **`admin-mobile.css` moved from `App.jsx` into the lazy admin chunk.** As a top-level
+  import it put 328 lines of admin console styling into the stylesheet every public
+  visitor blocks on. Its two global rules were redundant: `index.css` already sets
+  `overflow-x: hidden` and Tailwind preflight already sets `box-sizing`.
+- **Bundle budget ratcheted 235 → 219 kB**; coverage floor raised to 60 lines / 59
+  statements / 45 functions / 46 branches.
+
+#### Fixed
+
+- **Every page declared the homepage as its canonical URL.** `DynamicSEO` renders once
+  above the router and emitted `<link rel="canonical" href="https://raslipwani.co.ke">` on
+  *every* route — telling crawlers that each listing, service page and statutory page was
+  a duplicate of `/` and should not be indexed on its own. `PublicLayout` now emits a
+  route-aware canonical; `Properties` (query-stripped) and `PropertyDetail` (slug-based)
+  still override it with their better answers. Home separately declared a `www.`
+  canonical — a different host from the rest of the site — which is also gone.
+- **The header tore down its scroll listener on every navigation.** `Header.jsx` registers
+  the listener in a mount effect, and because each page rendered its own `<Header />`, the
+  router replaced that element on each route change — rebuilding the listener and
+  resetting `isScrolled` to `false`. A visitor who scrolled down and clicked a nav link
+  landed with the header in its unscrolled state. It now mounts once per session.
+- **`console.error` leaked Supabase internals to visitors.** `App.jsx` printed error
+  objects — table names, column names, sometimes row contents — into the console of anyone
+  who hit a missing listing. Dropped from the build and asserted absent from the artifact.
+- **`index.html`'s `<title>` read `Rasilpwani Properties`**, against `Raslipwani` in all
+  174 other occurrences. It is the pre-JS title every crawler and browser tab sees first.
+
+#### Removed
+
+- **`@fortawesome/fontawesome-free`** and its `main.jsx` stylesheet import. It had been
+  emitting **1,022,976 bytes** of icon fonts — `fa-solid-900`, `fa-brands-400`,
+  `fa-regular-400` and a v4 compatibility shim, each as both `.woff2` and `.ttf` — to draw
+  about forty glyphs. The CSS bundle fell from 146.1 kB to 74.4 kB raw (35.1 → 12.7 kB
+  gzip), and first load from 229.8 kB to 213.2 kB gzip.
+- **`src/styles/calendar.css`**, imported by nothing.
+
+#### Known trap, recorded rather than fixed
+
+- `src/test/setup.jsx` mocks `useLocation` **globally** to a fixed `/admin`. That suits the
+  admin components it was written for and quietly breaks any route-aware component's
+  tests — `PublicLayout` reported the same canonical on every route until its suite
+  overrode the mock locally. Narrowing the global mock is a candidate for 4B.
 
 ### Release 3 — "Coherent" · branch `feat/release-3-coherent`
 

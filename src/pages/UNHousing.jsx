@@ -1,8 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { 
   Building, 
   MapPin, 
@@ -146,8 +144,7 @@ const UNHousing = () => {
         <meta name="keywords" content="UN housing Nairobi, diplomatic housing Kenya, Gigiri apartments, UN staff accommodation, international housing Nairobi" />
       </Helmet>
       
-      <Header />
-
+      <main className="flex-grow">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-20">
         <div className="absolute inset-0 opacity-10">
@@ -472,7 +469,7 @@ const UNHousing = () => {
         </div>
       </section>
       
-      <Footer />
+      </main>
     </>
   );
 };

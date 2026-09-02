@@ -16,14 +16,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
 import { SettingsProvider } from './contexts/SettingsContext';
 import DynamicSEO from './components/DynamicSEO';
 import MaintenancePage from './pages/MaintenancePage';
-import './styles/admin-mobile.css'; // Import admin mobile optimizations
+import { logger } from './utils/logger';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -126,25 +125,37 @@ function App() {
         }>
           <ErrorBoundary name="route">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/properties/:id" element={<PropertyDetail />} />
-            {/* International section */}
-            <Route path="/international" element={<International />} />
-            <Route path="/international/un-housing" element={<UNHousing />} />
+            {/*
+              Every public page hangs off one layout route. The chrome — header,
+              footer, and the route-aware canonical tag — is rendered once by
+              <PublicLayout> instead of eleven times by eleven pages, so the
+              header's scroll listener survives navigation instead of being torn
+              down and rebuilt on each one.
+            */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/properties/:id" element={<PropertyDetail />} />
+              {/* International section */}
+              <Route path="/international" element={<International />} />
+              <Route path="/international/un-housing" element={<UNHousing />} />
 
-            
-            {/* Updated services routes */}
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/viewing" element={<ViewingExperience />} />
-            
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
+              {/* Updated services routes */}
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/viewing" element={<ViewingExperience />} />
 
-            {/* Statutory pages linked from the footer on every page */}
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+
+              {/* Statutory pages linked from the footer on every page */}
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+
+              {/* Enhanced 404 page. Inside the layout so a mistyped URL still
+                  offers the navigation that gets the visitor somewhere real. */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+
             {/* SEO-friendly redirects */}
             <Route path="/listings" element={<Navigate to="/properties" replace />} />
             <Route path="/contact-us" element={<Navigate to="/contact" replace />} />
@@ -186,24 +197,6 @@ function App() {
               <Route path="clients/:id" element={<ClientDetail />} />
               <Route path="settings" element={<Settings />} />
             </Route>
-            
-            {/* Enhanced 404 page */}
-            <Route path="*" element={
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-grow container mx-auto px-4 py-32 text-center">
-                  <h1 className="text-4xl font-bold mb-6">Page Not Found</h1>
-                  <p className="text-xl mb-8">The page you're looking for doesn't exist or has been moved.</p>
-                  <Link 
-                    to="/" 
-                    className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
-                  >
-                    Return to Homepage
-                  </Link>
-                </main>
-                <Footer />
-              </div>
-            } />
           </Routes>
           </ErrorBoundary>
         </Suspense>
@@ -214,6 +207,29 @@ function App() {
     </ErrorBoundary>
   );
 }
+
+/**
+ * The 404. It renders inside <PublicLayout>, so it supplies only its <main> —
+ * the header and footer come from the layout route, which is the point: a
+ * visitor who mistyped a URL keeps the navigation that gets them somewhere real.
+ */
+const NotFound = () => (
+  <main className="flex-grow container mx-auto px-4 py-32 text-center">
+    <Helmet>
+      <title>Page Not Found | Raslipwani Properties</title>
+      {/* A soft 404 that search engines are welcome to index is worse than none. */}
+      <meta name="robots" content="noindex" />
+    </Helmet>
+    <h1 className="text-4xl font-bold mb-6">Page Not Found</h1>
+    <p className="text-xl mb-8">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
+    <Link
+      to="/"
+      className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
+    >
+      Return to Homepage
+    </Link>
+  </main>
+);
 
 const PropertyModalRoute = () => {
   const { id } = useParams();
@@ -234,7 +250,7 @@ const PropertyModalRoute = () => {
         if (error) throw error;
         setProperty(data);
       } catch (err) {
-        console.error('Failed to load property:', err);
+        logger.error('Failed to load property:', err);
       } finally {
         setLoading(false);
       }

@@ -42,7 +42,18 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
-      # `prebuild` runs the secret-shaped-env-name guard automatically.
+      # A colour migration is the one kind of work no assertion can verify —
+      # nothing catches "this card renders dark text on a dark ground". What can
+      # be enforced is that the debt only shrinks, so the count of literal
+      # Tailwind palette classes is a ceiling that CI refuses to let rise.
+      # Lowering it is a deliberate commit; see palette-budget.json.
+      - name: Palette ratchet
+        run: npm run palette:ratchet
+
+      # `prebuild` runs the secret-shaped-env-name guard and asserts that
+      # src/styles/tokens.css is still what src/design/tokens.js generates. A
+      # build that paints from a stale stylesheet is worse than one that fails,
+      # because the contrast test would then be proving a palette nobody sees.
       - name: Build
         run: npm run build
 
@@ -50,6 +61,13 @@ jobs:
       # gains are only durable if exceeding them fails something.
       - name: Bundle size
         run: npm run bundle:report
+
+      # `vite.config.js` drops console output at build time; this asserts it on
+      # the artifact. A config option is a claim until something checks it, and
+      # console output is not a private channel — the call this replaced printed
+      # Supabase error objects into every visitor's console.
+      - name: No console output in the bundle
+        run: npm run check:console
 
       # A rendered app is easier to argue about than a stack trace.
       - name: Upload build

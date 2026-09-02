@@ -15,6 +15,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 
+import { logger } from '../../utils/logger';
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
@@ -53,7 +54,7 @@ const Bookings = () => {
         if (error) throw error;
         setBookings(data || []);
       } catch (error) {
-        console.error('Error fetching bookings:', error);
+        logger.error('Error fetching bookings:', error);
       } finally {
         setLoading(false);
       }
@@ -147,7 +148,7 @@ const Bookings = () => {
       setSuccessMessage(`Status updated to ${status}`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Update error:', error);
+      logger.error('Update error:', error);
     }
   };
 
@@ -173,7 +174,7 @@ const Bookings = () => {
       setSuccessMessage(`Booking ${archive ? 'archived' : 'restored'} successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Archive error:', error);
+      logger.error('Archive error:', error);
     }
   };
 

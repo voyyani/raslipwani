@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { notifyBookingReceived } from '../utils/bookingNotifications';
 
+import { logger } from '../utils/logger';
 const ServicesMain = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeFAQ, setActiveFAQ] = useState(null);
@@ -38,7 +37,7 @@ const ServicesMain = () => {
         if (error) throw error;
         setProperties(data || []);
       } catch (error) {
-        console.error('Error fetching properties:', error);
+        logger.error('Error fetching properties:', error);
       } finally {
         setLoadingProperties(false);
       }
@@ -181,7 +180,7 @@ const ServicesMain = () => {
       setActiveModal(null);
       setCurrentStep(1);
     } catch (error) {
-      console.error('Booking error:', error);
+      logger.error('Booking error:', error);
       alert('Failed to submit booking. Please try again or call us directly.');
     } finally {
       setIsSubmitting(false);
@@ -224,9 +223,7 @@ const ServicesMain = () => {
         />
       </Helmet>
       
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header />
-        
+      <>
         {/* Booking Modal */}
         <AnimatePresence>
           {activeModal === 'booking' && (
@@ -647,7 +644,7 @@ const ServicesMain = () => {
           )}
         </AnimatePresence>
           
-        <main className="flex-grow">
+        <main className="flex-grow bg-gray-50">
           {/* Services Hero */}
           <section className="bg-gradient-to-br from-primary via-blue-700 to-blue-800 py-20 md:py-28 text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20"></div>
@@ -834,8 +831,7 @@ const ServicesMain = () => {
           </section>
         </main>
         
-        <Footer />
-      </div>
+      </>
     </>
   );
 };

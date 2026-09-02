@@ -5,6 +5,7 @@ import { FaSave, FaSpinner, FaCheckCircle, FaTimesCircle, FaCloudUploadAlt } fro
 import toast from 'react-hot-toast';
 import { useSettings } from '../../../hooks/useSettings';
 
+import { logger } from '../../../utils/logger';
 /**
  * CloudinarySettings - Cloudinary configuration for image uploads
  * Works with flat table structure (single row with columns)
@@ -26,14 +27,14 @@ const CloudinarySettings = () => {
     staleTime: 0,
     refetchOnMount: 'always',
     queryFn: async () => {
-      console.log('[CloudinarySettings] Fetching settings...');
+      logger.debug('[CloudinarySettings] Fetching settings...');
       const { data, error } = await supabase
         .from('admin_settings')
         .select('cloud_name, upload_preset, cloudinary_api_key, cloudinary_api_secret')
         .limit(1)
         .single();
 
-      console.log('[CloudinarySettings] Fetch result:', { data, error });
+      logger.debug('[CloudinarySettings] Fetch result:', { data, error });
 
       if (error && error.code !== 'PGRST116') throw error;
 
@@ -52,7 +53,7 @@ const CloudinarySettings = () => {
   // Update settings mutation
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      console.log('[CloudinarySettings] Saving settings:', settings);
+      logger.debug('[CloudinarySettings] Saving settings:', settings);
 
       const updateData = {
         cloud_name: settings.cloud_name,
@@ -68,7 +69,7 @@ const CloudinarySettings = () => {
         .limit(1)
         .single();
 
-      console.log('[CloudinarySettings] Existing row:', { existing, selectError });
+      logger.debug('[CloudinarySettings] Existing row:', { existing, selectError });
 
       if (existing) {
         const { data, error } = await supabase
@@ -76,14 +77,14 @@ const CloudinarySettings = () => {
           .update(updateData)
           .eq('id', existing.id)
           .select();
-        console.log('[CloudinarySettings] Update result:', { data, error });
+        logger.debug('[CloudinarySettings] Update result:', { data, error });
         if (error) throw error;
       } else {
         const { data, error } = await supabase
           .from('admin_settings')
           .insert(updateData)
           .select();
-        console.log('[CloudinarySettings] Insert result:', { data, error });
+        logger.debug('[CloudinarySettings] Insert result:', { data, error });
         if (error) throw error;
       }
     },
@@ -93,7 +94,7 @@ const CloudinarySettings = () => {
       refreshSettings();
     },
     onError: (error) => {
-      console.error('[CloudinarySettings] Save error:', error);
+      logger.error('[CloudinarySettings] Save error:', error);
       toast.error('Failed to save settings: ' + error.message);
     }
   });
@@ -128,7 +129,7 @@ const CloudinarySettings = () => {
       );
 
       const result = await response.json();
-      console.log('[CloudinarySettings] Test upload result:', result);
+      logger.debug('[CloudinarySettings] Test upload result:', result);
 
       if (result.secure_url) {
         setTestStatus('success');
@@ -138,7 +139,7 @@ const CloudinarySettings = () => {
         toast.error(`Upload failed: ${result.error.message}`);
       }
     } catch (error) {
-      console.error('Upload test failed:', error);
+      logger.error('Upload test failed:', error);
       setTestStatus('error');
       toast.error('Upload test failed - check your settings');
     }

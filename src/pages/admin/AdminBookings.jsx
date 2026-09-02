@@ -26,6 +26,7 @@ import {
   FaChevronUp
 } from 'react-icons/fa';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
+import { statusClasses } from '../../design/status';
 import BookingDetailModal from './BookingDetailModal';
 import MobileBookingCard from '../../components/admin/MobileBookingCard';
 import { exportToCSV } from '../../utils/exportUtils';
@@ -392,7 +393,7 @@ const AdminBookings = () => {
               <span className="text-lg font-bold text-gray-900">{stats.total}</span>
               <span className="text-sm text-gray-600">Total Bookings</span>
               {stats.pending > 0 && (
-                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClasses('pending')}`}>
                   {stats.pending} pending
                 </span>
               )}

@@ -31,6 +31,7 @@ import {
   FaStar
 } from 'react-icons/fa';
 
+import { logger } from '../../utils/logger';
 const AdminProperties = () => {
   const queryClient = useQueryClient();
   const [properties, setProperties] = useState([]);
@@ -317,7 +318,7 @@ const AdminProperties = () => {
       const results = await Promise.all(uploadPromises);
       return results.map(result => result.secure_url);
     } catch (err) {
-      console.error('Image upload error:', err);
+      logger.error('Image upload error:', err);
       toast.error('Failed to upload images. Please check Cloudinary settings.');
       return [];
     } finally {
@@ -424,7 +425,7 @@ const AdminProperties = () => {
     try {
       const newFeaturedValue = !property.featured;
       
-      console.log('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
+      logger.debug('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
       
       // Plain client: the Supabase Auth session carries admin identity, and the
       // "admins manage properties" policy in 009 authorises this write.
@@ -435,11 +436,11 @@ const AdminProperties = () => {
         .select();
       
       if (error) {
-        console.error('Supabase error:', error);
+        logger.error('Supabase error:', error);
         throw error;
       }
       
-      console.log('Update result:', data);
+      logger.debug('Update result:', data);
       
       // Check if update actually happened
       if (!data || data.length === 0) {
@@ -455,7 +456,7 @@ const AdminProperties = () => {
       
       toast.success(newFeaturedValue ? 'Added to featured' : 'Removed from featured');
     } catch (error) {
-      console.error('Toggle featured error:', error);
+      logger.error('Toggle featured error:', error);
       toast.error(`Failed: ${error.message || 'Unknown error'}`);
     }
   };

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
+import Icon from '../Icon';
 const ViewingForm = ({ 
   bookingData, 
   handleInputChange, 
@@ -18,7 +19,7 @@ const ViewingForm = ({
         onClick={closeModal}
         className="text-gray-500 hover:text-primary transition-colors"
       >
-        <i className="fas fa-times text-xl"></i>
+        <Icon name="times" size={20} />
       </button>
     </div>
     
@@ -38,13 +39,13 @@ const ViewingForm = ({
           >
             <div className="flex justify-between items-start">
               <div className="bg-primary/10 p-3 rounded-lg mb-3">
-                <i className={`${option.icon} text-xl text-primary`}></i>
+                <Icon name={option.icon} size={20} className="text-primary" />
               </div>
             </div>
             <h5 className="font-bold text-lg mb-2">{option.title}</h5>
             <p className="text-gray-600 mb-3">{option.description}</p>
             <div className="text-sm text-gray-500 flex items-center">
-              <i className="far fa-clock mr-1"></i> {option.duration}
+              <Icon name="clock" className="mr-1" /> {option.duration}
             </div>
           </motion.div>
         ))}
@@ -78,7 +79,7 @@ const ViewingForm = ({
         >
           {isSubmitting ? (
             <span className="flex items-center justify-center">
-              <i className="fas fa-spinner fa-spin mr-2"></i> Processing...
+              <Icon name="spinner" className="animate-spin mr-2" /> Processing...
             </span>
           ) : `Book ${viewingOptions.find(o => o.type === bookingData.viewingType)?.title}`}
         </motion.button>
