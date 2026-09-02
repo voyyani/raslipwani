@@ -15,26 +15,31 @@
 -- REVISION 2026-09-02 — why this file changed
 -- -----------------------------------------------------------------------------
 --
--- The previous version could not run against this database. It named columns
--- that no migration in this repo ever creates, and it was not re-runnable.
+-- The previous version aborted against this database, and could not be run
+-- twice. Both problems came from the same habit: asserting the schema instead
+-- of checking it.
 --
---   1. `bookings.is_archived` DOES NOT EXIST. It was referenced in the booking
---      INSERT policy, but `is_archived` is a column on `clients` (001), never
---      added to `bookings` by any migration. PostgreSQL evaluates the WITH
---      CHECK expression when the policy is CREATEd, so this aborted the whole
---      transaction with `column "is_archived" does not exist`.
---      ⚠️  007_emergency_lockdown.sql line ~151 carries the SAME defect and
---          will fail the same way. Fix it there too before applying 007.
---      ⚠️  The app has the same bug at runtime: AdminBookings.jsx:70 and
---          AdminLayout.jsx:49 both filter `bookings.is_archived`. Those queries
---          are failing in production today. Tracked separately.
+--   1. It named columns whose existence it could not know. Every column this
+--      file guards is conditional: `status`, `admin_notes`, `internal_notes`,
+--      `confirmed_at`, `confirmed_by`, `assigned_agent_id` and `client_id` come
+--      from 002, and this file's own header records that 003 and 004 abort
+--      partway through. PostgreSQL evaluates a WITH CHECK expression when the
+--      policy is CREATEd, so a single absent column aborted the entire
+--      transaction with a one-line `column "x" does not exist` and no
+--      indication of which of the nine it meant.
 --
---   2. Every other column named here is conditional. `status`, `admin_notes`,
---      `internal_notes`, `confirmed_at`, `confirmed_by`, `assigned_agent_id`
---      come from 002; `client_id` from 002; and this file's own header notes
---      that 003/004 aborted before completing. Any of them may be absent, and
---      each absent one aborted the transaction with the same cryptic error.
---      They are now detected at run time and guarded only if present.
+--      Introspection on 2026-09-02 confirmed all of them are present, and the
+--      run-time assembly below now proves that rather than assuming it.
+--
+--   2. A false alarm worth recording, because the correction matters more than
+--      the mistake. `is_archived` was briefly removed from the booking guard on
+--      the grounds that no migration creates it. That was true of the migration
+--      chain and false of the database: `bookings.is_archived boolean` exists in
+--      production, 007 applied cleanly with the guard, and the live policy
+--      contains it. `000_baseline.sql` was the thing that was wrong — it had
+--      been reconstructed from application code rather than read from
+--      pg_catalog. The baseline is now transcribed from the live schema, and
+--      the guard is back.
 --
 --   3. `ALTER COLUMN ... TYPE uuid USING NULL` was a data-loss trap on re-run.
 --      Once an admin is assigned to a booking, re-running the old file would
@@ -57,6 +62,20 @@
 -- does not exist, and every skip prints a NOTICE. Read the NOTICEs.
 --
 -- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- PRECONDITIONS, VERIFIED AGAINST PRODUCTION 2026-09-02
+-- -----------------------------------------------------------------------------
+--   007 applied ✅   008 applied ✅   009 (this file) not applied
+--   bookings.assigned_agent_id  text, 0 of 12 rows populated  → safe to convert
+--   bookings.confirmed_by       text, 0 of 12 rows populated  → safe to convert
+--   bookings.client_id          already uuid                  → left alone
+--   bookings.is_archived        boolean, present              → guard applies
+--   booking types in use: viewing, consultation, contact      → policy matches
+--   statuses in use: pending, confirmed, cancelled            → policy matches
+--   properties.status: 'available' on all 12 rows             → nothing hidden
+--   booking_notes / email_templates                           → absent, skipped
+-- -----------------------------------------------------------------------------
 
 BEGIN;
 
@@ -240,12 +259,14 @@ BEGIN
     RAISE NOTICE 'bookings.status missing — submitters cannot be held to pending';
   END IF;
 
-  -- `is_archived` is deliberately NOT checked here: it does not exist on
-  -- bookings in this schema. The previous version of this file assumed it did
-  -- and could not run. If it is ever added, add the guard back.
+  -- A submitter may not file a booking that is already archived, which would
+  -- hide it from the admin queue on arrival. Confirmed present in production
+  -- 2026-09-02; still conditional, because it is absent from every migration
+  -- older than the 2026-09-02 baseline rewrite.
   IF pg_temp.col_exists('bookings', 'is_archived') THEN
     checks := checks || $c$is_archived IS NOT TRUE$c$;
-    RAISE NOTICE 'bookings.is_archived exists after all — guard included';
+  ELSE
+    RAISE NOTICE 'bookings.is_archived missing — archived-on-arrival is possible';
   END IF;
 
   -- Admin-only fields must not be settable by the submitter. client_id links a
@@ -356,11 +377,12 @@ $adminsettings$;
 --     A secret living in a PostgREST-exposed table is a published secret,
 --     whatever the policy says. See ROADMAP Phase 0.2.
 --
--- Admins DO need to read this table: AdminProperties.jsx:107-110 reads
--- cloud_name and upload_preset to configure Cloudinary image upload, and it
--- discards the error (`const { data: settings } = ...`). A blanket revoke here
--- would break admin image upload silently, with no diagnostic.
--- So: admins may read, nobody may write from the app, anon has no access.
+-- The admin read policy below is precautionary, not required. Re-checked
+-- 2026-09-02: no code queries this table — `grep -rn "from('settings')" src api`
+-- returns nothing, because 010 repointed AdminProperties.jsx at `admin_settings`
+-- (it reads cloud_name and upload_preset from there, discarding the error).
+-- The policy costs nothing and avoids a silent breakage if something is still
+-- pointed here; 010 retires the table outright.
 -- -----------------------------------------------------------------------------
 DO $settings$
 BEGIN

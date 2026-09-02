@@ -35,10 +35,40 @@ it — those are marked 🔑 **owner-verify** and are listed in
 | Zoom | ✅ `user-scalable=no` removed — WCAG 1.4.4 (AA) no longer failed at the viewport tag |
 | Release 4 | 📐 **Scoped and measured, not started** — four mergeable slices, ~15 days. See [Release 4 — "Themed"](#-release-4--themed--scoped-2026-09-02-not-started) |
 
-**The single most important fact on this page:** *no database migration has been applied.*
-`007`, `008`, and `009` are authored, reviewed, and committed — and inert. Until an owner
-runs them, **every exposure described in the section below is still open in production.**
-The code is ready; the database is untouched.
+**Status of the migrations — re-verified by live introspection 2026-09-02:**
+
+| Migration | State | Effect |
+|---|---|---|
+| `007` emergency lockdown | ✅ **APPLIED** | anon grants reduced to exactly `properties:SELECT`, `admin_settings:SELECT`, `bookings:INSERT`; RLS on for all 8 tables. **The data-destruction vector is closed.** |
+| `008` admin_users | ✅ **APPLIED** | `admin_users` + `is_admin()` exist. `auth.users` is still 0. |
+| `009` auth RLS policies | ⬜ **not applied** | `clients`, `client_communications` and `client_property_interests` still carry inherited `USING (true)` policies for `authenticated`. Harmless while `auth.users` = 0; live the moment the first account exists. |
+| `010` consolidate settings | ⬜ **not applied** | legacy `settings` table still present, still holding a live Cloudinary `api_secret`. |
+| `011` close definer RPC | 🆕 ⬜ **not applied** | **closes an anon-callable, RLS-bypassing write path** — see below. |
+| `012` lock admin_users + defaults | 🆕 ⬜ **not applied** | `authenticated` can currently `TRUNCATE admin_users`; RLS does not cover TRUNCATE. |
+
+**Two new findings from the 2026-09-02 introspection, neither visible from the repo:**
+
+1. 🔴 `public.update_setting(text,text,text)` is `SECURITY DEFINER`, owned by
+   `postgres`, **executable by `anon`**, and runs an `UPDATE admin_settings` with no
+   `WHERE` clause. SECURITY DEFINER bypasses RLS entirely, so 007's policies do not
+   apply inside it, and PostgREST exposes it at `/rest/v1/rpc/update_setting`. It writes
+   only `updated_by`/`updated_at`, so the blast radius is narrow — but it is an
+   unauthenticated write into a table that is supposed to be read-only for anon.
+   `get_setting(text)` has the same exposure and returns NULL unconditionally. Neither is
+   called anywhere in `src/` or `api/`. `011` drops both.
+2. 🔴 `authenticated` holds `TRUNCATE` on `admin_users`. **RLS does not apply to
+   TRUNCATE**, so the table's SELECT-only policy does not stop it — any signed-in user
+   could delete every admin row and lock every administrator out. The cause is
+   structural: `admin_users` was created by `008`, *after* `007`'s revoke swept the
+   tables that existed then, so it inherited Supabase's default ACL of `arwdDxtm` for
+   anon and authenticated. Every future table will do the same. `012` fixes the table
+   and the default.
+
+**Still true:** the Cloudinary and `service_role` key rotations remain outstanding, and
+`admin_settings` — which anon reads with `USING (true)` — has `cloudinary_api_secret`
+and `email_api_key` columns that `CloudinarySettings.jsx` writes to. They are NULL
+today. **Saving that admin form publishes your Cloudinary secret to anyone with the anon
+key.** Do not use that screen until the columns are removed.
 
 **Resolved since:** the first-load bundle regression. Removing Clerk's `manualChunks`
 entry had let Rollup pull FullCalendar and Quill into the main chunk (283 kB gzip on its

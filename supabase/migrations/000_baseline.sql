@@ -3,7 +3,7 @@
 -- Purpose:   Create the two tables the entire product runs on — `properties`
 --            and `bookings` — plus the legacy `settings` table and the shared
 --            `update_updated_at_column()` trigger function.
--- Date:      2026-09-02
+-- Date:      2026-09-02  ·  Rewritten from the live schema 2026-09-02
 -- =============================================================================
 --
 -- WHY THIS FILE EXISTS
@@ -14,39 +14,55 @@
 -- against an empty database. That means no staging environment, no local
 -- reproduction, and no way to reason about live schema from the code.
 --
--- HOW THIS FILE WAS BUILT  ⚠️  READ BEFORE APPLYING
+-- HOW THIS FILE WAS BUILT
 --
--- It is a *reconstruction*, not a dump. No live-schema export existed at the
--- time of writing, so every column below is derived from evidence in the
--- repository:
+-- ✅ 2026-09-02: this is no longer a reconstruction. Every column, type,
+--    default, nullability and constraint below was read directly out of the
+--    live database (project `gihgdouvltxlpynpuyde`) via
+--    `information_schema.columns` + `pg_get_constraintdef`, and transcribed.
 --
---   • columns the application reads or writes (AdminProperties.jsx form state,
---     the booking inserts in ServicesMain.jsx and Contact.jsx, AdminBookings.jsx,
---     BookingDetailModal.jsx, exportUtils.js)
---   • types implied by later migrations — e.g. 002 declares
---     `property_id INTEGER REFERENCES properties(id)`, which fixes
---     `properties.id` as an integer identity column, not a uuid
+--    The previous version of this file was inferred from application code, and
+--    it was wrong in ways that mattered:
 --
--- The 2026-09-01 audit counted 24 columns on `properties` and 25 on `bookings`.
--- This file may therefore differ from production by a column or two. Every
--- statement is idempotent and additive — `CREATE TABLE IF NOT EXISTS` and
--- `ADD COLUMN IF NOT EXISTS` — so applying it against the live database cannot
--- drop or retype anything. Worst case it adds a column production lacked.
+--      • `bookings.id` was declared BIGINT identity. It is `uuid` defaulting to
+--        `uuid_generate_v4()`.
+--      • `bookings` was missing `message`, `is_archived` and `archived_at`
+--        entirely. `is_archived` is the column that 007 and 009 guard, so a
+--        test derived from this file concluded — wrongly — that the guard
+--        referenced a column that does not exist. The DATABASE was right and
+--        the BASELINE was wrong.
+--      • `bookings` declared `inquiry_type`, `property_type`, `location` and
+--        `budget`, none of which exist in production.
+--      • `bookings.email` and `.phone` are NOT NULL in production; this file
+--        had them nullable. A booking insert that omits `phone` fails on the
+--        column constraint, whatever the RLS policy says.
+--      • `properties.id` is `integer` from a sequence, `images`/`amenities` are
+--        `text[]` and not `jsonb`, and the table carries `city`, `state`,
+--        `zip_code` and `year_built`, which this file did not mention.
+--      • `settings` has `api_key`, `api_secret` and `secure` columns — the
+--        Cloudinary credential store — which this file omitted.
 --
--- 🔑 OWNER STEP: after applying, run the drift query at the bottom of this file
--- and reconcile any differences. Until that is done, treat this baseline as
--- "close" rather than "correct".
+--    The lesson is recorded rather than quietly fixed: a baseline inferred from
+--    application code reads like documentation and behaves like a guess. This
+--    one is now transcribed from `pg_catalog`, and should be regenerated the
+--    same way whenever production changes.
+--
+-- Every statement remains idempotent and additive — `CREATE TABLE IF NOT EXISTS`
+-- and `ADD COLUMN IF NOT EXISTS` — so applying it against the live database
+-- cannot drop or retype anything.
 --
 -- =============================================================================
 
 
 -- -----------------------------------------------------------------------------
--- 0. Shared trigger function
---
--- 003a's admin_settings trigger calls this and never defines it — another way
--- the chain could not replay. Defined here, once, for every table that wants it.
+-- Extensions the live schema depends on
 -- -----------------------------------------------------------------------------
+-- bookings.id defaults to uuid_generate_v4(), which lives in uuid-ossp.
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- -----------------------------------------------------------------------------
+-- Shared trigger function
+-- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -55,162 +71,171 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 -- -----------------------------------------------------------------------------
--- 1. properties
+-- properties — transcribed from the live schema 2026-09-02
 -- -----------------------------------------------------------------------------
-
+-- `id` is an integer sequence, NOT a uuid: 002 declares
+-- `property_id INTEGER REFERENCES properties(id)`, and production agrees.
+-- `images` and `amenities` are text[] and NOT jsonb.
 CREATE TABLE IF NOT EXISTS public.properties (
-  id            BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  id            SERIAL PRIMARY KEY,
 
   -- Listing
-  title         TEXT NOT NULL,
+  title         VARCHAR(255) NOT NULL,
   description   TEXT,
-  price         NUMERIC(14, 2),
+  price         NUMERIC NOT NULL,
 
-  -- Classification. `purpose` is sale|rent; `property_type` is constrained by
-  -- purpose in the admin UI (sale: land|residential|commercial,
-  -- rent: apartment|villa|office) and is deliberately left unconstrained here
-  -- so the vocabulary can change without a migration.
-  property_type TEXT,
-  purpose       TEXT    DEFAULT 'sale',
-  status        TEXT    DEFAULT 'available',
+  -- Classification
+  property_type VARCHAR(50),
+  purpose       VARCHAR DEFAULT '',
+  status        VARCHAR(20) DEFAULT 'available',
 
   -- Location
-  location      TEXT,
-  address       TEXT,
+  location      VARCHAR(255),
+  address       VARCHAR(255),
+  city          VARCHAR(100),
+  state         VARCHAR(50),
+  zip_code      VARCHAR(20),
 
   -- Specification
   bedrooms      INTEGER,
-  bathrooms     NUMERIC(4, 1),
-  area_sqft     NUMERIC(12, 2),
-  lot_size_sqft NUMERIC(12, 2),
+  bathrooms     INTEGER,
+  area_sqft     INTEGER,
+  lot_size_sqft INTEGER,
+  year_built    INTEGER,
 
   -- Features
   has_pool      BOOLEAN DEFAULT FALSE,
   has_garden    BOOLEAN DEFAULT FALSE,
   featured      BOOLEAN DEFAULT FALSE,
 
-  -- Media and amenities are JSONB arrays of Cloudinary URLs / free-text labels
-  images        JSONB   DEFAULT '[]'::jsonb,
-  amenities     JSONB   DEFAULT '[]'::jsonb
+  -- Cloudinary URLs / free-text amenity labels
+  images        TEXT[],
+  amenities     TEXT[],
+
+  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Additive guards: if production already has `properties`, these fill in only
--- what is missing and touch nothing that exists.
+-- Additive, for databases created against an older version of this file.
 ALTER TABLE public.properties
-  ADD COLUMN IF NOT EXISTS updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  ADD COLUMN IF NOT EXISTS purpose       TEXT DEFAULT 'sale',
-  ADD COLUMN IF NOT EXISTS status        TEXT DEFAULT 'available',
-  ADD COLUMN IF NOT EXISTS lot_size_sqft NUMERIC(12, 2),
+  ADD COLUMN IF NOT EXISTS city          VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS state         VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS zip_code      VARCHAR(20),
+  ADD COLUMN IF NOT EXISTS year_built    INTEGER,
+  ADD COLUMN IF NOT EXISTS lot_size_sqft INTEGER,
   ADD COLUMN IF NOT EXISTS has_pool      BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS has_garden    BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS featured      BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS images        JSONB DEFAULT '[]'::jsonb,
-  ADD COLUMN IF NOT EXISTS amenities     JSONB DEFAULT '[]'::jsonb;
+  ADD COLUMN IF NOT EXISTS purpose       VARCHAR DEFAULT '',
+  ADD COLUMN IF NOT EXISTS status        VARCHAR(20) DEFAULT 'available',
+  ADD COLUMN IF NOT EXISTS updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
--- Every public listing query filters or sorts on these.
 CREATE INDEX IF NOT EXISTS idx_properties_status     ON public.properties(status);
 CREATE INDEX IF NOT EXISTS idx_properties_purpose    ON public.properties(purpose);
 CREATE INDEX IF NOT EXISTS idx_properties_featured   ON public.properties(featured) WHERE featured = TRUE;
 CREATE INDEX IF NOT EXISTS idx_properties_created_at ON public.properties(created_at DESC);
 
-DROP TRIGGER IF EXISTS update_properties_updated_at ON public.properties;
-CREATE TRIGGER update_properties_updated_at
+DROP TRIGGER IF EXISTS trigger_set_updated_at ON public.properties;
+CREATE TRIGGER trigger_set_updated_at
   BEFORE UPDATE ON public.properties
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-
 -- -----------------------------------------------------------------------------
--- 2. bookings
---
--- One table serves three intake paths, discriminated by `type`:
---   'viewing'      — property viewing request      (ServicesMain.jsx)
---   'consultation' — valuation / advisory request  (ServicesMain.jsx)
---   'contact'      — general enquiry               (Contact.jsx)
---
--- `type` is NOT NULL with no default. That is load-bearing: the service form
--- omitted it for months and every submission silently failed to save.
+-- bookings — transcribed from the live schema 2026-09-02
 -- -----------------------------------------------------------------------------
-
+-- ⚠️  `email` and `phone` are NOT NULL in production. Any insert path that omits
+--     phone fails on the column constraint before RLS is even consulted.
+--
+-- ⚠️  `is_archived` and `archived_at` exist here and are guarded by the booking
+--     INSERT policy in 007/009. An earlier version of this file omitted them,
+--     which made those guards look like references to a non-existent column.
+--
+-- `confirmed_by` and `assigned_agent_id` are `text` because they once held Clerk
+-- user IDs. 009 converts them to `uuid REFERENCES auth.users(id)`.
 CREATE TABLE IF NOT EXISTS public.bookings (
-  id            BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
   type          TEXT NOT NULL,
 
   -- Contact details supplied by the prospect
   name          TEXT NOT NULL,
-  email         TEXT,
-  phone         TEXT,
+  email         TEXT NOT NULL,
+  phone         TEXT NOT NULL,
 
   -- Viewing / consultation path
-  service       TEXT,   -- finer-grained than `type`: viewing|valuation|consultation|management
-  viewing_type  TEXT,   -- physical|virtual
+  service        TEXT,
+  viewing_type   TEXT,
   appointment_at TIMESTAMP WITH TIME ZONE,
 
   -- General-enquiry path
   subject       TEXT,
-  inquiry_type  TEXT,
-  property_type TEXT,
-  location      TEXT,
-  budget        TEXT,
+  message       TEXT,
+  notes         TEXT,
 
-  notes         TEXT
+  -- Workflow
+  status        TEXT DEFAULT 'pending',
+  is_archived   BOOLEAN DEFAULT FALSE,
+  archived_at   TIMESTAMP WITH TIME ZONE,
+
+  -- Admin-only fields. The INSERT policy requires every one of these to be NULL
+  -- on submission, so a prospect cannot self-confirm or self-assign.
+  admin_notes         TEXT,
+  internal_notes      TEXT,
+  confirmed_at        TIMESTAMP WITH TIME ZONE,
+  confirmed_by        TEXT,
+  cancelled_at        TIMESTAMP WITH TIME ZONE,
+  cancellation_reason TEXT,
+  priority            VARCHAR(10) DEFAULT 'medium'
+                        CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  assigned_agent_id   TEXT,
+
+  -- client_id carries no REFERENCES here on purpose: `clients` is created by
+  -- 001, which runs after this file. 002 adds the foreign key once it exists.
+  client_id     UUID,
+  property_id   INTEGER REFERENCES public.properties(id) ON DELETE SET NULL,
+
+  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Additive, for databases created against an older version of this file.
 ALTER TABLE public.bookings
-  ADD COLUMN IF NOT EXISTS service        TEXT,
-  ADD COLUMN IF NOT EXISTS viewing_type   TEXT,
-  ADD COLUMN IF NOT EXISTS appointment_at TIMESTAMP WITH TIME ZONE,
-  ADD COLUMN IF NOT EXISTS subject        TEXT,
-  ADD COLUMN IF NOT EXISTS inquiry_type   TEXT,
-  ADD COLUMN IF NOT EXISTS property_type  TEXT,
-  ADD COLUMN IF NOT EXISTS location       TEXT,
-  ADD COLUMN IF NOT EXISTS budget         TEXT,
-  ADD COLUMN IF NOT EXISTS notes          TEXT;
+  ADD COLUMN IF NOT EXISTS message     TEXT,
+  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS archived_at TIMESTAMP WITH TIME ZONE;
 
 CREATE INDEX IF NOT EXISTS idx_bookings_created_at     ON public.bookings(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_bookings_type           ON public.bookings(type);
+CREATE INDEX IF NOT EXISTS idx_bookings_status         ON public.bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_is_archived    ON public.bookings(is_archived);
 CREATE INDEX IF NOT EXISTS idx_bookings_appointment_at ON public.bookings(appointment_at);
 
--- Note: `status`, `priority`, `client_id`, `property_id`, and the admin
--- workflow columns are added by 002; the identity columns are retyped to
--- uuid by 009. They are deliberately not duplicated here.
-
-
 -- -----------------------------------------------------------------------------
--- 3. settings (legacy Cloudinary credentials)
---
--- Superseded by `admin_settings` and removed by 010. Recreated here only so the
--- chain replays; a fresh database gets an empty table that 010 then drops.
---
--- ⚠️ In production this table held a Cloudinary `api_secret` readable by the
--- anon key. No secret column is recreated here — see 010 and Phase 0.2.
+-- settings — the legacy Cloudinary credential table
 -- -----------------------------------------------------------------------------
-
+-- ⚠️  `api_secret` is a live Cloudinary credential and was anon-readable until
+--     007. It must be rotated and moved to a server-side environment variable;
+--     010 retires this table. See ROADMAP Phase 0.2.
 CREATE TABLE IF NOT EXISTS public.settings (
-  id            BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  cloud_name    TEXT,
-  upload_preset TEXT
+  id            SERIAL PRIMARY KEY,
+  cloud_name    VARCHAR(100) NOT NULL,
+  api_key       VARCHAR(100) NOT NULL,
+  api_secret    VARCHAR(100) NOT NULL,
+  upload_preset VARCHAR(100),
+  secure        BOOLEAN   DEFAULT TRUE,
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- =============================================================================
--- 🔑 OWNER DRIFT CHECK — run against production after applying
---
--- Compare the result with the column lists above. Anything present in
--- production and absent here is a column this file must gain; anything absent
--- in production is a column this file just added (harmless, but worth knowing).
+-- DRIFT CHECK — re-run whenever production changes
+-- =============================================================================
 --
 --   SELECT table_name, column_name, data_type, is_nullable, column_default
---     FROM information_schema.columns
---    WHERE table_schema = 'public'
---      AND table_name IN ('properties', 'bookings', 'settings')
---    ORDER BY table_name, ordinal_position;
+--   FROM information_schema.columns
+--   WHERE table_schema = 'public' AND table_name IN ('properties','bookings','settings')
+--   ORDER BY table_name, ordinal_position;
 --
+-- Compare against this file. A baseline that has drifted is worse than no
+-- baseline, because it is trusted.
 -- =============================================================================

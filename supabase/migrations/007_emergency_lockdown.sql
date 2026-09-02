@@ -58,6 +58,21 @@
 -- 3. VERIFY AFTERWARDS. The verification block at the end is not optional —
 --    a control you have not tested is a control you do not have.
 --
+-- -----------------------------------------------------------------------------
+-- STATUS: ✅ APPLIED to production on or before 2026-09-02, verified by
+-- introspection the same day — anon grants are exactly
+-- (properties SELECT, admin_settings SELECT, bookings INSERT), RLS is on for
+-- all 8 tables, and the three policies below are live.
+--
+-- A brief detour worth recording: the `is_archived` guard in the booking policy
+-- was removed on 2026-09-02 because no migration in this repo creates that
+-- column, and it was assumed the file could never have run. Introspection
+-- disproved that — `bookings.is_archived boolean` exists in production and the
+-- live policy contains the guard. The column was missing from
+-- `000_baseline.sql`, not from the database. The guard is restored, and the
+-- baseline has been rewritten from `pg_catalog` instead of from inference.
+-- -----------------------------------------------------------------------------
+--
 -- =============================================================================
 
 
@@ -148,14 +163,7 @@ CREATE POLICY "public may submit a booking"
     AND name  IS NOT NULL AND length(trim(name))  BETWEEN 1 AND 200
     AND email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320
     AND (status IS NULL OR status = 'pending')
-    -- NOTE (2026-09-02): an `is_archived IS NOT TRUE` guard was removed here.
-    -- `is_archived` is a column on `clients` (001), and no migration ever adds
-    -- it to `bookings`. PostgreSQL evaluates WITH CHECK at CREATE POLICY time,
-    -- so naming it aborted this entire migration with
-    --   ERROR: column "is_archived" does not exist
-    -- which is why the lockdown could not be applied. The app has the same bug
-    -- at runtime (AdminBookings.jsx:70, AdminLayout.jsx:49). If the column is
-    -- ever added to bookings, restore the guard here and in 009.
+    AND is_archived IS NOT TRUE
     -- Admin-only fields must not be settable by the submitter.
     AND admin_notes       IS NULL
     AND internal_notes    IS NULL
