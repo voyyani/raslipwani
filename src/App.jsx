@@ -15,7 +15,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import AdminLayout from './pages/admin/AdminLayout';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ToastProvider from './components/Toast';
@@ -55,15 +54,19 @@ const ViewingExperience = lazy(() => import('./components/services/ViewingExperi
 // Admin sign-in (Supabase Auth)
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 
-// Admin components
-import Dashboard from './pages/admin/Dashboard';
-import AdminProperties from './pages/admin/AdminProperties';
-import Bookings from './features/bookings/Bookings';
-import AdminBookings from './pages/admin/AdminBookings';
-import ClientManagement from './pages/admin/ClientManagement';
-import ClientDetail from './pages/admin/ClientDetail';
-import Settings from './pages/admin/Settings';
-import PropertyModal from './components/PropertyModal'; 
+// Admin components. Lazy-loaded: the admin console is reachable only by a
+// signed-in admin, so none of it belongs in the bundle a first-time visitor
+// downloads.
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminProperties = lazy(() => import('./pages/admin/AdminProperties'));
+const Bookings = lazy(() => import('./features/bookings/Bookings'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const ClientManagement = lazy(() => import('./pages/admin/ClientManagement'));
+const ClientDetail = lazy(() => import('./pages/admin/ClientDetail'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+
+const PropertyModal = lazy(() => import('./components/PropertyModal'));
 
 const defaultBrandLogo = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg';
 
