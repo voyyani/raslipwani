@@ -12,6 +12,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -105,7 +106,8 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <ErrorBoundary name="root">
+      <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
@@ -120,6 +122,7 @@ function App() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         }>
+          <ErrorBoundary name="route">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
@@ -165,7 +168,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminLayout>
-                    <Outlet />
+                    <ErrorBoundary name="admin">
+                      <Outlet />
+                    </ErrorBoundary>
                   </AdminLayout>
                 </ProtectedRoute>
               } 
@@ -197,11 +202,13 @@ function App() {
               </div>
             } />
           </Routes>
+          </ErrorBoundary>
         </Suspense>
       </Router>
       </SettingsProvider>
     </AuthProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
