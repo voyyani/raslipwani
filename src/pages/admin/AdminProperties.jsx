@@ -103,9 +103,11 @@ const AdminProperties = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Cloudinary settings
+        // Fetch Cloudinary settings. `admin_settings` is the single source
+        // of truth since 010; the legacy `settings` table it replaced also
+        // held the Cloudinary api_secret in a browser-readable row.
         const { data: settings } = await supabase
-          .from('settings')
+          .from('admin_settings')
           .select('cloud_name, upload_preset')
           .single();
         
