@@ -148,7 +148,14 @@ CREATE POLICY "public may submit a booking"
     AND name  IS NOT NULL AND length(trim(name))  BETWEEN 1 AND 200
     AND email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320
     AND (status IS NULL OR status = 'pending')
-    AND is_archived IS NOT TRUE
+    -- NOTE (2026-09-02): an `is_archived IS NOT TRUE` guard was removed here.
+    -- `is_archived` is a column on `clients` (001), and no migration ever adds
+    -- it to `bookings`. PostgreSQL evaluates WITH CHECK at CREATE POLICY time,
+    -- so naming it aborted this entire migration with
+    --   ERROR: column "is_archived" does not exist
+    -- which is why the lockdown could not be applied. The app has the same bug
+    -- at runtime (AdminBookings.jsx:70, AdminLayout.jsx:49). If the column is
+    -- ever added to bookings, restore the guard here and in 009.
     -- Admin-only fields must not be settable by the submitter.
     AND admin_notes       IS NULL
     AND internal_notes    IS NULL

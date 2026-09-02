@@ -1,37 +1,167 @@
 -- =============================================================================
 -- 009_auth_rls_policies.sql
--- Date: 2026-09-01
+-- Date: 2026-09-01  ·  Revised: 2026-09-02 (made runnable + idempotent)
 -- Replaces every USING (true) policy with a real rule based on auth.uid().
 -- Depends on: 007_emergency_lockdown.sql, 008_admin_users.sql
 -- =============================================================================
 --
--- ⚠️  NOT YET APPLIED. Apply 007, then 008, then this file, in that order, and
---     take a database backup first. Verification queries are at the bottom.
+-- ⚠️  Apply 007, then 008, then this file, in that order, and take a database
+--     backup first. Verification queries are at the bottom.
 --
 --     Applying 009 before 007 leaves the blanket anon grants in place, and the
 --     policies below will not save you: grants are checked before RLS.
+--
+-- -----------------------------------------------------------------------------
+-- REVISION 2026-09-02 — why this file changed
+-- -----------------------------------------------------------------------------
+--
+-- The previous version could not run against this database. It named columns
+-- that no migration in this repo ever creates, and it was not re-runnable.
+--
+--   1. `bookings.is_archived` DOES NOT EXIST. It was referenced in the booking
+--      INSERT policy, but `is_archived` is a column on `clients` (001), never
+--      added to `bookings` by any migration. PostgreSQL evaluates the WITH
+--      CHECK expression when the policy is CREATEd, so this aborted the whole
+--      transaction with `column "is_archived" does not exist`.
+--      ⚠️  007_emergency_lockdown.sql line ~151 carries the SAME defect and
+--          will fail the same way. Fix it there too before applying 007.
+--      ⚠️  The app has the same bug at runtime: AdminBookings.jsx:70 and
+--          AdminLayout.jsx:49 both filter `bookings.is_archived`. Those queries
+--          are failing in production today. Tracked separately.
+--
+--   2. Every other column named here is conditional. `status`, `admin_notes`,
+--      `internal_notes`, `confirmed_at`, `confirmed_by`, `assigned_agent_id`
+--      come from 002; `client_id` from 002; and this file's own header notes
+--      that 003/004 aborted before completing. Any of them may be absent, and
+--      each absent one aborted the transaction with the same cryptic error.
+--      They are now detected at run time and guarded only if present.
+--
+--   3. `ALTER COLUMN ... TYPE uuid USING NULL` was a data-loss trap on re-run.
+--      Once an admin is assigned to a booking, re-running the old file would
+--      silently NULL every assignment. It now converts only a `text` column,
+--      refuses to run if the column holds data, and skips a `uuid` column.
+--
+--   4. `ADD CONSTRAINT` is not re-runnable in PostgreSQL (there is no
+--      IF NOT EXISTS form). A second run failed with "constraint already
+--      exists". Both foreign keys are now added only when the column has no
+--      foreign key at all — which also covers 003b, whose version of
+--      `assigned_agent_id` arrives with its own inline FK under a different
+--      name.
+--
+--   5. Missing prerequisites produced confusing failures deep in the file.
+--      There is now a preflight block that fails immediately with a sentence
+--      telling you which migration to apply first.
+--
+-- The security intent is unchanged. Nothing here is weaker than the version it
+-- replaces: a guard that is skipped is skipped because the column it protects
+-- does not exist, and every skip prints a NOTICE. Read the NOTICEs.
 --
 -- =============================================================================
 
 BEGIN;
 
 -- -----------------------------------------------------------------------------
--- Identity columns: text (Clerk IDs) -> uuid (auth.users)
--- Verified 2026-09-01 against the live database: assigned_agent_id, confirmed_by
--- and client_id are 100% NULL across all 12 bookings, so `USING NULL` discards
--- nothing. If that is no longer true when you apply this, STOP and re-check —
--- the conversion would silently destroy data.
---     SELECT count(assigned_agent_id), count(confirmed_by) FROM bookings;  -- expect 0, 0
+-- PREFLIGHT — fail loudly and early, not cryptically and late
 -- -----------------------------------------------------------------------------
-ALTER TABLE public.bookings
-  ALTER COLUMN assigned_agent_id TYPE uuid USING NULL,
-  ALTER COLUMN confirmed_by      TYPE uuid USING NULL;
+DO $preflight$
+BEGIN
+  IF to_regprocedure('public.is_admin()') IS NULL THEN
+    RAISE EXCEPTION
+      'Missing public.is_admin(). Apply 008_admin_users.sql before this file.';
+  END IF;
 
-ALTER TABLE public.bookings
-  ADD CONSTRAINT bookings_assigned_agent_fk
-    FOREIGN KEY (assigned_agent_id) REFERENCES auth.users(id) ON DELETE SET NULL,
-  ADD CONSTRAINT bookings_confirmed_by_fk
-    FOREIGN KEY (confirmed_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+  IF to_regclass('public.bookings') IS NULL THEN
+    RAISE EXCEPTION
+      'Missing public.bookings. Apply 000_baseline.sql before this file.';
+  END IF;
+
+  IF to_regclass('public.properties') IS NULL THEN
+    RAISE EXCEPTION
+      'Missing public.properties. Apply 000_baseline.sql before this file.';
+  END IF;
+
+  IF to_regclass('public.admin_users') IS NULL THEN
+    RAISE EXCEPTION
+      'Missing public.admin_users. Apply 008_admin_users.sql before this file.';
+  END IF;
+END
+$preflight$;
+
+-- A column-existence helper, scoped to this transaction and discarded with it.
+CREATE FUNCTION pg_temp.col_exists(tbl text, col text)
+RETURNS boolean LANGUAGE sql STABLE AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = tbl AND column_name = col
+  );
+$$;
+
+-- -----------------------------------------------------------------------------
+-- Identity columns: text (Clerk IDs) -> uuid (auth.users)
+--
+-- Verified 2026-09-01 against the live database: assigned_agent_id and
+-- confirmed_by were 100% NULL across all 12 bookings. That is re-checked here
+-- rather than assumed — if the columns have since been populated, this ABORTS
+-- instead of discarding the values.
+-- -----------------------------------------------------------------------------
+DO $identity$
+DECLARE
+  col       text;
+  coltype   text;
+  populated bigint;
+BEGIN
+  FOREACH col IN ARRAY ARRAY['assigned_agent_id', 'confirmed_by']
+  LOOP
+    SELECT data_type INTO coltype
+      FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'bookings' AND column_name = col;
+
+    IF coltype IS NULL THEN
+      RAISE NOTICE 'bookings.% does not exist — skipping conversion (002 not applied?)', col;
+      CONTINUE;
+    END IF;
+
+    IF coltype = 'uuid' THEN
+      RAISE NOTICE 'bookings.% is already uuid — nothing to convert', col;
+    ELSE
+      EXECUTE format('SELECT count(%I) FROM public.bookings', col) INTO populated;
+
+      IF populated > 0 THEN
+        RAISE EXCEPTION
+          'bookings.% holds % non-null value(s). Converting to uuid would destroy them. '
+          'Back them up, decide the auth.users mapping by hand, then re-run.',
+          col, populated;
+      END IF;
+
+      EXECUTE format(
+        'ALTER TABLE public.bookings ALTER COLUMN %I TYPE uuid USING NULL::uuid', col);
+      RAISE NOTICE 'bookings.% converted % -> uuid', col, coltype;
+    END IF;
+
+    -- Add the FK only if this column has no foreign key yet. 003b may already
+    -- have created one inline under a generated name.
+    IF EXISTS (
+      SELECT 1
+        FROM information_schema.table_constraints  tc
+        JOIN information_schema.key_column_usage   kcu
+          ON  kcu.constraint_name   = tc.constraint_name
+          AND kcu.constraint_schema = tc.constraint_schema
+       WHERE tc.constraint_type = 'FOREIGN KEY'
+         AND tc.table_schema    = 'public'
+         AND tc.table_name      = 'bookings'
+         AND kcu.column_name    = col
+    ) THEN
+      RAISE NOTICE 'bookings.% already has a foreign key — leaving it alone', col;
+    ELSE
+      EXECUTE format(
+        'ALTER TABLE public.bookings ADD CONSTRAINT %I FOREIGN KEY (%I) '
+        'REFERENCES auth.users(id) ON DELETE SET NULL',
+        'bookings_' || col || '_fk', col);
+      RAISE NOTICE 'bookings.% foreign key -> auth.users(id) added', col;
+    END IF;
+  END LOOP;
+END
+$identity$;
 
 -- -----------------------------------------------------------------------------
 -- properties: public reads available listings; admins do everything
@@ -39,10 +169,24 @@ ALTER TABLE public.bookings
 DROP POLICY IF EXISTS "public reads available properties" ON public.properties;
 DROP POLICY IF EXISTS "admins manage properties"          ON public.properties;
 
-CREATE POLICY "public reads available properties"
-  ON public.properties FOR SELECT
-  TO anon, authenticated
-  USING (status = 'available' OR public.is_admin());
+DO $properties$
+DECLARE
+  read_rule text;
+BEGIN
+  IF pg_temp.col_exists('properties', 'status') THEN
+    read_rule := $rule$status = 'available' OR public.is_admin()$rule$;
+  ELSE
+    -- Listings are public by nature, so a missing status column is not an
+    -- exposure — but it does mean unpublished rows would be visible if the
+    -- column is added later without revisiting this policy.
+    RAISE NOTICE 'properties.status does not exist — public SELECT is unfiltered';
+    read_rule := 'true';
+  END IF;
+
+  EXECUTE 'CREATE POLICY "public reads available properties" ON public.properties '
+       || 'FOR SELECT TO anon, authenticated USING (' || read_rule || ')';
+END
+$properties$;
 
 CREATE POLICY "admins manage properties"
   ON public.properties FOR ALL
@@ -54,31 +198,82 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.properties TO authenticated;
 
 -- -----------------------------------------------------------------------------
 -- bookings: anon may submit only; admins read and manage
+--
 -- The absence of an anon SELECT policy is the point — it is what stops a
 -- competitor from harvesting your leads with the public anon key.
+--
+-- The WITH CHECK expression is assembled from the columns that actually exist,
+-- because PostgreSQL validates it at CREATE POLICY time and one absent column
+-- aborts the entire migration. Every omission raises a NOTICE.
 -- -----------------------------------------------------------------------------
 DROP POLICY IF EXISTS "public may submit a booking" ON public.bookings;
 DROP POLICY IF EXISTS "admins manage bookings"      ON public.bookings;
 
-CREATE POLICY "public may submit a booking"
-  ON public.bookings FOR INSERT
-  TO anon, authenticated
-  WITH CHECK (
-    type IN ('viewing', 'consultation', 'contact')
-    AND name  IS NOT NULL AND length(trim(name))  BETWEEN 1 AND 200
-    AND email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320
-    AND (status IS NULL OR status = 'pending')
-    AND is_archived IS NOT TRUE
-    -- Admin-only fields must not be settable by the submitter.
-    AND admin_notes       IS NULL
-    AND internal_notes    IS NULL
-    AND confirmed_at      IS NULL
-    AND confirmed_by      IS NULL
-    AND assigned_agent_id IS NULL
-    -- client_id links a booking to a CRM record. A submitter who learns or guesses
-    -- a client uuid could otherwise attach their booking to someone else's record.
-    AND client_id         IS NULL
-  );
+DO $bookings$
+DECLARE
+  checks     text[] := ARRAY[]::text[];
+  admin_only text[] := ARRAY['admin_notes', 'internal_notes', 'confirmed_at',
+                             'confirmed_by', 'assigned_agent_id', 'client_id'];
+  col        text;
+  rule       text;
+BEGIN
+  -- What kind of booking this is.
+  IF pg_temp.col_exists('bookings', 'type') THEN
+    checks := checks || $c$type IN ('viewing', 'consultation', 'contact')$c$;
+  ELSE
+    RAISE NOTICE 'bookings.type missing — booking type is unconstrained';
+  END IF;
+
+  -- Contact details must be present and sanely bounded.
+  IF pg_temp.col_exists('bookings', 'name') THEN
+    checks := checks || $c$name IS NOT NULL AND length(trim(name)) BETWEEN 1 AND 200$c$;
+  END IF;
+
+  IF pg_temp.col_exists('bookings', 'email') THEN
+    checks := checks || $c$email IS NOT NULL AND length(trim(email)) BETWEEN 3 AND 320$c$;
+  END IF;
+
+  -- A submitter may not self-confirm.
+  IF pg_temp.col_exists('bookings', 'status') THEN
+    checks := checks || $c$(status IS NULL OR status = 'pending')$c$;
+  ELSE
+    RAISE NOTICE 'bookings.status missing — submitters cannot be held to pending';
+  END IF;
+
+  -- `is_archived` is deliberately NOT checked here: it does not exist on
+  -- bookings in this schema. The previous version of this file assumed it did
+  -- and could not run. If it is ever added, add the guard back.
+  IF pg_temp.col_exists('bookings', 'is_archived') THEN
+    checks := checks || $c$is_archived IS NOT TRUE$c$;
+    RAISE NOTICE 'bookings.is_archived exists after all — guard included';
+  END IF;
+
+  -- Admin-only fields must not be settable by the submitter. client_id links a
+  -- booking to a CRM record: a submitter who learns or guesses a client uuid
+  -- could otherwise attach their booking to someone else's record.
+  FOREACH col IN ARRAY admin_only
+  LOOP
+    IF pg_temp.col_exists('bookings', col) THEN
+      checks := checks || format('%I IS NULL', col);
+    ELSE
+      RAISE NOTICE 'bookings.% missing — no submitter guard needed for it', col;
+    END IF;
+  END LOOP;
+
+  IF array_length(checks, 1) IS NULL THEN
+    RAISE EXCEPTION
+      'No recognisable columns on public.bookings. Refusing to create an '
+      'unconstrained INSERT policy. Check that 000_baseline.sql applied.';
+  END IF;
+
+  rule := array_to_string(checks, E'\n    AND ');
+
+  EXECUTE 'CREATE POLICY "public may submit a booking" ON public.bookings '
+       || 'FOR INSERT TO anon, authenticated WITH CHECK (' || E'\n    ' || rule || E'\n  )';
+
+  RAISE NOTICE 'bookings INSERT policy created with % guard(s)', array_length(checks, 1);
+END
+$bookings$;
 
 CREATE POLICY "admins manage bookings"
   ON public.bookings FOR ALL
@@ -93,17 +288,23 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.bookings TO authenticated;
 -- Replaces the inherited `TO authenticated USING (true)` policies, which would
 -- otherwise grant EVERY signed-in user full access to every client record.
 -- -----------------------------------------------------------------------------
-DO $$
+DO $clients$
 DECLARE t text; p text;
 BEGIN
   FOREACH t IN ARRAY ARRAY['clients', 'client_communications', 'client_property_interests']
   LOOP
+    IF to_regclass('public.' || t) IS NULL THEN
+      RAISE NOTICE 'skipping %: table does not exist (001 not applied?)', t;
+      CONTINUE;
+    END IF;
+
     FOR p IN SELECT policyname FROM pg_policies
              WHERE schemaname = 'public' AND tablename = t
     LOOP
       EXECUTE format('DROP POLICY %I ON public.%I', p, t);
     END LOOP;
 
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format(
       'CREATE POLICY "admins manage %1$s" ON public.%1$I FOR ALL TO authenticated '
       'USING (public.is_admin()) WITH CHECK (public.is_admin())', t);
@@ -111,29 +312,41 @@ BEGIN
     EXECUTE format('REVOKE ALL ON public.%I FROM anon', t);
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', t);
   END LOOP;
-END $$;
+END
+$clients$;
 
 -- -----------------------------------------------------------------------------
 -- admin_settings: public read (drives site-wide branding); admin write
 -- -----------------------------------------------------------------------------
-DROP POLICY IF EXISTS "public reads settings"  ON public.admin_settings;
-DROP POLICY IF EXISTS "admins manage settings" ON public.admin_settings;
+DO $adminsettings$
+BEGIN
+  IF to_regclass('public.admin_settings') IS NULL THEN
+    RAISE NOTICE 'skipping admin_settings: table does not exist (003a not applied?)';
+    RETURN;
+  END IF;
 
-CREATE POLICY "public reads settings"
-  ON public.admin_settings FOR SELECT
-  TO anon, authenticated
-  USING (true);
+  DROP POLICY IF EXISTS "public reads settings"  ON public.admin_settings;
+  DROP POLICY IF EXISTS "admins manage settings" ON public.admin_settings;
 
-CREATE POLICY "admins manage settings"
-  ON public.admin_settings FOR ALL
-  TO authenticated
-  USING (public.is_admin())
-  WITH CHECK (public.is_admin());
+  ALTER TABLE public.admin_settings ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT, INSERT, UPDATE ON public.admin_settings TO authenticated;
+  CREATE POLICY "public reads settings"
+    ON public.admin_settings FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+  CREATE POLICY "admins manage settings"
+    ON public.admin_settings FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+  GRANT SELECT, INSERT, UPDATE ON public.admin_settings TO authenticated;
+END
+$adminsettings$;
 
 -- -----------------------------------------------------------------------------
--- settings: no access for anon or authenticated. service_role only.
+-- settings: no access for anon. Admin read only.
 --
 -- ⚠️  THIS DOES NOT UNDO THE EXPOSURE. The Cloudinary api_secret in this table
 --     has been publicly readable (verified 2026-09-01: RLS off, 0 policies,
@@ -142,23 +355,33 @@ GRANT SELECT, INSERT, UPDATE ON public.admin_settings TO authenticated;
 --     `ALTER TABLE public.settings DROP COLUMN api_secret;`.
 --     A secret living in a PostgREST-exposed table is a published secret,
 --     whatever the policy says. See ROADMAP Phase 0.2.
--- -----------------------------------------------------------------------------
-REVOKE ALL ON public.settings FROM anon;
-
+--
 -- Admins DO need to read this table: AdminProperties.jsx:107-110 reads
 -- cloud_name and upload_preset to configure Cloudinary image upload, and it
 -- discards the error (`const { data: settings } = ...`). A blanket revoke here
 -- would break admin image upload silently, with no diagnostic.
--- So: admins may read, nobody may write from the app, anon has no access at all.
-ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+-- So: admins may read, nobody may write from the app, anon has no access.
+-- -----------------------------------------------------------------------------
+DO $settings$
+BEGIN
+  IF to_regclass('public.settings') IS NULL THEN
+    RAISE NOTICE 'skipping settings: table does not exist (already retired by 010?)';
+    RETURN;
+  END IF;
 
-DROP POLICY IF EXISTS "admins read settings" ON public.settings;
-CREATE POLICY "admins read settings"
-  ON public.settings FOR SELECT
-  TO authenticated
-  USING (public.is_admin());
+  REVOKE ALL ON public.settings FROM anon;
 
-GRANT SELECT ON public.settings TO authenticated;
+  ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+
+  DROP POLICY IF EXISTS "admins read settings" ON public.settings;
+  CREATE POLICY "admins read settings"
+    ON public.settings FOR SELECT
+    TO authenticated
+    USING (public.is_admin());
+
+  GRANT SELECT ON public.settings TO authenticated;
+END
+$settings$;
 
 -- -----------------------------------------------------------------------------
 -- booking_notes / email_templates: gate them IF they exist.
@@ -174,7 +397,7 @@ GRANT SELECT ON public.settings TO authenticated;
 -- policies, which would let any signed-in non-admin read every internal note on
 -- every customer booking. Gating them here means the fix cannot be forgotten.
 -- -----------------------------------------------------------------------------
-DO $$
+DO $optional$
 DECLARE t text; p text;
 BEGIN
   FOREACH t IN ARRAY ARRAY['booking_notes', 'email_templates']
@@ -198,7 +421,8 @@ BEGIN
     EXECUTE format('REVOKE ALL ON public.%I FROM anon', t);
     EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', t);
   END LOOP;
-END $$;
+END
+$optional$;
 
 COMMIT;
 
@@ -207,7 +431,19 @@ COMMIT;
 -- VERIFICATION — run after COMMIT. Do not skip.
 -- =============================================================================
 --
--- 1. No permissive policies survive. Expect ZERO rows.
+-- 0. Read the NOTICEs this migration printed. Every "skipping" line is a column
+--    or table that is absent, which means a guard you expected is not there.
+--    In the Supabase SQL editor they appear under the results pane.
+--
+-- 1. Confirm the booking INSERT policy has the guards you expect. In
+--    particular, check that the admin-only fields present in your schema all
+--    appear as `IS NULL`:
+--
+--   SELECT policyname, with_check
+--   FROM pg_policies
+--   WHERE schemaname = 'public' AND tablename = 'bookings';
+--
+-- 2. No permissive policies survive. Expect ZERO rows.
 --    (The one documented exception is the public SELECT on admin_settings,
 --     which the site needs to render its branding.)
 --
@@ -218,7 +454,7 @@ COMMIT;
 --     AND NOT (tablename = 'admin_settings' AND cmd = 'SELECT')
 --   ORDER BY tablename;
 --
--- 2. The anon grant surface. Expect EXACTLY three rows:
+-- 3. The anon grant surface. Expect EXACTLY three rows:
 --      admin_settings | SELECT
 --      bookings       | INSERT
 --      properties     | SELECT
@@ -228,7 +464,7 @@ COMMIT;
 --   WHERE table_schema = 'public' AND grantee = 'anon'
 --   GROUP BY table_name ORDER BY table_name;
 --
--- 3. Prove it from OUTSIDE, with the public anon key. This is the step that
+-- 4. Prove it from OUTSIDE, with the public anon key. This is the step that
 --    actually demonstrates the fix; the SQL above only describes intent.
 --
 --   U=$(grep '^VITE_SUPABASE_URL=' .env | cut -d= -f2-)
