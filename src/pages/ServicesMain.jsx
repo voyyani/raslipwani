@@ -5,6 +5,7 @@ import { supabase } from '../utils/supabaseClient';
 import toast from 'react-hot-toast';
 
 import { notifyBookingReceived } from '../utils/bookingNotifications';
+import Modal from '../components/ui/Modal';
 
 import { logger } from '../utils/logger';
 const ServicesMain = () => {
@@ -197,6 +198,14 @@ const ServicesMain = () => {
     setActiveModal('booking');
   };
 
+  /**
+   * A viewing takes a fourth step to choose how the property is viewed; every
+   * other service is done in three. The expression appeared inline in the
+   * progress bar and again in the final-step guard, so the two could disagree
+   * about how many steps the form had.
+   */
+  const totalSteps = bookingData.serviceType === 'viewing' ? 4 : 3;
+
   const closeModal = () => {
     setActiveModal(null);
     setCurrentStep(1);
@@ -230,44 +239,35 @@ const ServicesMain = () => {
       
       <>
         {/* Booking Modal */}
-        <AnimatePresence>
-          {activeModal === 'booking' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-              >
-                <div className="p-6 md:p-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-primary">Book Your Service</h2>
-                      <p className="text-gray-600 text-sm mt-1">Step {currentStep} of {bookingData.serviceType === 'viewing' ? 4 : 3}</p>
-                    </div>
-                    <button 
-                      onClick={closeModal}
-                      className="text-gray-500 hover:text-primary text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mb-8">
-                    <div className="flex justify-between mb-2">
-                      {[1, 2, 3, 4].slice(0, bookingData.serviceType === 'viewing' ? 4 : 3).map(step => (
-                        <div key={step} className={`flex-1 h-2 rounded-full mx-1 ${
-                          step <= currentStep ? 'bg-primary' : 'bg-gray-200'
-                        }`}></div>
-                      ))}
-                    </div>
-                  </div>
+        {/*
+          The booking dialog. It used to be a hand-rolled `fixed inset-0`
+          overlay: focus stayed on the page behind it, Tab walked out of the
+          form into content the dialog was covering, Escape did nothing, and
+          closing dropped focus to the top of the document. This is the point
+          in the journey where a visitor becomes a customer, so it is the worst
+          place on the site to have had those four defects.
+        */}
+        <Modal
+          isOpen={activeModal === 'booking'}
+          onClose={closeModal}
+          title="Book Your Service"
+          description={`Step ${currentStep} of ${totalSteps}`}
+          size="xl"
+        >
+          {/* Progress bar. `aria-hidden` because the step count is already
+              announced in the dialog's description above. */}
+          <div className="mb-8" aria-hidden="true">
+            <div className="flex justify-between mb-2">
+              {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
+                <div
+                  key={step}
+                  className={`flex-1 h-2 rounded-full mx-1 ${
+                    step <= currentStep ? 'bg-brand' : 'bg-surface-sunken'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Step 1: Service Selection */}
@@ -504,7 +504,7 @@ const ServicesMain = () => {
                     )}
 
                     {/* Step 3/4: Personal Details */}
-                    {(currentStep === (bookingData.serviceType === 'viewing' ? 4 : 3)) && (
+                    {currentStep === totalSteps && (
                       <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -643,11 +643,7 @@ const ServicesMain = () => {
                       </motion.div>
                     )}
                   </form>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </Modal>
           
         <main className="flex-grow bg-gray-50">
           {/* Services Hero */}

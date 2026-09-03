@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import InvestmentCalculator from '../components/InvestmentCalculator';
+import Modal from '../components/ui/Modal';
 import { 
   Globe, 
   TrendingUp, 
@@ -397,22 +398,21 @@ const International = () => {
         </div>
       </section>
 
-      {/* Investment Calculator Modal */}
-      {showCalculator && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto relative">
-            <button
-              onClick={() => setShowCalculator(false)}
-              className="absolute top-4 right-4 z-10 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <InvestmentCalculator />
-          </div>
-        </div>
-      )}
+      {/*
+        The calculator used to render its own overlay with a hand-drawn close
+        cross and no way out but the mouse: no focus trap, no Escape, no focus
+        returned to the button that opened it. `Modal` carries all three.
+      */}
+      <Modal
+        isOpen={showCalculator}
+        onClose={() => setShowCalculator(false)}
+        title="Investment Calculator"
+        description="Model returns on a Nairobi property before you commit to a viewing."
+        size="3xl"
+        bodyClassName=""
+      >
+        <InvestmentCalculator />
+      </Modal>
 
       {/* Why Nairobi Section */}
       <section ref={overviewRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">

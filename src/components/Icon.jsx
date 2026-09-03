@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+  Archive,
+  ArchiveRestore,
   Bath,
   Bed,
   Building2,
@@ -26,6 +28,7 @@ import {
   Linkedin,
   Loader2,
   Mail,
+  Download,
   Map,
   MapPin,
   MessageSquare,
@@ -33,8 +36,10 @@ import {
   Rocket,
   Ruler,
   Search,
+  Share2,
   ShieldCheck,
   Star,
+  StickyNote,
   Target,
   TrendingUp,
   Twitter,
@@ -121,6 +126,13 @@ const REGISTRY = {
   'user': User,
   'file-alt': FileText,
   'file-contract': FileSignature,
+  'sticky-note': StickyNote,
+  'file-export': Download,
+
+  // Record keeping
+  'archive': Archive,
+  'trash-restore': ArchiveRestore,
+  'share': Share2,
 
   // Interface
   'check-circle': CheckCircle2,

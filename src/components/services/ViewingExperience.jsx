@@ -8,6 +8,7 @@ import { notifyBookingReceived } from '../../utils/bookingNotifications';
 
 import { logger } from '../../utils/logger';
 import Icon from '../Icon';
+import Modal from '../ui/Modal';
 const ViewingExperience = () => {
   const [properties, setProperties] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
@@ -274,6 +275,12 @@ const ViewingExperience = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  /** Leaving the booking flow resets both pieces of its state together. */
+  const closeBooking = () => {
+    setSelectedProperty(null);
+    setBookingStep(0);
   };
 
   const formatPrice = (price) => {
@@ -599,35 +606,22 @@ const ViewingExperience = () => {
       </section>
 
       {/* Booking Flow Modal */}
-      <AnimatePresence>
-        {(bookingStep > 0 && selectedProperty) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            >
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">
-                    {bookingStep === 1 ? 'Confirm Viewing Details' : 'Schedule Your Viewing'}
-                  </h2>
-                  <button 
-                    onClick={() => {
-                      setSelectedProperty(null);
-                      setBookingStep(0);
-                    }}
-                    className="text-gray-500 hover:text-primary"
-                  >
-                    <Icon name="times" />
-                  </button>
-                </div>
-                
+      {/*
+        The viewing booking dialog — the moment a visitor becomes a customer.
+        It was a hand-rolled overlay: focus stayed behind it, Tab left the form
+        for the page underneath, Escape did nothing and closing returned focus
+        to the top of the document. `Modal` handles all four, once.
+      */}
+      {/* The guard is at the call site, not inside `Modal`: JSX evaluates
+          children before the component can decide not to render them, and the
+          body below dereferences `selectedProperty`. */}
+      {bookingStep > 0 && selectedProperty && (
+      <Modal
+        isOpen
+        onClose={closeBooking}
+        title={bookingStep === 1 ? 'Confirm Viewing Details' : 'Schedule Your Viewing'}
+        size="lg"
+      >
                 {bookingStep === 1 ? (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
@@ -833,11 +827,8 @@ const ViewingExperience = () => {
                     </div>
                   </form>
                 )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </Modal>
+      )}
     </main>
   );
 };

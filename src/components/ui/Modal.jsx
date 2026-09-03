@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useId, useRef } from 'react';
+import React, { useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 
 import Icon from '../Icon';
+import useDialog from './useDialog';
 
 /**
  * The one dialog.
@@ -21,22 +22,22 @@ import Icon from '../Icon';
  *    where they were.
  * 4. **Escape did nothing.** The only way out was to find and click the X.
  *
+ * All four live in `useDialog`, not here, so that the one surface which cannot
+ * wear this chrome — the full-bleed property gallery — still gets them.
+ *
  * The portal matters for the same reason the trap does: rendering in place means
  * the dialog inherits the stacking and `overflow` of whatever contained it, and
  * a dialog clipped by an ancestor's `overflow: hidden` is a dialog with content
  * nobody can reach.
  */
 
-/** Everything focusable, minus anything deliberately removed from the tab order. */
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), ' +
-  'select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 const SIZES = {
   sm: 'max-w-md',
   md: 'max-w-2xl',
-  lg: 'max-w-4xl',
-  xl: 'max-w-6xl',
+  lg: 'max-w-3xl',
+  xl: 'max-w-4xl',
+  '2xl': 'max-w-6xl',
+  '3xl': 'max-w-7xl',
 };
 
 const Modal = ({
@@ -50,84 +51,13 @@ const Modal = ({
   initialFocusRef,
   closeOnBackdrop = true,
   className = '',
+  bodyClassName = 'p-6',
 }) => {
   const panelRef = useRef(null);
-  const restoreFocusRef = useRef(null);
   const titleId = `modal-title-${useId()}`;
   const descriptionId = `modal-description-${useId()}`;
 
-  const focusable = useCallback(
-    () => Array.from(panelRef.current?.querySelectorAll(FOCUSABLE) ?? []),
-    []
-  );
-
-  // Remember the opener before the dialog steals focus, and give it back on the
-  // way out. Reading it in an effect keyed on `isOpen` catches the element that
-  // was actually focused at open time.
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    restoreFocusRef.current = document.activeElement;
-
-    const target = initialFocusRef?.current ?? focusable()[0] ?? panelRef.current;
-    // A frame's delay lets the portal mount before focus moves into it.
-    const raf = requestAnimationFrame(() => target?.focus());
-
-    return () => {
-      cancelAnimationFrame(raf);
-      const opener = restoreFocusRef.current;
-      if (opener && typeof opener.focus === 'function' && document.contains(opener)) {
-        opener.focus();
-      }
-    };
-  }, [isOpen, initialFocusRef, focusable]);
-
-  // Background scroll lock. The previous value is restored rather than cleared,
-  // so nesting a dialog inside a already-locked surface does not unlock it.
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        onClose();
-        return;
-      }
-
-      if (event.key !== 'Tab') return;
-
-      const items = focusable();
-      if (items.length === 0) {
-        // Nothing to move to — keep focus on the panel rather than letting it
-        // escape to the page behind.
-        event.preventDefault();
-        return;
-      }
-
-      const first = items[0];
-      const last = items[items.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [isOpen, onClose, focusable]);
+  useDialog({ isOpen, onClose, panelRef, initialFocusRef });
 
   if (!isOpen) return null;
 
@@ -175,7 +105,7 @@ const Modal = ({
           </button>
         </div>
 
-        <div className="p-6">{children}</div>
+        <div className={bodyClassName}>{children}</div>
 
         {footer && <div className="p-6 pt-0 flex justify-end gap-3">{footer}</div>}
       </div>
@@ -191,11 +121,13 @@ Modal.propTypes = {
   description: PropTypes.node,
   children: PropTypes.node,
   footer: PropTypes.node,
-  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', '2xl', '3xl']),
   /** Focus this instead of the first focusable child — e.g. a Cancel button. */
   initialFocusRef: PropTypes.shape({ current: PropTypes.any }),
   closeOnBackdrop: PropTypes.bool,
   className: PropTypes.string,
+  /** Padding for the body. Pass `''` when the child brings its own. */
+  bodyClassName: PropTypes.string,
 };
 
 export default Modal;
