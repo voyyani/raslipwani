@@ -473,7 +473,7 @@ const ClientManagement = () => {
                   </button>
                   <button
                     onClick={() => handleEdit(client)}
-                    className="flex-1 bg-accent-hover hover:bg-yellow-700 text-white px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm"
+                    className="flex-1 bg-accent-hover hover:bg-yellow-700 text-content-on-media px-3 py-2 rounded-md flex items-center justify-center gap-2 text-sm"
                   >
                     <Edit2 className="w-4 h-4" /> Edit
                   </button>

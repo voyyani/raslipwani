@@ -273,7 +273,7 @@ const InvestmentCalculator = () => {
         {/* Results Panel */}
         <div className="space-y-6">
           {/* Key Metrics */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 text-white">
+          <div className="bg-gradient-to-br from-brand to-indigo-700 rounded-2xl shadow-xl p-8 text-content-on-media">
             <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <TrendingUp className="w-6 h-6" />
               Investment Returns
@@ -281,21 +281,21 @@ const InvestmentCalculator = () => {
 
             {results && (
               <div className="space-y-6">
-                <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="text-sm text-blue-100 mb-1">Total ROI</div>
+                <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-line-media/20">
+                  <div className="text-sm text-content-on-media/90 mb-1">Total ROI</div>
                   <div className="text-4xl font-bold">{results.roi.toFixed(1)}%</div>
-                  <div className="text-sm text-blue-200 mt-1">
+                  <div className="text-sm text-content-on-media/80 mt-1">
                     Over {inputs.holdingPeriod} years
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="text-xs text-blue-100 mb-1">Annual ROI</div>
+                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-line-media/20">
+                    <div className="text-xs text-content-on-media/90 mb-1">Annual ROI</div>
                     <div className="text-2xl font-bold">{results.annualizedROI.toFixed(1)}%</div>
                   </div>
-                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <div className="text-xs text-blue-100 mb-1">Cash on Cash</div>
+                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-line-media/20">
+                    <div className="text-xs text-content-on-media/90 mb-1">Cash on Cash</div>
                     <div className="text-2xl font-bold">{results.cashOnCash.toFixed(1)}%</div>
                   </div>
                 </div>
@@ -377,9 +377,9 @@ const InvestmentCalculator = () => {
           </div>
 
           {/* CTA */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white text-center">
+          <div className="bg-gradient-to-r from-brand to-indigo-600 rounded-xl p-6 text-content-on-media text-center">
             <h4 className="text-xl font-bold mb-2">Like What You See?</h4>
-            <p className="mb-4 text-blue-100">
+            <p className="mb-4 text-content-on-media/90">
               Schedule a consultation with our investment team
             </p>
             <button className="bg-surface-raised text-brand hover:bg-surface-sunken px-8 py-3 rounded-lg font-semibold transition-all">

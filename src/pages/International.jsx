@@ -250,7 +250,7 @@ const International = () => {
 
       <main className="flex-grow">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-brand-hover via-indigo-900 to-purple-900 text-content-on-media py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEyYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-pulse"></div>
         </div>
@@ -262,7 +262,7 @@ const International = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-2 bg-surface-raised/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-white/20">
+            <div className="inline-flex items-center gap-2 bg-surface-raised/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-line-media/20">
               <Globe className="w-5 h-5" />
               <span className="text-sm font-medium">International Property Services</span>
             </div>
@@ -274,7 +274,7 @@ const International = () => {
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto">
+            <p className="text-xl md:text-2xl text-content-on-media/90 mb-8 max-w-4xl mx-auto">
               Whether you're in the diaspora, relocating for work, or seeking investment opportunities - 
               we make Nairobi real estate accessible from anywhere in the world.
             </p>
@@ -288,7 +288,7 @@ const International = () => {
               </button>
               <button 
                 onClick={() => setShowCalculator(!showCalculator)}
-                className="bg-surface-raised/10 hover:bg-surface-raised/20 backdrop-blur-sm border-2 border-white/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
+                className="bg-surface-raised/10 hover:bg-surface-raised/20 backdrop-blur-sm border-2 border-line-media/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
               >
                 Investment Calculator
               </button>
@@ -296,7 +296,7 @@ const International = () => {
 
             {/* Currency Selector */}
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <span className="text-sm text-blue-200">View prices in:</span>
+              <span className="text-sm text-content-on-media/80">View prices in:</span>
               {currencies.map(curr => (
                 <button
                   key={curr.code}
@@ -304,7 +304,7 @@ const International = () => {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     selectedCurrency === curr.code
                       ? 'bg-surface-raised text-brand-content'
-                      : 'bg-surface-raised/10 hover:bg-surface-raised/20 text-white'
+                      : 'bg-surface-raised/10 hover:bg-surface-raised/20 text-content-on-media'
                   }`}
                 >
                   {curr.code}
@@ -315,7 +315,7 @@ const International = () => {
         </div>
 
         {/* Floating Navigation Pills */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex gap-2 bg-surface-raised/10 backdrop-blur-md rounded-full p-2 border border-white/20">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex gap-2 bg-surface-raised/10 backdrop-blur-md rounded-full p-2 border border-line-media/20">
           {[
             { label: 'Overview', ref: overviewRef, section: 'overview' },
             { label: 'Investment', ref: investRef, section: 'invest' },
@@ -329,7 +329,7 @@ const International = () => {
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
                 activeSection === item.section
                   ? 'bg-surface-raised text-brand-content'
-                  : 'text-white hover:bg-surface-raised/10'
+                  : 'text-content-on-media hover:bg-surface-raised/10'
               }`}
             >
               {item.label}
@@ -357,8 +357,8 @@ const International = () => {
               const Icon = audience.icon;
               const body = (
                 <>
-                  <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="w-8 h-8 text-white" />
+                  <div className="bg-gradient-to-br from-brand to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Icon className="w-8 h-8 text-content-on-media" />
                   </div>
                   <h3 className="text-2xl font-bold text-content mb-3">{audience.title}</h3>
                   <p className="text-content-muted mb-6">{audience.description}</p>
@@ -377,7 +377,7 @@ const International = () => {
                 </>
               );
               const cardClass =
-                'group block text-left w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border-2 border-brand-subtle hover:border-brand-subtle transition-all hover:shadow-xl';
+                'group block text-left w-full h-full bg-gradient-to-br from-brand-subtle to-indigo-50 p-8 rounded-2xl border-2 border-brand-subtle hover:border-brand-subtle transition-all hover:shadow-xl';
 
               return audience.to ? (
                 <Link key={audience.title} to={audience.to} className={cardClass}>
@@ -415,7 +415,7 @@ const International = () => {
       </Modal>
 
       {/* Why Nairobi Section */}
-      <section ref={overviewRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section ref={overviewRef} className="py-20 bg-gradient-to-b from-surface to-surface-raised">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
@@ -436,7 +436,7 @@ const International = () => {
                 viewport={{ once: true }}
                 className="text-center p-8 bg-surface-raised rounded-2xl shadow-lg hover:shadow-xl transition-all"
               >
-                <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="text-6xl font-bold bg-gradient-to-r from-brand to-purple-600 bg-clip-text text-transparent mb-2">
                   {item.stat}
                 </div>
                 <div className="text-lg font-semibold text-content mb-2">{item.label}</div>
@@ -470,12 +470,12 @@ const International = () => {
                 viewport={{ once: true }}
                 className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-line hover:border-brand-subtle"
               >
-                <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white">
+                <div className="bg-gradient-to-r from-brand via-indigo-600 to-purple-600 p-8 text-content-on-media">
                   <h3 className="text-2xl font-bold mb-3">{opp.title}</h3>
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-4xl font-bold">{opp.roi}</span>
                   </div>
-                  <span className="text-blue-200 text-sm">expected returns</span>
+                  <span className="text-content-on-media/80 text-sm">expected returns</span>
                 </div>
                 
                 <div className="p-8">
@@ -497,7 +497,7 @@ const International = () => {
                   
                   <Link
                     to="/contact?inquiry=investment"
-                    className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-center py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+                    className="block w-full bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-media text-center py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
                   >
                     Learn More
                   </Link>
@@ -509,7 +509,7 @@ const International = () => {
       </section>
 
       {/* Diaspora Section */}
-      <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-surface via-brand-subtle to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-brand-subtle px-6 py-3 rounded-full mb-6">
@@ -536,7 +536,7 @@ const International = () => {
                     </div>
                     <TrendingUp className="w-8 h-8 text-success-content" />
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-brand-subtle">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-brand-subtle to-indigo-50 rounded-xl border border-brand-subtle">
                     <div>
                       <div className="text-sm text-content-muted">Portfolio Value</div>
                       <div className="text-2xl font-bold text-brand">{formatCurrency(320000)}</div>
@@ -575,9 +575,9 @@ const International = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-12 text-white text-center shadow-2xl">
+          <div className="bg-gradient-to-r from-brand via-indigo-600 to-purple-600 rounded-2xl p-12 text-content-on-media text-center shadow-2xl">
             <h3 className="text-3xl font-bold mb-4">Build Wealth Back Home</h3>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-content-on-media/90 mb-8 max-w-2xl mx-auto">
               Start with as little as $30,000 and receive monthly USD returns directly to your international account
             </p>
             <Link
@@ -613,9 +613,9 @@ const International = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   viewport={{ once: true }}
-                  className="p-8 border-2 border-line rounded-2xl hover:border-brand hover:shadow-xl transition-all bg-gradient-to-br from-white to-gray-50 group"
+                  className="p-8 border-2 border-line rounded-2xl hover:border-brand hover:shadow-xl transition-all bg-gradient-to-br from-surface-raised to-surface group"
                 >
-                  <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <div className="bg-gradient-to-br from-brand-subtle to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <Icon className="w-7 h-7 text-brand" />
                   </div>
                   <h3 className="text-xl font-bold text-content mb-3">{service.title}</h3>
@@ -628,7 +628,7 @@ const International = () => {
       </section>
 
       {/* Featured Properties */}
-      <section ref={propertiesRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section ref={propertiesRef} className="py-20 bg-gradient-to-b from-surface to-surface-raised">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
@@ -677,7 +677,7 @@ const International = () => {
                   </p>
 
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-brand to-purple-600 bg-clip-text text-transparent">
                       {formatCurrency(property.price)}
                     </span>
                   </div>
@@ -691,7 +691,7 @@ const International = () => {
 
                   <Link
                     to={`/properties`}
-                    className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-center py-3 rounded-xl font-semibold transition-all"
+                    className="block w-full bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-media text-center py-3 rounded-xl font-semibold transition-all"
                   >
                     View Details
                   </Link>
@@ -703,7 +703,7 @@ const International = () => {
           <div className="text-center">
             <Link
               to="/properties?filter=international"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-media px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
             >
               View All International Properties
               <ChevronRight className="w-5 h-5" />
@@ -713,12 +713,12 @@ const International = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white">
+      <section className="py-20 bg-gradient-to-r from-brand via-indigo-600 to-purple-700 text-content-on-media">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl mb-10 text-blue-100">
+          <p className="text-xl mb-10 text-content-on-media/90">
             Schedule a consultation with our international property specialists
           </p>
           
@@ -740,14 +740,14 @@ const International = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
-            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-line-media/20">
               <Mail className="w-6 h-6 mb-3" />
-              <div className="text-sm text-blue-200 mb-1">Email Us</div>
+              <div className="text-sm text-content-on-media/80 mb-1">Email Us</div>
               <div className="font-semibold">international@raslipwani.com</div>
             </div>
-            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-line-media/20">
               <Phone className="w-6 h-6 mb-3" />
-              <div className="text-sm text-blue-200 mb-1">WhatsApp</div>
+              <div className="text-sm text-content-on-media/80 mb-1">WhatsApp</div>
               <div className="font-semibold">+254 758 066 526</div>
             </div>
           </div>

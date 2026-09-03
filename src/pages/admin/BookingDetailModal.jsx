@@ -239,7 +239,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50"
+        className="fixed inset-0 bg-scrim/50 flex items-end md:items-center justify-center z-50"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
@@ -271,19 +271,19 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
           </div>
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 md:p-6 flex justify-between items-start">
+          <div className="bg-gradient-to-r from-brand to-brand-hover text-content-on-media p-4 md:p-6 flex justify-between items-start">
             <div className="flex-1 min-w-0">
               {/* Mobile Back Button */}
               <button 
                 onClick={onClose}
-                className="md:hidden flex items-center gap-1 text-white/80 text-sm mb-2"
+                className="md:hidden flex items-center gap-1 text-content-on-media/80 text-sm mb-2"
               >
                 <FaChevronLeft className="text-xs" />
                 Back
               </button>
               <h2 className="text-lg md:text-2xl font-bold mb-2">Booking Details</h2>
               <div className="flex items-center gap-2 md:gap-4 flex-wrap">
-                <BookingStatusBadge status={booking.status} className="bg-surface-raised bg-opacity-20 border-white border-opacity-30 text-xs md:text-sm" />
+                <BookingStatusBadge status={booking.status} className="bg-surface-raised bg-opacity-20 border-line-media border-opacity-30 text-xs md:text-sm" />
                 {booking.priority && (
                   <span className={`text-xs md:text-sm font-semibold ${getPriorityColor(booking.priority)}`}>
                     {booking.priority.toUpperCase()} Priority
@@ -294,7 +294,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
             </div>
             <button
               onClick={onClose}
-              className="hidden md:block text-white hover:text-gray-200 transition p-2 flex-shrink-0"
+              className="hidden md:block text-content-on-media hover:text-content-on-media/90 transition p-2 flex-shrink-0"
             >
               <FaTimes className="text-2xl" />
             </button>
@@ -485,7 +485,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                       disabled={updatePriorityMutation.isPending}
                       className={`px-4 py-2 rounded-md font-medium transition ${
                         booking.priority === priority
-                          ? 'bg-brand text-white'
+                          ? 'bg-brand text-content-on-media'
                           : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
                       }`}
                     >

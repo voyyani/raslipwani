@@ -428,7 +428,7 @@ const PropertyDetail = () => {
           {/* Enhanced Image Viewer */}
           <div 
             className={`bg-surface-raised rounded-xl shadow-md overflow-hidden mb-8 relative ${
-              isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
+              isFullscreen ? 'fixed inset-0 z-50 bg-scrim' : ''
             }`}
           >
             {property.images?.length > 0 ? (
@@ -436,7 +436,7 @@ const PropertyDetail = () => {
                 ref={containerRef}
                 className={`relative ${
                   isFullscreen 
-                    ? 'h-screen w-full bg-black cursor-grab' 
+                    ? 'h-screen w-full bg-scrim cursor-grab' 
                     : 'h-[50vh] min-h-[400px] bg-surface-sunken cursor-pointer'
                 }`}
                 onTouchStart={handleTouchStart}
@@ -455,7 +455,7 @@ const PropertyDetail = () => {
                     >
                       {isImageLoading && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-line-media"></div>
                         </div>
                       )}
                       <motion.img
@@ -514,7 +514,7 @@ const PropertyDetail = () => {
                     <button
                       className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
                         isFullscreen 
-                          ? 'bg-black/50 hover:bg-black/70 text-white' 
+                          ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' 
                           : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
                       onClick={(e) => {
@@ -530,7 +530,7 @@ const PropertyDetail = () => {
                     <button
                       className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-20 ${
                         isFullscreen 
-                          ? 'bg-black/50 hover:bg-black/70 text-white' 
+                          ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' 
                           : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
                       onClick={(e) => {
@@ -563,7 +563,7 @@ const PropertyDetail = () => {
                 {/* Fullscreen Controls */}
                 {isFullscreen && showControls && (
                   <button
-                    className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm"
+                    className="absolute top-4 right-4 z-20 bg-scrim/50 hover:bg-scrim/70 text-content-on-media rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFullscreen();
@@ -578,14 +578,14 @@ const PropertyDetail = () => {
                 
                 {/* Zoom Indicator */}
                 {isFullscreen && zoom > 1 && (
-                  <div className="absolute top-4 right-20 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm">
+                  <div className="absolute top-4 right-20 z-20 bg-scrim/50 text-content-on-media text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm">
                     {zoom.toFixed(1)}x
                   </div>
                 )}
                 
                 {/* Fullscreen Hint */}
                 {!isFullscreen && (
-                  <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center backdrop-blur-sm transition-opacity hover:opacity-100 opacity-90">
+                  <div className="absolute top-4 right-4 z-20 bg-scrim/50 text-content-on-media text-sm font-medium px-3 py-1 rounded-full flex items-center backdrop-blur-sm transition-opacity hover:opacity-100 opacity-90">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>

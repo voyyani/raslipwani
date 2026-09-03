@@ -257,7 +257,7 @@ const Properties = () => {
       
       <>
         {/* Enhanced Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-primary pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-scrim via-brand-hover to-primary pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -277,7 +277,7 @@ const Properties = () => {
               className="text-center mb-12"
             >
               <motion.h1 
-                className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent leading-tight"
+                className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-surface-raised to-surface-sunken bg-clip-text text-transparent leading-tight"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -286,7 +286,7 @@ const Properties = () => {
               </motion.h1>
               
               <motion.p 
-                className="text-xl text-gray-200 max-w-3xl mx-auto mb-8 font-light leading-relaxed"
+                className="text-xl text-content-on-media/90 max-w-3xl mx-auto mb-8 font-light leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
@@ -652,7 +652,7 @@ const PropertyCard = ({ property, index, openModal }) => {
             height="280"
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-surface-sunken to-surface-sunken flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl mb-2">🏠</div>
               <span className="text-content-subtle text-sm">Image Coming Soon</span>
@@ -673,7 +673,7 @@ const PropertyCard = ({ property, index, openModal }) => {
         </div>
         
         {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-500"></div>
+        <div className="absolute inset-0 bg-scrim/0 group-hover:bg-scrim/10 transition-all duration-500"></div>
       </div>
       
       <div className="p-5">
@@ -733,7 +733,7 @@ const PropertyCard = ({ property, index, openModal }) => {
 // Enhanced Property Skeleton Loader
 const PropertySkeleton = () => (
   <div className="bg-surface-raised rounded-2xl overflow-hidden shadow-lg animate-pulse border border-line">
-    <div className="pb-[70%] relative bg-gradient-to-br from-gray-200 to-gray-300"></div>
+    <div className="pb-[70%] relative bg-gradient-to-br from-surface-sunken to-surface-sunken"></div>
     <div className="p-5">
       <div className="flex justify-between mb-3">
         <div className="h-5 bg-surface-sunken rounded w-3/5"></div>

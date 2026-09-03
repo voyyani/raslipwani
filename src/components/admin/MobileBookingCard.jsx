@@ -103,7 +103,7 @@ const MobileBookingCard = ({
       >
         <button
           onClick={() => handleAction(onConfirm)}
-          className="flex flex-col items-center text-white"
+          className="flex flex-col items-center text-content-on-media"
         >
           <FaCalendarCheck className="text-2xl mb-1" />
           <span className="text-xs font-medium">Confirm</span>
@@ -117,7 +117,7 @@ const MobileBookingCard = ({
       >
         <button
           onClick={() => handleAction(onCancel)}
-          className="flex flex-col items-center text-white"
+          className="flex flex-col items-center text-content-on-media"
         >
           <FaTimes className="text-2xl mb-1" />
           <span className="text-xs font-medium">Cancel</span>

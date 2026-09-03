@@ -180,11 +180,11 @@ const Contact = () => {
       </Helmet>
       
       <>
-        <main className="flex-grow bg-gradient-to-b from-white to-gray-50">
-          <section className="bg-gradient-to-r from-blue-800 to-primary py-24 md:py-32 relative overflow-hidden">
-            <div className="absolute inset-0 bg-black opacity-20"></div>
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/10 to-blue-600/10"></div>
-            <div className="container mx-auto px-4 relative z-10 text-center text-white">
+        <main className="flex-grow bg-gradient-to-b from-surface-raised to-surface">
+          <section className="bg-gradient-to-r from-brand-hover to-primary py-24 md:py-32 relative overflow-hidden">
+            <div className="absolute inset-0 bg-scrim opacity-20"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/10 to-brand/10"></div>
+            <div className="container mx-auto px-4 relative z-10 text-center text-content-on-media">
               <motion.h1 
                 className="text-4xl md:text-6xl font-bold mb-6"
                 initial={{ opacity: 0, y: 20 }}
@@ -524,14 +524,14 @@ const Contact = () => {
                       <div className="pt-2">
                         <motion.button
                           type="submit"
-                          className="bg-gradient-to-r from-primary to-blue-700 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-primary transition-all shadow-md hover:shadow-lg w-full md:w-auto flex items-center justify-center font-medium"
+                          className="bg-gradient-to-r from-primary to-brand-hover text-content-on-media px-8 py-4 rounded-lg hover:from-brand-hover hover:to-primary transition-all shadow-md hover:shadow-lg w-full md:w-auto flex items-center justify-center font-medium"
                           disabled={isSubmitting}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           {isSubmitting ? (
                             <>
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-content-on-media" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
@@ -548,7 +548,7 @@ const Contact = () => {
                     </form>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-blue-50 to-gray-50 p-6 md:p-10">
+                  <div className="bg-gradient-to-br from-brand-subtle to-surface p-6 md:p-10">
                     <h2 className="text-2xl font-bold text-primary mb-6">Kenya-Wide Real Estate Services</h2>
                     
                     <div className="space-y-6">
@@ -680,8 +680,8 @@ const Contact = () => {
           </section>
           
           {/* CTA Section */}
-          <section className="py-16 bg-gradient-to-r from-primary to-blue-800">
-            <div className="container mx-auto px-4 text-center text-white">
+          <section className="py-16 bg-gradient-to-r from-primary to-brand-hover">
+            <div className="container mx-auto px-4 text-center text-content-on-media">
               <motion.h2 
                 className="text-3xl md:text-4xl font-bold mb-4"
                 initial={{ opacity: 0, y: 20 }}

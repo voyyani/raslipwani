@@ -240,7 +240,7 @@ const PropertyModal = ({ property, closeModal }) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/80"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -261,7 +261,7 @@ const PropertyModal = ({ property, closeModal }) => {
       >
         {/* Image Carousel */}
         <div 
-          className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-[50vh] min-h-[300px]'} bg-black`}
+          className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-[50vh] min-h-[300px]'} bg-scrim`}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -284,7 +284,7 @@ const PropertyModal = ({ property, closeModal }) => {
                   >
                     {isImageLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-line-media"></div>
                       </div>
                     )}
                     <motion.img
@@ -345,7 +345,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-10 ${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -362,7 +362,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-10 ${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -388,7 +388,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       exit={{ opacity: 0 }}
                       onClick={toggleFullscreen}
                       className={`${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                     >
@@ -400,7 +400,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       exit={{ opacity: 0 }}
                       onClick={isFullscreen ? toggleFullscreen : closeModal}
                       className={`${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Close modal"}
                     >
@@ -413,7 +413,7 @@ const PropertyModal = ({ property, closeModal }) => {
               {/* Zoom Indicator */}
               {zoomLevel > 1 && (
                 <motion.div 
-                  className="absolute top-4 left-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm"
+                  className="absolute top-4 left-4 z-20 bg-scrim/50 text-content-on-media text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
@@ -527,7 +527,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       href={`tel:${OFFICE_PHONE}`}
-                      className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                      className="bg-gradient-to-r from-primary to-secondary text-content-on-media font-medium py-2 px-4 rounded-lg shadow-md"
                     >
                       Call Now
                     </motion.a>
@@ -539,7 +539,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleContactAgent}
-                    className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                    className="bg-gradient-to-r from-primary to-secondary text-content-on-media font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
                   >
                     Contact Agent
                   </motion.button>

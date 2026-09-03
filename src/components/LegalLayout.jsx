@@ -25,7 +25,7 @@ const LegalLayout = ({ title, description, updatedOn, children }) => {
           <div className="bg-primary text-content-on-brand py-14 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl">
               <h1 className="text-3xl md:text-4xl font-bold">{title}</h1>
-              <p className="mt-3 text-white/80 text-sm">
+              <p className="mt-3 text-content-on-media/80 text-sm">
                 Last updated{' '}
                 <time dateTime={updatedOn}>
                   {new Date(`${updatedOn}T00:00:00Z`).toLocaleDateString('en-KE', {

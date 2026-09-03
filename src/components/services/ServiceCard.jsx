@@ -12,7 +12,7 @@ const ServiceCard = ({ service, onBook, index }) => (
   >
     <div className="p-8">
       <div className="flex items-start mb-6">
-        <div className={`bg-gradient-to-r ${service.color} p-4 rounded-xl mr-5 text-white`}>
+        <div className={`bg-gradient-to-r ${service.color} p-4 rounded-xl mr-5 text-content-on-media`}>
           <Icon name={service.icon} size={30} />
         </div>
         <div>
@@ -44,7 +44,7 @@ const ServiceCard = ({ service, onBook, index }) => (
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => onBook(service.title)}
-          className="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 px-5 rounded-xl transition-all shadow-md hover:shadow-lg"
+          className="w-full bg-gradient-to-r from-primary to-secondary text-content-on-media py-3 px-5 rounded-xl transition-all shadow-md hover:shadow-lg"
         >
           Book Service
         </motion.button>

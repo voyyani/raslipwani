@@ -11,7 +11,7 @@ import Icon from '../Icon';
  * a button there, and roughly two hundred hand-assembled class strings in
  * between. Three things went wrong every time, and each is fixed once here:
  *
- * 1. **Colour was literal.** `bg-brand hover:bg-brand-hover` cannot theme. Every
+ * 1. **Colour was literal.** `bg-blue-600 hover:bg-blue-700` cannot theme. Every
  *    variant below resolves to semantic tokens, so a button is correct in both
  *    themes without the call site knowing a theme exists.
  * 2. **Focus was invisible or absent.** A `div` takes no focus at all, and the

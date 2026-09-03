@@ -631,7 +631,7 @@ const ServicesMain = () => {
                                 <motion.div
                                   animate={{ rotate: 360 }}
                                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+                                  className="w-5 h-5 border-2 border-line-media border-t-transparent rounded-full mr-2"
                                 />
                                 Processing...
                               </>
@@ -647,8 +647,8 @@ const ServicesMain = () => {
           
         <main className="flex-grow bg-surface">
           {/* Services Hero */}
-          <section className="bg-gradient-to-br from-primary via-blue-700 to-blue-800 py-20 md:py-28 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-black/20"></div>
+          <section className="bg-gradient-to-br from-primary via-brand-hover to-brand-hover py-20 md:py-28 text-content-on-media relative overflow-hidden">
+            <div className="absolute inset-0 bg-scrim/20"></div>
             <div className="container mx-auto px-4 relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -658,7 +658,7 @@ const ServicesMain = () => {
                 <h1 className="text-4xl md:text-6xl font-bold mb-6">
                   Kenya Real Estate Services
                 </h1>
-                <p className="text-xl md:text-2xl mb-8 text-blue-100">
+                <p className="text-xl md:text-2xl mb-8 text-content-on-media/90">
                   Book viewings, valuations, and consultations for properties across Kenya
                 </p>
                 <motion.button
@@ -673,7 +673,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openBookingModal('consultation')}
-                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
+                  className="bg-transparent border-2 border-line-media text-content-on-media font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
                 >
                   Get Consultation
                 </motion.button>
@@ -789,20 +789,20 @@ const ServicesMain = () => {
           </section>
           
           {/* CTA Section */}
-          <section className="py-20 bg-gradient-to-r from-primary to-blue-800 relative overflow-hidden">
-            <div className="absolute inset-0 bg-black/10"></div>
+          <section className="py-20 bg-gradient-to-r from-primary to-brand-hover relative overflow-hidden">
+            <div className="absolute inset-0 bg-scrim/10"></div>
             <div className="container mx-auto px-4 relative z-10 text-center">
               <motion.h2 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-4"
+                className="text-3xl md:text-4xl font-bold text-content-on-media mb-4"
               >
                 Ready to Find Your Perfect Property?
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                className="text-white text-xl mb-8 max-w-2xl mx-auto"
+                className="text-content-on-media text-xl mb-8 max-w-2xl mx-auto"
               >
                 Book a viewing or consultation with our Kenya real estate experts today
               </motion.p>
@@ -823,7 +823,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   href="tel:+254758066526" 
-                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
+                  className="bg-transparent border-2 border-line-media text-content-on-media font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
                 >
                   📞 +254 758 066 526
                 </motion.a>

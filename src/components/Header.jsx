@@ -95,7 +95,7 @@ const Header = () => {
                   isScrolled ? 'w-10 h-10' : 'w-12 h-12 md:w-14 md:h-14'
                 } group-hover:scale-105 group-hover:shadow-xl`}
               />
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success-content rounded-full border-2 border-white shadow-sm"></div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success-content rounded-full border-2 border-line-media shadow-sm"></div>
             </div>
             <div className="flex flex-col">
               <h1 className={`font-bold text-primary transition-all duration-500 ${
@@ -251,7 +251,7 @@ const Header = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-scrim/60 backdrop-blur-sm z-40 lg:hidden"
               onClick={closeMenu}
             />
             
@@ -264,17 +264,17 @@ const Header = () => {
               className="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-surface-raised shadow-2xl z-50 lg:hidden overflow-y-auto"
             >
               {/* Header */}
-              <div className="p-6 border-b border-line bg-gradient-to-r from-primary to-blue-600 text-white">
+              <div className="p-6 border-b border-line bg-gradient-to-r from-primary to-brand text-content-on-media">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <img
                       src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
                       alt="Raslipwani Properties"
-                      className="w-12 h-12 rounded-xl object-cover border-2 border-white"
+                      className="w-12 h-12 rounded-xl object-cover border-2 border-line-media"
                     />
                     <div>
                       <h2 className="text-lg font-bold">Raslipwani</h2>
-                      <p className="text-white/80 text-xs">Properties</p>
+                      <p className="text-content-on-media/80 text-xs">Properties</p>
                     </div>
                   </div>
                   <button 
@@ -444,7 +444,7 @@ const Header = () => {
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary to-blue-600"
+          className="h-full bg-gradient-to-r from-primary to-brand"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: isScrolled ? 1 : 0 }}
           transition={{ duration: 0.3 }}

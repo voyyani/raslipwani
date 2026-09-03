@@ -152,13 +152,13 @@ const AdminLayout = ({ children }) => {
         onClick={closeSidebar}
         className={`flex items-center p-3 rounded-lg transition-all duration-200 group relative ${
           active
-            ? 'bg-brand text-white shadow-lg'
-            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            ? 'bg-brand text-content-on-media shadow-lg'
+            : 'text-content-on-media/80 hover:bg-gray-700/50 hover:text-content-on-media'
         }`}
         title={isSidebarCollapsed ? item.label : undefined}
       >
         <div className="relative flex-shrink-0">
-          <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-blue-300'}`} />
+          <Icon className={`w-5 h-5 ${active ? 'text-content-on-media' : 'text-content-on-media/70'}`} />
           {/* Badge */}
           {item.badge && (
             <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center bg-danger-content text-content-on-brand text-[10px] font-bold rounded-full px-1">
@@ -198,7 +198,7 @@ const AdminLayout = ({ children }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              className="lg:hidden fixed inset-0 bg-scrim/60 backdrop-blur-sm z-40"
               onClick={closeSidebar}
               aria-hidden="true"
             />
@@ -208,8 +208,8 @@ const AdminLayout = ({ children }) => {
         {/* Sidebar - Hidden on mobile unless open */}
         <aside 
           className={`
-            bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 
-            text-white flex flex-col shrink-0
+            bg-gradient-to-b from-scrim via-scrim to-scrim 
+            text-content-on-media flex flex-col shrink-0
             fixed top-0 left-0 h-full z-40
             transition-transform duration-300 ease-in-out
             w-[280px] max-w-[85vw]
@@ -223,8 +223,8 @@ const AdminLayout = ({ children }) => {
             <div className="flex items-center justify-between gap-2">
               {!isSidebarCollapsed && (
                 <div>
-                  <h2 className="text-lg font-bold text-white">Admin Panel</h2>
-                  <p className="text-xs text-blue-300 mt-0.5">Raslipwani Properties</p>
+                  <h2 className="text-lg font-bold text-content-on-media">Admin Panel</h2>
+                  <p className="text-xs text-content-on-media/70 mt-0.5">Raslipwani Properties</p>
                 </div>
               )}
               
@@ -286,10 +286,10 @@ const AdminLayout = ({ children }) => {
               
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-white text-sm truncate">
+                  <p className="font-medium text-content-on-media text-sm truncate">
                     {user?.email?.split('@')[0] ?? 'Admin'}
                   </p>
-                  <p className="text-xs text-blue-300 truncate">
+                  <p className="text-xs text-content-on-media/70 truncate">
                     {user?.email ?? ''}
                   </p>
                 </div>
@@ -298,7 +298,7 @@ const AdminLayout = ({ children }) => {
             
             <button
               onClick={handleLogout}
-              className={`flex items-center w-full p-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors ${
+              className={`flex items-center w-full p-3 text-content-on-media/80 hover:bg-gray-700/50 hover:text-content-on-media rounded-lg transition-colors ${
                 isSidebarCollapsed ? 'lg:justify-center' : ''
               }`}
               title={isSidebarCollapsed ? "Sign Out" : undefined}

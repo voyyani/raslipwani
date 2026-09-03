@@ -108,7 +108,7 @@ const Home = () => {
           {/* Hero Section */}
           <section className="relative bg-cover bg-center min-h-screen flex items-center">
             {/* Background overlay with gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70 z-0"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-scrim/40 to-scrim/70 z-0"></div>
             
             {/* Optimized responsive background */}
             <picture className="absolute inset-0 z-[-1] pointer-events-none">
@@ -142,7 +142,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="max-w-2xl text-white"
+                className="max-w-2xl text-content-on-media"
               >
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
                   Your Trusted Real Estate Partner in Kenya
@@ -159,7 +159,7 @@ const Home = () => {
                   </Link>
                   <button 
                     onClick={scrollToServices}
-                    className="bg-surface-raised/10 backdrop-blur-sm hover:bg-surface-raised/20 text-white font-bold py-3 px-6 rounded-md transition-all duration-300 border border-white/30"
+                    className="bg-surface-raised/10 backdrop-blur-sm hover:bg-surface-raised/20 text-content-on-media font-bold py-3 px-6 rounded-md transition-all duration-300 border border-line-media/30"
                   >
                     Our Services
                   </button>
@@ -295,7 +295,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-3xl font-bold text-white mb-4"
+                className="text-3xl font-bold text-content-on-media mb-4"
               >
                 Ready to Begin Your Journey?
               </motion.h2>
@@ -303,7 +303,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-white text-xl mb-8 max-w-2xl mx-auto"
+                className="text-content-on-media text-xl mb-8 max-w-2xl mx-auto"
               >
                 Our experts are ready to guide you to your dream property in Kenya
               </motion.p>
@@ -316,7 +316,7 @@ const Home = () => {
                 </Link>
                 <Link 
                   to="/properties" 
-                  className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-md hover:bg-surface-raised/10 transition-all duration-300"
+                  className="inline-block bg-transparent border-2 border-line-media text-content-on-media font-bold py-3 px-8 rounded-md hover:bg-surface-raised/10 transition-all duration-300"
                 >
                   Browse Listings
                 </Link>
@@ -354,7 +354,7 @@ const ServiceCard = ({ icon, title, index }) => (
         {/* Sized by class, not the `size` prop: this is the only icon on the site
             that grows at the `md` breakpoint, and a prop cannot be responsive.
             Tailwind's w/h override the width/height attributes the prop sets. */}
-        <Icon name={icon} className="w-5 h-5 md:w-8 md:h-8 text-white" />
+        <Icon name={icon} className="w-5 h-5 md:w-8 md:h-8 text-content-on-media" />
       </div>
       <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
     </div>
@@ -392,7 +392,7 @@ const PropertyCard = ({ property, index, openModal }) => {
             height="300"
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-surface-sunken to-surface-sunken flex items-center justify-center">
             <span className="text-content-subtle">No Image Available</span>
           </div>
         )}
@@ -453,7 +453,7 @@ const PropertyCard = ({ property, index, openModal }) => {
 // Property Skeleton Loader
 const PropertySkeleton = () => (
   <div className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl animate-pulse">
-    <div className="pb-[75%] relative bg-gradient-to-br from-gray-100 to-gray-200"></div>
+    <div className="pb-[75%] relative bg-gradient-to-br from-surface-sunken to-surface-sunken"></div>
     <div className="p-6">
       <div className="flex justify-between mb-4">
         <div className="h-7 bg-surface-sunken rounded-xl w-3/5"></div>
@@ -480,7 +480,7 @@ const BenefitCard = ({ title, description, index }) => (
     className="flex items-start"
   >
     <div className="bg-primary rounded-full p-2 mr-4 mt-1 flex-shrink-0">
-      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-6 h-6 text-content-on-media" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
       </svg>
     </div>

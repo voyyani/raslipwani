@@ -39,6 +39,9 @@
   --info-surface: 230 240 249; /* #E6F0F9 */
   --info-content: 18 74 118; /* #124A76 */
   --info-border: 156 195 227; /* #9CC3E3 */
+  --content-on-media: 255 255 255; /* #FFFFFF */
+  --line-on-media: 255 255 255; /* #FFFFFF */
+  --scrim: 0 0 0; /* #000000 */
 }
 
 
@@ -76,4 +79,7 @@
   --info-surface: 12 35 54; /* #0C2336 */
   --info-content: 140 196 238; /* #8CC4EE */
   --info-border: 32 75 113; /* #204B71 */
+  --content-on-media: 255 255 255; /* #FFFFFF */
+  --line-on-media: 255 255 255; /* #FFFFFF */
+  --scrim: 0 0 0; /* #000000 */
 }

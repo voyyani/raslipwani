@@ -295,7 +295,7 @@ const ViewingExperience = () => {
     // `flex-grow`, not `min-h-screen`: this page now sits inside the layout
     // route's flex column, which already fills the viewport. Keeping
     // `min-h-screen` here would push the footer a full screen down the page.
-    <main className="flex-grow bg-gradient-to-b from-blue-50 to-white">
+    <main className="flex-grow bg-gradient-to-b from-brand-subtle to-surface-raised">
       {/* Viewing Options Section */}
       <section id="viewing-options" className="py-12">
         <div className="container mx-auto px-4">
@@ -334,7 +334,7 @@ const ViewingExperience = () => {
                   <div className="flex items-center mb-4">
                     <div className={`p-3 rounded-xl mr-3 ${
                       viewingType === option.type 
-                        ? 'bg-primary text-white' 
+                        ? 'bg-primary text-content-on-media' 
                         : 'bg-surface-sunken text-primary'
                     }`}>
                       <Icon name={option.icon} size={20} />
@@ -371,7 +371,7 @@ const ViewingExperience = () => {
                   
                   <div className={`w-full py-2.5 rounded-lg font-medium text-sm text-center ${
                     viewingType === option.type
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-content-on-media'
                       : 'bg-surface-sunken text-content-muted'
                   }`}>
                     {viewingType === option.type ? 'Selected' : 'Select Option'}
@@ -559,9 +559,9 @@ const ViewingExperience = () => {
                         <Icon name="home" size={30} />
                       </div>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                      <h3 className="text-white font-bold text-md">{property.title}</h3>
-                      <p className="text-white/90 text-xs">{property.location}</p>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-scrim/70 to-transparent p-3">
+                      <h3 className="text-content-on-media font-bold text-md">{property.title}</h3>
+                      <p className="text-content-on-media/90 text-xs">{property.location}</p>
                     </div>
                   </div>
                   <div className="p-4">

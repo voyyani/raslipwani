@@ -119,7 +119,7 @@ const MobilePropertyCard = ({
 
         {/* Featured Badge */}
         {property.featured && (
-          <div className="absolute top-2 left-2 bg-accent text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+          <div className="absolute top-2 left-2 bg-accent text-content-on-media px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
             <FaStar className="text-[10px]" />
             Featured
           </div>
@@ -131,7 +131,7 @@ const MobilePropertyCard = ({
         </div>
 
         {/* Price Overlay */}
-        <div className="absolute bottom-2 left-2 bg-black/70 text-white px-3 py-1.5 rounded-lg">
+        <div className="absolute bottom-2 left-2 bg-scrim/70 text-content-on-media px-3 py-1.5 rounded-lg">
           <span className="text-lg font-bold">{formatPrice(property.price)}</span>
           {property.purpose === 'rent' && <span className="text-xs opacity-80">/mo</span>}
         </div>
@@ -160,7 +160,7 @@ const MobilePropertyCard = ({
             <div className="flex items-center gap-2 text-sm text-content-muted mt-0.5">
               <TypeIcon className="text-xs" />
               <span className="capitalize">{property.property_type}</span>
-              <span className="text-gray-300">•</span>
+              <span className="text-content-on-media/80">•</span>
               <span className="capitalize">{property.purpose}</span>
             </div>
           </div>

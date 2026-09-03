@@ -172,6 +172,61 @@ const MAP = {
   'bg-yellow-400': 'bg-accent',
   'bg-yellow-500': 'bg-accent',
   'bg-yellow-600': 'bg-accent-hover',
+
+  // ---- Over media --------------------------------------------------------
+  //
+  // These run *after* the context pass below, so anything resolvable as text on
+  // a brand ground has already been taken. What is left sits on a photograph or
+  // a brand gradient, and must stay light in both themes — which is what
+  // `content-on-media` is for. The opacity steps preserve the hierarchy the
+  // original light-blue and light-grey shades were expressing.
+  'text-white': 'text-content-on-media',
+  'border-white': 'border-line-media',
+  'bg-black': 'bg-scrim',
+  'text-gray-200': 'text-content-on-media/90',
+  'text-gray-300': 'text-content-on-media/80',
+  'text-blue-100': 'text-content-on-media/90',
+  'text-blue-200': 'text-content-on-media/80',
+  'text-blue-300': 'text-content-on-media/70',
+
+  // ---- Gradient stops ----------------------------------------------------
+  //
+  // A gradient stop asks the same question a solid ground does — which role is
+  // this? — so the blue stops resolve to the brand they always were, and the
+  // near-black stops to the scrim they always were. The indigo, purple and pink
+  // stops are left alone: they have no role in the token layer, and inventing
+  // one for decoration is a design decision, not a mechanical one.
+  'from-blue-500': 'from-brand',
+  'from-blue-600': 'from-brand',
+  'to-blue-600': 'to-brand',
+  'to-blue-700': 'to-brand-hover',
+  'from-blue-700': 'from-brand-hover',
+  'from-blue-800': 'from-brand-hover',
+  'to-blue-800': 'to-brand-hover',
+  'from-blue-900': 'from-brand-hover',
+  'via-blue-700': 'via-brand-hover',
+  'via-blue-800': 'via-brand-hover',
+  'via-blue-900': 'via-brand-hover',
+  'from-blue-50': 'from-brand-subtle',
+  'from-blue-100': 'from-brand-subtle',
+  'to-blue-50': 'to-brand-subtle',
+  'to-blue-100': 'to-brand-subtle',
+  'via-blue-50': 'via-brand-subtle',
+  'from-white': 'from-surface-raised',
+  'to-white': 'to-surface-raised',
+  'from-gray-50': 'from-surface',
+  'to-gray-50': 'to-surface',
+  'from-gray-100': 'from-surface-sunken',
+  'from-gray-200': 'from-surface-sunken',
+  'to-gray-200': 'to-surface-sunken',
+  'to-gray-300': 'to-surface-sunken',
+  'from-black': 'from-scrim',
+  'to-black': 'to-scrim',
+  'from-gray-900': 'from-scrim',
+  'via-gray-900': 'via-scrim',
+  'to-gray-800': 'to-scrim',
+  'from-green-500': 'from-success-content',
+  'to-green-600': 'to-success-content',
 };
 
 /**
@@ -213,6 +268,21 @@ const PATTERNS = Object.entries(MAP).map(([from, to]) => [boundary(from), to, fr
 const CLASS_ATTR = /(className\s*=\s*)(["'`])([\s\S]*?)\2/g;
 
 /**
+ * String and template literals, comments, in that order.
+ *
+ * Rewriting is confined to string literals because that is the only place a
+ * class can be. The first version of this script replaced across whole files
+ * and quietly edited the prose in doc comments — a comment explaining why
+ * `bg-white` cannot be themed became one explaining why `bg-surface-raised`
+ * cannot be themed, which is nonsense, and exactly the kind of damage a codemod
+ * does silently. Comments are matched here only so they can be skipped.
+ */
+const SEGMENTS =
+  /(`(?:\\[\s\S]|[^\\`])*`)|('(?:\\[\s\S]|[^\\'])*')|("(?:\\[\s\S]|[^\\"])*")|(\/\*[\s\S]*?\*\/)|(\/\/[^\n]*)/g;
+
+const isComment = (segment) => segment.startsWith('/*') || segment.startsWith('//');
+
+/**
  * Pass 2 — `text-white` on a brand or status ground, resolved locally.
  *
  * Only fires when the ground is in the *same* class value, which is the one
@@ -233,16 +303,23 @@ const perClass = new Map();
 
 for (const file of files) {
   const before = readFileSync(file, 'utf8');
-  let after = before;
 
-  for (const [pattern, to, from] of PATTERNS) {
-    const hits = after.match(pattern);
-    if (!hits) continue;
-    perClass.set(from, (perClass.get(from) || 0) + hits.length);
-    after = after.replace(pattern, to);
-  }
+  // The context pass runs first, and must: the table sends every surviving
+  // `text-white` to `content-on-media`, so a button label would be claimed as
+  // media text if the ground-aware pass ran second.
+  let after = resolveTextOnGround(before);
 
-  after = resolveTextOnGround(after);
+  after = after.replace(SEGMENTS, (segment) => {
+    if (isComment(segment)) return segment;
+    let out = segment;
+    for (const [pattern, to, from] of PATTERNS) {
+      const hits = out.match(pattern);
+      if (!hits) continue;
+      perClass.set(from, (perClass.get(from) || 0) + hits.length);
+      out = out.replace(pattern, to);
+    }
+    return out;
+  });
 
   if (after !== before) {
     filesChanged += 1;

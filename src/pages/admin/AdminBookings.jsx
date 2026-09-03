@@ -545,7 +545,7 @@ const AdminBookings = () => {
                       onClick={() => setFilters({ ...filters, status })}
                       className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                         filters.status === status
-                          ? 'bg-brand text-white'
+                          ? 'bg-brand text-content-on-media'
                           : 'bg-surface-sunken text-content-muted'
                       }`}
                     >
@@ -563,7 +563,7 @@ const AdminBookings = () => {
                       onClick={() => setFilters({ ...filters, priority })}
                       className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                         filters.priority === priority
-                          ? 'bg-brand text-white'
+                          ? 'bg-brand text-content-on-media'
                           : 'bg-surface-sunken text-content-muted'
                       }`}
                     >
@@ -590,7 +590,7 @@ const AdminBookings = () => {
         <div className="space-y-4">
           {Object.keys(groupedBookings).length === 0 ? (
             <div className="text-center py-12 bg-surface-raised rounded-lg shadow">
-              <FaCalendar className="mx-auto text-4xl text-gray-300 mb-3" />
+              <FaCalendar className="mx-auto text-4xl text-content-on-media/80 mb-3" />
               <p className="text-content-subtle">No bookings found</p>
             </div>
           ) : (
@@ -659,7 +659,7 @@ const AdminBookings = () => {
               onClick={() => setViewType('timeGridDay')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'timeGridDay'
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -670,7 +670,7 @@ const AdminBookings = () => {
               onClick={() => setViewType('timeGridWeek')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'timeGridWeek'
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -681,7 +681,7 @@ const AdminBookings = () => {
               onClick={() => setViewType('dayGridMonth')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'dayGridMonth'
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -692,7 +692,7 @@ const AdminBookings = () => {
               onClick={() => setViewType('listWeek')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'listWeek'
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -765,7 +765,7 @@ const AdminBookings = () => {
               <label className="block text-sm font-medium text-content-muted mb-1">Actions</label>
               <button
                 onClick={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
-                className="w-full px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+                className="w-full px-3 py-2 bg-gray-600 text-content-on-media rounded-md hover:bg-gray-700 transition"
               >
                 Clear Filters
               </button>

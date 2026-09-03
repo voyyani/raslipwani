@@ -42,7 +42,7 @@ const ServiceForm = ({
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-70"
+          className="w-full bg-gradient-to-r from-primary to-secondary text-content-on-media font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
             <span className="flex items-center justify-center">

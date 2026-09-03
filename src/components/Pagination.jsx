@@ -26,7 +26,7 @@ const Pagination = ({
           onClick={() => onPageChange(i)}
           className={`px-4 py-2 border-y border-line-strong text-sm ${
             currentPage === i
-              ? 'bg-brand text-white border-brand'
+              ? 'bg-brand text-content-on-media border-brand'
               : 'bg-surface-raised text-content-muted hover:bg-surface'
           } ${i === startPage ? 'border-l rounded-l-md' : ''} ${
             i === endPage ? 'border-r rounded-r-md' : ''
@@ -45,7 +45,7 @@ const Pagination = ({
               onClick={() => onPageChange(1)}
               className={`px-4 py-2 border border-line-strong text-sm ${
                 1 === currentPage
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-raised text-content-muted hover:bg-surface'
               } border-r-0 rounded-l-md`}
             >
@@ -68,7 +68,7 @@ const Pagination = ({
               onClick={() => onPageChange(totalPages)}
               className={`px-4 py-2 border border-line-strong text-sm ${
                 totalPages === currentPage
-                  ? 'bg-brand text-white'
+                  ? 'bg-brand text-content-on-media'
                   : 'bg-surface-raised text-content-muted hover:bg-surface'
               } border-l-0 rounded-r-md`}
             >

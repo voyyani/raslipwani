@@ -139,7 +139,7 @@ const DebugPanel = ({ hidden = true }) => {
       {/* Floating Bug Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 right-4 z-[9999] bg-purple-600 text-white p-3 rounded-full shadow-lg"
+        className="fixed bottom-20 right-4 z-[9999] bg-purple-600 text-content-on-media p-3 rounded-full shadow-lg"
       >
         <FaBug className="text-lg" />
         {logs.filter(l => l.type === 'error').length > 0 && (
@@ -154,7 +154,7 @@ const DebugPanel = ({ hidden = true }) => {
         <div className="fixed inset-x-2 bottom-24 z-[9999] bg-gray-900 rounded-lg shadow-2xl max-h-[60vh] flex flex-col border border-gray-700">
           {/* Header */}
           <div className="flex items-center justify-between p-2 border-b border-gray-700 bg-gray-800 rounded-t-lg">
-            <span className="text-white font-medium text-sm">Debug Console ({logs.length} logs)</span>
+            <span className="text-content-on-media font-medium text-sm">Debug Console ({logs.length} logs)</span>
             <div className="flex gap-2">
               <button
                 onClick={downloadLogs}
@@ -165,14 +165,14 @@ const DebugPanel = ({ hidden = true }) => {
               </button>
               <button
                 onClick={() => { setLogs([]); localStorage.removeItem('debug_logs'); }}
-                className="text-content-subtle hover:text-white p-1"
+                className="text-content-subtle hover:text-content-on-media p-1"
                 title="Clear logs"
               >
                 <FaTrash className="text-sm" />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-content-subtle hover:text-white p-1"
+                className="text-content-subtle hover:text-content-on-media p-1"
               >
                 <FaTimes />
               </button>

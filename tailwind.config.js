@@ -52,7 +52,11 @@ export default {
           'brand-subtle',
           'brand-content',
           'accent-hover',
-          'focus-ring'
+          'focus-ring',
+          // Theme-invariant by design — the ground beneath them is a photograph
+          // or a brand gradient, which does not flip. See FIXED_TOKENS.
+          'content-on-media',
+          'scrim'
         ),
 
         // `border` collides with Tailwind's `border` utility if declared flat —
@@ -61,6 +65,7 @@ export default {
         line: {
           DEFAULT: token('border'),
           strong: token('border-strong'),
+          media: token('line-on-media'),
         },
 
         // ---- Status. One map, four intents, three parts each. -------------
