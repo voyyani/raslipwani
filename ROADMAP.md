@@ -216,36 +216,49 @@ is exactly one document telling the owner what to run.
 
 ## Block 3 — Release 4C · Primitives, and the migration they carry *(≈5 days)*
 
-The token layer is built and proven; **nothing consumes it yet** beyond the eight status
-pills Slice 4B shipped as its own proof. 4C is where the layer gets spent.
+The token layer is built and proven. 4C is where the layer gets spent.
 
-- [ ] **Primitives on the token layer:** `Button`, `Input`, `Select`, `Card`, `Badge`,
-      `Modal`, `Toast`, `ConfirmDialog`. Both themes, keyboard-complete **from the first
-      commit** — an inaccessible primitive multiplies by every call site.
-- [ ] **Retire the 10 native browser dialogs** (re-verified 2026-09-02: **5 `alert()` and
-      5 `confirm()`**). Two are not admin conveniences: `ServicesMain.jsx:167` and
-      `ViewingExperience.jsx:208` are both **live booking confirmations** — the
-      highest-value moment in the customer journey — delivered as an unstyled,
-      thread-blocking browser dialog. `react-hot-toast` is already a dependency in 16
-      files. The four destructive `confirm()` calls become a `ConfirmDialog` that names
-      what is being deleted.
-- [ ] **`Modal` absorbs `PropertyModal`, `BookingModal`, `BookingDetailModal` and
-      `ClientForm`** — which is also how Block 4's focus-trap requirement gets satisfied
-      once instead of four times.
+**Progress, measured 2026-09-03.** The primitive layer and the whole dialog problem are
+done; what remains is the long tail — migrating surfaces through the primitives, which is
+also what collapses the palette count and finishes the icon consolidation.
+
+- [x] **Primitives on the token layer:** `Button`, `Input`/`Textarea`/`Select` (over a
+      shared `Field`), `Card`, `Badge`, `Modal`, `Toast`, `ConfirmDialog`, plus
+      `useConfirm`/`usePrompt` and the `useDialog` hook the two chrome-less dialogs need.
+      Keyboard-complete from the first commit.
+- [x] **Retire the native browser dialogs.** The count was **eleven**, not ten: the
+      roadmap missed a `window.prompt()` collecting a cancellation reason, where a
+      cancelled dialog and an empty string were indistinguishable. Both customer-facing
+      ones are gone. `noNativeDialogs.test.js` fails the build on the twelfth.
+- [x] **Every dialog rendered by one primitive.** The count here was **eleven**, not the
+      four this document named — `PropertyModal`, `BookingModal`, `BookingDetailModal`,
+      `ClientForm`, `ClientManagement`, `AdminProperties`, `EmailSettings`,
+      `Bookings`, `ServicesMain`, `International`, `ViewingExperience`. All eleven were
+      missing the same four things: focus never entered the panel, Tab walked out of it,
+      focus was never returned to the opener, Escape did nothing. `noBespokeDialogs.test.js`
+      holds the line. Block 4's focus-trap requirement is satisfied by this, once.
+- [x] **Two duplications removed on the way through.** `Bookings.jsx` carried a 170-line
+      inline copy of `BookingModal` that had already drifted from it, and `ServicesMain`
+      computed its step count in two places that could disagree.
 - [ ] **Migrate surfaces through the primitives**, highest-traffic first: Home →
       Properties → PropertyDetail → booking flow → Contact/About → admin. **One PR per
       surface, each dropping the palette ratchet ceiling.** Admin last: it has one user,
       and it is where a mistake costs least.
-- [ ] **Finish the icon consolidation.** FontAwesome is gone, but **`react-icons` is still
-      imported in 30 files** against `lucide-react` in 11. Two libraries ship where one
-      would do. The `<Icon>` registry built in 4A is the seam: migrate `react-icons` call
+      *Started: the ratchet is at **2,772**, down from 3,005, without a surface pass yet —
+      that fall is entirely the dialog work.*
+- [ ] **Finish the AdminProperties form.** Its dialog is behind `Modal`, but its 1,284
+      lines of hand-written fields still carry unassociated labels. Deliberately deferred:
+      it belongs with that surface's pass, not smuggled into a dialog commit.
+- [ ] **Finish the icon consolidation.** `react-icons` is imported in **29 files** against
+      `lucide-react` in 11. The `<Icon>` registry built in 4A is the seam: migrate call
       sites through it as each surface is touched, rather than as a separate sweep.
 - [ ] Bring the CSS bundle under 50 kB raw as the raw classes collapse into primitives
-      (76.7 kB today).
+      (**80.9 kB** today — it rose slightly as the primitives added their own utilities,
+      and falls when the surfaces stop hand-writing theirs).
 
-**Exit:** raw-palette ratchet **below 400** (the ceiling is **3,005** today and blocking
-in CI) · **zero** `alert()`/`confirm()` in `src/` · every modal rendered by one primitive ·
-CSS under 50 kB raw.
+**Exit:** raw-palette ratchet **below 400** (the ceiling is **2,772** today and blocking
+in CI) · ~~zero `alert()`/`confirm()` in `src/`~~ ✅ · ~~every modal rendered by one
+primitive~~ ✅ · CSS under 50 kB raw.
 
 ---
 
@@ -456,13 +469,14 @@ removed along with the rest of the finished work.
 | Policies that are `USING (true)` | 19 → 1 after `009` (the documented public SELECT) | 1 | 1 |
 | Published secrets not yet rotated | **3** (service key, Cloudinary secret, `sbp_` token) | 0 | 1 |
 | Release 4 work reaching production | **0 of 2 slices** (unmerged, unpushed) | both | 2 |
-| Raw palette classes in `src/` | **3,005**, ceiling live and blocking | **< 400** → 0 | 3 |
-| Native `alert()`/`confirm()` | **10**, 2 of them customer-facing | 0 | 3 |
-| Icon libraries | **2** (`react-icons` in 30 files, `lucide-react` in 11) | 1 | 3 |
+| Raw palette classes in `src/` | **2,772** (from 3,005), ceiling live and blocking | **< 400** → 0 | 3 |
+| Native `alert()`/`confirm()`/`prompt()` | **0** (there were 11, not 10) | 0 | ✅ 3 |
+| Hand-rolled dialog overlays | **0** (there were 11, not the 4 recorded) | 0 | ✅ 3 |
+| Icon libraries | **2** (`react-icons` in 29 files, `lucide-react` in 11) | 1 | 3 |
 | Booking notification delivery | **0%** — 8 enquiries stranded | 100% | 1 |
-| CSS bundle (raw) | **76.7 kB** | < 50 kB | 3 |
+| CSS bundle (raw) | **80.9 kB** | < 50 kB | 3 |
 | Themes shipped | **1** (the layer for 2 exists; the provider does not) | 2, both AA | 4 |
-| `<label>` without an associated control | **~123 of 134** | 0 | 4 |
+| `<label>` without an associated control | **96** (from ~123), falling structurally via `Field` | 0 | 4 |
 | `aria-expanded` in the codebase | **2** | every disclosure control | 4 |
 | axe violations | **not measured** | 0, enforced in CI | 4 |
 | Files importing Supabase directly | **23** | 0 | 5 |
@@ -472,7 +486,7 @@ removed along with the rest of the finished work.
 | Property pages in the sitemap | **0** | all | 7 |
 | JSON-LD geo error | **~500 km** from the stated address | correct | 7 |
 | `.ts`/`.tsx` files | **0** | incremental adoption | 8 |
-| Test coverage | **62.4% statements** | ≥ 70% | ongoing |
+| Test coverage | **62.4% statements** (297 tests, from 227) | ≥ 70% | ongoing |
 | Overall audit score | **~5.5 / 10** | **9 / 10** | — |
 
 **The score is capped at roughly 6 until Block 1 is executed, and no amount of further
