@@ -33,7 +33,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gradient-to-b from-scrim to-scrim text-content-on-media relative overflow-hidden">
+    <footer className="bg-gradient-to-b from-surface-chrome to-surface-chrome-raised text-content-on-media relative overflow-hidden">
       {/* Enhanced Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -77,7 +77,7 @@ const Footer = () => {
               {[
                 { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-brand' },
                 { icon: 'instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
-                { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
+                { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-surface-chrome-raised' },
                 { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-brand' },
                 { icon: 'twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
               ].filter(s => s.href).map((social, index) => (
@@ -86,7 +86,7 @@ const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 bg-gray-700/80 hover:bg-primary rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:shadow-lg backdrop-blur-sm"
+                  className="w-9 h-9 bg-surface-chrome-raised/80 hover:bg-primary rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:shadow-lg backdrop-blur-sm"
                   aria-label={social.label}
                 >
                   <Icon name={social.icon} size={14} className="text-content-on-media" />
@@ -97,7 +97,7 @@ const Footer = () => {
 
           {/* Quick Links - Enhanced */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700/80 relative">
+            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-line-media/20 relative">
               Quick Links
               <div className="absolute bottom-0 left-0 w-10 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full"></div>
             </h4>
@@ -120,7 +120,7 @@ const Footer = () => {
 
           {/* Our Services - Enhanced */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700/80 relative">
+            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-line-media/20 relative">
               Our Services
               <div className="absolute bottom-0 left-0 w-10 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full"></div>
             </h4>
@@ -140,7 +140,7 @@ const Footer = () => {
 
           {/* Contact Information - Enhanced */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-gray-700/80 relative">
+            <h4 className="text-lg font-semibold mb-6 pb-3 border-b border-line-media/20 relative">
               Get In Touch
               <div className="absolute bottom-0 left-0 w-10 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full"></div>
             </h4>
@@ -178,13 +178,13 @@ const Footer = () => {
             </div>
 
             {/* Enhanced Locations Served */}
-            <div className="mt-6 pt-6 border-t border-gray-700/80">
+            <div className="mt-6 pt-6 border-t border-line-media/20">
               <p className="text-content-on-media/80 font-medium mb-3 text-sm">Serving Key Locations:</p>
               <div className="flex flex-wrap gap-1.5">
                 {locations.map((location, index) => (
                   <span 
                     key={index}
-                    className="px-2.5 py-1 bg-gray-700/50 rounded-full text-content-on-media/80 text-xs border border-gray-600/50 hover:border-primary/50 hover:text-content-on-media transition-all duration-300 cursor-pointer backdrop-blur-sm"
+                    className="px-2.5 py-1 bg-surface-chrome-raised/50 rounded-full text-content-on-media/80 text-xs border border-line-media/20 hover:border-primary/50 hover:text-content-on-media transition-all duration-300 cursor-pointer backdrop-blur-sm"
                   >
                     {location}
                   </span>
@@ -195,7 +195,7 @@ const Footer = () => {
         </div>
 
         {/* Enhanced Bottom Bar */}
-        <div className="border-t border-gray-700/80 pt-8">
+        <div className="border-t border-line-media/20 pt-8">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
             <div className="text-content-subtle text-sm text-center lg:text-left">
               <p>

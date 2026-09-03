@@ -763,7 +763,7 @@ const AdminProperties = () => {
                             onClick={() => setStatusFilter(status)}
                             className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                               statusFilter === status
-                                ? 'bg-brand text-content-on-media'
+                                ? 'bg-brand text-content-on-brand'
                                 : 'bg-surface-sunken text-content-muted'
                             }`}
                           >
@@ -781,7 +781,7 @@ const AdminProperties = () => {
                             onClick={() => setPurposeFilter(purpose)}
                             className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                               purposeFilter === purpose
-                                ? 'bg-brand text-content-on-media'
+                                ? 'bg-brand text-content-on-brand'
                                 : 'bg-surface-sunken text-content-muted'
                             }`}
                           >
@@ -901,7 +901,7 @@ const AdminProperties = () => {
                       onClick={() => setCurrentPage(page)}
                       className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm ${
                         currentPage === page
-                          ? 'bg-brand text-content-on-media'
+                          ? 'bg-brand text-content-on-brand'
                           : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
                       }`}
                     >

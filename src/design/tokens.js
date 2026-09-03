@@ -170,6 +170,15 @@ export const FIXED_TOKENS = {
   'content-on-media': '#FFFFFF',
   'line-on-media': '#FFFFFF',
   scrim: '#000000',
+
+  // Deliberately dark chrome — the admin sidebar, the site footer. These were
+  // `bg-gray-900` and neither obvious token fitted: `scrim` flattened a
+  // three-stop gradient to pure black, and `surface-inverse` would have turned
+  // the chrome near-white in the dark theme while the light text over it stayed
+  // light. A chrome that is dark in both themes is its own role, so it gets its
+  // own name. `content-on-media` reads on it at about 13:1.
+  'surface-chrome': '#0A2E46',
+  'surface-chrome-raised': '#123A54',
 };
 
 /** The statuses the app models, in the order a booking moves through them. */

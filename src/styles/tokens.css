@@ -42,6 +42,8 @@
   --content-on-media: 255 255 255; /* #FFFFFF */
   --line-on-media: 255 255 255; /* #FFFFFF */
   --scrim: 0 0 0; /* #000000 */
+  --surface-chrome: 10 46 70; /* #0A2E46 */
+  --surface-chrome-raised: 18 58 84; /* #123A54 */
 }
 
 
@@ -82,4 +84,6 @@
   --content-on-media: 255 255 255; /* #FFFFFF */
   --line-on-media: 255 255 255; /* #FFFFFF */
   --scrim: 0 0 0; /* #000000 */
+  --surface-chrome: 10 46 70; /* #0A2E46 */
+  --surface-chrome-raised: 18 58 84; /* #123A54 */
 }

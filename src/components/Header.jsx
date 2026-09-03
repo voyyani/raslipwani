@@ -6,6 +6,7 @@ import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo
 import { useSettings } from '../hooks/useSettings';
 
 import Icon from './Icon';
+import ThemeToggle from './ui/ThemeToggle';
 const Header = () => {
   const { logo, siteName, tagline } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -124,6 +125,16 @@ const Header = () => {
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
                     <button
+                      type="button"
+                      // Hover alone opened this, so a keyboard user could reach
+                      // the button and never the two links behind it. Click
+                      // toggles, and the state is announced rather than implied.
+                      aria-haspopup="true"
+                      aria-expanded={openDropdown === item.label}
+                      aria-controls={`nav-dropdown-${item.label}`}
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === item.label ? null : item.label)
+                      }
                       className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
                     >
                       <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
@@ -137,7 +148,10 @@ const Header = () => {
                     
                     {/* Dropdown Menu */}
                     {openDropdown === item.label && (
-                      <div className="absolute top-full left-0 mt-2 w-56 bg-surface-raised rounded-xl shadow-xl border border-line py-2 z-50">
+                      <div
+                        id={`nav-dropdown-${item.label}`}
+                        className="absolute top-full left-0 mt-2 w-56 bg-surface-raised rounded-xl shadow-xl border border-line py-2 z-50"
+                      >
                         {item.dropdown.map((subItem) => (
                           <Link
                             key={subItem.path}
@@ -205,12 +219,16 @@ const Header = () => {
             })}
           </nav>
           
-          {/* Right Section - Auth & Mobile Menu */}
+          {/* Right Section - Theme, Auth & Mobile Menu */}
           <div className="flex items-center gap-4">
+            {/* Sits outside the md-only block deliberately: a phone is the most
+                likely place someone is reading in the dark. */}
+            <ThemeToggle />
+
             <div className="hidden md:block">
               <AuthButtons />
             </div>
-            
+
             {/* Mobile Menu Button */}
             <motion.button 
               onClick={toggleMenu}

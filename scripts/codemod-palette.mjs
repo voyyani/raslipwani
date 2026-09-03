@@ -22,11 +22,12 @@
  *    `md:` / `group-hover:` prefix, so a class cannot mean one thing at rest and
  *    another on hover.
  *
- * A second, context-aware pass then resolves the single largest ambiguous case:
- * `text-white` sitting in the *same class attribute* as a brand or status
- * ground is text on that ground, and becomes `content-on-brand`. That inference
- * is local and checkable, which is why it is allowed where the general case is
- * not.
+ * A ground-aware pass runs first and resolves the single largest ambiguous case:
+ * `text-white` sitting in the *same string* as a brand or status ground is text
+ * on that ground, and becomes `content-on-brand`. That inference is local and
+ * checkable, which is why it is allowed where the general case is not. It runs
+ * before the table because the table sends every surviving `text-white` to
+ * `content-on-media`, which would otherwise claim button labels.
  *
  *   node scripts/codemod-palette.mjs --dry     report what would change
  *   node scripts/codemod-palette.mjs           write the changes
@@ -222,9 +223,6 @@ const MAP = {
   'to-gray-300': 'to-surface-sunken',
   'from-black': 'from-scrim',
   'to-black': 'to-scrim',
-  'from-gray-900': 'from-scrim',
-  'via-gray-900': 'via-scrim',
-  'to-gray-800': 'to-scrim',
   'from-green-500': 'from-success-content',
   'to-green-600': 'to-success-content',
 };
@@ -264,8 +262,17 @@ const boundary = (cls) =>
 
 const PATTERNS = Object.entries(MAP).map(([from, to]) => [boundary(from), to, from]);
 
-/** Class attribute values, however they are written. */
-const CLASS_ATTR = /(className\s*=\s*)(["'`])([\s\S]*?)\2/g;
+/**
+ * Grounds that must not be mapped, and why.
+ *
+ * `bg-gray-800`/`bg-gray-900` and their gradient stops are an intentionally dark
+ * *chrome* — the admin sidebar, the footer — not a scrim over an image. Mapping
+ * them to `scrim` flattened the sidebar's three-stop gradient to pure black, and
+ * mapping them to `surface-inverse` would invert the chrome in dark mode while
+ * the white text over it stayed white. Both are wrong for different reasons, so
+ * the table holds neither: they are hand-migrated to `surface-chrome`.
+ */
+const CHROME_NOTE = 'dark chrome — hand-migrated to surface-chrome';
 
 /**
  * String and template literals, comments, in that order.
@@ -283,18 +290,139 @@ const SEGMENTS =
 const isComment = (segment) => segment.startsWith('/*') || segment.startsWith('//');
 
 /**
- * Pass 2 — `text-white` on a brand or status ground, resolved locally.
+ * The ground-aware pass — `text-white` on a brand or status ground.
  *
- * Only fires when the ground is in the *same* class value, which is the one
- * place the relationship is visible without rendering the page.
+ * Fires only when the ground appears in the *same string* as the text class,
+ * which is the one place the relationship is visible without rendering the page.
+ *
+ * This originally keyed off `className="…"` and so never matched
+ * `className={`…`}` — which is how most of this codebase writes conditional
+ * classes. The result was that button labels on brand grounds were swept into
+ * `content-on-media` and would have rendered white on the light-blue dark-theme
+ * brand at about 2:1. Working on string segments rather than on attributes
+ * catches both spellings, and the ternary arms inside them.
  */
-const resolveTextOnGround = (source) =>
-  source.replace(CLASS_ATTR, (whole, head, quote, value) => {
-    if (!value.includes('text-white')) return whole;
-    if (!ON_BRAND_GROUNDS.some((g) => boundary(g).test(value))) return whole;
-    const rewritten = value.replace(boundary('text-white'), 'text-content-on-brand');
-    return `${head}${quote}${rewritten}${quote}`;
-  });
+/**
+ * Splits a segment into the scopes a single class list can occupy.
+ *
+ * A template literal is not one scope. `${active ? 'bg-brand text-white' :
+ * 'text-white …'}` holds two mutually exclusive class lists, and treating the
+ * whole literal as one scope leaks the active arm's brand ground onto the
+ * inactive arm — which is exactly what happened to the admin sidebar's inactive
+ * links on the first run. So each static run between `${}` holes is its own
+ * scope, and inside a hole, each quoted string is its own scope.
+ */
+/**
+ * Rewrites every `className` value in a source file through `fn`.
+ *
+ * The ground-aware pass has to be bounded to a real attribute, not to whatever
+ * a quote-matching regex thinks a string is. An apostrophe in ordinary JSX prose
+ * — "Kenya's coast" — opens a span that runs to the next apostrophe and silently
+ * merges two unrelated elements into one scope, which is enough to leak a brand
+ * ground onto an icon three lines away. So this walks `className=` and takes
+ * either the quoted value or the brace-balanced expression after it, tracking
+ * quotes and template literals so a brace inside a string cannot close it early.
+ */
+const eachClassName = (source, fn) => {
+  let out = '';
+  let i = 0;
+
+  while (i < source.length) {
+    const at = source.indexOf('className', i);
+    if (at === -1) {
+      out += source.slice(i);
+      break;
+    }
+
+    let j = at + 'className'.length;
+    while (/\s/.test(source[j])) j += 1;
+    if (source[j] !== '=') {
+      out += source.slice(i, at + 1);
+      i = at + 1;
+      continue;
+    }
+    j += 1;
+    while (/\s/.test(source[j])) j += 1;
+
+    const opener = source[j];
+    let end;
+
+    if (opener === '"' || opener === "'" || opener === '`') {
+      end = j + 1;
+      while (end < source.length && source[end] !== opener) {
+        if (source[end] === '\\') end += 1;
+        end += 1;
+      }
+      end += 1;
+    } else if (opener === '{') {
+      let depth = 0;
+      let quote = null;
+      end = j;
+      while (end < source.length) {
+        const ch = source[end];
+        if (quote) {
+          if (ch === '\\') end += 1;
+          else if (ch === quote) quote = null;
+        } else if (ch === '"' || ch === "'" || ch === '`') {
+          quote = ch;
+        } else if (ch === '{') {
+          depth += 1;
+        } else if (ch === '}') {
+          depth -= 1;
+          if (depth === 0) {
+            end += 1;
+            break;
+          }
+        }
+        end += 1;
+      }
+    } else {
+      out += source.slice(i, j);
+      i = j;
+      continue;
+    }
+
+    out += source.slice(i, j) + fn(source.slice(j, end));
+    i = end;
+  }
+
+  return out;
+};
+
+const LITERAL =
+  /`(?:\\[\s\S]|[^\\`])*`|'(?:\\.|[^\\'])*'|"(?:\\.|[^\\"])*"/g;
+
+const perScope = (value, fn) => {
+  // A plain quoted value is one class list.
+  if (value.startsWith('"') || value.startsWith("'")) return fn(value);
+
+  // A template literal is not one scope: each static run between `${}` holes is
+  // its own class list, and each string inside a hole is another. A ternary's
+  // two arms are mutually exclusive, so the ground in one must not be visible
+  // from the other.
+  if (value.startsWith('`')) {
+    return value.replace(/\$\{[\s\S]*?\}|[^$]+|\$/g, (part) =>
+      part.startsWith('${')
+        ? part.replace(LITERAL, (lit) => perScope(lit, fn))
+        : fn(part)
+    );
+  }
+
+  // A `{…}` expression container: every literal inside it is its own scope.
+  return value.replace(LITERAL, (lit) => perScope(lit, fn));
+};
+
+const resolveTextOnGround = (segment) => {
+  // `content-on-media` is also claimed back here, which is what repairs the
+  // sites the attribute-only version of this pass missed on its first run.
+  const wrong = ['text-white', 'text-content-on-media'].filter((c) => segment.includes(c));
+  if (!wrong.length) return segment;
+  if (!ON_BRAND_GROUNDS.some((g) => boundary(g).test(segment))) return segment;
+  return wrong.reduce(
+    (out, cls) => out.replace(boundary(cls), 'text-content-on-brand'),
+    segment
+  );
+};
 
 const files = globSync('src/**/*.{js,jsx}', { exclude: (p) => p.includes('/design/tokens.js') });
 
@@ -307,9 +435,11 @@ for (const file of files) {
   // The context pass runs first, and must: the table sends every surviving
   // `text-white` to `content-on-media`, so a button label would be claimed as
   // media text if the ground-aware pass ran second.
-  let after = resolveTextOnGround(before);
+  // Ground-aware first, always: the table sends every surviving `text-white` to
+  // `content-on-media`, so running it first would claim button labels.
+  const grounded = eachClassName(before, (value) => perScope(value, resolveTextOnGround));
 
-  after = after.replace(SEGMENTS, (segment) => {
+  const after = grounded.replace(SEGMENTS, (segment) => {
     if (isComment(segment)) return segment;
     let out = segment;
     for (const [pattern, to, from] of PATTERNS) {
@@ -331,3 +461,4 @@ const total = [...perClass.values()].reduce((a, b) => a + b, 0);
 const verb = process.argv.includes('--dry') ? 'would rewrite' : 'rewrote';
 console.log(`${verb} ${total} literal palette sites across ${filesChanged} files`);
 console.log(`(ambiguous classes left in place — ${AMBIGUOUS_NOTE})`);
+console.log(`(dark chrome left in place — ${CHROME_NOTE})`);

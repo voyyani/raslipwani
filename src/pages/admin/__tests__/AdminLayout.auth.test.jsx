@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AdminLayout from '../AdminLayout';
+import { ThemeProvider } from '../../../contexts/ThemeContext';
 
 const mockSignOut = vi.fn();
 const mockAuth = {
@@ -20,9 +21,11 @@ const renderLayout = () => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/admin']}>
-        <AdminLayout><div>PAGE CONTENT</div></AdminLayout>
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={['/admin']}>
+          <AdminLayout><div>PAGE CONTENT</div></AdminLayout>
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

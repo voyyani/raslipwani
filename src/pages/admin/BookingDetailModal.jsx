@@ -485,7 +485,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                       disabled={updatePriorityMutation.isPending}
                       className={`px-4 py-2 rounded-md font-medium transition ${
                         booking.priority === priority
-                          ? 'bg-brand text-content-on-media'
+                          ? 'bg-brand text-content-on-brand'
                           : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
                       }`}
                     >

@@ -20,6 +20,7 @@ import Header from './AdminHeader';
 import AdminBottomNav from './AdminBottomNav';
 import AdminBreadcrumb from './AdminBreadcrumb';
 import DebugPanel from '../../components/admin/DebugPanel';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 
 // Imported here rather than in App.jsx so it rides the lazy admin chunk. As a
 // top-level App import it was in the stylesheet every public visitor blocks on,
@@ -152,8 +153,8 @@ const AdminLayout = ({ children }) => {
         onClick={closeSidebar}
         className={`flex items-center p-3 rounded-lg transition-all duration-200 group relative ${
           active
-            ? 'bg-brand text-content-on-media shadow-lg'
-            : 'text-content-on-media/80 hover:bg-gray-700/50 hover:text-content-on-media'
+            ? 'bg-brand text-content-on-brand shadow-lg'
+            : 'text-content-on-media/80 hover:bg-surface-chrome-raised/50 hover:text-content-on-media'
         }`}
         title={isSidebarCollapsed ? item.label : undefined}
       >
@@ -208,7 +209,7 @@ const AdminLayout = ({ children }) => {
         {/* Sidebar - Hidden on mobile unless open */}
         <aside 
           className={`
-            bg-gradient-to-b from-scrim via-scrim to-scrim 
+            bg-gradient-to-b from-surface-chrome via-surface-chrome to-surface-chrome-raised 
             text-content-on-media flex flex-col shrink-0
             fixed top-0 left-0 h-full z-40
             transition-transform duration-300 ease-in-out
@@ -219,7 +220,7 @@ const AdminLayout = ({ children }) => {
           `}
         >
           {/* Sidebar Header */}
-          <div className={`p-4 border-b border-gray-700/50 shrink-0 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
+          <div className={`p-4 border-b border-line-media/20 shrink-0 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
             <div className="flex items-center justify-between gap-2">
               {!isSidebarCollapsed && (
                 <div>
@@ -231,7 +232,7 @@ const AdminLayout = ({ children }) => {
               {/* Close button for mobile */}
               <button
                 onClick={closeSidebar}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                className="lg:hidden p-2 rounded-lg hover:bg-surface-chrome-raised transition-colors"
                 aria-label="Close sidebar"
               >
                 <FaTimes className="w-5 h-5 text-content-subtle" />
@@ -240,7 +241,7 @@ const AdminLayout = ({ children }) => {
               {/* Collapse button for desktop */}
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="hidden lg:flex p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                className="hidden lg:flex p-2 rounded-lg hover:bg-surface-chrome-raised transition-colors"
                 aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 title={isSidebarCollapsed ? "Expand (Ctrl+[)" : "Collapse (Ctrl+[)"}
               >
@@ -254,7 +255,7 @@ const AdminLayout = ({ children }) => {
           </div>
           
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          <nav className="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin scrollbar-thumb-surface-chrome-raised scrollbar-track-transparent">
             {navSections.map((section) => (
               <div key={section.title}>
                 {/* Section header */}
@@ -275,7 +276,7 @@ const AdminLayout = ({ children }) => {
           </nav>
           
           {/* User section */}
-          <div className={`mt-auto p-4 border-t border-gray-700/50 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
+          <div className={`mt-auto p-4 border-t border-line-media/20 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
             <div className={`flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'gap-3'} mb-3`}>
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-brand bg-primary text-sm font-bold uppercase text-content-on-brand"
@@ -298,7 +299,7 @@ const AdminLayout = ({ children }) => {
             
             <button
               onClick={handleLogout}
-              className={`flex items-center w-full p-3 text-content-on-media/80 hover:bg-gray-700/50 hover:text-content-on-media rounded-lg transition-colors ${
+              className={`flex items-center w-full p-3 text-content-on-media/80 hover:bg-surface-chrome-raised/50 hover:text-content-on-media rounded-lg transition-colors ${
                 isSidebarCollapsed ? 'lg:justify-center' : ''
               }`}
               title={isSidebarCollapsed ? "Sign Out" : undefined}
@@ -312,9 +313,14 @@ const AdminLayout = ({ children }) => {
         {/* Main content area */}
         <main className="flex-1 min-h-screen bg-surface w-full overflow-x-hidden pb-20 lg:pb-0">
           <div className="p-3 sm:p-4 lg:p-6 w-full max-w-7xl mx-auto">
-            {/* Breadcrumb Navigation */}
-            <AdminBreadcrumb />
-            
+            {/* Breadcrumb Navigation, and the theme control beside it — the
+                admin console is the surface someone stares at all day, so it is
+                the one that most wants a dark option. */}
+            <div className="flex items-center justify-between gap-4">
+              <AdminBreadcrumb />
+              <ThemeToggle />
+            </div>
+
             {/* Page Content */}
             {children}
           </div>

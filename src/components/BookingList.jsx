@@ -422,7 +422,7 @@ const BookingList = ({
                     onClick={() => setCurrentPage(page)}
                     className={`px-4 py-2 border-y border-line-strong text-sm ${
                       currentPage === page
-                        ? 'bg-brand text-content-on-media border-brand'
+                        ? 'bg-brand text-content-on-brand border-brand'
                         : 'bg-surface-raised text-content-muted hover:bg-surface'
                     } ${index === 0 ? 'border-l rounded-l-md' : ''} ${
                       index === array.length - 1 ? 'border-r rounded-r-md' : ''

@@ -20,6 +20,7 @@ import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';
 import MaintenancePage from './pages/MaintenancePage';
 import { logger } from './utils/logger';
@@ -109,6 +110,7 @@ function App() {
   return (
     <ErrorBoundary name="root">
       <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
       <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
@@ -203,6 +205,7 @@ function App() {
       </Router>
       </SettingsProvider>
     </AuthProvider>
+      </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

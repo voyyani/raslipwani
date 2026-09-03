@@ -56,7 +56,9 @@ export default {
           // Theme-invariant by design — the ground beneath them is a photograph
           // or a brand gradient, which does not flip. See FIXED_TOKENS.
           'content-on-media',
-          'scrim'
+          'scrim',
+          'surface-chrome',
+          'surface-chrome-raised'
         ),
 
         // `border` collides with Tailwind's `border` utility if declared flat —

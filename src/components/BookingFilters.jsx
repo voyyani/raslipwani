@@ -43,7 +43,7 @@ const BookingFilters = ({
               onClick={() => setViewFilter('active')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 viewFilter === 'active'
-                  ? 'bg-brand text-content-on-media'
+                  ? 'bg-brand text-content-on-brand'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -53,7 +53,7 @@ const BookingFilters = ({
               onClick={() => setViewFilter('archived')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 viewFilter === 'archived'
-                  ? 'bg-brand text-content-on-media'
+                  ? 'bg-brand text-content-on-brand'
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
@@ -70,7 +70,7 @@ const BookingFilters = ({
             onClick={() => setViewType('list')}
             className={`px-4 py-2 rounded-lg flex items-center ${
               viewType === 'list'
-                ? 'bg-brand text-content-on-media'
+                ? 'bg-brand text-content-on-brand'
                 : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
             }`}
           >
@@ -80,7 +80,7 @@ const BookingFilters = ({
             onClick={() => setViewType('calendar')}
             className={`px-4 py-2 rounded-lg flex items-center ${
               viewType === 'calendar'
-                ? 'bg-brand text-content-on-media'
+                ? 'bg-brand text-content-on-brand'
                 : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
             }`}
           >
@@ -96,7 +96,7 @@ const BookingFilters = ({
                 onClick={() => setDateRange('today')}
                 className={`px-4 py-2 text-sm font-medium ${
                   dateRange === 'today'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >
@@ -106,7 +106,7 @@ const BookingFilters = ({
                 onClick={() => setDateRange('week')}
                 className={`px-4 py-2 text-sm font-medium ${
                   dateRange === 'week'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 } border-l border-r border-line-strong`}
               >
@@ -116,7 +116,7 @@ const BookingFilters = ({
                 onClick={() => setDateRange('month')}
                 className={`px-4 py-2 text-sm font-medium ${
                   dateRange === 'month'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >
@@ -132,7 +132,7 @@ const BookingFilters = ({
                 onClick={() => setCalendarViewMode('day')}
                 className={`px-4 py-2 text-sm font-medium flex items-center ${
                   calendarViewMode === 'day'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >
@@ -142,7 +142,7 @@ const BookingFilters = ({
                 onClick={() => setCalendarViewMode('week')}
                 className={`px-4 py-2 text-sm font-medium flex items-center ${
                   calendarViewMode === 'week'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 } border-l border-r border-line-strong`}
               >
@@ -152,7 +152,7 @@ const BookingFilters = ({
                 onClick={() => setCalendarViewMode('month')}
                 className={`px-4 py-2 text-sm font-medium flex items-center ${
                   calendarViewMode === 'month'
-                    ? 'bg-brand text-content-on-media'
+                    ? 'bg-brand text-content-on-brand'
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >

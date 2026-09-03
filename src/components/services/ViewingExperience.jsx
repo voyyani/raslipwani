@@ -334,7 +334,7 @@ const ViewingExperience = () => {
                   <div className="flex items-center mb-4">
                     <div className={`p-3 rounded-xl mr-3 ${
                       viewingType === option.type 
-                        ? 'bg-primary text-content-on-media' 
+                        ? 'bg-primary text-content-on-brand' 
                         : 'bg-surface-sunken text-primary'
                     }`}>
                       <Icon name={option.icon} size={20} />
@@ -371,7 +371,7 @@ const ViewingExperience = () => {
                   
                   <div className={`w-full py-2.5 rounded-lg font-medium text-sm text-center ${
                     viewingType === option.type
-                      ? 'bg-primary text-content-on-media'
+                      ? 'bg-primary text-content-on-brand'
                       : 'bg-surface-sunken text-content-muted'
                   }`}>
                     {viewingType === option.type ? 'Selected' : 'Select Option'}
