@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../utils/supabaseClient';
+import toast from 'react-hot-toast';
+
 import { notifyBookingReceived } from '../utils/bookingNotifications';
 
 import { logger } from '../utils/logger';
@@ -163,7 +165,10 @@ const ServicesMain = () => {
       // booking is already saved, so a mail outage must not read as a failure.
       await notifyBookingReceived(record);
 
-      alert("Thank you for your booking! Our team will contact you within 2 hours to confirm.");
+      toast.success(
+        'Booking received. Our team will contact you within 2 hours to confirm.',
+        { duration: 6000 }
+      );
       
       // Reset form
       setBookingData({
@@ -181,7 +186,7 @@ const ServicesMain = () => {
       setCurrentStep(1);
     } catch (error) {
       logger.error('Booking error:', error);
-      alert('Failed to submit booking. Please try again or call us directly.');
+      toast.error('We could not submit that booking. Please try again, or call us directly.');
     } finally {
       setIsSubmitting(false);
     }

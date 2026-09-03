@@ -3,12 +3,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../utils/supabaseClient';
 import { formatDateTime } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
+
+import useConfirm from './ui/useConfirm';
 import { 
   Phone, Mail, Video, MessageSquare, Calendar, 
   Plus, Edit2, Trash2, Eye, X, Save 
 } from 'lucide-react';
 
 const CommunicationTimeline = ({ clientId }) => {
+  const [confirm, confirmDialog] = useConfirm();
   const queryClient = useQueryClient();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingComm, setEditingComm] = useState(null);
@@ -324,13 +327,16 @@ const CommunicationTimeline = ({ clientId }) => {
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm('Delete this communication?')) {
-                            deleteMutation.mutate(comm.id);
-                          }
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: 'Delete communication',
+                            message: `This ${comm.type || 'communication'} record will be permanently deleted.`,
+                            confirmLabel: 'Delete',
+                          });
+                          if (ok) deleteMutation.mutate(comm.id);
                         }}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete"
+                        className="text-danger-content hover:opacity-80"
+                        aria-label="Delete communication"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -346,6 +352,8 @@ const CommunicationTimeline = ({ clientId }) => {
           ))}
         </div>
       )}
+
+      {confirmDialog}
     </div>
   );
 };

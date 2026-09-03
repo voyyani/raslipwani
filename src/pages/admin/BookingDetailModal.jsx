@@ -23,11 +23,16 @@ import {
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import toast from 'react-hot-toast';
 
+import useConfirm from '../../components/ui/useConfirm';
+import usePrompt from '../../components/ui/usePrompt';
+
 /**
  * BookingDetailModal - Comprehensive booking detail and management modal
  * Features: Status workflow, internal notes, quick actions, activity log
  */
 const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
+  const [confirm, confirmDialog] = useConfirm();
+  const [prompt, promptDialog] = usePrompt();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('overview');
   const [newNote, setNewNote] = useState('');
@@ -167,9 +172,26 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
     }
   };
 
-  const handleCancel = () => {
-    const reason = prompt('Please provide a cancellation reason:');
-    if (reason) {
+  /**
+   * Cancel the booking, with a reason.
+   *
+   * This used `prompt()`, whose empty-submission and dismissal cases are both
+   * falsy — so an admin who pressed OK without typing cancelled nothing and was
+   * told nothing. `usePrompt` requires the value and keeps the dialog open until
+   * it has one; `null` still means dismissed.
+   */
+  const handleCancel = async () => {
+    const reason = await prompt({
+      title: 'Cancel booking',
+      label: 'Cancellation reason',
+      hint: 'Recorded against the booking and shown in its history.',
+      multiline: true,
+      confirmLabel: 'Cancel booking',
+      cancelLabel: 'Keep booking',
+      requiredMessage: 'A cancellation reason is required.',
+    });
+
+    if (reason !== null) {
       updateStatusMutation.mutate({ status: 'cancelled', reason });
     }
   };
@@ -518,12 +540,17 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           {format(new Date(note.created_at), 'PPp')}
                         </div>
                         <button
-                          onClick={() => {
-                            if (window.confirm('Delete this note?')) {
-                              deleteNoteMutation.mutate(note.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: 'Delete note',
+                              message:
+                                'This note will be permanently deleted from the booking.',
+                              confirmLabel: 'Delete note',
+                            });
+                            if (ok) deleteNoteMutation.mutate(note.id);
                           }}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-danger-content hover:opacity-80"
+                          aria-label="Delete note"
                         >
                           <FaTrash />
                         </button>
@@ -641,6 +668,9 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         </div>
         </motion.div>
       </motion.div>
+
+      {confirmDialog}
+      {promptDialog}
     </AnimatePresence>
   );
 };

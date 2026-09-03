@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+
 import { supabase } from '../../utils/supabaseClient';
+import { notifyBookingReceived } from '../../utils/bookingNotifications';
 
 import { logger } from '../../utils/logger';
 import Icon from '../Icon';
@@ -201,15 +204,52 @@ const ViewingExperience = () => {
     });
   };
 
+  /**
+   * Submit a viewing booking.
+   *
+   * 🔴 This handler previously contained the comment `// Booking submission
+   * logic` and nothing else, followed by an `alert()` reading "Your viewing has
+   * been booked successfully!". No row was ever written and no notification was
+   * ever sent: the customer was told their viewing was confirmed, and it did not
+   * exist. Every viewing booked through this component since it shipped was lost
+   * at the moment of submission.
+   *
+   * It now writes the same `bookings` shape `ServicesMain` writes — including
+   * `type`, which is NOT NULL with no default — and sends the same notification.
+   */
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // Booking submission logic
-      alert("Your viewing has been booked successfully! We'll send confirmation details shortly.");
-      
-      // Reset booking flow
+      const record = {
+        type: 'viewing',
+        name: bookingData.name,
+        email: bookingData.email,
+        phone: bookingData.phone,
+        service: 'viewing',
+        property_id: selectedProperty?.id ?? null,
+        viewing_type: viewingType,
+        appointment_at: bookingData.date
+          ? new Date(`${bookingData.date}T${bookingData.time || '00:00'}`).toISOString()
+          : null,
+        notes: bookingData.notes,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase.from('bookings').insert([record]);
+
+      if (error) throw error;
+
+      // Best-effort, exactly as on the services path: the booking is already
+      // saved, so a mail outage must not be reported to the customer as failure.
+      await notifyBookingReceived(record);
+
+      toast.success('Viewing booked. We will send confirmation details shortly.', {
+        duration: 6000,
+      });
+
       setSelectedProperty(null);
       setBookingStep(0);
       setBookingData({
@@ -220,10 +260,9 @@ const ViewingExperience = () => {
         time: '',
         notes: '',
       });
-      
     } catch (error) {
       logger.error('Booking error:', error);
-      alert('Failed to submit booking. Please try again.');
+      toast.error('We could not book that viewing. Please try again, or call us directly.');
     } finally {
       setIsSubmitting(false);
     }

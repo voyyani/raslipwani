@@ -3,7 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
+import toast from 'react-hot-toast';
+
 import { logger } from '../utils/logger';
+
+/** The office number, in one place: it appeared as a literal in three. */
+const OFFICE_PHONE = '+254758066526';
 const PropertyModal = ({ property, closeModal }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
@@ -117,10 +122,22 @@ const PropertyModal = ({ property, closeModal }) => {
     setShowPhone(true);
   };
 
-  // Copy phone number to clipboard
-  const copyPhoneNumber = () => {
-    navigator.clipboard.writeText('+254758066526');
-    alert('Phone number copied to clipboard!');
+  /**
+   * Copy the office number.
+   *
+   * `writeText` returns a promise and rejects when the clipboard permission is
+   * denied or the page is not in a secure context. The previous version ignored
+   * it and announced success unconditionally, so a denied copy still told the
+   * visitor the number was on their clipboard when it was not.
+   */
+  const copyPhoneNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(OFFICE_PHONE);
+      toast.success('Phone number copied.');
+    } catch (error) {
+      logger.error('Clipboard write failed:', error);
+      toast.error(`Could not copy. Our number is ${OFFICE_PHONE}.`);
+    }
   };
 
   // Handle Schedule Tour button click
@@ -475,7 +492,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     <h4 className="text-lg font-semibold">Contact Agent</h4>
                   </div>
                   <a 
-                    href="tel:+254758066526" 
+                    href={`tel:${OFFICE_PHONE}`} 
                     className="text-2xl font-bold text-primary mb-3 hover:underline"
                   >
                     +254 758 066 526
@@ -492,7 +509,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      href="tel:+254758066526"
+                      href={`tel:${OFFICE_PHONE}`}
                       className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-2 px-4 rounded-lg shadow-md"
                     >
                       Call Now

@@ -32,11 +32,14 @@ import MobileBookingCard from '../../components/admin/MobileBookingCard';
 import { exportToCSV } from '../../utils/exportUtils';
 import toast from 'react-hot-toast';
 
+import useConfirm from '../../components/ui/useConfirm';
+
 /**
  * AdminBookings - Professional booking management with calendar views
  * Features: FullCalendar integration, drag-and-drop, status workflow, filters
  */
 const AdminBookings = () => {
+  const [confirm, confirmDialog] = useConfirm();
   const queryClient = useQueryClient();
   
   // Mobile detection
@@ -282,18 +285,28 @@ const AdminBookings = () => {
   };
 
   // Handle event drag and drop
-  const handleEventDrop = (info) => {
+  const handleEventDrop = async (info) => {
     const bookingId = parseInt(info.event.id);
     const newDate = info.event.start.toISOString();
 
-    // Confirm reschedule
-    if (window.confirm(`Reschedule booking to ${format(info.event.start, 'PPp')}?`)) {
-      rescheduleMutation.mutate({
-        id: bookingId,
-        newDate: newDate
-      });
+    // Rescheduling is not destructive, so the dialog is not styled as such —
+    // but it still has to be answered before the drag is committed, and a
+    // declined drag must be reverted or the calendar shows a move that never
+    // happened.
+    const ok = await confirm({
+      title: 'Reschedule booking',
+      message: `${info.event.title || 'This booking'} will move to ${format(
+        info.event.start,
+        'PPp'
+      )}.`,
+      confirmLabel: 'Reschedule',
+      destructive: false,
+    });
+
+    if (ok) {
+      rescheduleMutation.mutate({ id: bookingId, newDate });
     } else {
-      info.revert(); // Revert if cancelled
+      info.revert();
     }
   };
 
@@ -818,6 +831,8 @@ const AdminBookings = () => {
           }}
         />
       )}
+
+      {confirmDialog}
     </div>
   );
 };

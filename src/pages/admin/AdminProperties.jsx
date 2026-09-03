@@ -32,7 +32,10 @@ import {
 } from 'react-icons/fa';
 
 import { logger } from '../../utils/logger';
+import useConfirm from '../../components/ui/useConfirm';
+
 const AdminProperties = () => {
+  const [confirm, confirmDialog] = useConfirm();
   const queryClient = useQueryClient();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -400,7 +403,18 @@ const AdminProperties = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this property?')) return;
+    // Name the listing. "Are you sure you want to delete this property?" is the
+    // same sentence for every row, so it cannot catch the mistake it exists to
+    // catch — deleting the wrong one.
+    const property = properties.find((p) => p.id === id);
+    const ok = await confirm({
+      title: 'Delete property',
+      message: property
+        ? `"${property.title}" will be permanently deleted. This cannot be undone.`
+        : 'This property will be permanently deleted. This cannot be undone.',
+      confirmLabel: 'Delete property',
+    });
+    if (!ok) return;
     
     try {
       setLoading(true);
@@ -1279,6 +1293,8 @@ const AdminProperties = () => {
           </div>
         </div>
       )}
+
+      {confirmDialog}
     </>
   );
 };
