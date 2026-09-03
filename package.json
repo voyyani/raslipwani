@@ -17,7 +17,8 @@
     "check:console": "node scripts/check-dist-console.mjs",
     "tokens": "node scripts/generate-tokens.mjs",
     "tokens:check": "node scripts/generate-tokens.mjs --check",
-    "palette:ratchet": "node scripts/palette-ratchet.mjs"
+    "palette:ratchet": "node scripts/palette-ratchet.mjs",
+    "label:ratchet": "node scripts/label-ratchet.mjs"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.20",

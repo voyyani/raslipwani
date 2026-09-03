@@ -112,10 +112,11 @@ const InvestmentCalculator = () => {
           <div className="space-y-6">
             {/* Currency Selector */}
             <div>
-              <label className="block text-sm font-semibold text-content-muted mb-2">
+              <label htmlFor="calc-currency" className="block text-sm font-semibold text-content-muted mb-2">
                 Currency
               </label>
               <select
+                id="calc-currency"
                 value={inputs.currency}
                 onChange={(e) => handleInputChange('currency', e.target.value)}
                 className="w-full px-4 py-3 border-2 border-line-strong rounded-lg focus:border-brand focus:outline-none text-lg"

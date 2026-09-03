@@ -408,8 +408,9 @@ const ViewingExperience = () => {
             <h3 className="text-lg font-bold mb-4">Filter Properties</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-content-muted mb-2 text-sm">Purpose</label>
+                <label htmlFor="ve-purpose" className="block text-content-muted mb-2 text-sm">Purpose</label>
                 <select
+                  id="ve-purpose"
                   name="purpose"
                   value={filters.purpose}
                   onChange={handleFilterChange}
@@ -421,8 +422,9 @@ const ViewingExperience = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-content-muted mb-2 text-sm">Property Type</label>
+                <label htmlFor="ve-propertytype" className="block text-content-muted mb-2 text-sm">Property Type</label>
                 <select
+                  id="ve-propertytype"
                   name="propertyType"
                   value={filters.propertyType}
                   onChange={handleFilterChange}
@@ -437,8 +439,9 @@ const ViewingExperience = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-content-muted mb-2 text-sm">Location</label>
+                <label htmlFor="ve-location" className="block text-content-muted mb-2 text-sm">Location</label>
                 <input
+                  id="ve-location"
                   type="text"
                   name="location"
                   value={filters.location}
@@ -448,8 +451,9 @@ const ViewingExperience = () => {
                 />
               </div>
               <div>
-                <label className="block text-content-muted mb-2 text-sm">Bedrooms</label>
+                <label htmlFor="ve-bedrooms" className="block text-content-muted mb-2 text-sm">Bedrooms</label>
                 <select
+                  id="ve-bedrooms"
                   name="bedrooms"
                   value={filters.bedrooms}
                   onChange={handleFilterChange}
@@ -736,8 +740,9 @@ const ViewingExperience = () => {
                   <form onSubmit={handleBookingSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-content-muted mb-1 text-sm">Full Name *</label>
+                        <label htmlFor="ve-name" className="block text-content-muted mb-1 text-sm">Full Name *</label>
                         <input 
+                          id="ve-name"
                           type="text" 
                           name="name"
                           value={bookingData.name}
@@ -747,8 +752,9 @@ const ViewingExperience = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-content-muted mb-1 text-sm">Email *</label>
+                        <label htmlFor="ve-email" className="block text-content-muted mb-1 text-sm">Email *</label>
                         <input 
+                          id="ve-email"
                           type="email" 
                           name="email"
                           value={bookingData.email}
@@ -761,8 +767,9 @@ const ViewingExperience = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-content-muted mb-1 text-sm">Phone *</label>
+                        <label htmlFor="ve-phone" className="block text-content-muted mb-1 text-sm">Phone *</label>
                         <input 
+                          id="ve-phone"
                           type="tel" 
                           name="phone"
                           value={bookingData.phone}
@@ -772,8 +779,9 @@ const ViewingExperience = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-content-muted mb-1 text-sm">Preferred Date *</label>
+                        <label htmlFor="ve-date" className="block text-content-muted mb-1 text-sm">Preferred Date *</label>
                         <input 
+                          id="ve-date"
                           type="date" 
                           name="date"
                           value={bookingData.date}
@@ -785,8 +793,9 @@ const ViewingExperience = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-content-muted mb-1 text-sm">Preferred Time *</label>
+                      <label htmlFor="ve-time" className="block text-content-muted mb-1 text-sm">Preferred Time *</label>
                       <input 
+                        id="ve-time"
                         type="time" 
                         name="time"
                         value={bookingData.time}
@@ -797,8 +806,9 @@ const ViewingExperience = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-content-muted mb-1 text-sm">Special Requests</label>
+                      <label htmlFor="ve-notes" className="block text-content-muted mb-1 text-sm">Special Requests</label>
                       <textarea 
+                        id="ve-notes"
                         name="notes"
                         value={bookingData.notes}
                         onChange={(e) => setBookingData(prev => ({ ...prev, notes: e.target.value }))}

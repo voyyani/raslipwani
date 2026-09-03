@@ -25,8 +25,9 @@ const ServiceForm = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Form fields same as original */}
       <div>
-        <label className="block text-content-muted mb-2">Service</label>
+        <label htmlFor="sf-service" className="block text-content-muted mb-2">Service</label>
         <input 
+          id="sf-service"
           type="text" 
           value={bookingData.service}
           readOnly

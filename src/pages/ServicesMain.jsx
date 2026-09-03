@@ -277,12 +277,13 @@ const ServicesMain = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-6"
                       >
-                        <div>
-                          <label className="block text-content-muted mb-4 font-medium text-lg">What service do you need?</label>
+                        <fieldset className="border-0 p-0 m-0">
+                          <legend className="block text-content-muted mb-4 font-medium text-lg">What service do you need?</legend>
                           <div className="grid gap-4">
                             {serviceTypes.map(service => (
                               <label 
                                 key={service.value} 
+                                htmlFor={`svc-service-${service.value}`}
                                 className={`flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all ${
                                   bookingData.serviceType === service.value 
                                     ? 'border-primary bg-brand-subtle shadow-md' 
@@ -290,6 +291,7 @@ const ServicesMain = () => {
                                 }`}
                               >
                                 <input
+                                  id={`svc-service-${service.value}`}
                                   type="radio"
                                   name="serviceType"
                                   value={service.value}
@@ -304,7 +306,7 @@ const ServicesMain = () => {
                               </label>
                             ))}
                           </div>
-                        </div>
+                        </fieldset>
 
                         <div className="flex justify-end">
                           <button
@@ -325,8 +327,8 @@ const ServicesMain = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-6"
                       >
-                        <div>
-                          <label className="block text-content-muted mb-4 font-medium text-lg">Select a Property to View</label>
+                        <fieldset className="border-0 p-0 m-0">
+                          <legend className="block text-content-muted mb-4 font-medium text-lg">Select a Property to View</legend>
                           
                           {loadingProperties ? (
                             <div className="text-center py-12">
@@ -343,6 +345,7 @@ const ServicesMain = () => {
                               {properties.map(property => (
                                 <label 
                                   key={property.id}
+                                  htmlFor={`svc-property-${property.id}`}
                                   className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
                                     bookingData.propertyId === property.id 
                                       ? 'border-primary bg-brand-subtle' 
@@ -351,6 +354,7 @@ const ServicesMain = () => {
                                 >
                                   <div className="flex-shrink-0 mt-1 mr-4">
                                     <input
+                                      id={`svc-property-${property.id}`}
                                       type="radio"
                                       name="propertyId"
                                       value={property.id}
@@ -403,7 +407,7 @@ const ServicesMain = () => {
                               ))}
                             </div>
                           )}
-                        </div>
+                        </fieldset>
 
                         <div className="flex justify-between">
                           <button
@@ -433,12 +437,13 @@ const ServicesMain = () => {
                         className="space-y-6"
                       >
                         {bookingData.serviceType === 'viewing' ? (
-                          <div>
-                            <label className="block text-content-muted mb-4 font-medium text-lg">Viewing Type</label>
+                          <fieldset className="border-0 p-0 m-0">
+                            <legend className="block text-content-muted mb-4 font-medium text-lg">Viewing Type</legend>
                             <div className="grid gap-4">
                               {viewingTypes.map(option => (
                                 <label 
                                   key={option.type} 
+                                  htmlFor={`svc-viewing-${option.type}`}
                                   className={`flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all ${
                                     bookingData.viewingType === option.type 
                                       ? 'border-primary bg-brand-subtle' 
@@ -446,6 +451,7 @@ const ServicesMain = () => {
                                   }`}
                                 >
                                   <input
+                                    id={`svc-viewing-${option.type}`}
                                     type="radio"
                                     name="viewingType"
                                     value={option.type}
@@ -464,10 +470,10 @@ const ServicesMain = () => {
                                 </label>
                               ))}
                             </div>
-                          </div>
+                          </fieldset>
                         ) : (
                           <div>
-                            <label className="block text-content-muted mb-4 font-medium text-lg">Service Details</label>
+                            <h3 className="block text-content-muted mb-4 font-medium text-lg">Service Details</h3>
                             <div className="bg-brand-subtle border border-brand-subtle rounded-xl p-6">
                               <h4 className="font-semibold text-primary text-lg mb-2">
                                 {serviceTypes.find(s => s.value === bookingData.serviceType)?.label}
@@ -512,8 +518,9 @@ const ServicesMain = () => {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-content-muted mb-2 text-sm font-medium">Full Name *</label>
+                            <label htmlFor="svc-name" className="block text-content-muted mb-2 text-sm font-medium">Full Name *</label>
                             <input 
+                              id="svc-name"
                               type="text" 
                               name="name"
                               value={bookingData.name}
@@ -524,8 +531,9 @@ const ServicesMain = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-content-muted mb-2 text-sm font-medium">Email *</label>
+                            <label htmlFor="svc-email" className="block text-content-muted mb-2 text-sm font-medium">Email *</label>
                             <input 
+                              id="svc-email"
                               type="email" 
                               name="email"
                               value={bookingData.email}
@@ -539,8 +547,9 @@ const ServicesMain = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-content-muted mb-2 text-sm font-medium">Phone *</label>
+                            <label htmlFor="svc-phone" className="block text-content-muted mb-2 text-sm font-medium">Phone *</label>
                             <input 
+                              id="svc-phone"
                               type="tel" 
                               name="phone"
                               value={bookingData.phone}
@@ -551,8 +560,9 @@ const ServicesMain = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-content-muted mb-2 text-sm font-medium">Preferred Date *</label>
+                            <label htmlFor="svc-date" className="block text-content-muted mb-2 text-sm font-medium">Preferred Date *</label>
                             <input 
+                              id="svc-date"
                               type="date" 
                               name="date"
                               value={bookingData.date}
@@ -566,8 +576,9 @@ const ServicesMain = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-content-muted mb-2 text-sm font-medium">Preferred Time *</label>
+                            <label htmlFor="svc-time" className="block text-content-muted mb-2 text-sm font-medium">Preferred Time *</label>
                             <input 
+                              id="svc-time"
                               type="time" 
                               name="time"
                               value={bookingData.time}
@@ -578,7 +589,7 @@ const ServicesMain = () => {
                           </div>
                           <div className="flex items-end">
                             <div className="w-full">
-                              <label className="block text-content-muted mb-2 text-sm font-medium">Service Type</label>
+                              <h4 className="block text-content-muted mb-2 text-sm font-medium">Service Type</h4>
                               <div className="p-3 bg-surface rounded-lg border border-line">
                                 <span className="font-medium text-primary">
                                   {serviceTypes.find(s => s.value === bookingData.serviceType)?.label}

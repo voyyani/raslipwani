@@ -56,8 +56,9 @@ const ViewingForm = ({
       {/* Form fields same as original */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-content-muted mb-2">Full Name *</label>
+          <label htmlFor="vf-name" className="block text-content-muted mb-2">Full Name *</label>
           <input 
+            id="vf-name"
             type="text" 
             name="name"
             value={bookingData.name}
