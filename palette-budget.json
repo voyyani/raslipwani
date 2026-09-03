@@ -1,4 +1,4 @@
 {
-  "max": 3005,
+  "max": 2999,
   "note": "Literal Tailwind palette classes in src/, counted by design/no-raw-palette-classes on 2026-09-02 at the end of Release 4 Slice 4B. This number only falls. ROADMAP.md records 1,784 from an earlier hand count that looked only at bg-/text- for a subset of hues and ignored variant chains, white/black, and configuration objects; the rule counts every colour utility across every hue plus bare white/black, which is the surface a theme actually has to cross. Slice 4C spends this budget surface by surface, lowering the ceiling with each PR."
 }
