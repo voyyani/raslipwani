@@ -134,7 +134,7 @@ const Home = () => {
             
             {/* Loading overlay */}
             {!heroLoaded && (
-              <div className="absolute inset-0 bg-gray-200 animate-pulse z-10"></div>
+              <div className="absolute inset-0 bg-surface-sunken animate-pulse z-10"></div>
             )}
             
             <div className="container mx-auto px-4 relative z-10">
@@ -153,13 +153,13 @@ const Home = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link 
                     to="/properties" 
-                    className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-md transition-colors duration-300 text-center shadow-lg hover:shadow-xl"
+                    className="bg-primary hover:bg-primary-dark text-content-on-brand font-bold py-3 px-6 rounded-md transition-colors duration-300 text-center shadow-lg hover:shadow-xl"
                   >
                     Browse Properties
                   </Link>
                   <button 
                     onClick={scrollToServices}
-                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-md transition-all duration-300 border border-white/30"
+                    className="bg-surface-raised/10 backdrop-blur-sm hover:bg-surface-raised/20 text-white font-bold py-3 px-6 rounded-md transition-all duration-300 border border-white/30"
                   >
                     Our Services
                   </button>
@@ -171,7 +171,7 @@ const Home = () => {
           </section>
           
           {/* Services Section - Minimal Icon Grid */}
-          <section ref={servicesRef} className="py-8 md:py-16 bg-gray-50">
+          <section ref={servicesRef} className="py-8 md:py-16 bg-surface">
             <div className="container mx-auto px-4">
               <div className="text-center mb-6 md:mb-10">
                 <motion.h2 
@@ -193,7 +193,7 @@ const Home = () => {
           </section>
           
           {/* Featured Properties */}
-          <section className="py-20 bg-white">
+          <section className="py-20 bg-surface-raised">
             <div className="container mx-auto px-4">
               <div className="text-center mb-16">
                 <motion.h2 
@@ -208,14 +208,14 @@ const Home = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="text-gray-600 max-w-2xl mx-auto"
+                  className="text-content-muted max-w-2xl mx-auto"
                 >
                   Exclusive listings currently available across Kenya
                 </motion.p>
               </div>
               
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
+                <div className="bg-danger-surface border border-danger-border text-danger-content px-4 py-3 rounded mb-6 text-center">
                   {error?.message || 'Failed to load featured properties. Please try again.'}
                 </div>
               )}
@@ -229,7 +229,7 @@ const Home = () => {
               ) : featuredProperties.length === 0 ? (
                 <div className="text-center py-12">
                   <h3 className="text-xl mb-4">No featured properties available</h3>
-                  <p className="text-gray-600">Check back later for new listings</p>
+                  <p className="text-content-muted">Check back later for new listings</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -247,7 +247,7 @@ const Home = () => {
               <div className="text-center mt-12">
                 <Link 
                   to="/properties" 
-                  className="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-md transition-colors duration-300 shadow-lg hover:shadow-xl"
+                  className="inline-block bg-primary hover:bg-primary-dark text-content-on-brand font-bold py-3 px-8 rounded-md transition-colors duration-300 shadow-lg hover:shadow-xl"
                 >
                   View All Properties
                 </Link>
@@ -256,7 +256,7 @@ const Home = () => {
           </section>
           
           {/* Why Choose Us - Condensed Strip */}
-          <section className="py-8 md:py-12 bg-white border-y border-gray-100">
+          <section className="py-8 md:py-12 bg-surface-raised border-y border-line">
             <div className="container mx-auto px-4">
               <div className="flex flex-col items-center gap-4 md:gap-6">
                 <h3 className="text-lg md:text-xl font-bold text-primary">
@@ -277,7 +277,7 @@ const Home = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.05 }}
-                      className="flex items-center gap-1.5 text-gray-700"
+                      className="flex items-center gap-1.5 text-content-muted"
                     >
                       <span className="text-lg">{item.icon}</span>
                       <span className="text-xs md:text-sm font-medium">{item.text}</span>
@@ -310,13 +310,13 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link 
                   to="/contact" 
-                  className="inline-block bg-white text-primary font-bold py-3 px-8 rounded-md hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="inline-block bg-surface-raised text-primary font-bold py-3 px-8 rounded-md hover:bg-surface-sunken transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   Get in Touch
                 </Link>
                 <Link 
                   to="/properties" 
-                  className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-md hover:bg-white/10 transition-all duration-300"
+                  className="inline-block bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-md hover:bg-surface-raised/10 transition-all duration-300"
                 >
                   Browse Listings
                 </Link>
@@ -358,7 +358,7 @@ const ServiceCard = ({ icon, title, index }) => (
       </div>
       <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
     </div>
-    <h3 className="mt-3 text-xs md:text-sm font-semibold text-gray-800 group-hover:text-primary transition-colors">{title}</h3>
+    <h3 className="mt-3 text-xs md:text-sm font-semibold text-content group-hover:text-primary transition-colors">{title}</h3>
   </motion.div>
 );
 
@@ -378,7 +378,7 @@ const PropertyCard = ({ property, index, openModal }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -10 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group cursor-pointer"
+      className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group cursor-pointer"
       onClick={() => openModal(property)}
     >
       <div className="relative pb-[75%] overflow-hidden">
@@ -393,11 +393,11 @@ const PropertyCard = ({ property, index, openModal }) => {
           />
         ) : (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
-            <span className="text-gray-500">No Image Available</span>
+            <span className="text-content-subtle">No Image Available</span>
           </div>
         )}
         {property.featured && (
-          <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full shadow-md">
+          <div className="absolute top-4 right-4 bg-primary text-content-on-brand text-sm font-bold px-3 py-1 rounded-full shadow-md">
             Featured
           </div>
         )}
@@ -405,7 +405,7 @@ const PropertyCard = ({ property, index, openModal }) => {
       
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">
-          <h2 className="text-xl font-bold text-gray-800 group-hover:text-primary transition-colors">
+          <h2 className="text-xl font-bold text-content group-hover:text-primary transition-colors">
             {property.title}
           </h2>
           <span className="text-xl font-bold text-primary">
@@ -413,7 +413,7 @@ const PropertyCard = ({ property, index, openModal }) => {
           </span>
         </div>
         
-        <p className="text-gray-600 mb-5 flex items-center">
+        <p className="text-content-muted mb-5 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -452,20 +452,20 @@ const PropertyCard = ({ property, index, openModal }) => {
 
 // Property Skeleton Loader
 const PropertySkeleton = () => (
-  <div className="bg-white rounded-2xl overflow-hidden shadow-xl animate-pulse">
+  <div className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl animate-pulse">
     <div className="pb-[75%] relative bg-gradient-to-br from-gray-100 to-gray-200"></div>
     <div className="p-6">
       <div className="flex justify-between mb-4">
-        <div className="h-7 bg-gray-200 rounded-xl w-3/5"></div>
-        <div className="h-7 bg-gray-200 rounded-xl w-1/4"></div>
+        <div className="h-7 bg-surface-sunken rounded-xl w-3/5"></div>
+        <div className="h-7 bg-surface-sunken rounded-xl w-1/4"></div>
       </div>
-      <div className="h-5 bg-gray-200 rounded-xl w-3/4 mb-6"></div>
+      <div className="h-5 bg-surface-sunken rounded-xl w-3/4 mb-6"></div>
       <div className="flex justify-between mb-6">
-        <div className="h-4 bg-gray-200 rounded-xl w-16"></div>
-        <div className="h-4 bg-gray-200 rounded-xl w-16"></div>
-        <div className="h-4 bg-gray-200 rounded-xl w-16"></div>
+        <div className="h-4 bg-surface-sunken rounded-xl w-16"></div>
+        <div className="h-4 bg-surface-sunken rounded-xl w-16"></div>
+        <div className="h-4 bg-surface-sunken rounded-xl w-16"></div>
       </div>
-      <div className="h-12 bg-gray-200 rounded-xl"></div>
+      <div className="h-12 bg-surface-sunken rounded-xl"></div>
     </div>
   </div>
 );
@@ -486,7 +486,7 @@ const BenefitCard = ({ title, description, index }) => (
     </div>
     <div>
       <h3 className="text-lg font-bold mb-1">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <p className="text-content-muted">{description}</p>
     </div>
   </motion.div>
 );

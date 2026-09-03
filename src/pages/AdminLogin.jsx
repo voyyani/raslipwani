@@ -39,16 +39,16 @@ const AdminLogin = () => {
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-light px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <div className="w-full max-w-md bg-surface-raised rounded-2xl shadow-xl p-8">
           <h1 className="text-2xl font-bold text-primary mb-1">Admin Sign In</h1>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-content-muted mb-6">
             Raslipwani Properties management console
           </p>
 
           {error && (
             <div
               role="alert"
-              className="mb-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-4 rounded-md border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger-content"
             >
               {error}
             </div>
@@ -56,7 +56,7 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
-              <label htmlFor="admin-email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="admin-email" className="block text-sm font-medium text-content-muted mb-1">
                 Email
               </label>
               <input
@@ -66,12 +66,12 @@ const AdminLogin = () => {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+                className="w-full rounded-md border border-line-strong px-3 py-2 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
               />
             </div>
 
             <div>
-              <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="admin-password" className="block text-sm font-medium text-content-muted mb-1">
                 Password
               </label>
               <input
@@ -81,14 +81,14 @@ const AdminLogin = () => {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+                className="w-full rounded-md border border-line-strong px-3 py-2 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-md bg-primary px-4 py-2.5 font-semibold text-white transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-md bg-primary px-4 py-2.5 font-semibold text-content-on-brand transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>

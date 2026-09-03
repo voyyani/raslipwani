@@ -224,7 +224,7 @@ const NotFound = () => (
     <p className="text-xl mb-8">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
     <Link
       to="/"
-      className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
+      className="inline-block bg-primary text-content-on-brand font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
     >
       Return to Homepage
     </Link>
@@ -276,12 +276,12 @@ const PropertyModalRoute = () => {
       {property ? (
         <PropertyModal property={property} closeModal={closeModal} />
       ) : (
-        <div className="bg-white p-8 rounded-xl max-w-md text-center">
+        <div className="bg-surface-raised p-8 rounded-xl max-w-md text-center">
           <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
           <p>The property you requested doesn't exist or has been removed.</p>
           <button 
             onClick={closeModal}
-            className="mt-6 bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary-dark"
+            className="mt-6 bg-primary text-content-on-brand py-2 px-6 rounded-lg hover:bg-primary-dark"
           >
             Close
           </button>

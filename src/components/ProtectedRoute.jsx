@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-surface-sunken">
         <div
           role="status"
           aria-label="Checking your session"
@@ -28,16 +28,16 @@ const ProtectedRoute = ({ children }) => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-        <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
-          <h1 className="mb-2 text-xl font-bold text-gray-900">Not authorised</h1>
-          <p className="mb-6 text-sm text-gray-600">
+      <div className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
+        <div className="max-w-md rounded-2xl bg-surface-raised p-8 text-center shadow-xl">
+          <h1 className="mb-2 text-xl font-bold text-content">Not authorised</h1>
+          <p className="mb-6 text-sm text-content-muted">
             This account does not have administrator access. If you believe this
             is a mistake, contact your system administrator.
           </p>
           <Link
             to="/"
-            className="inline-block rounded-md bg-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-secondary"
+            className="inline-block rounded-md bg-primary px-6 py-2.5 font-semibold text-content-on-brand transition-colors hover:bg-secondary"
           >
             Return to site
           </Link>

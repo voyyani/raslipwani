@@ -106,17 +106,17 @@ const LocalizationSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Currency Settings</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Currency Settings</h3>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Currency Code
               </label>
               <select
@@ -126,7 +126,7 @@ const LocalizationSettings = () => {
                   const symbols = { USD: '$', KES: 'KSh', GBP: '£', EUR: '€', AED: 'AED' };
                   setFormData({ ...formData, currencyCode: code, currencySymbol: symbols[code] || code });
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="KES">KES - Kenyan Shilling</option>
                 <option value="USD">USD - US Dollar</option>
@@ -137,14 +137,14 @@ const LocalizationSettings = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Currency Symbol
               </label>
               <input
                 type="text"
                 value={formData.currencySymbol}
                 onChange={(e) => setFormData({ ...formData, currencySymbol: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                 placeholder="KSh"
               />
             </div>
@@ -152,13 +152,13 @@ const LocalizationSettings = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Symbol Position
               </label>
               <select
                 value={formData.currencyPosition}
                 onChange={(e) => setFormData({ ...formData, currencyPosition: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="before">Before amount ($ 100)</option>
                 <option value="after">After amount (100 $)</option>
@@ -166,13 +166,13 @@ const LocalizationSettings = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Decimal Places
               </label>
               <select
                 value={formData.decimals}
                 onChange={(e) => setFormData({ ...formData, decimals: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="0">0 (1234)</option>
                 <option value="2">2 (1234.56)</option>
@@ -180,24 +180,24 @@ const LocalizationSettings = () => {
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-900 mb-1">Preview:</p>
-            <p className="text-xl font-bold text-blue-900">{currencyPreview()}</p>
+          <div className="bg-brand-subtle border border-brand-subtle rounded-lg p-4">
+            <p className="text-sm text-brand-content mb-1">Preview:</p>
+            <p className="text-xl font-bold text-brand-content">{currencyPreview()}</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Locale & Format Settings</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Locale & Format Settings</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Locale
             </label>
             <select
               value={formData.localeCode}
               onChange={(e) => setFormData({ ...formData, localeCode: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
             >
               <option value="en-KE">English (Kenya)</option>
               <option value="en-US">English (United States)</option>
@@ -208,13 +208,13 @@ const LocalizationSettings = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Date Format
               </label>
               <select
                 value={formData.dateFormat}
                 onChange={(e) => setFormData({ ...formData, dateFormat: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="DD/MM/YYYY">DD/MM/YYYY (18/01/2026)</option>
                 <option value="MM/DD/YYYY">MM/DD/YYYY (01/18/2026)</option>
@@ -223,13 +223,13 @@ const LocalizationSettings = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Time Format
               </label>
               <select
                 value={formData.timeFormat}
                 onChange={(e) => setFormData({ ...formData, timeFormat: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="24h">24-hour (14:30)</option>
                 <option value="12h">12-hour (2:30 PM)</option>
@@ -243,7 +243,7 @@ const LocalizationSettings = () => {
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
           {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
           Save Changes

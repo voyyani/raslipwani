@@ -266,7 +266,7 @@ const Properties = () => {
           </div>
           
           {/* Animated Background Elements */}
-          <div className="absolute top-20 left-10 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+          <div className="absolute top-20 left-10 w-24 h-24 bg-surface-raised/5 rounded-full blur-xl"></div>
           <div className="absolute bottom-20 right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
           
           <div className="container mx-auto px-4 relative z-10">
@@ -303,14 +303,14 @@ const Properties = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <div className="bg-white rounded-2xl shadow-2xl p-2 border border-gray-100">
+              <div className="bg-surface-raised rounded-2xl shadow-2xl p-2 border border-line">
                 <div className="flex flex-col md:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <FiMapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+                    <FiMapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-content-subtle text-lg" />
                     <input
                       type="text"
                       placeholder="Search by location, property type, or keyword..."
-                      className="w-full pl-12 pr-4 py-4 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-500"
+                      className="w-full pl-12 pr-4 py-4 bg-transparent border-none focus:ring-0 focus:outline-none text-content-muted placeholder-content-subtle"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -319,13 +319,13 @@ const Properties = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setIsFilterOpen(!isFilterOpen)}
-                      className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-4 rounded-xl transition-colors font-medium"
+                      className="flex items-center gap-2 bg-surface-sunken hover:bg-surface-sunken text-content-muted px-6 py-4 rounded-xl transition-colors font-medium"
                     >
                       <FiFilter className="text-lg" />
                       <span className="hidden sm:inline">Filters</span>
                     </button>
                     
-                    <button className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl transition-colors font-medium shadow-lg hover:shadow-xl">
+                    <button className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-content-on-brand px-8 py-4 rounded-xl transition-colors font-medium shadow-lg hover:shadow-xl">
                       <FiSearch className="text-lg" />
                       <span>Search</span>
                     </button>
@@ -345,7 +345,7 @@ const Properties = () => {
                     <button
                       key={index}
                       onClick={() => setSearchQuery(chip.value)}
-                      className="bg-gray-50 hover:bg-primary hover:text-white text-gray-700 px-3 py-1.5 rounded-full text-sm transition-all duration-300 border border-gray-200 hover:border-primary"
+                      className="bg-surface hover:bg-primary hover:text-content-on-brand text-content-muted px-3 py-1.5 rounded-full text-sm transition-all duration-300 border border-line hover:border-primary"
                     >
                       {chip.label}
                     </button>
@@ -356,7 +356,7 @@ const Properties = () => {
           </div>
         </section>
         
-        <main className="flex-grow bg-gray-50">
+        <main className="flex-grow bg-surface">
           <div className="container mx-auto px-4 py-12">
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Enhanced Filters Sidebar */}
@@ -366,12 +366,12 @@ const Properties = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24 border border-gray-100">
+                <div className="bg-surface-raised rounded-2xl shadow-lg p-6 sticky top-24 border border-line">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-800">Filter Properties</h2>
+                    <h2 className="text-xl font-bold text-content">Filter Properties</h2>
                     <button 
                       onClick={() => setIsFilterOpen(false)}
-                      className="lg:hidden text-gray-400 hover:text-gray-600"
+                      className="lg:hidden text-content-subtle hover:text-content-muted"
                     >
                       <FiX className="w-5 h-5" />
                     </button>
@@ -379,7 +379,7 @@ const Properties = () => {
                   
                   {/* Purpose Filter (Rent/Sale) */}
                   <div className="mb-6">
-                    <label className="block text-gray-700 mb-3 font-medium">Purpose</label>
+                    <label className="block text-content-muted mb-3 font-medium">Purpose</label>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { value: 'all', label: 'All', icon: '🏠' },
@@ -392,7 +392,7 @@ const Properties = () => {
                           className={`p-3 rounded-xl border-2 transition-all duration-300 text-center ${
                             purposeFilter === option.value
                               ? 'border-primary bg-primary/10 text-primary font-medium'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                              : 'border-line hover:border-line-strong text-content-muted'
                           }`}
                         >
                           <div className="text-lg mb-1">{option.icon}</div>
@@ -404,9 +404,9 @@ const Properties = () => {
                   
                   {/* Property Type */}
                   <div className="mb-6">
-                    <label className="block text-gray-700 mb-3 font-medium">Property Type</label>
+                    <label className="block text-content-muted mb-3 font-medium">Property Type</label>
                     <select
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-white"
+                      className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
                       value={filterOption}
                       onChange={(e) => setFilterOption(e.target.value)}
                     >
@@ -421,9 +421,9 @@ const Properties = () => {
                   
                   {/* Sort By */}
                   <div className="mb-6">
-                    <label className="block text-gray-700 mb-3 font-medium">Sort By</label>
+                    <label className="block text-content-muted mb-3 font-medium">Sort By</label>
                     <select
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-white"
+                      className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
                       value={sortOption}
                       onChange={(e) => setSortOption(e.target.value)}
                     >
@@ -438,7 +438,7 @@ const Properties = () => {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-xl transition-colors border-2 border-transparent hover:border-gray-300"
+                    className="w-full bg-surface-sunken hover:bg-surface-sunken text-content font-medium py-3 rounded-xl transition-colors border-2 border-transparent hover:border-line-strong"
                     onClick={clearAllFilters}
                   >
                     Reset All Filters
@@ -455,17 +455,17 @@ const Properties = () => {
                   transition={{ delay: 0.2 }}
                 >
                   <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+                    <h2 className="text-2xl md:text-3xl font-bold text-content">
                       {filteredProperties.length} Properties Found
                     </h2>
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-content-muted mt-2">
                       Showing {filteredProperties.length} of {properties.length} premium properties across Kenya
                     </p>
                   </div>
                   
                   <button 
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="lg:hidden flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:border-primary transition-colors"
+                    className="lg:hidden flex items-center gap-2 bg-surface-raised border-2 border-line text-content-muted px-4 py-2 rounded-xl hover:border-primary transition-colors"
                   >
                     <FiFilter className="text-lg" />
                     <span>Filters</span>
@@ -480,7 +480,7 @@ const Properties = () => {
                     animate={{ opacity: 1, y: 0 }}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-gray-800">Active Filters</h3>
+                      <h3 className="text-lg font-medium text-content">Active Filters</h3>
                       <button 
                         onClick={clearAllFilters}
                         className="text-sm text-primary hover:underline font-medium"
@@ -511,13 +511,13 @@ const Properties = () => {
                 
                 {error && (
                   <motion.div 
-                    className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-8"
+                    className="bg-danger-surface border-2 border-danger-border text-danger-content px-6 py-4 rounded-2xl mb-8"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                   >
                     <div className="flex items-center">
-                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                        <FiX className="text-red-500" />
+                      <div className="w-6 h-6 bg-danger-surface rounded-full flex items-center justify-center mr-3">
+                        <FiX className="text-danger-content" />
                       </div>
                       {error}
                     </div>
@@ -533,21 +533,21 @@ const Properties = () => {
                 ) : filteredProperties.length === 0 ? (
                   <div>
                     <motion.div 
-                      className="text-center py-16 bg-white rounded-2xl shadow-lg mb-12 border border-gray-100"
+                      className="text-center py-16 bg-surface-raised rounded-2xl shadow-lg mb-12 border border-line"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
                       <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <FiSearch className="text-3xl text-primary" />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-800 mb-4">No properties match your criteria</h3>
-                      <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                      <h3 className="text-2xl font-bold text-content mb-4">No properties match your criteria</h3>
+                      <p className="text-content-muted mb-8 max-w-md mx-auto">
                         Try adjusting your filters or search terms to find your perfect property in Kenya
                       </p>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-primary hover:bg-primary-dark text-white font-medium py-3 px-8 rounded-xl transition-colors shadow-lg hover:shadow-xl"
+                        className="bg-primary hover:bg-primary-dark text-content-on-brand font-medium py-3 px-8 rounded-xl transition-colors shadow-lg hover:shadow-xl"
                         onClick={clearAllFilters}
                       >
                         Reset Filters & Search
@@ -562,7 +562,7 @@ const Properties = () => {
                         transition={{ delay: 0.2 }}
                         className="mb-12"
                       >
-                        <h3 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+                        <h3 className="text-2xl font-bold text-content mb-8 text-center">
                           Featured Properties You Might Like
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -638,7 +638,7 @@ const PropertyCard = ({ property, index, openModal }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -8 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-gray-100"
+      className="bg-surface-raised rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-line"
       onClick={() => openModal(property)}
     >
       <div className="relative pb-[70%] overflow-hidden">
@@ -655,7 +655,7 @@ const PropertyCard = ({ property, index, openModal }) => {
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl mb-2">🏠</div>
-              <span className="text-gray-500 text-sm">Image Coming Soon</span>
+              <span className="text-content-subtle text-sm">Image Coming Soon</span>
             </div>
           </div>
         )}
@@ -663,11 +663,11 @@ const PropertyCard = ({ property, index, openModal }) => {
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {property.featured && (
-            <div className="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+            <div className="bg-primary text-content-on-brand text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
               Featured
             </div>
           )}
-          <div className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
+          <div className="bg-surface-raised/90 backdrop-blur-sm text-content text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
             {getPurposeIcon(property.purpose)} {property.purpose === 'sale' ? 'For Sale' : 'For Rent'}
           </div>
         </div>
@@ -678,7 +678,7 @@ const PropertyCard = ({ property, index, openModal }) => {
       
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
-          <h2 className="text-lg font-bold text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+          <h2 className="text-lg font-bold text-content group-hover:text-primary transition-colors line-clamp-2 leading-tight">
             {property.title}
           </h2>
           <span className="text-lg font-bold text-primary whitespace-nowrap ml-2">
@@ -686,12 +686,12 @@ const PropertyCard = ({ property, index, openModal }) => {
           </span>
         </div>
         
-        <p className="text-gray-600 mb-4 flex items-center text-sm">
+        <p className="text-content-muted mb-4 flex items-center text-sm">
           <FiMapPin className="w-4 h-4 mr-2 text-primary flex-shrink-0" />
           <span className="line-clamp-1">{property.location}</span>
         </p>
         
-        <div className="flex justify-between mb-4 text-sm text-gray-500">
+        <div className="flex justify-between mb-4 text-sm text-content-subtle">
           <div className="flex items-center">
             <span className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center mr-1.5">
               <span className="text-primary text-xs">🛏️</span>
@@ -712,9 +712,9 @@ const PropertyCard = ({ property, index, openModal }) => {
           </div>
         </div>
         
-        <div className="pt-3 border-t border-gray-100">
+        <div className="pt-3 border-t border-line">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-500 capitalize">
+            <span className="text-xs text-content-subtle capitalize">
               {property.property_type}
             </span>
             <div className="text-primary font-medium text-sm group-hover:text-primary-dark transition-colors flex items-center">
@@ -732,20 +732,20 @@ const PropertyCard = ({ property, index, openModal }) => {
 
 // Enhanced Property Skeleton Loader
 const PropertySkeleton = () => (
-  <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse border border-gray-100">
+  <div className="bg-surface-raised rounded-2xl overflow-hidden shadow-lg animate-pulse border border-line">
     <div className="pb-[70%] relative bg-gradient-to-br from-gray-200 to-gray-300"></div>
     <div className="p-5">
       <div className="flex justify-between mb-3">
-        <div className="h-5 bg-gray-200 rounded w-3/5"></div>
-        <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+        <div className="h-5 bg-surface-sunken rounded w-3/5"></div>
+        <div className="h-5 bg-surface-sunken rounded w-1/4"></div>
       </div>
-      <div className="h-4 bg-gray-200 rounded w-4/5 mb-4"></div>
+      <div className="h-4 bg-surface-sunken rounded w-4/5 mb-4"></div>
       <div className="flex justify-between mb-4">
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
-        <div className="h-3 bg-gray-200 rounded w-16"></div>
+        <div className="h-3 bg-surface-sunken rounded w-16"></div>
+        <div className="h-3 bg-surface-sunken rounded w-16"></div>
+        <div className="h-3 bg-surface-sunken rounded w-16"></div>
       </div>
-      <div className="h-8 bg-gray-200 rounded"></div>
+      <div className="h-8 bg-surface-sunken rounded"></div>
     </div>
   </div>
 );

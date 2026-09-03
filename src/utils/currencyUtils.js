@@ -178,11 +178,11 @@ import { Globe } from 'lucide-react';
 export const CurrencySelector = ({ value, onChange, className = '' }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Globe className="w-4 h-4 text-gray-500" />
+      <Globe className="w-4 h-4 text-content-subtle" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm font-medium"
+        className="px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:outline-none text-sm font-medium"
       >
         {Object.entries(currencyConfig).map(([code, curr]) => (
           <option key={code} value={code}>

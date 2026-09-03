@@ -150,55 +150,55 @@ const GeneralSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-        <p className="text-sm text-gray-500 mb-4">These settings appear in the Header, Footer, and throughout the site.</p>
+        <h3 className="text-lg font-semibold text-content mb-4">Basic Information</h3>
+        <p className="text-sm text-content-subtle mb-4">These settings appear in the Header, Footer, and throughout the site.</p>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Business Name <span className="text-xs text-blue-500">(Header &amp; Footer)</span>
+            <label className="block text-sm font-medium text-content-muted mb-1">
+              Business Name <span className="text-xs text-brand">(Header &amp; Footer)</span>
             </label>
             <input
               type="text"
               value={formData.business_name}
               onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="Raslipwani Properties"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company Tagline <span className="text-xs text-blue-500">(Header subtitle)</span>
+            <label className="block text-sm font-medium text-content-muted mb-1">
+              Company Tagline <span className="text-xs text-brand">(Header subtitle)</span>
             </label>
             <input
               type="text"
               value={formData.company_tagline}
               onChange={(e) => setFormData({ ...formData, company_tagline: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="Your Premier Real Estate Partner"
             />
-            <p className="text-xs text-gray-500 mt-1">A short slogan that appears under your logo in the header</p>
+            <p className="text-xs text-content-subtle mt-1">A short slogan that appears under your logo in the header</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company Logo URL <span className="text-xs text-blue-500">(Header &amp; Footer)</span>
+            <label className="block text-sm font-medium text-content-muted mb-1">
+              Company Logo URL <span className="text-xs text-brand">(Header &amp; Footer)</span>
             </label>
             <div className="flex gap-2">
               <input
                 type="url"
                 value={formData.company_logo}
                 onChange={(e) => setFormData({ ...formData, company_logo: e.target.value })}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                 placeholder="https://example.com/logo.png"
               />
-              <div className="flex-shrink-0 w-12 h-12 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+              <div className="flex-shrink-0 w-12 h-12 border-2 border-line rounded-lg overflow-hidden bg-surface">
                 <img 
                   src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'} 
                   alt="Logo preview" 
@@ -207,7 +207,7 @@ const GeneralSettings = () => {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-content-subtle mt-1">
               {formData.company_logo ? '✓ Custom logo set' : 'Using default logo - paste a URL above to change'}
             </p>
           </div>
@@ -215,141 +215,141 @@ const GeneralSettings = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Contact Information</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Business Email
             </label>
             <input
               type="email"
               value={formData.business_email}
               onChange={(e) => setFormData({ ...formData, business_email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="info@raslipwani.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Business Phone
             </label>
             <input
               type="tel"
               value={formData.business_phone}
               onChange={(e) => setFormData({ ...formData, business_phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="+254712345678"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               WhatsApp Number
             </label>
             <input
               type="tel"
               value={formData.whatsapp_number}
               onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="+254712345678"
             />
-            <p className="text-xs text-gray-500 mt-1">Used for the WhatsApp chat button</p>
+            <p className="text-xs text-content-subtle mt-1">Used for the WhatsApp chat button</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Business Address
             </label>
             <textarea
               value={formData.business_address}
               onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="Kilifi, Kenya"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Service Locations
             </label>
             <textarea
               value={formData.service_locations}
               onChange={(e) => setFormData({ ...formData, service_locations: e.target.value })}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi"
             />
-            <p className="text-xs text-gray-500 mt-1">Comma-separated list of locations you serve</p>
+            <p className="text-xs text-content-subtle mt-1">Comma-separated list of locations you serve</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Social Media</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Facebook URL
             </label>
             <input
               type="url"
               value={formData.social_facebook}
               onChange={(e) => setFormData({ ...formData, social_facebook: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="https://facebook.com/raslipwani"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Twitter URL
             </label>
             <input
               type="url"
               value={formData.social_twitter}
               onChange={(e) => setFormData({ ...formData, social_twitter: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="https://twitter.com/raslipwani"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Instagram URL
             </label>
             <input
               type="url"
               value={formData.social_instagram}
               onChange={(e) => setFormData({ ...formData, social_instagram: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="https://instagram.com/raslipwani"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               LinkedIn URL
             </label>
             <input
               type="url"
               value={formData.social_linkedin}
               onChange={(e) => setFormData({ ...formData, social_linkedin: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="https://linkedin.com/company/raslipwani"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               TikTok URL
             </label>
             <input
               type="url"
               value={formData.social_tiktok}
               onChange={(e) => setFormData({ ...formData, social_tiktok: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="https://tiktok.com/@raslipwani"
             />
           </div>
@@ -360,7 +360,7 @@ const GeneralSettings = () => {
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
           {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
           Save Changes

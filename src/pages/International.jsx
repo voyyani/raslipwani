@@ -262,7 +262,7 @@ const International = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-white/20">
+            <div className="inline-flex items-center gap-2 bg-surface-raised/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-white/20">
               <Globe className="w-5 h-5" />
               <span className="text-sm font-medium">International Property Services</span>
             </div>
@@ -282,13 +282,13 @@ const International = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button 
                 onClick={() => scrollToSection(propertiesRef, 'properties')}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-content px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Explore Properties
               </button>
               <button 
                 onClick={() => setShowCalculator(!showCalculator)}
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border-2 border-white/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
+                className="bg-surface-raised/10 hover:bg-surface-raised/20 backdrop-blur-sm border-2 border-white/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
               >
                 Investment Calculator
               </button>
@@ -303,8 +303,8 @@ const International = () => {
                   onClick={() => setSelectedCurrency(curr.code)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     selectedCurrency === curr.code
-                      ? 'bg-white text-blue-900'
-                      : 'bg-white/10 hover:bg-white/20 text-white'
+                      ? 'bg-surface-raised text-brand-content'
+                      : 'bg-surface-raised/10 hover:bg-surface-raised/20 text-white'
                   }`}
                 >
                   {curr.code}
@@ -315,7 +315,7 @@ const International = () => {
         </div>
 
         {/* Floating Navigation Pills */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex gap-2 bg-white/10 backdrop-blur-md rounded-full p-2 border border-white/20">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex gap-2 bg-surface-raised/10 backdrop-blur-md rounded-full p-2 border border-white/20">
           {[
             { label: 'Overview', ref: overviewRef, section: 'overview' },
             { label: 'Investment', ref: investRef, section: 'invest' },
@@ -328,8 +328,8 @@ const International = () => {
               onClick={() => scrollToSection(item.ref, item.section)}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
                 activeSection === item.section
-                  ? 'bg-white text-blue-900'
-                  : 'text-white hover:bg-white/10'
+                  ? 'bg-surface-raised text-brand-content'
+                  : 'text-white hover:bg-surface-raised/10'
               }`}
             >
               {item.label}
@@ -339,13 +339,13 @@ const International = () => {
       </section>
 
       {/* Audience triage — the first decision a visitor has to make */}
-      <section className="py-16 bg-white border-b border-gray-100">
+      <section className="py-16 bg-surface-raised border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-content mb-4">
               Capturing the UN Nairobi Opportunity
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               Nairobi is the UN&apos;s only headquarters city in the global south. Three
               groups of people buy and rent here for very different reasons — start with
               the one that describes you.
@@ -360,24 +360,24 @@ const International = () => {
                   <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{audience.title}</h3>
-                  <p className="text-gray-600 mb-6">{audience.description}</p>
+                  <h3 className="text-2xl font-bold text-content mb-3">{audience.title}</h3>
+                  <p className="text-content-muted mb-6">{audience.description}</p>
                   <ul className="space-y-2 mb-6">
                     {audience.benefits.map((benefit) => (
-                      <li key={benefit} className="flex items-center text-sm text-gray-700">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full mr-3" aria-hidden="true" />
+                      <li key={benefit} className="flex items-center text-sm text-content-muted">
+                        <span className="w-2 h-2 bg-brand rounded-full mr-3" aria-hidden="true" />
                         {benefit}
                       </li>
                     ))}
                   </ul>
-                  <span className="inline-flex items-center gap-2 font-semibold text-blue-600">
+                  <span className="inline-flex items-center gap-2 font-semibold text-brand">
                     {audience.cta}
                     <ChevronRight className="w-4 h-4" />
                   </span>
                 </>
               );
               const cardClass =
-                'group block text-left w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border-2 border-blue-100 hover:border-blue-300 transition-all hover:shadow-xl';
+                'group block text-left w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border-2 border-brand-subtle hover:border-brand-subtle transition-all hover:shadow-xl';
 
               return audience.to ? (
                 <Link key={audience.title} to={audience.to} className={cardClass}>
@@ -418,10 +418,10 @@ const International = () => {
       <section ref={overviewRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
               Why Nairobi? Why Now?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               East Africa's hub for international business, diplomacy, and investment - creating unprecedented real estate opportunities
             </p>
           </div>
@@ -434,13 +434,13 @@ const International = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                className="text-center p-8 bg-surface-raised rounded-2xl shadow-lg hover:shadow-xl transition-all"
               >
                 <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                   {item.stat}
                 </div>
-                <div className="text-lg font-semibold text-gray-900 mb-2">{item.label}</div>
-                <div className="text-sm text-gray-600">{item.detail}</div>
+                <div className="text-lg font-semibold text-content mb-2">{item.label}</div>
+                <div className="text-sm text-content-muted">{item.detail}</div>
               </motion.div>
             ))}
           </div>
@@ -449,13 +449,13 @@ const International = () => {
       </section>
 
       {/* Investment Opportunities */}
-      <section ref={investRef} className="py-20 bg-white">
+      <section ref={investRef} className="py-20 bg-surface-raised">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
               Investment Opportunities
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               Transparent, professionally managed investments with attractive returns
             </p>
           </div>
@@ -468,7 +468,7 @@ const International = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-blue-200"
+                className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-line hover:border-brand-subtle"
               >
                 <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white">
                   <h3 className="text-2xl font-bold mb-3">{opp.title}</h3>
@@ -479,18 +479,18 @@ const International = () => {
                 </div>
                 
                 <div className="p-8">
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-6">
-                    <div className="text-sm text-green-700 font-medium mb-1">From</div>
-                    <div className="text-3xl font-bold text-green-900">{opp.minInvestment}</div>
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-success-border rounded-xl p-4 mb-6">
+                    <div className="text-sm text-success-content font-medium mb-1">From</div>
+                    <div className="text-3xl font-bold text-success-content">{opp.minInvestment}</div>
                   </div>
                   
-                  <p className="text-gray-600 mb-6 leading-relaxed">{opp.description}</p>
+                  <p className="text-content-muted mb-6 leading-relaxed">{opp.description}</p>
                   
                   <div className="space-y-3 mb-8">
                     {opp.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{feature}</span>
+                        <CheckCircle className="w-5 h-5 text-success-content flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-content-muted">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -512,40 +512,40 @@ const International = () => {
       <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-blue-100 px-6 py-3 rounded-full mb-6">
-              <Globe className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-900">For African Diaspora</span>
+            <div className="inline-flex items-center gap-2 bg-brand-subtle px-6 py-3 rounded-full mb-6">
+              <Globe className="w-5 h-5 text-brand" />
+              <span className="text-sm font-semibold text-brand-content">For African Diaspora</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
               Manage Your Property Portfolio Remotely
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               Own and manage Nairobi real estate from anywhere in the world with complete transparency and professional support
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div>
-              <div className="bg-white rounded-2xl shadow-2xl p-8 border-2 border-blue-100">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">Remote Management Dashboard</h3>
+              <div className="bg-surface-raised rounded-2xl shadow-2xl p-8 border-2 border-brand-subtle">
+                <h3 className="text-3xl font-bold text-content mb-6">Remote Management Dashboard</h3>
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-success-border">
                     <div>
-                      <div className="text-sm text-gray-600">Monthly Income</div>
-                      <div className="text-2xl font-bold text-green-600">{formatCurrency(4000)}</div>
+                      <div className="text-sm text-content-muted">Monthly Income</div>
+                      <div className="text-2xl font-bold text-success-content">{formatCurrency(4000)}</div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-green-600" />
+                    <TrendingUp className="w-8 h-8 text-success-content" />
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-brand-subtle">
                     <div>
-                      <div className="text-sm text-gray-600">Portfolio Value</div>
-                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(320000)}</div>
+                      <div className="text-sm text-content-muted">Portfolio Value</div>
+                      <div className="text-2xl font-bold text-brand">{formatCurrency(320000)}</div>
                     </div>
-                    <Home className="w-8 h-8 text-blue-600" />
+                    <Home className="w-8 h-8 text-brand" />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                     <div>
-                      <div className="text-sm text-gray-600">Annual ROI</div>
+                      <div className="text-sm text-content-muted">Annual ROI</div>
                       <div className="text-2xl font-bold text-purple-600">13.2%</div>
                     </div>
                     <TrendingUp className="w-8 h-8 text-purple-600" />
@@ -564,11 +564,11 @@ const International = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     viewport={{ once: true }}
-                    className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-100 hover:border-blue-200"
+                    className="bg-surface-raised p-6 rounded-xl shadow-lg hover:shadow-xl transition-all border border-line hover:border-brand-subtle"
                   >
-                    <Icon className="w-10 h-10 text-blue-600 mb-4" />
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h4>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
+                    <Icon className="w-10 h-10 text-brand mb-4" />
+                    <h4 className="text-lg font-bold text-content mb-2">{feature.title}</h4>
+                    <p className="text-sm text-content-muted">{feature.description}</p>
                   </motion.div>
                 );
               })}
@@ -582,7 +582,7 @@ const International = () => {
             </p>
             <Link
               to="/contact?type=diaspora"
-              className="inline-flex items-center gap-2 bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg"
+              className="inline-flex items-center gap-2 bg-surface-raised text-brand hover:bg-surface-sunken px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg"
             >
               Schedule Consultation
               <ChevronRight className="w-5 h-5" />
@@ -592,13 +592,13 @@ const International = () => {
       </section>
 
       {/* Services Section */}
-      <section ref={servicesRef} className="py-20 bg-white">
+      <section ref={servicesRef} className="py-20 bg-surface-raised">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
               International Services
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               Everything you need to invest, buy, or relocate - no matter where you are
             </p>
           </div>
@@ -613,13 +613,13 @@ const International = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   viewport={{ once: true }}
-                  className="p-8 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-xl transition-all bg-gradient-to-br from-white to-gray-50 group"
+                  className="p-8 border-2 border-line rounded-2xl hover:border-brand hover:shadow-xl transition-all bg-gradient-to-br from-white to-gray-50 group"
                 >
                   <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="w-7 h-7 text-blue-600" />
+                    <Icon className="w-7 h-7 text-brand" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{service.description}</p>
+                  <h3 className="text-xl font-bold text-content mb-3">{service.title}</h3>
+                  <p className="text-content-muted leading-relaxed">{service.description}</p>
                 </motion.div>
               );
             })}
@@ -631,10 +631,10 @@ const International = () => {
       <section ref={propertiesRef} className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
               Featured International Properties
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-content-muted max-w-3xl mx-auto">
               Prime locations ideal for international clients, expats, and investors
             </p>
           </div>
@@ -647,7 +647,7 @@ const International = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-blue-200"
+                className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-line hover:border-brand-subtle"
               >
                 <div className="relative h-64">
                   <img 
@@ -656,13 +656,13 @@ const International = () => {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                    <span className="bg-brand text-content-on-brand px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                       {property.type}
                     </span>
                   </div>
                   {property.furnished && (
                     <div className="absolute top-4 right-4">
-                      <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      <span className="bg-success-content text-content-on-brand px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                         Furnished
                       </span>
                     </div>
@@ -670,8 +670,8 @@ const International = () => {
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h3>
-                  <p className="text-gray-600 mb-4 flex items-center gap-2">
+                  <h3 className="text-2xl font-bold text-content mb-2">{property.title}</h3>
+                  <p className="text-content-muted mb-4 flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     {property.location}
                   </p>
@@ -682,7 +682,7 @@ const International = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 mb-6 text-gray-600">
+                  <div className="flex items-center gap-4 mb-6 text-content-muted">
                     <span className="flex items-center gap-1">
                       <Home className="w-4 h-4" />
                       {property.bedrooms} bed
@@ -725,14 +725,14 @@ const International = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link
               to="/contact?type=international"
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2 shadow-xl"
+              className="bg-surface-raised text-brand hover:bg-surface-sunken px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2 shadow-xl"
             >
               <Phone className="w-5 h-5" />
               Schedule Consultation
             </Link>
             <button
               onClick={() => setShowCalculator(true)}
-              className="bg-blue-800 hover:bg-blue-900 px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2"
+              className="bg-brand-hover hover:bg-brand-hover px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2"
             >
               <TrendingUp className="w-5 h-5" />
               Calculate Returns
@@ -740,12 +740,12 @@ const International = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
               <Mail className="w-6 h-6 mb-3" />
               <div className="text-sm text-blue-200 mb-1">Email Us</div>
               <div className="font-semibold">international@raslipwani.com</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
               <Phone className="w-6 h-6 mb-3" />
               <div className="text-sm text-blue-200 mb-1">WhatsApp</div>
               <div className="font-semibold">+254 758 066 526</div>

@@ -278,15 +278,15 @@ const ServicesMain = () => {
                         className="space-y-6"
                       >
                         <div>
-                          <label className="block text-gray-700 mb-4 font-medium text-lg">What service do you need?</label>
+                          <label className="block text-content-muted mb-4 font-medium text-lg">What service do you need?</label>
                           <div className="grid gap-4">
                             {serviceTypes.map(service => (
                               <label 
                                 key={service.value} 
                                 className={`flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all ${
                                   bookingData.serviceType === service.value 
-                                    ? 'border-primary bg-blue-50 shadow-md' 
-                                    : 'border-gray-200 hover:border-primary hover:shadow-sm'
+                                    ? 'border-primary bg-brand-subtle shadow-md' 
+                                    : 'border-line hover:border-primary hover:shadow-sm'
                                 }`}
                               >
                                 <input
@@ -298,8 +298,8 @@ const ServicesMain = () => {
                                   className="mt-1 mr-4 text-primary focus:ring-primary"
                                 />
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-gray-800 text-lg">{service.label}</h4>
-                                  <p className="text-gray-600 mt-1">{service.description}</p>
+                                  <h4 className="font-semibold text-content text-lg">{service.label}</h4>
+                                  <p className="text-content-muted mt-1">{service.description}</p>
                                 </div>
                               </label>
                             ))}
@@ -310,7 +310,7 @@ const ServicesMain = () => {
                           <button
                             type="button"
                             onClick={nextStep}
-                            className="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg"
+                            className="bg-primary text-content-on-brand px-8 py-3 rounded-lg font-medium hover:bg-brand-hover transition-colors shadow-lg"
                           >
                             Continue
                           </button>
@@ -326,17 +326,17 @@ const ServicesMain = () => {
                         className="space-y-6"
                       >
                         <div>
-                          <label className="block text-gray-700 mb-4 font-medium text-lg">Select a Property to View</label>
+                          <label className="block text-content-muted mb-4 font-medium text-lg">Select a Property to View</label>
                           
                           {loadingProperties ? (
                             <div className="text-center py-12">
                               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                              <p className="text-gray-600 mt-4">Loading available properties...</p>
+                              <p className="text-content-muted mt-4">Loading available properties...</p>
                             </div>
                           ) : properties.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-xl">
-                              <p className="text-gray-600">No properties currently available for viewing.</p>
-                              <p className="text-sm text-gray-500 mt-2">Please contact us for upcoming listings.</p>
+                            <div className="text-center py-12 bg-surface rounded-xl">
+                              <p className="text-content-muted">No properties currently available for viewing.</p>
+                              <p className="text-sm text-content-subtle mt-2">Please contact us for upcoming listings.</p>
                             </div>
                           ) : (
                             <div className="grid gap-4 max-h-96 overflow-y-auto">
@@ -345,8 +345,8 @@ const ServicesMain = () => {
                                   key={property.id}
                                   className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
                                     bookingData.propertyId === property.id 
-                                      ? 'border-primary bg-blue-50' 
-                                      : 'border-gray-200 hover:border-primary'
+                                      ? 'border-primary bg-brand-subtle' 
+                                      : 'border-line hover:border-primary'
                                   }`}
                                 >
                                   <div className="flex-shrink-0 mt-1 mr-4">
@@ -361,17 +361,17 @@ const ServicesMain = () => {
                                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                                       bookingData.propertyId === property.id 
                                         ? 'border-primary bg-primary' 
-                                        : 'border-gray-400 bg-white'
+                                        : 'border-line-strong bg-surface-raised'
                                     }`}>
                                       {bookingData.propertyId === property.id && (
-                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                        <div className="w-2 h-2 bg-surface-raised rounded-full"></div>
                                       )}
                                     </div>
                                   </div>
                                   
                                   {/* Property Image */}
                                   {property.images && property.images.length > 0 && (
-                                    <div className="w-24 h-24 rounded-lg overflow-hidden mr-4 flex-shrink-0 border border-gray-200">
+                                    <div className="w-24 h-24 rounded-lg overflow-hidden mr-4 flex-shrink-0 border border-line">
                                       <img 
                                         src={property.images[0]} 
                                         alt={property.title}
@@ -383,20 +383,20 @@ const ServicesMain = () => {
                                   <div className="flex-1">
                                     <div className="flex justify-between items-start mb-2">
                                       <div>
-                                        <h4 className="font-semibold text-gray-800">{property.title}</h4>
-                                        <p className="text-gray-600 text-sm">{property.location}</p>
+                                        <h4 className="font-semibold text-content">{property.title}</h4>
+                                        <p className="text-content-muted text-sm">{property.location}</p>
                                       </div>
                                       <span className="font-bold text-primary whitespace-nowrap ml-4">
                                         {property.price ? formatCurrency(property.price) : 'Price on request'}
                                       </span>
                                     </div>
-                                    <p className="text-gray-700 text-sm mt-1 line-clamp-2">
+                                    <p className="text-content-muted text-sm mt-1 line-clamp-2">
                                       {property.description}
                                     </p>
                                     <div className="flex flex-wrap gap-2 mt-2">
-                                      {property.bedrooms && <span className="text-xs bg-gray-100 px-2 py-1 rounded">🛏 {property.bedrooms} beds</span>}
-                                      {property.bathrooms && <span className="text-xs bg-gray-100 px-2 py-1 rounded">🚿 {property.bathrooms} baths</span>}
-                                      {property.size && <span className="text-xs bg-gray-100 px-2 py-1 rounded">📐 {property.size} sqft</span>}
+                                      {property.bedrooms && <span className="text-xs bg-surface-sunken px-2 py-1 rounded">🛏 {property.bedrooms} beds</span>}
+                                      {property.bathrooms && <span className="text-xs bg-surface-sunken px-2 py-1 rounded">🚿 {property.bathrooms} baths</span>}
+                                      {property.size && <span className="text-xs bg-surface-sunken px-2 py-1 rounded">📐 {property.size} sqft</span>}
                                     </div>
                                   </div>
                                 </label>
@@ -409,7 +409,7 @@ const ServicesMain = () => {
                           <button
                             type="button"
                             onClick={prevStep}
-                            className="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                            className="px-6 py-3 border border-line-strong rounded-lg font-medium hover:bg-surface transition-colors"
                           >
                             Back
                           </button>
@@ -417,7 +417,7 @@ const ServicesMain = () => {
                             type="button"
                             onClick={nextStep}
                             disabled={!bookingData.propertyId}
-                            className="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="bg-primary text-content-on-brand px-6 py-3 rounded-lg font-medium hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
                             Continue
                           </button>
@@ -434,15 +434,15 @@ const ServicesMain = () => {
                       >
                         {bookingData.serviceType === 'viewing' ? (
                           <div>
-                            <label className="block text-gray-700 mb-4 font-medium text-lg">Viewing Type</label>
+                            <label className="block text-content-muted mb-4 font-medium text-lg">Viewing Type</label>
                             <div className="grid gap-4">
                               {viewingTypes.map(option => (
                                 <label 
                                   key={option.type} 
                                   className={`flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all ${
                                     bookingData.viewingType === option.type 
-                                      ? 'border-primary bg-blue-50' 
-                                      : 'border-gray-200 hover:border-primary'
+                                      ? 'border-primary bg-brand-subtle' 
+                                      : 'border-line hover:border-primary'
                                   }`}
                                 >
                                   <input
@@ -456,8 +456,8 @@ const ServicesMain = () => {
                                   <div className="flex items-center">
                                     <span className="text-3xl mr-4">{option.icon}</span>
                                     <div>
-                                      <h4 className="font-semibold text-gray-800 text-lg">{option.title}</h4>
-                                      <p className="text-gray-600">{option.description}</p>
+                                      <h4 className="font-semibold text-content text-lg">{option.title}</h4>
+                                      <p className="text-content-muted">{option.description}</p>
                                       <p className="text-sm text-primary font-medium mt-1">{option.duration}</p>
                                     </div>
                                   </div>
@@ -467,12 +467,12 @@ const ServicesMain = () => {
                           </div>
                         ) : (
                           <div>
-                            <label className="block text-gray-700 mb-4 font-medium text-lg">Service Details</label>
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                            <label className="block text-content-muted mb-4 font-medium text-lg">Service Details</label>
+                            <div className="bg-brand-subtle border border-brand-subtle rounded-xl p-6">
                               <h4 className="font-semibold text-primary text-lg mb-2">
                                 {serviceTypes.find(s => s.value === bookingData.serviceType)?.label}
                               </h4>
-                              <p className="text-gray-700">
+                              <p className="text-content-muted">
                                 {bookingData.serviceType === 'valuation' 
                                   ? 'We will contact you to discuss your valuation needs and schedule an assessment.'
                                   : bookingData.serviceType === 'consultation'
@@ -488,14 +488,14 @@ const ServicesMain = () => {
                           <button
                             type="button"
                             onClick={prevStep}
-                            className="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                            className="px-6 py-3 border border-line-strong rounded-lg font-medium hover:bg-surface transition-colors"
                           >
                             Back
                           </button>
                           <button
                             type="button"
                             onClick={nextStep}
-                            className="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                            className="bg-primary text-content-on-brand px-6 py-3 rounded-lg font-medium hover:bg-brand-hover transition-colors"
                           >
                             Continue
                           </button>
@@ -512,26 +512,26 @@ const ServicesMain = () => {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-gray-700 mb-2 text-sm font-medium">Full Name *</label>
+                            <label className="block text-content-muted mb-2 text-sm font-medium">Full Name *</label>
                             <input 
                               type="text" 
                               name="name"
                               value={bookingData.name}
                               onChange={(e) => setBookingData(prev => ({ ...prev, name: e.target.value }))}
                               required
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                              className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                               placeholder="Your full name"
                             />
                           </div>
                           <div>
-                            <label className="block text-gray-700 mb-2 text-sm font-medium">Email *</label>
+                            <label className="block text-content-muted mb-2 text-sm font-medium">Email *</label>
                             <input 
                               type="email" 
                               name="email"
                               value={bookingData.email}
                               onChange={(e) => setBookingData(prev => ({ ...prev, email: e.target.value }))}
                               required
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                              className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                               placeholder="your.email@example.com"
                             />
                           </div>
@@ -539,19 +539,19 @@ const ServicesMain = () => {
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-gray-700 mb-2 text-sm font-medium">Phone *</label>
+                            <label className="block text-content-muted mb-2 text-sm font-medium">Phone *</label>
                             <input 
                               type="tel" 
                               name="phone"
                               value={bookingData.phone}
                               onChange={(e) => setBookingData(prev => ({ ...prev, phone: e.target.value }))}
                               required
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                              className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                               placeholder="+254 700 000 000"
                             />
                           </div>
                           <div>
-                            <label className="block text-gray-700 mb-2 text-sm font-medium">Preferred Date *</label>
+                            <label className="block text-content-muted mb-2 text-sm font-medium">Preferred Date *</label>
                             <input 
                               type="date" 
                               name="date"
@@ -559,32 +559,32 @@ const ServicesMain = () => {
                               onChange={(e) => setBookingData(prev => ({ ...prev, date: e.target.value }))}
                               required
                               min={new Date().toISOString().split('T')[0]}
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                              className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                             />
                           </div>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-gray-700 mb-2 text-sm font-medium">Preferred Time *</label>
+                            <label className="block text-content-muted mb-2 text-sm font-medium">Preferred Time *</label>
                             <input 
                               type="time" 
                               name="time"
                               value={bookingData.time}
                               onChange={(e) => setBookingData(prev => ({ ...prev, time: e.target.value }))}
                               required
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                              className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                             />
                           </div>
                           <div className="flex items-end">
                             <div className="w-full">
-                              <label className="block text-gray-700 mb-2 text-sm font-medium">Service Type</label>
-                              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <label className="block text-content-muted mb-2 text-sm font-medium">Service Type</label>
+                              <div className="p-3 bg-surface rounded-lg border border-line">
                                 <span className="font-medium text-primary">
                                   {serviceTypes.find(s => s.value === bookingData.serviceType)?.label}
                                 </span>
                                 {bookingData.serviceType === 'viewing' && bookingData.propertyId && (
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-sm text-content-muted mt-1">
                                     Property: {properties.find(p => p.id === bookingData.propertyId)?.title}
                                   </p>
                                 )}
@@ -594,7 +594,7 @@ const ServicesMain = () => {
                         </div>
                         
                         <div>
-                          <label className="block text-gray-700 mb-2 text-sm font-medium">
+                          <label className="block text-content-muted mb-2 text-sm font-medium">
                             {bookingData.serviceType === 'viewing' ? 'Special Requests for Viewing' : 'Additional Information'}
                           </label>
                           <textarea 
@@ -607,7 +607,7 @@ const ServicesMain = () => {
                                 ? "Any specific requests or questions about the property..."
                                 : "Tell us more about your requirements..."
                             }
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            className="w-full p-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                           ></textarea>
                         </div>
                         
@@ -615,7 +615,7 @@ const ServicesMain = () => {
                           <button
                             type="button"
                             onClick={prevStep}
-                            className="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                            className="px-6 py-3 border border-line-strong rounded-lg font-medium hover:bg-surface transition-colors"
                           >
                             Back
                           </button>
@@ -624,7 +624,7 @@ const ServicesMain = () => {
                             whileTap={{ scale: 0.98 }}
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-primary text-white font-medium py-3.5 px-8 rounded-lg shadow-lg hover:shadow-xl disabled:opacity-70 transition-all flex items-center"
+                            className="bg-primary text-content-on-brand font-medium py-3.5 px-8 rounded-lg shadow-lg hover:shadow-xl disabled:opacity-70 transition-all flex items-center"
                           >
                             {isSubmitting ? (
                               <>
@@ -645,7 +645,7 @@ const ServicesMain = () => {
                   </form>
         </Modal>
           
-        <main className="flex-grow bg-gray-50">
+        <main className="flex-grow bg-surface">
           {/* Services Hero */}
           <section className="bg-gradient-to-br from-primary via-blue-700 to-blue-800 py-20 md:py-28 text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20"></div>
@@ -665,7 +665,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openBookingModal('viewing')}
-                  className="bg-white text-primary font-bold py-4 px-8 rounded-xl hover:bg-blue-50 transition-all shadow-2xl text-lg mr-4 mb-4"
+                  className="bg-surface-raised text-primary font-bold py-4 px-8 rounded-xl hover:bg-brand-subtle transition-all shadow-2xl text-lg mr-4 mb-4"
                 >
                   Book a Viewing
                 </motion.button>
@@ -673,7 +673,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openBookingModal('consultation')}
-                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-white hover:text-primary transition-all shadow-2xl text-lg"
+                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
                 >
                   Get Consultation
                 </motion.button>
@@ -682,7 +682,7 @@ const ServicesMain = () => {
           </section>
 
           {/* Services Grid */}
-          <section className="py-16 bg-white">
+          <section className="py-16 bg-surface-raised">
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -690,7 +690,7 @@ const ServicesMain = () => {
                 className="text-center mb-16"
               >
                 <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Our Services</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+                <p className="text-content-muted max-w-2xl mx-auto text-lg">
                   Comprehensive real estate solutions tailored for the Kenyan market
                 </p>
               </motion.div>
@@ -703,25 +703,25 @@ const ServicesMain = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ y: -5 }}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all p-6 border border-gray-100 group cursor-pointer"
+                    className="bg-surface-raised rounded-2xl shadow-lg hover:shadow-xl transition-all p-6 border border-line group cursor-pointer"
                     onClick={() => openBookingModal(service.title.toLowerCase().includes('sale') ? 'consultation' : 
                                              service.title.toLowerCase().includes('valuation') ? 'valuation' :
                                              service.title.toLowerCase().includes('management') ? 'management' : 'viewing')}
                   >
                     <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{service.icon}</div>
                     <h3 className="text-xl font-bold text-primary mb-3">{service.title}</h3>
-                    <p className="text-gray-600 mb-4">{service.description}</p>
+                    <p className="text-content-muted mb-4">{service.description}</p>
                     <ul className="space-y-2 mb-6">
                       {service.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center text-sm text-gray-700">
+                        <li key={idx} className="flex items-center text-sm text-content-muted">
                           <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
                           {feature}
                         </li>
                       ))}
                     </ul>
-                    <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
+                    <div className="border-t border-line pt-4 flex justify-between items-center">
                       <span className="text-primary font-semibold">{service.price}</span>
-                      <span className="text-blue-600 font-medium text-sm">Book Now →</span>
+                      <span className="text-brand font-medium text-sm">Book Now →</span>
                     </div>
                   </motion.div>
                 ))}
@@ -730,7 +730,7 @@ const ServicesMain = () => {
           </section>
           
           {/* FAQ Section */}
-          <section className="py-16 bg-gray-50">
+          <section className="py-16 bg-surface">
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -740,7 +740,7 @@ const ServicesMain = () => {
                 <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
                   Frequently Asked Questions
                 </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+                <p className="text-content-muted max-w-2xl mx-auto text-lg">
                   Everything you need to know about our Kenya real estate services
                 </p>
               </motion.div>
@@ -752,13 +752,13 @@ const ServicesMain = () => {
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="border-b border-gray-200 last:border-b-0"
+                    className="border-b border-line last:border-b-0"
                   >
                     <button 
                       className="flex justify-between items-center w-full text-left py-6 group"
                       onClick={() => toggleFAQ(index)}
                     >
-                      <h3 className="text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors pr-4">
+                      <h3 className="text-lg font-semibold text-content group-hover:text-primary transition-colors pr-4">
                         {faq.question}
                       </h3>
                       <motion.span
@@ -776,7 +776,7 @@ const ServicesMain = () => {
                           exit={{ opacity: 0, height: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="pb-6 text-gray-600 leading-relaxed">
+                          <div className="pb-6 text-content-muted leading-relaxed">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -815,7 +815,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openBookingModal('viewing')}
-                  className="bg-white text-primary font-bold py-4 px-8 rounded-xl hover:bg-blue-50 transition-all shadow-2xl text-lg"
+                  className="bg-surface-raised text-primary font-bold py-4 px-8 rounded-xl hover:bg-brand-subtle transition-all shadow-2xl text-lg"
                 >
                   Book a Viewing
                 </motion.button>
@@ -823,7 +823,7 @@ const ServicesMain = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   href="tel:+254758066526" 
-                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-white hover:text-primary transition-all shadow-2xl text-lg"
+                  className="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-xl hover:bg-surface-raised hover:text-primary transition-all shadow-2xl text-lg"
                 >
                   📞 +254 758 066 526
                 </motion.a>

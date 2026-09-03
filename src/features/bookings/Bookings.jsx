@@ -217,7 +217,7 @@ const Bookings = () => {
       
       {/* Success Message */}
       {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50 animate-fadeIn">
+        <div className="fixed top-4 right-4 bg-success-surface border border-success-border text-success-content px-4 py-3 rounded-lg shadow-lg z-50 animate-fadeIn">
           <p>{successMessage}</p>
         </div>
       )}

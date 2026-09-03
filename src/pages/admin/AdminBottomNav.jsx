@@ -72,7 +72,7 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
 
   return (
     <nav 
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-raised border-t border-line shadow-[0_-4px_20px_rgba(0,0,0,0.1)]"
       role="navigation"
       aria-label="Admin bottom navigation"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
@@ -94,8 +94,8 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
                 className="flex flex-col items-center justify-center flex-1 h-full py-1 group"
                 aria-label="Open more options"
               >
-                <Icon className="w-5 h-5 text-gray-500 group-active:text-blue-600" />
-                <span className="text-[10px] font-medium text-gray-500 mt-0.5">
+                <Icon className="w-5 h-5 text-content-subtle group-active:text-brand" />
+                <span className="text-[10px] font-medium text-content-subtle mt-0.5">
                   {item.label}
                 </span>
               </button>
@@ -114,24 +114,24 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
               {active && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-blue-600 rounded-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-brand rounded-full"
                   initial={false}
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
               
               <div className="relative">
-                <Icon className={`w-5 h-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+                <Icon className={`w-5 h-5 ${active ? 'text-brand' : 'text-content-subtle'}`} />
                 
                 {/* Badge */}
                 {item.badge && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5">
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] flex items-center justify-center bg-danger-content text-content-on-brand text-[9px] font-bold rounded-full px-0.5">
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}
               </div>
               
-              <span className={`text-[10px] font-medium mt-0.5 ${active ? 'text-blue-600' : 'text-gray-500'}`}>
+              <span className={`text-[10px] font-medium mt-0.5 ${active ? 'text-brand' : 'text-content-subtle'}`}>
                 {item.label}
               </span>
             </NavLink>

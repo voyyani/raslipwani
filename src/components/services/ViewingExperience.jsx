@@ -310,7 +310,7 @@ const ViewingExperience = () => {
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="text-gray-600 max-w-3xl mx-auto"
+              className="text-content-muted max-w-3xl mx-auto"
             >
               Select the viewing option that best suits your needs and schedule
             </motion.p>
@@ -323,7 +323,7 @@ const ViewingExperience = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`text-left bg-white rounded-2xl shadow-lg overflow-hidden border-2 ${
+                className={`text-left bg-surface-raised rounded-2xl shadow-lg overflow-hidden border-2 ${
                   viewingType === option.type 
                     ? 'border-primary ring-2 ring-primary/30' 
                     : 'border-transparent'
@@ -335,13 +335,13 @@ const ViewingExperience = () => {
                     <div className={`p-3 rounded-xl mr-3 ${
                       viewingType === option.type 
                         ? 'bg-primary text-white' 
-                        : 'bg-gray-100 text-primary'
+                        : 'bg-surface-sunken text-primary'
                     }`}>
                       <Icon name={option.icon} size={20} />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold">{option.title}</h3>
-                      <p className="text-gray-600 text-sm">{option.description}</p>
+                      <p className="text-content-muted text-sm">{option.description}</p>
                     </div>
                   </div>
                   
@@ -353,7 +353,7 @@ const ViewingExperience = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Price:</span>
                       <span className={`font-medium ${
-                        option.price === "Free" ? 'text-green-600' : 'text-primary'
+                        option.price === "Free" ? 'text-success-content' : 'text-primary'
                       }`}>
                         {option.price}
                       </span>
@@ -363,7 +363,7 @@ const ViewingExperience = () => {
                   <ul className="space-y-2 mb-4 text-sm">
                     {option.features.map((feature, i) => (
                       <li key={i} className="flex items-start">
-                        <Icon name="check-circle" size={12} className="text-green-500 mt-0.5 mr-2" />
+                        <Icon name="check-circle" size={12} className="text-success-content mt-0.5 mr-2" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -372,7 +372,7 @@ const ViewingExperience = () => {
                   <div className={`w-full py-2.5 rounded-lg font-medium text-sm text-center ${
                     viewingType === option.type
                       ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-700'
+                      : 'bg-surface-sunken text-content-muted'
                   }`}>
                     {viewingType === option.type ? 'Selected' : 'Select Option'}
                   </div>
@@ -384,7 +384,7 @@ const ViewingExperience = () => {
       </section>
 
       {/* Filters Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-surface">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <motion.h2 
@@ -397,23 +397,23 @@ const ViewingExperience = () => {
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="text-gray-600 max-w-3xl mx-auto text-sm"
+              className="text-content-muted max-w-3xl mx-auto text-sm"
             >
               Browse our curated selection of premium properties
             </motion.p>
           </div>
           
           {/* Filters */}
-          <div className="bg-white rounded-xl shadow-md p-5 mb-8">
+          <div className="bg-surface-raised rounded-xl shadow-md p-5 mb-8">
             <h3 className="text-lg font-bold mb-4">Filter Properties</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-gray-700 mb-2 text-sm">Purpose</label>
+                <label className="block text-content-muted mb-2 text-sm">Purpose</label>
                 <select
                   name="purpose"
                   value={filters.purpose}
                   onChange={handleFilterChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                 >
                   <option value="">All Purposes</option>
                   <option value="sale">For Sale</option>
@@ -421,12 +421,12 @@ const ViewingExperience = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-gray-700 mb-2 text-sm">Property Type</label>
+                <label className="block text-content-muted mb-2 text-sm">Property Type</label>
                 <select
                   name="propertyType"
                   value={filters.propertyType}
                   onChange={handleFilterChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                 >
                   <option value="">All Types</option>
                   <option value="villa">Villa</option>
@@ -437,23 +437,23 @@ const ViewingExperience = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-gray-700 mb-2 text-sm">Location</label>
+                <label className="block text-content-muted mb-2 text-sm">Location</label>
                 <input
                   type="text"
                   name="location"
                   value={filters.location}
                   onChange={handleFilterChange}
                   placeholder="Enter location"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2 text-sm">Bedrooms</label>
+                <label className="block text-content-muted mb-2 text-sm">Bedrooms</label>
                 <select
                   name="bedrooms"
                   value={filters.bedrooms}
                   onChange={handleFilterChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                 >
                   <option value="">Any</option>
                   <option value="1">1+</option>
@@ -469,7 +469,7 @@ const ViewingExperience = () => {
             {activeFilters.length > 0 && (
               <div className="mt-5">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-800">Active Filters</h3>
+                  <h3 className="text-sm font-medium text-content">Active Filters</h3>
                   <button 
                     onClick={clearAllFilters}
                     className="text-xs text-primary hover:underline"
@@ -501,14 +501,14 @@ const ViewingExperience = () => {
             <div className="mt-6 flex justify-between">
               <button
                 onClick={fetchProperties}
-                className="bg-primary text-white py-2.5 px-6 rounded-lg hover:bg-primary-dark font-medium text-sm"
+                className="bg-primary text-content-on-brand py-2.5 px-6 rounded-lg hover:bg-primary-dark font-medium text-sm"
               >
                 {showResults ? 'Update Results' : 'Find Properties'}
               </button>
               
               <button
                 onClick={clearAllFilters}
-                className="bg-gray-100 text-gray-800 py-2.5 px-5 rounded-lg hover:bg-gray-200 font-medium text-sm"
+                className="bg-surface-sunken text-content py-2.5 px-5 rounded-lg hover:bg-surface-sunken font-medium text-sm"
               >
                 Reset Filters
               </button>
@@ -523,13 +523,13 @@ const ViewingExperience = () => {
           )}
           
           {showResults && !loading && filteredProperties.length === 0 && (
-            <div className="bg-white rounded-xl shadow-md p-8 text-center">
-              <Icon name="search" size={30} className="text-gray-400 mb-3" />
+            <div className="bg-surface-raised rounded-xl shadow-md p-8 text-center">
+              <Icon name="search" size={30} className="text-content-subtle mb-3" />
               <h3 className="text-lg font-bold mb-1">No properties match your criteria</h3>
-              <p className="text-gray-600 mb-4 text-sm">Try adjusting your filters or check back later</p>
+              <p className="text-content-muted mb-4 text-sm">Try adjusting your filters or check back later</p>
               <button 
                 onClick={clearAllFilters}
-                className="bg-primary text-white py-1.5 px-5 rounded-lg hover:bg-primary-dark text-sm"
+                className="bg-primary text-content-on-brand py-1.5 px-5 rounded-lg hover:bg-primary-dark text-sm"
               >
                 Reset Filters
               </button>
@@ -544,7 +544,7 @@ const ViewingExperience = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-md transition-all"
+                  className="bg-surface-raised rounded-xl shadow-lg overflow-hidden hover:shadow-md transition-all"
                 >
                   <div className="relative pb-[75%] overflow-hidden">
                     {property.images && property.images.length > 0 ? (
@@ -555,7 +555,7 @@ const ViewingExperience = () => {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="absolute inset-0 w-full h-full bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center text-gray-500">
+                      <div className="absolute inset-0 w-full h-full bg-surface-sunken border-2 border-dashed rounded-xl flex items-center justify-center text-content-subtle">
                         <Icon name="home" size={30} />
                       </div>
                     )}
@@ -569,7 +569,7 @@ const ViewingExperience = () => {
                       <span className="text-primary font-bold text-lg">
                         {formatPrice(property.price)}
                       </span>
-                      <div className="flex gap-2 text-gray-600 text-xs">
+                      <div className="flex gap-2 text-content-muted text-xs">
                         <span>
                           <Icon name="bed" className="mr-1" /> {property.bedrooms || '-'}
                         </span>
@@ -582,17 +582,17 @@ const ViewingExperience = () => {
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 mb-3 line-clamp-2 text-sm">
+                    <p className="text-content-muted mb-3 line-clamp-2 text-sm">
                       {property.description || 'No description available'}
                     </p>
                     
-                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                    <div className="flex justify-between items-center pt-3 border-t border-line">
                       <button
                         onClick={() => {
                           setSelectedProperty(property);
                           setBookingStep(1);
                         }}
-                        className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors text-sm flex items-center justify-center"
+                        className="w-full bg-primary text-content-on-brand py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors text-sm flex items-center justify-center"
                       >
                         <Icon name="calendar-check" className="mr-1.5" /> Book Viewing
                       </button>
@@ -626,7 +626,7 @@ const ViewingExperience = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-bold mb-3">Property Details</h3>
-                      <div className="bg-gray-100 rounded-lg p-3 mb-4">
+                      <div className="bg-surface-sunken rounded-lg p-3 mb-4">
                         <div className="flex items-start">
                           {selectedProperty.images && selectedProperty.images.length > 0 ? (
                             <img 
@@ -635,13 +635,13 @@ const ViewingExperience = () => {
                               className="w-20 h-20 object-cover rounded-lg mr-3"
                             />
                           ) : (
-                            <div className="bg-gray-200 border-2 border-dashed rounded-xl w-20 h-20 flex items-center justify-center text-gray-500 mr-3">
+                            <div className="bg-surface-sunken border-2 border-dashed rounded-xl w-20 h-20 flex items-center justify-center text-content-subtle mr-3">
                               <Icon name="home" />
                             </div>
                           )}
                           <div>
                             <h4 className="font-bold text-md">{selectedProperty.title}</h4>
-                            <p className="text-gray-600 mb-1 text-sm">{selectedProperty.location}</p>
+                            <p className="text-content-muted mb-1 text-sm">{selectedProperty.location}</p>
                             <p className="text-primary font-bold text-sm">
                               {formatPrice(selectedProperty.price)}
                             </p>
@@ -651,14 +651,14 @@ const ViewingExperience = () => {
                       
                       <div className="mb-4">
                         <h4 className="font-bold mb-2 text-md">Selected Viewing Experience</h4>
-                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <div className="bg-brand-subtle rounded-lg p-3 border border-brand-subtle">
                           <div className="flex items-center mb-1">
                             <Icon name={viewingOptions.find(o => o.type === viewingType)?.icon} className="text-primary mr-2" />
                             <h5 className="font-bold">
                               {viewingOptions.find(o => o.type === viewingType)?.title}
                             </h5>
                           </div>
-                          <p className="text-gray-600 mb-2 text-sm">
+                          <p className="text-content-muted mb-2 text-sm">
                             {viewingOptions.find(o => o.type === viewingType)?.description}
                           </p>
                           <div className="flex justify-between items-center text-sm">
@@ -668,7 +668,7 @@ const ViewingExperience = () => {
                         </div>
                       </div>
                       
-                      <div className="mt-4 bg-gray-50 rounded-lg p-3">
+                      <div className="mt-4 bg-surface rounded-lg p-3">
                         <div className="flex justify-between items-center mb-1 text-sm">
                           <span className="font-medium">Viewing Price:</span>
                           <span className="font-bold">
@@ -679,7 +679,7 @@ const ViewingExperience = () => {
                       
                       <button
                         onClick={() => setBookingStep(2)}
-                        className="w-full mt-4 bg-primary text-white py-2.5 px-5 rounded-lg hover:bg-primary-dark transition-colors font-medium text-sm"
+                        className="w-full mt-4 bg-primary text-content-on-brand py-2.5 px-5 rounded-lg hover:bg-primary-dark transition-colors font-medium text-sm"
                       >
                         Continue to Schedule
                       </button>
@@ -688,42 +688,42 @@ const ViewingExperience = () => {
                     <div>
                       <h3 className="text-lg font-bold mb-3">What to Expect</h3>
                       <div className="space-y-3">
-                        <div className="bg-white border border-gray-200 rounded-lg p-3">
+                        <div className="bg-surface-raised border border-line rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
                               <Icon name="clock" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Preparation</h4>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-content-muted">
                                 Our agent will prepare the property for your viewing
                               </p>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="bg-white border border-gray-200 rounded-lg p-3">
+                        <div className="bg-surface-raised border border-line rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
                               <Icon name="user" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Dedicated Agent</h4>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-content-muted">
                                 A specialized agent will guide you through the viewing
                               </p>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="bg-white border border-gray-200 rounded-lg p-3">
+                        <div className="bg-surface-raised border border-line rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
                               <Icon name="file-alt" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Follow-Up</h4>
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-content-muted">
                                 After the viewing, we'll provide a detailed summary
                               </p>
                             </div>
@@ -736,75 +736,75 @@ const ViewingExperience = () => {
                   <form onSubmit={handleBookingSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-gray-700 mb-1 text-sm">Full Name *</label>
+                        <label className="block text-content-muted mb-1 text-sm">Full Name *</label>
                         <input 
                           type="text" 
                           name="name"
                           value={bookingData.name}
                           onChange={(e) => setBookingData(prev => ({ ...prev, name: e.target.value }))}
                           required
-                          className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                          className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-gray-700 mb-1 text-sm">Email *</label>
+                        <label className="block text-content-muted mb-1 text-sm">Email *</label>
                         <input 
                           type="email" 
                           name="email"
                           value={bookingData.email}
                           onChange={(e) => setBookingData(prev => ({ ...prev, email: e.target.value }))}
                           required
-                          className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                          className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                         />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-gray-700 mb-1 text-sm">Phone *</label>
+                        <label className="block text-content-muted mb-1 text-sm">Phone *</label>
                         <input 
                           type="tel" 
                           name="phone"
                           value={bookingData.phone}
                           onChange={(e) => setBookingData(prev => ({ ...prev, phone: e.target.value }))}
                           required
-                          className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                          className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-gray-700 mb-1 text-sm">Preferred Date *</label>
+                        <label className="block text-content-muted mb-1 text-sm">Preferred Date *</label>
                         <input 
                           type="date" 
                           name="date"
                           value={bookingData.date}
                           onChange={(e) => setBookingData(prev => ({ ...prev, date: e.target.value }))}
                           required
-                          className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                          className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-gray-700 mb-1 text-sm">Preferred Time *</label>
+                      <label className="block text-content-muted mb-1 text-sm">Preferred Time *</label>
                       <input 
                         type="time" 
                         name="time"
                         value={bookingData.time}
                         onChange={(e) => setBookingData(prev => ({ ...prev, time: e.target.value }))}
                         required
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                        className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-gray-700 mb-1 text-sm">Special Requests</label>
+                      <label className="block text-content-muted mb-1 text-sm">Special Requests</label>
                       <textarea 
                         name="notes"
                         value={bookingData.notes}
                         onChange={(e) => setBookingData(prev => ({ ...prev, notes: e.target.value }))}
                         rows="3"
                         placeholder="Any specific requests or questions"
-                        className="w-full p-2.5 border border-gray-300 rounded-lg text-sm"
+                        className="w-full p-2.5 border border-line-strong rounded-lg text-sm"
                       ></textarea>
                     </div>
                     
@@ -814,7 +814,7 @@ const ViewingExperience = () => {
                         whileTap={{ scale: 0.99 }}
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-primary text-white font-medium py-2.5 px-5 rounded-lg shadow hover:shadow-md disabled:opacity-70 text-sm"
+                        className="w-full bg-primary text-content-on-brand font-medium py-2.5 px-5 rounded-lg shadow hover:shadow-md disabled:opacity-70 text-sm"
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center">

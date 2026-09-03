@@ -93,32 +93,32 @@ const InvestmentCalculator = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        <h2 className="text-4xl font-bold text-content mb-4">
           Investment Calculator
         </h2>
-        <p className="text-xl text-gray-600">
+        <p className="text-xl text-content-muted">
           Calculate your potential returns from Nairobi real estate investments
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Input Panel */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Home className="w-6 h-6 text-blue-600" />
+        <div className="bg-surface-raised rounded-2xl shadow-xl p-8">
+          <h3 className="text-2xl font-bold text-content mb-6 flex items-center gap-2">
+            <Home className="w-6 h-6 text-brand" />
             Investment Parameters
           </h3>
 
           <div className="space-y-6">
             {/* Currency Selector */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Currency
               </label>
               <select
                 value={inputs.currency}
                 onChange={(e) => handleInputChange('currency', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                className="w-full px-4 py-3 border-2 border-line-strong rounded-lg focus:border-brand focus:outline-none text-lg"
               >
                 {Object.entries(currencies).map(([code, curr]) => (
                   <option key={code} value={code}>
@@ -130,7 +130,7 @@ const InvestmentCalculator = () => {
 
             {/* Property Value */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Property Value: {formatCurrency(inputs.propertyValue)}
               </label>
               <input
@@ -140,9 +140,9 @@ const InvestmentCalculator = () => {
                 step="5000"
                 value={inputs.propertyValue}
                 onChange={(e) => handleInputChange('propertyValue', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-brand"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>{formatCurrency(20000)}</span>
                 <span>{formatCurrency(500000)}</span>
               </div>
@@ -150,7 +150,7 @@ const InvestmentCalculator = () => {
 
             {/* Down Payment */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Down Payment: {inputs.downPayment}%
               </label>
               <input
@@ -160,9 +160,9 @@ const InvestmentCalculator = () => {
                 step="5"
                 value={inputs.downPayment}
                 onChange={(e) => handleInputChange('downPayment', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-brand"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>10%</span>
                 <span>100%</span>
               </div>
@@ -170,7 +170,7 @@ const InvestmentCalculator = () => {
 
             {/* Annual Rental Yield */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Expected Annual Rental Yield: {inputs.rentalYield}%
               </label>
               <input
@@ -180,9 +180,9 @@ const InvestmentCalculator = () => {
                 step="0.5"
                 value={inputs.rentalYield}
                 onChange={(e) => handleInputChange('rentalYield', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-success"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>4%</span>
                 <span>15%</span>
               </div>
@@ -190,7 +190,7 @@ const InvestmentCalculator = () => {
 
             {/* Property Appreciation */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Annual Property Appreciation: {inputs.appreciation}%
               </label>
               <input
@@ -200,9 +200,9 @@ const InvestmentCalculator = () => {
                 step="0.5"
                 value={inputs.appreciation}
                 onChange={(e) => handleInputChange('appreciation', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-success"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>3%</span>
                 <span>20%</span>
               </div>
@@ -210,7 +210,7 @@ const InvestmentCalculator = () => {
 
             {/* Holding Period */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Holding Period: {inputs.holdingPeriod} years
               </label>
               <input
@@ -220,9 +220,9 @@ const InvestmentCalculator = () => {
                 step="1"
                 value={inputs.holdingPeriod}
                 onChange={(e) => handleInputChange('holdingPeriod', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-purple-600"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>1 year</span>
                 <span>20 years</span>
               </div>
@@ -230,7 +230,7 @@ const InvestmentCalculator = () => {
 
             {/* Occupancy Rate */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Expected Occupancy Rate: {inputs.occupancyRate}%
               </label>
               <input
@@ -240,9 +240,9 @@ const InvestmentCalculator = () => {
                 step="5"
                 value={inputs.occupancyRate}
                 onChange={(e) => handleInputChange('occupancyRate', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-brand"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>50%</span>
                 <span>100%</span>
               </div>
@@ -250,7 +250,7 @@ const InvestmentCalculator = () => {
 
             {/* Management Fee */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-content-muted mb-2">
                 Property Management Fee: {inputs.managementFee}%
               </label>
               <input
@@ -260,9 +260,9 @@ const InvestmentCalculator = () => {
                 step="1"
                 value={inputs.managementFee}
                 onChange={(e) => handleInputChange('managementFee', e.target.value)}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
+                className="w-full h-2 bg-surface-sunken rounded-lg appearance-none cursor-pointer accent-warning"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-content-subtle mt-1">
                 <span>0%</span>
                 <span>20%</span>
               </div>
@@ -281,7 +281,7 @@ const InvestmentCalculator = () => {
 
             {results && (
               <div className="space-y-6">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                   <div className="text-sm text-blue-100 mb-1">Total ROI</div>
                   <div className="text-4xl font-bold">{results.roi.toFixed(1)}%</div>
                   <div className="text-sm text-blue-200 mt-1">
@@ -290,17 +290,17 @@ const InvestmentCalculator = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                     <div className="text-xs text-blue-100 mb-1">Annual ROI</div>
                     <div className="text-2xl font-bold">{results.annualizedROI.toFixed(1)}%</div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="bg-surface-raised/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                     <div className="text-xs text-blue-100 mb-1">Cash on Cash</div>
                     <div className="text-2xl font-bold">{results.cashOnCash.toFixed(1)}%</div>
                   </div>
                 </div>
 
-                <div className="bg-green-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-400/30">
+                <div className="bg-success-content/20 backdrop-blur-sm rounded-xl p-4 border border-success-border/30">
                   <div className="text-sm text-green-100 mb-1">Net Profit</div>
                   <div className="text-3xl font-bold">{formatCurrency(results.netProfit)}</div>
                 </div>
@@ -309,65 +309,65 @@ const InvestmentCalculator = () => {
           </div>
 
           {/* Detailed Breakdown */}
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Detailed Breakdown</h3>
+          <div className="bg-surface-raised rounded-2xl shadow-xl p-8">
+            <h3 className="text-xl font-bold text-content mb-6">Detailed Breakdown</h3>
             
             {results && (
               <div className="space-y-4">
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
                     Initial Investment
                   </span>
                   <span className="font-semibold">{formatCurrency(results.initialInvestment)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Monthly Rental Income
                   </span>
-                  <span className="font-semibold text-green-600">{formatCurrency(results.monthlyIncome)}</span>
+                  <span className="font-semibold text-success-content">{formatCurrency(results.monthlyIncome)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600">Annual Rental Income</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(results.netAnnualRent)}</span>
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted">Annual Rental Income</span>
+                  <span className="font-semibold text-success-content">{formatCurrency(results.netAnnualRent)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600">Total Rental ({inputs.holdingPeriod} years)</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(results.totalRentalIncome)}</span>
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted">Total Rental ({inputs.holdingPeriod} years)</span>
+                  <span className="font-semibold text-success-content">{formatCurrency(results.totalRentalIncome)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600 flex items-center gap-2">
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
                     Property Value (Future)
                   </span>
-                  <span className="font-semibold text-blue-600">{formatCurrency(results.futureValue)}</span>
+                  <span className="font-semibold text-brand">{formatCurrency(results.futureValue)}</span>
                 </div>
 
-                <div className="flex justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600">Capital Appreciation</span>
-                  <span className="font-semibold text-blue-600">{formatCurrency(results.totalAppreciation)}</span>
+                <div className="flex justify-between py-3 border-b border-line">
+                  <span className="text-content-muted">Capital Appreciation</span>
+                  <span className="font-semibold text-brand">{formatCurrency(results.totalAppreciation)}</span>
                 </div>
 
-                <div className="flex justify-between py-4 bg-green-50 rounded-lg px-4 mt-4">
-                  <span className="font-bold text-gray-900 text-lg">Total Returns</span>
-                  <span className="font-bold text-green-600 text-lg">{formatCurrency(results.totalReturns)}</span>
+                <div className="flex justify-between py-4 bg-success-surface rounded-lg px-4 mt-4">
+                  <span className="font-bold text-content text-lg">Total Returns</span>
+                  <span className="font-bold text-success-content text-lg">{formatCurrency(results.totalReturns)}</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Disclaimer */}
-          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6">
+          <div className="bg-warning-surface border-2 border-warning-border rounded-xl p-6">
             <div className="flex gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-warning-content flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-yellow-900 mb-2">Investment Disclaimer</h4>
-                <p className="text-sm text-yellow-800">
+                <h4 className="font-semibold text-warning-content mb-2">Investment Disclaimer</h4>
+                <p className="text-sm text-warning-content">
                   These calculations are estimates based on the parameters you've provided. 
                   Actual returns may vary based on market conditions, property performance, and other factors. 
                   Consult with our investment advisors for personalized projections.
@@ -382,7 +382,7 @@ const InvestmentCalculator = () => {
             <p className="mb-4 text-blue-100">
               Schedule a consultation with our investment team
             </p>
-            <button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-all">
+            <button className="bg-surface-raised text-brand hover:bg-surface-sunken px-8 py-3 rounded-lg font-semibold transition-all">
               Get Started
             </button>
           </div>

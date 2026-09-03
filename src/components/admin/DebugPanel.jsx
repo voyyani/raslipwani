@@ -125,8 +125,8 @@ const DebugPanel = ({ hidden = true }) => {
 
   const getLogColor = (type) => {
     switch (type) {
-      case 'error': return 'text-red-400 bg-red-900/30';
-      case 'warn': return 'text-yellow-400 bg-yellow-900/30';
+      case 'error': return 'text-red-400 bg-danger-content/30';
+      case 'warn': return 'text-accent bg-yellow-900/30';
       default: return 'text-green-400 bg-gray-800';
     }
   };
@@ -143,7 +143,7 @@ const DebugPanel = ({ hidden = true }) => {
       >
         <FaBug className="text-lg" />
         {logs.filter(l => l.type === 'error').length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-danger-content text-content-on-brand text-xs w-5 h-5 rounded-full flex items-center justify-center">
             {logs.filter(l => l.type === 'error').length}
           </span>
         )}
@@ -165,14 +165,14 @@ const DebugPanel = ({ hidden = true }) => {
               </button>
               <button
                 onClick={() => { setLogs([]); localStorage.removeItem('debug_logs'); }}
-                className="text-gray-400 hover:text-white p-1"
+                className="text-content-subtle hover:text-white p-1"
                 title="Clear logs"
               >
                 <FaTrash className="text-sm" />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white p-1"
+                className="text-content-subtle hover:text-white p-1"
               >
                 <FaTimes />
               </button>
@@ -182,11 +182,11 @@ const DebugPanel = ({ hidden = true }) => {
           {/* Logs */}
           <div className="flex-1 overflow-y-auto p-2 space-y-1 text-xs font-mono">
             {logs.length === 0 ? (
-              <div className="text-gray-500 text-center py-4">No logs yet...</div>
+              <div className="text-content-subtle text-center py-4">No logs yet...</div>
             ) : (
               logs.map((log, i) => (
                 <div key={i} className={`p-1.5 rounded ${getLogColor(log.type)}`}>
-                  <span className="text-gray-500">[{new Date(log.time).toLocaleTimeString()}]</span>{' '}
+                  <span className="text-content-subtle">[{new Date(log.time).toLocaleTimeString()}]</span>{' '}
                   <span className="text-blue-400">[{log.url}]</span>{' '}
                   <span className="whitespace-pre-wrap break-all">{log.message}</span>
                 </div>

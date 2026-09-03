@@ -148,17 +148,17 @@ const CloudinarySettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div className="bg-brand-subtle border border-brand-subtle rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">
-          <FaCloudUploadAlt className="text-blue-600 text-2xl mt-0.5" />
+          <FaCloudUploadAlt className="text-brand text-2xl mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">About Cloudinary</h4>
-            <p className="text-sm text-blue-800">
+            <h4 className="font-medium text-brand-content mb-2">About Cloudinary</h4>
+            <p className="text-sm text-brand-content">
               Configure your Cloudinary account for image uploads. Get your credentials from{' '}
               <a href="https://cloudinary.com/console" target="_blank" rel="noopener noreferrer" className="underline font-medium">
                 Cloudinary Dashboard
@@ -169,82 +169,82 @@ const CloudinarySettings = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Cloud Name <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium text-content-muted mb-1">
+          Cloud Name <span className="text-danger-content">*</span>
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={formData.cloud_name}
             onChange={(e) => setFormData({ ...formData, cloud_name: e.target.value })}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
             placeholder="your-cloud-name"
             required
           />
           {formData.cloud_name && (
-            <span className="flex items-center text-xs text-green-600 bg-green-50 px-2 rounded">
+            <span className="flex items-center text-xs text-success-content bg-success-surface px-2 rounded">
               ✓ Set
             </span>
           )}
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-content-subtle mt-1">
           Found in your Cloudinary Dashboard under "Cloud Name"
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Upload Preset <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium text-content-muted mb-1">
+          Upload Preset <span className="text-danger-content">*</span>
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={formData.upload_preset}
             onChange={(e) => setFormData({ ...formData, upload_preset: e.target.value })}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
             placeholder="unsigned_preset"
             required
           />
           {formData.upload_preset && (
-            <span className="flex items-center text-xs text-green-600 bg-green-50 px-2 rounded">
+            <span className="flex items-center text-xs text-success-content bg-success-surface px-2 rounded">
               ✓ Set
             </span>
           )}
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-content-subtle mt-1">
           Create an unsigned upload preset in Cloudinary Settings → Upload → Upload Presets
         </p>
       </div>
 
       <div className="border-t pt-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Optional: API Credentials (for advanced features)</h4>
+        <h4 className="text-sm font-medium text-content-muted mb-3">Optional: API Credentials (for advanced features)</h4>
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               API Key
             </label>
             <input
               type="text"
               value={formData.cloudinary_api_key}
               onChange={(e) => setFormData({ ...formData, cloudinary_api_key: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="123456789012345"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               API Secret
             </label>
             <input
               type="password"
               value={formData.cloudinary_api_secret}
               onChange={(e) => setFormData({ ...formData, cloudinary_api_secret: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="••••••••••••••••••••"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-content-subtle mt-1">
               Only needed for signed uploads and admin API features
             </p>
           </div>
@@ -255,7 +255,7 @@ const CloudinarySettings = () => {
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
           {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
           Save Changes
@@ -265,7 +265,7 @@ const CloudinarySettings = () => {
           type="button"
           onClick={handleTestUpload}
           disabled={testStatus === 'testing'}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-success-content text-content-on-brand rounded-md hover:bg-success-content transition disabled:opacity-50"
         >
           {testStatus === 'testing' && <FaSpinner className="animate-spin" />}
           {testStatus === 'success' && <FaCheckCircle />}
@@ -276,12 +276,12 @@ const CloudinarySettings = () => {
       </div>
 
       {/* Current config summary */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Current Configuration</h4>
-        <div className="text-xs text-gray-600 space-y-1 font-mono">
-          <p><span className="text-gray-500">Upload URL:</span> https://api.cloudinary.com/v1_1/<span className="text-blue-600">{formData.cloud_name || '[cloud_name]'}</span>/image/upload</p>
-          <p><span className="text-gray-500">Preset:</span> <span className="text-blue-600">{formData.upload_preset || '[not set]'}</span></p>
-          <p><span className="text-gray-500">API Key:</span> {formData.cloudinary_api_key ? '••••' + formData.cloudinary_api_key.slice(-4) : <span className="text-gray-400">[not set]</span>}</p>
+      <div className="mt-6 p-4 bg-surface rounded-lg">
+        <h4 className="text-sm font-medium text-content-muted mb-2">Current Configuration</h4>
+        <div className="text-xs text-content-muted space-y-1 font-mono">
+          <p><span className="text-content-subtle">Upload URL:</span> https://api.cloudinary.com/v1_1/<span className="text-brand">{formData.cloud_name || '[cloud_name]'}</span>/image/upload</p>
+          <p><span className="text-content-subtle">Preset:</span> <span className="text-brand">{formData.upload_preset || '[not set]'}</span></p>
+          <p><span className="text-content-subtle">API Key:</span> {formData.cloudinary_api_key ? '••••' + formData.cloudinary_api_key.slice(-4) : <span className="text-content-subtle">[not set]</span>}</p>
         </div>
       </div>
     </form>

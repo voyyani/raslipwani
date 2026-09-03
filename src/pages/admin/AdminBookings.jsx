@@ -352,7 +352,7 @@ const AdminBookings = () => {
         </div>
         <div className="text-xs truncate">{eventInfo.event.title}</div>
         {priority === 'high' || priority === 'urgent' ? (
-          <div className="text-xs text-red-600 font-bold">⚠</div>
+          <div className="text-xs text-danger-content font-bold">⚠</div>
         ) : null}
       </div>
     );
@@ -361,7 +361,7 @@ const AdminBookings = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
       </div>
     );
   }
@@ -384,15 +384,15 @@ const AdminBookings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6 pb-20 md:pb-6">
+    <div className="min-h-screen bg-surface p-3 sm:p-4 lg:p-6 pb-20 md:pb-6">
       <Helmet>
         <title>Booking Management - Raslipwani Properties Admin</title>
       </Helmet>
 
       {/* Header */}
       <div className="mb-4">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Bookings</h1>
-        <p className="text-sm text-gray-600 hidden sm:block">Manage appointments with calendar</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-content">Bookings</h1>
+        <p className="text-sm text-content-muted hidden sm:block">Manage appointments with calendar</p>
       </div>
 
       {/* Mobile Stats - Collapsible */}
@@ -400,18 +400,18 @@ const AdminBookings = () => {
         <div className="mb-4">
           <button 
             onClick={() => setExpandedStats(!expandedStats)}
-            className="w-full flex items-center justify-between bg-white rounded-lg shadow p-3"
+            className="w-full flex items-center justify-between bg-surface-raised rounded-lg shadow p-3"
           >
             <div className="flex items-center gap-4">
-              <span className="text-lg font-bold text-gray-900">{stats.total}</span>
-              <span className="text-sm text-gray-600">Total Bookings</span>
+              <span className="text-lg font-bold text-content">{stats.total}</span>
+              <span className="text-sm text-content-muted">Total Bookings</span>
               {stats.pending > 0 && (
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClasses('pending')}`}>
                   {stats.pending} pending
                 </span>
               )}
             </div>
-            {expandedStats ? <FaChevronUp className="text-gray-400" /> : <FaChevronDown className="text-gray-400" />}
+            {expandedStats ? <FaChevronUp className="text-content-subtle" /> : <FaChevronDown className="text-content-subtle" />}
           </button>
           
           <AnimatePresence>
@@ -423,17 +423,17 @@ const AdminBookings = () => {
                 className="overflow-hidden"
               >
                 <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="bg-yellow-50 rounded-lg p-2 text-center border border-yellow-200">
-                    <div className="text-lg font-bold text-yellow-800">{stats.pending}</div>
-                    <div className="text-xs text-yellow-700">Pending</div>
+                  <div className="bg-warning-surface rounded-lg p-2 text-center border border-warning-border">
+                    <div className="text-lg font-bold text-warning-content">{stats.pending}</div>
+                    <div className="text-xs text-warning-content">Pending</div>
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-2 text-center border border-blue-200">
-                    <div className="text-lg font-bold text-blue-800">{stats.confirmed}</div>
-                    <div className="text-xs text-blue-700">Confirmed</div>
+                  <div className="bg-brand-subtle rounded-lg p-2 text-center border border-brand-subtle">
+                    <div className="text-lg font-bold text-brand-content">{stats.confirmed}</div>
+                    <div className="text-xs text-brand">Confirmed</div>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-2 text-center border border-green-200">
-                    <div className="text-lg font-bold text-green-800">{stats.completed}</div>
-                    <div className="text-xs text-green-700">Completed</div>
+                  <div className="bg-success-surface rounded-lg p-2 text-center border border-success-border">
+                    <div className="text-lg font-bold text-success-content">{stats.completed}</div>
+                    <div className="text-xs text-success-content">Completed</div>
                   </div>
                 </div>
               </motion.div>
@@ -445,42 +445,42 @@ const AdminBookings = () => {
       {/* Desktop Stats Dashboard */}
       {stats && !isMobile && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total</div>
+          <div className="bg-surface-raised rounded-lg shadow p-3 sm:p-4">
+            <div className="text-xl sm:text-2xl font-bold text-content">{stats.total}</div>
+            <div className="text-xs sm:text-sm text-content-muted">Total</div>
           </div>
-          <div className="bg-yellow-50 rounded-lg shadow p-3 sm:p-4 border border-yellow-200">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-800">{stats.pending}</div>
-            <div className="text-xs sm:text-sm text-yellow-700">Pending</div>
+          <div className="bg-warning-surface rounded-lg shadow p-3 sm:p-4 border border-warning-border">
+            <div className="text-xl sm:text-2xl font-bold text-warning-content">{stats.pending}</div>
+            <div className="text-xs sm:text-sm text-warning-content">Pending</div>
           </div>
-          <div className="bg-blue-50 rounded-lg shadow p-3 sm:p-4 border border-blue-200">
-            <div className="text-xl sm:text-2xl font-bold text-blue-800">{stats.confirmed}</div>
-            <div className="text-xs sm:text-sm text-blue-700">Confirmed</div>
+          <div className="bg-brand-subtle rounded-lg shadow p-3 sm:p-4 border border-brand-subtle">
+            <div className="text-xl sm:text-2xl font-bold text-brand-content">{stats.confirmed}</div>
+            <div className="text-xs sm:text-sm text-brand">Confirmed</div>
           </div>
-          <div className="bg-green-50 rounded-lg shadow p-3 sm:p-4 border border-green-200">
-            <div className="text-xl sm:text-2xl font-bold text-green-800">{stats.completed}</div>
-            <div className="text-xs sm:text-sm text-green-700">Completed</div>
+          <div className="bg-success-surface rounded-lg shadow p-3 sm:p-4 border border-success-border">
+            <div className="text-xl sm:text-2xl font-bold text-success-content">{stats.completed}</div>
+            <div className="text-xs sm:text-sm text-success-content">Completed</div>
           </div>
-          <div className="bg-red-50 rounded-lg shadow p-3 sm:p-4 border border-red-200">
-            <div className="text-xl sm:text-2xl font-bold text-red-800">{stats.cancelled}</div>
-            <div className="text-xs sm:text-sm text-red-700">Cancelled</div>
+          <div className="bg-danger-surface rounded-lg shadow p-3 sm:p-4 border border-danger-border">
+            <div className="text-xl sm:text-2xl font-bold text-danger-content">{stats.cancelled}</div>
+            <div className="text-xs sm:text-sm text-danger-content">Cancelled</div>
           </div>
-          <div className="bg-orange-50 rounded-lg shadow p-3 sm:p-4 border border-orange-200">
-            <div className="text-xl sm:text-2xl font-bold text-orange-800">{stats.high_priority}</div>
-            <div className="text-xs sm:text-sm text-orange-700">High Priority</div>
+          <div className="bg-warning-surface rounded-lg shadow p-3 sm:p-4 border border-warning-border">
+            <div className="text-xl sm:text-2xl font-bold text-warning-content">{stats.high_priority}</div>
+            <div className="text-xs sm:text-sm text-warning-content">High Priority</div>
           </div>
         </div>
       )}
 
       {/* Mobile View Toggle */}
       {isMobile && (
-        <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-1 mb-4 bg-surface-sunken p-1 rounded-lg">
           <button
             onClick={() => setMobileView('list')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
               mobileView === 'list'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600'
+                ? 'bg-surface-raised text-brand shadow-sm'
+                : 'text-content-muted'
             }`}
           >
             <FaList className="text-sm" />
@@ -490,8 +490,8 @@ const AdminBookings = () => {
             onClick={() => setMobileView('calendar')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
               mobileView === 'calendar'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600'
+                ? 'bg-surface-raised text-brand shadow-sm'
+                : 'text-content-muted'
             }`}
           >
             <FaCalendar className="text-sm" />
@@ -504,21 +504,21 @@ const AdminBookings = () => {
       {isMobile && mobileView === 'list' && (
         <div className="flex gap-2 mb-4">
           <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle text-sm" />
             <input
               type="text"
               placeholder="Search bookings..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-3 py-2.5 text-sm border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-transparent"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`px-3 py-2.5 rounded-lg border transition-all ${
               showFilters || filters.status !== 'all' || filters.priority !== 'all'
-                ? 'bg-blue-50 border-blue-300 text-blue-600'
-                : 'bg-white border-gray-200 text-gray-600'
+                ? 'bg-brand-subtle border-brand-subtle text-brand'
+                : 'bg-surface-raised border-line text-content-muted'
             }`}
           >
             <FaFilter />
@@ -535,9 +535,9 @@ const AdminBookings = () => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-4"
           >
-            <div className="bg-white rounded-lg shadow p-3 space-y-3">
+            <div className="bg-surface-raised rounded-lg shadow p-3 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-xs font-medium text-content-muted mb-1">Status</label>
                 <div className="flex flex-wrap gap-2">
                   {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(status => (
                     <button
@@ -545,8 +545,8 @@ const AdminBookings = () => {
                       onClick={() => setFilters({ ...filters, status })}
                       className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                         filters.status === status
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-brand text-white'
+                          : 'bg-surface-sunken text-content-muted'
                       }`}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -555,7 +555,7 @@ const AdminBookings = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+                <label className="block text-xs font-medium text-content-muted mb-1">Priority</label>
                 <div className="flex flex-wrap gap-2">
                   {['all', 'low', 'normal', 'high', 'urgent'].map(priority => (
                     <button
@@ -563,8 +563,8 @@ const AdminBookings = () => {
                       onClick={() => setFilters({ ...filters, priority })}
                       className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
                         filters.priority === priority
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-brand text-white'
+                          : 'bg-surface-sunken text-content-muted'
                       }`}
                     >
                       {priority.charAt(0).toUpperCase() + priority.slice(1)}
@@ -575,7 +575,7 @@ const AdminBookings = () => {
               {(filters.status !== 'all' || filters.priority !== 'all') && (
                 <button
                   onClick={() => setFilters({ ...filters, status: 'all', priority: 'all' })}
-                  className="w-full py-2 text-sm text-red-600 font-medium"
+                  className="w-full py-2 text-sm text-danger-content font-medium"
                 >
                   Clear Filters
                 </button>
@@ -589,21 +589,21 @@ const AdminBookings = () => {
       {isMobile && mobileView === 'list' && (
         <div className="space-y-4">
           {Object.keys(groupedBookings).length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
+            <div className="text-center py-12 bg-surface-raised rounded-lg shadow">
               <FaCalendar className="mx-auto text-4xl text-gray-300 mb-3" />
-              <p className="text-gray-500">No bookings found</p>
+              <p className="text-content-subtle">No bookings found</p>
             </div>
           ) : (
             Object.entries(groupedBookings).map(([dateGroup, groupBookings]) => (
               <div key={dateGroup}>
-                <div className="sticky top-0 z-10 bg-gray-50 py-2">
+                <div className="sticky top-0 z-10 bg-surface py-2">
                   <h3 className={`text-sm font-semibold ${
-                    dateGroup === 'Today' ? 'text-blue-600' :
-                    dateGroup === 'Tomorrow' ? 'text-green-600' :
-                    dateGroup === 'Past' ? 'text-gray-400' : 'text-gray-700'
+                    dateGroup === 'Today' ? 'text-brand' :
+                    dateGroup === 'Tomorrow' ? 'text-success-content' :
+                    dateGroup === 'Past' ? 'text-content-subtle' : 'text-content-muted'
                   }`}>
                     {dateGroup}
-                    <span className="ml-2 text-gray-400 font-normal">({groupBookings.length})</span>
+                    <span className="ml-2 text-content-subtle font-normal">({groupBookings.length})</span>
                   </h3>
                 </div>
                 <div>
@@ -630,7 +630,7 @@ const AdminBookings = () => {
 
       {/* Mobile Calendar View */}
       {isMobile && mobileView === 'calendar' && (
-        <div className="bg-white rounded-lg shadow-md p-2 overflow-hidden">
+        <div className="bg-surface-raised rounded-lg shadow-md p-2 overflow-hidden">
           <FullCalendar
             plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
             initialView="listWeek"
@@ -651,7 +651,7 @@ const AdminBookings = () => {
 
       {/* Desktop Toolbar */}
       {!isMobile && (
-      <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="bg-surface-raised rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex flex-col gap-3 sm:gap-4">
           {/* View Switcher */}
           <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-1">
@@ -659,8 +659,8 @@ const AdminBookings = () => {
               onClick={() => setViewType('timeGridDay')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'timeGridDay'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand text-white'
+                  : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
               <FaCalendarDay />
@@ -670,8 +670,8 @@ const AdminBookings = () => {
               onClick={() => setViewType('timeGridWeek')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'timeGridWeek'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand text-white'
+                  : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
               <FaCalendarWeek />
@@ -681,8 +681,8 @@ const AdminBookings = () => {
               onClick={() => setViewType('dayGridMonth')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'dayGridMonth'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand text-white'
+                  : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
               <FaTh />
@@ -692,8 +692,8 @@ const AdminBookings = () => {
               onClick={() => setViewType('listWeek')}
               className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md transition text-xs sm:text-base whitespace-nowrap ${
                 viewType === 'listWeek'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand text-white'
+                  : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
               <FaList />
@@ -705,14 +705,14 @@ const AdminBookings = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition text-xs sm:text-base"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-surface-sunken text-content-muted rounded-md hover:bg-surface-sunken transition text-xs sm:text-base"
             >
               <FaFilter />
               <span className="hidden xs:inline">Filters</span>
             </button>
             <button
               onClick={handleExport}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-xs sm:text-base"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-success-content text-content-on-brand rounded-md hover:bg-success-content transition text-xs sm:text-base"
             >
               <FaDownload />
               <span className="hidden xs:inline">Export</span>
@@ -724,21 +724,21 @@ const AdminBookings = () => {
         {showFilters && (
           <div className="mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
+              <label className="block text-xs sm:text-sm font-medium text-content-muted mb-1">Search</label>
               <input
                 type="text"
                 placeholder="Name, email, phone..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               />
             </div>
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-xs sm:text-sm font-medium text-content-muted mb-1">Status</label>
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -748,11 +748,11 @@ const AdminBookings = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Priority</label>
               <select
                 value={filters.priority}
                 onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="all">All Priorities</option>
                 <option value="low">Low</option>
@@ -762,7 +762,7 @@ const AdminBookings = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Actions</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Actions</label>
               <button
                 onClick={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
                 className="w-full px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
@@ -777,7 +777,7 @@ const AdminBookings = () => {
 
       {/* Desktop Calendar */}
       {!isMobile && (
-      <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-6 overflow-hidden">
+      <div className="bg-surface-raised rounded-lg shadow-md p-3 sm:p-4 lg:p-6 overflow-hidden">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
           initialView={viewType}

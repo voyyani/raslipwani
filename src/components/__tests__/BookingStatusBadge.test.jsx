@@ -5,7 +5,7 @@ import { statusClasses, statusLabel } from '../../design/status';
 import { STATUSES } from '../../design/tokens';
 
 /**
- * This suite used to assert literal classes — `bg-yellow-100`, `bg-blue-100` — and
+ * This suite used to assert literal classes — `bg-warning-surface`, `bg-brand-subtle` — and
  * in doing so it froze in place the very inconsistency Slice 4B removed: it
  * required `confirmed` to be blue while `BookingList` and `BookingRow` rendered
  * the same status green, and nothing failed because each site was tested against

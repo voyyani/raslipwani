@@ -75,10 +75,10 @@ const Footer = () => {
             {/* Enhanced Social Links */}
             <div className="flex space-x-3 pt-4">
               {[
-                { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-blue-500' },
+                { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-brand' },
                 { icon: 'instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
                 { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-gray-800' },
-                { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-blue-600' },
+                { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-brand' },
                 { icon: 'twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
               ].filter(s => s.href).map((social, index) => (
                 <a 
@@ -106,7 +106,7 @@ const Footer = () => {
                 <li key={index}>
                   <Link 
                     to={link.path}
-                    className="text-gray-300 hover:text-white transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-white/5 px-2 -mx-2"
+                    className="text-gray-300 hover:text-white transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-surface-raised/5 px-2 -mx-2"
                   >
                     <svg className="w-3 h-3 text-primary mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -127,7 +127,7 @@ const Footer = () => {
             <ul className="space-y-2.5">
               {services.map((service, index) => (
                 <li key={index}>
-                  <div className="text-gray-300 hover:text-white transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-white/5 px-2 -mx-2 cursor-pointer">
+                  <div className="text-gray-300 hover:text-white transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-surface-raised/5 px-2 -mx-2 cursor-pointer">
                     <svg className="w-3 h-3 text-primary mr-3 opacity-70 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -145,34 +145,34 @@ const Footer = () => {
               <div className="absolute bottom-0 left-0 w-10 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full"></div>
             </h4>
             <div className="space-y-4">
-              <div className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <div className="flex items-start group p-2 rounded-lg hover:bg-surface-raised/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
                   <Icon name="map-marker-alt" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">Headquarters</p>
-                  <p className="text-gray-400 text-xs mt-1">{address()}</p>
-                  <p className="text-gray-400 text-xs">Services Nationwide</p>
+                  <p className="text-content-subtle text-xs mt-1">{address()}</p>
+                  <p className="text-content-subtle text-xs">Services Nationwide</p>
                 </div>
               </div>
 
-              <a href={`tel:${phone()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <a href={`tel:${phone()}`} className="flex items-start group p-2 rounded-lg hover:bg-surface-raised/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
                   <Icon name="phone" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{phone()}</p>
-                  <p className="text-gray-400 text-xs mt-1">Mon-Fri, 8AM-6PM</p>
+                  <p className="text-content-subtle text-xs mt-1">Mon-Fri, 8AM-6PM</p>
                 </div>
               </a>
 
-              <a href={`mailto:${email()}`} className="flex items-start group p-2 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <a href={`mailto:${email()}`} className="flex items-start group p-2 rounded-lg hover:bg-surface-raised/5 transition-all duration-300">
                 <div className="w-9 h-9 bg-primary/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-primary/30 transition-colors flex-shrink-0">
                   <Icon name="envelope" size={12} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-gray-300 group-hover:text-white transition-colors font-medium text-sm">{email()}</p>
-                  <p className="text-gray-400 text-xs mt-1">Quick response guaranteed</p>
+                  <p className="text-content-subtle text-xs mt-1">Quick response guaranteed</p>
                 </div>
               </a>
             </div>
@@ -197,29 +197,29 @@ const Footer = () => {
         {/* Enhanced Bottom Bar */}
         <div className="border-t border-gray-700/80 pt-8">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
-            <div className="text-gray-400 text-sm text-center lg:text-left">
+            <div className="text-content-subtle text-sm text-center lg:text-left">
               <p>
                 &copy; {currentYear} {siteName()}. All rights reserved. 
                 <span className="mx-2 hidden sm:inline">•</span>
                 <br className="sm:hidden" />
-                <span className="text-gray-500">Premier Real Estate Services Across Kenya</span>
+                <span className="text-content-subtle">Premier Real Estate Services Across Kenya</span>
               </p>
             </div>
             
             <div className="flex items-center space-x-5 text-sm">
-              <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors text-xs hover:underline">
+              <Link to="/privacy" className="text-content-subtle hover:text-white transition-colors text-xs hover:underline">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors text-xs hover:underline">
+              <Link to="/terms" className="text-content-subtle hover:text-white transition-colors text-xs hover:underline">
                 Terms of Service
               </Link>
-              <div className="text-gray-500 text-xs">
+              <div className="text-content-subtle text-xs">
                 Crafted by{' '}
                 <a 
                   href="https://voyani.tech" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-primary transition-colors font-medium"
+                  className="text-content-subtle hover:text-primary transition-colors font-medium"
                 >
                   Voyani
                 </a>
@@ -239,7 +239,7 @@ const Footer = () => {
           aria-label="Chat on WhatsApp"
         >
           <Icon name="whatsapp" size={20} className="text-white" />
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-danger-content rounded-full animate-ping"></div>
         </a>
       </div>
 
@@ -254,7 +254,7 @@ const Footer = () => {
         >
           <Icon name="whatsapp" size={18} className="text-white group-hover:scale-110 transition-transform" />
           <span className="text-sm font-semibold">Chat with us</span>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-danger-content rounded-full animate-pulse"></div>
         </a>
       </div>
     </footer>

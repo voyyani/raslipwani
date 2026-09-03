@@ -82,13 +82,13 @@ describe('Settings', () => {
     const cloudinaryTab = screen.getByRole('button', { name: /cloudinary/i });
 
     // General should be active initially
-    expect(generalTab).toHaveClass('text-blue-600');
+    expect(generalTab).toHaveClass('text-brand');
 
     // Click Cloudinary
     await user.click(cloudinaryTab);
 
     await waitFor(() => {
-      expect(cloudinaryTab).toHaveClass('text-blue-600');
+      expect(cloudinaryTab).toHaveClass('text-brand');
     });
   });
 });

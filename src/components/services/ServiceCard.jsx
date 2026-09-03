@@ -8,7 +8,7 @@ const ServiceCard = ({ service, onBook, index }) => (
     initial={{ opacity: 0, y: 30 }}
     whileInView={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.1 }}
-    className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all hover:shadow-2xl"
+    className="bg-surface-raised rounded-2xl shadow-xl overflow-hidden border border-line transition-all hover:shadow-2xl"
   >
     <div className="p-8">
       <div className="flex items-start mb-6">
@@ -16,13 +16,13 @@ const ServiceCard = ({ service, onBook, index }) => (
           <Icon name={service.icon} size={30} />
         </div>
         <div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">{service.title}</h3>
-          <p className="text-gray-600">{service.description}</p>
+          <h3 className="text-2xl font-bold text-content mb-2">{service.title}</h3>
+          <p className="text-content-muted">{service.description}</p>
         </div>
       </div>
       
       <div className="mb-6">
-        <h4 className="font-semibold text-gray-700 mb-3">Key Features:</h4>
+        <h4 className="font-semibold text-content-muted mb-3">Key Features:</h4>
         <ul className="space-y-2">
           {service.features.map((feature, idx) => (
             <motion.li 
@@ -32,14 +32,14 @@ const ServiceCard = ({ service, onBook, index }) => (
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * idx }}
             >
-              <Icon name="check-circle" className="text-green-500 mt-1 mr-2" />
+              <Icon name="check-circle" className="text-success-content mt-1 mr-2" />
               <span>{feature}</span>
             </motion.li>
           ))}
         </ul>
       </div>
       
-      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+      <div className="flex justify-between items-center pt-4 border-t border-line">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

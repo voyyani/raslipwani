@@ -152,7 +152,7 @@ const AdminLayout = ({ children }) => {
         onClick={closeSidebar}
         className={`flex items-center p-3 rounded-lg transition-all duration-200 group relative ${
           active
-            ? 'bg-blue-600 text-white shadow-lg'
+            ? 'bg-brand text-white shadow-lg'
             : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
         }`}
         title={isSidebarCollapsed ? item.label : undefined}
@@ -161,7 +161,7 @@ const AdminLayout = ({ children }) => {
           <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-blue-300'}`} />
           {/* Badge */}
           {item.badge && (
-            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center bg-danger-content text-content-on-brand text-[10px] font-bold rounded-full px-1">
               {item.badge > 99 ? '99+' : item.badge}
             </span>
           )}
@@ -175,7 +175,7 @@ const AdminLayout = ({ children }) => {
         {active && (
           <motion.div
             layoutId="sidebarActiveIndicator"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-surface-raised rounded-r-full"
             initial={false}
             transition={{ type: 'spring', stiffness: 500, damping: 35 }}
           />
@@ -185,7 +185,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-surface overflow-x-hidden">
       {/* Top Header */}
       <Header />
       
@@ -234,7 +234,7 @@ const AdminLayout = ({ children }) => {
                 className="lg:hidden p-2 rounded-lg hover:bg-gray-700 transition-colors"
                 aria-label="Close sidebar"
               >
-                <FaTimes className="w-5 h-5 text-gray-400" />
+                <FaTimes className="w-5 h-5 text-content-subtle" />
               </button>
               
               {/* Collapse button for desktop */}
@@ -245,9 +245,9 @@ const AdminLayout = ({ children }) => {
                 title={isSidebarCollapsed ? "Expand (Ctrl+[)" : "Collapse (Ctrl+[)"}
               >
                 {isSidebarCollapsed ? (
-                  <FaChevronRight className="w-4 h-4 text-gray-400" />
+                  <FaChevronRight className="w-4 h-4 text-content-subtle" />
                 ) : (
-                  <FaChevronLeft className="w-4 h-4 text-gray-400" />
+                  <FaChevronLeft className="w-4 h-4 text-content-subtle" />
                 )}
               </button>
             </div>
@@ -259,7 +259,7 @@ const AdminLayout = ({ children }) => {
               <div key={section.title}>
                 {/* Section header */}
                 {!isSidebarCollapsed && (
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
+                  <h3 className="text-xs font-semibold text-content-subtle uppercase tracking-wider mb-2 px-3">
                     {section.title}
                   </h3>
                 )}
@@ -278,7 +278,7 @@ const AdminLayout = ({ children }) => {
           <div className={`mt-auto p-4 border-t border-gray-700/50 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
             <div className={`flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'gap-3'} mb-3`}>
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-blue-400 bg-primary text-sm font-bold uppercase text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-brand bg-primary text-sm font-bold uppercase text-content-on-brand"
                 aria-hidden="true"
               >
                 {(user?.email?.[0] ?? '?')}
@@ -310,7 +310,7 @@ const AdminLayout = ({ children }) => {
         </aside>
         
         {/* Main content area */}
-        <main className="flex-1 min-h-screen bg-gray-50 w-full overflow-x-hidden pb-20 lg:pb-0">
+        <main className="flex-1 min-h-screen bg-surface w-full overflow-x-hidden pb-20 lg:pb-0">
           <div className="p-3 sm:p-4 lg:p-6 w-full max-w-7xl mx-auto">
             {/* Breadcrumb Navigation */}
             <AdminBreadcrumb />

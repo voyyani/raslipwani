@@ -116,48 +116,48 @@ const AdvancedSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       {/* Maintenance Mode */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Maintenance Mode</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Maintenance Mode</h3>
         
         {formData.maintenanceEnabled && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start gap-3">
-            <FaExclamationTriangle className="text-red-600 mt-0.5" />
+          <div className="bg-danger-surface border border-danger-border rounded-lg p-4 mb-4 flex items-start gap-3">
+            <FaExclamationTriangle className="text-danger-content mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-900">Warning: Maintenance mode is active</p>
-              <p className="text-xs text-red-700 mt-1">Your website is currently in maintenance mode. Visitors will see the maintenance message.</p>
+              <p className="text-sm font-medium text-danger-content">Warning: Maintenance mode is active</p>
+              <p className="text-xs text-danger-content mt-1">Your website is currently in maintenance mode. Visitors will see the maintenance message.</p>
             </div>
           </div>
         )}
 
         <div className="space-y-4">
-          <label className="flex items-center gap-3 cursor-pointer bg-gray-50 p-4 rounded-lg">
+          <label className="flex items-center gap-3 cursor-pointer bg-surface p-4 rounded-lg">
             <input
               type="checkbox"
               checked={formData.maintenanceEnabled}
               onChange={(e) => setFormData({ ...formData, maintenanceEnabled: e.target.checked })}
-              className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-5 h-5 text-brand rounded focus:ring-2 focus:ring-focus-ring"
             />
             <div>
-              <span className="font-medium text-gray-900">Enable Maintenance Mode</span>
-              <p className="text-sm text-gray-600">Put the website into maintenance mode</p>
+              <span className="font-medium text-content">Enable Maintenance Mode</span>
+              <p className="text-sm text-content-muted">Put the website into maintenance mode</p>
             </div>
           </label>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Maintenance Message
             </label>
             <textarea
               value={formData.maintenanceMessage}
               onChange={(e) => setFormData({ ...formData, maintenanceMessage: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="Message displayed to visitors during maintenance"
             />
           </div>
@@ -166,36 +166,36 @@ const AdvancedSettings = () => {
 
       {/* Analytics */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Analytics & Tracking</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Analytics & Tracking</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Google Analytics Tracking ID
             </label>
             <input
               type="text"
               value={formData.googleAnalytics}
               onChange={(e) => setFormData({ ...formData, googleAnalytics: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-content-subtle mt-1">
               Optional: Add Google Analytics to track website traffic
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Facebook Pixel ID
             </label>
             <input
               type="text"
               value={formData.facebookPixel}
               onChange={(e) => setFormData({ ...formData, facebookPixel: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="1234567890123456"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-content-subtle mt-1">
               Optional: Add Facebook Pixel for conversion tracking
             </p>
           </div>
@@ -204,30 +204,30 @@ const AdvancedSettings = () => {
 
       {/* Legal Pages */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Pages</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Legal Pages</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Terms of Service URL
             </label>
             <input
               type="text"
               value={formData.termsUrl}
               onChange={(e) => setFormData({ ...formData, termsUrl: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="/terms"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-content-muted mb-1">
               Privacy Policy URL
             </label>
             <input
               type="text"
               value={formData.privacyUrl}
               onChange={(e) => setFormData({ ...formData, privacyUrl: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               placeholder="/privacy"
             />
           </div>
@@ -238,7 +238,7 @@ const AdvancedSettings = () => {
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
           {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
           Save Changes

@@ -69,21 +69,21 @@ const BookingList = ({
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
       </div>
     );
   }
 
   if (filteredBookings.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="mx-auto text-gray-400 text-4xl mb-4">
+      <div className="text-center py-12 bg-surface rounded-lg border border-line">
+        <div className="mx-auto text-content-subtle text-4xl mb-4">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="text-xl mb-4 text-gray-600">No appointments found</h3>
-        <p className="text-gray-500 max-w-md mx-auto mb-6">
+        <h3 className="text-xl mb-4 text-content-muted">No appointments found</h3>
+        <p className="text-content-subtle max-w-md mx-auto mb-6">
           {statusFilter === 'all' 
             ? "You don't have any appointments scheduled yet." 
             : `You don't have any ${statusFilter} appointments.`}
@@ -98,14 +98,14 @@ const BookingList = ({
     : null;
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+    <div className="overflow-x-auto rounded-lg border border-line shadow-sm">
       {groupedBookings ? (
         // Grouped view for week/month
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-line">
           {groupedBookings.map(({ date, bookings }) => (
             <div key={date} className="py-4 px-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
+                <h3 className="text-lg font-semibold text-content">
                   {date === 'unscheduled' 
                     ? 'Unscheduled Appointments' 
                     : new Date(date).toLocaleDateString('en-US', { 
@@ -116,7 +116,7 @@ const BookingList = ({
                       })
                   }
                 </h3>
-                <span className="bg-gray-100 text-gray-600 rounded-full px-3 py-1 text-sm">
+                <span className="bg-surface-sunken text-content-muted rounded-full px-3 py-1 text-sm">
                   {bookings.length} {bookings.length === 1 ? 'appointment' : 'appointments'}
                 </span>
               </div>
@@ -125,12 +125,12 @@ const BookingList = ({
                 {bookings.map(booking => (
                   <div 
                     key={booking.id} 
-                    className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                    className="p-4 bg-surface-raised border border-line rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-medium text-gray-900">{booking.name}</div>
-                        <div className="text-sm text-gray-500">{booking.service || booking.viewing_type}</div>
+                        <div className="font-medium text-content">{booking.name}</div>
+                        <div className="text-sm text-content-subtle">{booking.service || booking.viewing_type}</div>
                       </div>
                       <span
                       className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
@@ -141,8 +141,8 @@ const BookingList = ({
                     
                     <div className="mt-3 text-sm">
                       {booking.appointment_at ? (
-                        <div className="flex items-center text-gray-600">
-                          <FaClock className="mr-2 text-gray-400 flex-shrink-0" />
+                        <div className="flex items-center text-content-muted">
+                          <FaClock className="mr-2 text-content-subtle flex-shrink-0" />
                           {formatDate(booking.appointment_at)}
                         </div>
                       ) : null}
@@ -174,7 +174,7 @@ const BookingList = ({
                       <div className="flex gap-2">
                         <button
                           onClick={() => openBookingModal(booking)}
-                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                          className="text-brand hover:text-brand-content text-sm flex items-center"
                         >
                           <FaEye className="mr-1" /> Details
                         </button>
@@ -187,14 +187,14 @@ const BookingList = ({
                         {viewFilter === 'active' ? (
                           <button
                             onClick={() => toggleArchive(booking.id, true)}
-                            className="text-gray-600 hover:text-gray-800 text-sm flex items-center"
+                            className="text-content-muted hover:text-content text-sm flex items-center"
                           >
                             <FaArchive className="mr-1" /> Archive
                           </button>
                         ) : (
                           <button
                             onClick={() => toggleArchive(booking.id, false)}
-                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                            className="text-brand hover:text-brand-content text-sm flex items-center"
                           >
                             <FaTrashRestore className="mr-1" /> Restore
                           </button>
@@ -210,35 +210,35 @@ const BookingList = ({
       ) : (
         // Default table view
         <>
-          <table className="min-w-full divide-y divide-gray-200 hidden md:table">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-line hidden md:table">
+            <thead className="bg-surface">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment Details</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-content-subtle uppercase tracking-wider">Client</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-content-subtle uppercase tracking-wider">Appointment Details</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-content-subtle uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-content-subtle uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-surface-raised divide-y divide-line">
               {currentBookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={booking.id} className="hover:bg-surface transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{booking.name}</div>
-                    <div className="text-sm text-gray-500">{booking.email}</div>
-                    <div className="text-sm text-gray-500">{booking.phone}</div>
+                    <div className="font-medium text-content">{booking.name}</div>
+                    <div className="text-sm text-content-subtle">{booking.email}</div>
+                    <div className="text-sm text-content-subtle">{booking.phone}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium">{booking.type}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-content-subtle">
                       {booking.service || booking.viewing_type}
                     </div>
                     <div className="text-sm mt-2">
                       {booking.appointment_at ? (
-                        <span className="text-gray-900">
+                        <span className="text-content">
                           {formatDate(booking.appointment_at)}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Not scheduled</span>
+                        <span className="text-content-subtle">Not scheduled</span>
                       )}
                     </div>
                   </td>
@@ -253,7 +253,7 @@ const BookingList = ({
                     <div className="flex space-x-3">
                       <button
                         onClick={() => openBookingModal(booking)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        className="text-brand hover:text-brand-content transition-colors"
                         title="View details"
                       >
                         <FaEye className="w-5 h-5" />
@@ -261,7 +261,7 @@ const BookingList = ({
                       {booking.status !== 'confirmed' && (
                         <button
                           onClick={() => updateStatus(booking.id, 'confirmed')}
-                          className="text-green-600 hover:text-green-800 transition-colors"
+                          className="text-success-content hover:text-success-content transition-colors"
                           title="Confirm appointment"
                         >
                           <FaCheck className="w-5 h-5" />
@@ -270,7 +270,7 @@ const BookingList = ({
                       {booking.status !== 'cancelled' && (
                         <button
                           onClick={() => updateStatus(booking.id, 'cancelled')}
-                          className="text-red-600 hover:text-red-800 transition-colors"
+                          className="text-danger-content hover:text-danger-content transition-colors"
                           title="Cancel appointment"
                         >
                           <FaTimes className="w-5 h-5" />
@@ -286,7 +286,7 @@ const BookingList = ({
                       {viewFilter === 'active' ? (
                         <button
                           onClick={() => toggleArchive(booking.id, true)}
-                          className="text-gray-600 hover:text-gray-800 transition-colors"
+                          className="text-content-muted hover:text-content transition-colors"
                           title="Archive appointment"
                         >
                           <FaArchive className="w-5 h-5" />
@@ -294,7 +294,7 @@ const BookingList = ({
                       ) : (
                         <button
                           onClick={() => toggleArchive(booking.id, false)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          className="text-brand hover:text-brand-content transition-colors"
                           title="Restore appointment"
                         >
                           <FaTrashRestore className="w-5 h-5" />
@@ -310,12 +310,12 @@ const BookingList = ({
           {/* Mobile List */}
           <div className="md:hidden">
             {currentBookings.map(booking => (
-              <div key={booking.id} className="border-b border-gray-200 p-4">
+              <div key={booking.id} className="border-b border-line p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-medium text-gray-900">{booking.name}</div>
-                    <div className="text-sm text-gray-500">{booking.email}</div>
-                    <div className="text-sm text-gray-500">{booking.phone}</div>
+                    <div className="font-medium text-content">{booking.name}</div>
+                    <div className="text-sm text-content-subtle">{booking.email}</div>
+                    <div className="text-sm text-content-subtle">{booking.phone}</div>
                   </div>
                   <span
                       className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
@@ -326,16 +326,16 @@ const BookingList = ({
                 
                 <div className="mt-3">
                   <div className="font-medium">{booking.type}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-content-subtle">
                     {booking.service || booking.viewing_type}
                   </div>
                   <div className="text-sm mt-2">
                     {booking.appointment_at ? (
-                      <span className="text-gray-900">
+                      <span className="text-content">
                         {formatDate(booking.appointment_at)}
                       </span>
                     ) : (
-                      <span className="text-gray-400">Not scheduled</span>
+                      <span className="text-content-subtle">Not scheduled</span>
                     )}
                   </div>
                 </div>
@@ -343,7 +343,7 @@ const BookingList = ({
                 <div className="flex justify-between mt-4">
                   <button
                     onClick={() => openBookingModal(booking)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-brand hover:text-brand-content"
                   >
                     Details
                   </button>
@@ -351,7 +351,7 @@ const BookingList = ({
                     {booking.status !== 'confirmed' && (
                       <button
                         onClick={() => updateStatus(booking.id, 'confirmed')}
-                        className="text-green-600 hover:text-green-800"
+                        className="text-success-content hover:text-success-content"
                         title="Confirm"
                       >
                         <FaCheck />
@@ -360,7 +360,7 @@ const BookingList = ({
                     {booking.status !== 'cancelled' && (
                       <button
                         onClick={() => updateStatus(booking.id, 'cancelled')}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-danger-content hover:text-danger-content"
                         title="Cancel"
                       >
                         <FaTimes />
@@ -369,7 +369,7 @@ const BookingList = ({
                     {viewFilter === 'active' ? (
                       <button
                         onClick={() => toggleArchive(booking.id, true)}
-                        className="text-gray-600 hover:text-gray-800"
+                        className="text-content-muted hover:text-content"
                         title="Archive"
                       >
                         <FaArchive />
@@ -377,7 +377,7 @@ const BookingList = ({
                     ) : (
                       <button
                         onClick={() => toggleArchive(booking.id, false)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-brand hover:text-brand-content"
                         title="Restore"
                       >
                         <FaTrashRestore />
@@ -392,8 +392,8 @@ const BookingList = ({
       )}
       
       {/* Enhanced Pagination */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-gray-50 border-t gap-4">
-        <p className="text-sm text-gray-600">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-surface border-t gap-4">
+        <p className="text-sm text-content-muted">
           Showing {indexOfFirstBooking + 1}-{Math.min(indexOfLastBooking, filteredBookings.length)} of {filteredBookings.length} appointments
         </p>
         <div className="flex gap-2">
@@ -402,8 +402,8 @@ const BookingList = ({
             disabled={currentPage === 1}
             className={`px-4 py-2 rounded-md text-sm ${
               currentPage === 1 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-surface-sunken text-content-subtle cursor-not-allowed' 
+                : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
             }`}
           >
             Previous
@@ -420,10 +420,10 @@ const BookingList = ({
                 <React.Fragment key={page}>
                   <button
                     onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 border-y border-gray-300 text-sm ${
+                    className={`px-4 py-2 border-y border-line-strong text-sm ${
                       currentPage === page
-                        ? 'bg-blue-600 text-white border-blue-700'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-brand text-white border-brand'
+                        : 'bg-surface-raised text-content-muted hover:bg-surface'
                     } ${index === 0 ? 'border-l rounded-l-md' : ''} ${
                       index === array.length - 1 ? 'border-r rounded-r-md' : ''
                     }`}
@@ -431,7 +431,7 @@ const BookingList = ({
                     {page}
                   </button>
                   {index < array.length - 1 && array[index + 1] - page > 1 && (
-                    <span className="px-3 py-2 border-y border-gray-300 text-gray-500">...</span>
+                    <span className="px-3 py-2 border-y border-line-strong text-content-subtle">...</span>
                   )}
                 </React.Fragment>
               ))}
@@ -442,8 +442,8 @@ const BookingList = ({
             disabled={currentPage === totalPages}
             className={`px-4 py-2 rounded-md text-sm ${
               currentPage === totalPages 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-surface-sunken text-content-subtle cursor-not-allowed' 
+                : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
             }`}
           >
             Next

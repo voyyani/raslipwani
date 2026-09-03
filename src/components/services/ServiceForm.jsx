@@ -16,7 +16,7 @@ const ServiceForm = ({
       <h3 className="text-2xl font-bold text-primary">Book Consultation</h3>
       <button 
         onClick={closeModal}
-        className="text-gray-500 hover:text-primary transition-colors"
+        className="text-content-subtle hover:text-primary transition-colors"
       >
         <Icon name="times" size={20} />
       </button>
@@ -25,12 +25,12 @@ const ServiceForm = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Form fields same as original */}
       <div>
-        <label className="block text-gray-700 mb-2">Service</label>
+        <label className="block text-content-muted mb-2">Service</label>
         <input 
           type="text" 
           value={bookingData.service}
           readOnly
-          className="w-full p-3 border border-gray-300 rounded-xl bg-gray-50"
+          className="w-full p-3 border border-line-strong rounded-xl bg-surface"
         />
       </div>
       

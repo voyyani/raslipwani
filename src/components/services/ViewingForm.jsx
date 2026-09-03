@@ -17,7 +17,7 @@ const ViewingForm = ({
       <h3 className="text-2xl font-bold text-primary">Book a Viewing Experience</h3>
       <button 
         onClick={closeModal}
-        className="text-gray-500 hover:text-primary transition-colors"
+        className="text-content-subtle hover:text-primary transition-colors"
       >
         <Icon name="times" size={20} />
       </button>
@@ -32,8 +32,8 @@ const ViewingForm = ({
             whileHover={{ y: -5 }}
             className={`border rounded-xl p-5 cursor-pointer transition-all shadow-md hover:shadow-lg ${
               bookingData.viewingType === option.type 
-                ? 'border-primary bg-blue-50' 
-                : 'border-gray-200 hover:border-primary'
+                ? 'border-primary bg-brand-subtle' 
+                : 'border-line hover:border-primary'
             }`}
             onClick={() => setBookingData(prev => ({ ...prev, viewingType: option.type }))}
           >
@@ -43,8 +43,8 @@ const ViewingForm = ({
               </div>
             </div>
             <h5 className="font-bold text-lg mb-2">{option.title}</h5>
-            <p className="text-gray-600 mb-3">{option.description}</p>
-            <div className="text-sm text-gray-500 flex items-center">
+            <p className="text-content-muted mb-3">{option.description}</p>
+            <div className="text-sm text-content-subtle flex items-center">
               <Icon name="clock" className="mr-1" /> {option.duration}
             </div>
           </motion.div>
@@ -56,14 +56,14 @@ const ViewingForm = ({
       {/* Form fields same as original */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 mb-2">Full Name *</label>
+          <label className="block text-content-muted mb-2">Full Name *</label>
           <input 
             type="text" 
             name="name"
             value={bookingData.name}
             onChange={handleInputChange}
             required
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full p-3 border border-line-strong rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
         {/* ... other fields ... */}

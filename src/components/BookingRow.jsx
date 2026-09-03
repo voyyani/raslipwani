@@ -21,24 +21,24 @@ const BookingRow = ({
   return (
     <>
       {/* Desktop Row */}
-      <tr className="hover:bg-gray-50 transition-colors hidden md:table-row">
+      <tr className="hover:bg-surface transition-colors hidden md:table-row">
         <td className="px-6 py-4">
-          <div className="font-medium text-gray-900">{booking.name}</div>
-          <div className="text-sm text-gray-500">{booking.email}</div>
-          <div className="text-sm text-gray-500">{booking.phone}</div>
+          <div className="font-medium text-content">{booking.name}</div>
+          <div className="text-sm text-content-subtle">{booking.email}</div>
+          <div className="text-sm text-content-subtle">{booking.phone}</div>
         </td>
         <td className="px-6 py-4">
           <div className="font-medium">{booking.type}</div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-content-subtle">
             {booking.service || booking.viewing_type}
           </div>
           <div className="text-sm mt-2">
             {booking.appointment_at ? (
-              <span className="text-gray-900">
+              <span className="text-content">
                 {formatDate(booking.appointment_at)}
               </span>
             ) : (
-              <span className="text-gray-400">Not scheduled</span>
+              <span className="text-content-subtle">Not scheduled</span>
             )}
           </div>
         </td>
@@ -53,7 +53,7 @@ const BookingRow = ({
           <div className="flex space-x-3">
             <button
               onClick={() => onViewDetails(booking)}
-              className="text-blue-600 hover:text-blue-800 transition-colors"
+              className="text-brand hover:text-brand-content transition-colors"
               title="View details"
             >
               <FaEye className="w-5 h-5" />
@@ -61,7 +61,7 @@ const BookingRow = ({
             {booking.status !== 'confirmed' && (
               <button
                 onClick={() => onUpdateStatus(booking.id, 'confirmed')}
-                className="text-green-600 hover:text-green-800 transition-colors"
+                className="text-success-content hover:text-success-content transition-colors"
                 title="Confirm appointment"
               >
                 <FaCheck className="w-5 h-5" />
@@ -70,7 +70,7 @@ const BookingRow = ({
             {booking.status !== 'cancelled' && (
               <button
                 onClick={() => onUpdateStatus(booking.id, 'cancelled')}
-                className="text-red-600 hover:text-red-800 transition-colors"
+                className="text-danger-content hover:text-danger-content transition-colors"
                 title="Cancel appointment"
               >
                 <FaTimes className="w-5 h-5" />
@@ -86,7 +86,7 @@ const BookingRow = ({
             {viewFilter === 'active' ? (
               <button
                 onClick={() => onArchive(booking.id, true)}
-                className="text-gray-600 hover:text-gray-800 transition-colors"
+                className="text-content-muted hover:text-content transition-colors"
                 title="Archive appointment"
               >
                 <FaArchive className="w-5 h-5" />
@@ -94,7 +94,7 @@ const BookingRow = ({
             ) : (
               <button
                 onClick={() => onArchive(booking.id, false)}
-                className="text-blue-600 hover:text-blue-800 transition-colors"
+                className="text-brand hover:text-brand-content transition-colors"
                 title="Restore appointment"
               >
                 <FaTrashRestore className="w-5 h-5" />
@@ -105,12 +105,12 @@ const BookingRow = ({
       </tr>
       
       {/* Mobile Row */}
-      <div className="border-b border-gray-200 p-4 md:hidden">
+      <div className="border-b border-line p-4 md:hidden">
         <div className="flex justify-between items-start">
           <div>
-            <div className="font-medium text-gray-900">{booking.name}</div>
-            <div className="text-sm text-gray-500">{booking.email}</div>
-            <div className="text-sm text-gray-500">{booking.phone}</div>
+            <div className="font-medium text-content">{booking.name}</div>
+            <div className="text-sm text-content-subtle">{booking.email}</div>
+            <div className="text-sm text-content-subtle">{booking.phone}</div>
           </div>
           <span
                       className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
@@ -121,16 +121,16 @@ const BookingRow = ({
         
         <div className="mt-3">
           <div className="font-medium">{booking.type}</div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-content-subtle">
             {booking.service || booking.viewing_type}
           </div>
           <div className="text-sm mt-2">
             {booking.appointment_at ? (
-              <span className="text-gray-900">
+              <span className="text-content">
                 {formatDate(booking.appointment_at)}
               </span>
             ) : (
-              <span className="text-gray-400">Not scheduled</span>
+              <span className="text-content-subtle">Not scheduled</span>
             )}
           </div>
         </div>
@@ -138,7 +138,7 @@ const BookingRow = ({
         <div className="flex justify-between mt-4">
           <button
             onClick={() => onViewDetails(booking)}
-            className="text-blue-600 hover:text-blue-800"
+            className="text-brand hover:text-brand-content"
           >
             Details
           </button>
@@ -146,7 +146,7 @@ const BookingRow = ({
             {booking.status !== 'confirmed' && (
               <button
                 onClick={() => onUpdateStatus(booking.id, 'confirmed')}
-                className="text-green-600 hover:text-green-800"
+                className="text-success-content hover:text-success-content"
                 title="Confirm"
               >
                 <FaCheck />
@@ -155,7 +155,7 @@ const BookingRow = ({
             {booking.status !== 'cancelled' && (
               <button
                 onClick={() => onUpdateStatus(booking.id, 'cancelled')}
-                className="text-red-600 hover:text-red-800"
+                className="text-danger-content hover:text-danger-content"
                 title="Cancel"
               >
                 <FaTimes />
@@ -164,7 +164,7 @@ const BookingRow = ({
             {viewFilter === 'active' ? (
               <button
                 onClick={() => onArchive(booking.id, true)}
-                className="text-gray-600 hover:text-gray-800"
+                className="text-content-muted hover:text-content"
                 title="Archive"
               >
                 <FaArchive />
@@ -172,7 +172,7 @@ const BookingRow = ({
             ) : (
               <button
                 onClick={() => onArchive(booking.id, false)}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-brand hover:text-brand-content"
                 title="Restore"
               >
                 <FaTrashRestore />

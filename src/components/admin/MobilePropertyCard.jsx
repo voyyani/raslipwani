@@ -43,10 +43,10 @@ const MobilePropertyCard = ({
 
   // Status colors
   const statusColors = {
-    available: 'bg-green-100 text-green-800 border-green-200',
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    sold: 'bg-red-100 text-red-800 border-red-200',
-    rented: 'bg-blue-100 text-blue-800 border-blue-200'
+    available: 'bg-success-surface text-success-content border-success-border',
+    pending: 'bg-warning-surface text-warning-content border-warning-border',
+    sold: 'bg-danger-surface text-danger-content border-danger-border',
+    rented: 'bg-brand-subtle text-brand-content border-brand-subtle'
   };
 
   // Format price
@@ -77,9 +77,9 @@ const MobilePropertyCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-3 relative">
+    <div className="bg-surface-raised rounded-xl shadow-sm overflow-hidden mb-3 relative">
       {/* Image Section */}
-      <div className="relative h-44 bg-gray-100">
+      <div className="relative h-44 bg-surface-sunken">
         {property.images?.length > 0 ? (
           <motion.div
             className="absolute inset-0"
@@ -98,7 +98,7 @@ const MobilePropertyCard = ({
             />
           </motion.div>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-content-subtle">
             <TypeIcon className="text-4xl" />
           </div>
         )}
@@ -110,7 +110,7 @@ const MobilePropertyCard = ({
               <div
                 key={idx}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  idx === currentImageIndex ? 'bg-white w-3' : 'bg-white/50'
+                  idx === currentImageIndex ? 'bg-surface-raised w-3' : 'bg-surface-raised/50'
                 }`}
               />
             ))}
@@ -119,7 +119,7 @@ const MobilePropertyCard = ({
 
         {/* Featured Badge */}
         {property.featured && (
-          <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+          <div className="absolute top-2 left-2 bg-accent text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
             <FaStar className="text-[10px]" />
             Featured
           </div>
@@ -143,9 +143,9 @@ const MobilePropertyCard = ({
             haptic();
             setShowActions(!showActions);
           }}
-          className="absolute bottom-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg"
+          className="absolute bottom-2 right-2 w-8 h-8 bg-surface-raised/90 rounded-full flex items-center justify-center shadow-lg"
         >
-          <FaEllipsisV className="text-gray-600 text-sm" />
+          <FaEllipsisV className="text-content-muted text-sm" />
         </button>
       </div>
 
@@ -154,10 +154,10 @@ const MobilePropertyCard = ({
         {/* Title & Type */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate text-base">
+            <h3 className="font-semibold text-content truncate text-base">
               {property.title}
             </h3>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mt-0.5">
+            <div className="flex items-center gap-2 text-sm text-content-muted mt-0.5">
               <TypeIcon className="text-xs" />
               <span className="capitalize">{property.property_type}</span>
               <span className="text-gray-300">•</span>
@@ -167,28 +167,28 @@ const MobilePropertyCard = ({
         </div>
 
         {/* Location */}
-        <div className="flex items-center gap-1.5 text-gray-600 mb-3">
-          <FaMapMarkerAlt className="text-xs text-gray-400" />
+        <div className="flex items-center gap-1.5 text-content-muted mb-3">
+          <FaMapMarkerAlt className="text-xs text-content-subtle" />
           <span className="text-sm truncate">{property.location}</span>
         </div>
 
         {/* Property Details */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-4 text-sm text-content-muted">
           {property.bedrooms && (
             <div className="flex items-center gap-1">
-              <FaBed className="text-gray-400" />
+              <FaBed className="text-content-subtle" />
               <span>{property.bedrooms}</span>
             </div>
           )}
           {property.bathrooms && (
             <div className="flex items-center gap-1">
-              <FaBath className="text-gray-400" />
+              <FaBath className="text-content-subtle" />
               <span>{property.bathrooms}</span>
             </div>
           )}
           {property.area_sqft && (
             <div className="flex items-center gap-1">
-              <FaRuler className="text-gray-400" />
+              <FaRuler className="text-content-subtle" />
               <span>{property.area_sqft.toLocaleString()} sqft</span>
             </div>
           )}
@@ -213,7 +213,7 @@ const MobilePropertyCard = ({
               initial={{ opacity: 0, scale: 0.9, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              className="absolute right-3 top-36 z-50 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden min-w-[160px]"
+              className="absolute right-3 top-36 z-50 bg-surface-raised rounded-lg shadow-xl border border-line overflow-hidden min-w-[160px]"
             >
               <button
                 onClick={(e) => {
@@ -222,9 +222,9 @@ const MobilePropertyCard = ({
                   setShowActions(false);
                   onView();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaEye className="text-blue-500" />
+                <FaEye className="text-brand" />
                 <span className="text-sm font-medium">View Details</span>
               </button>
               
@@ -235,9 +235,9 @@ const MobilePropertyCard = ({
                   setShowActions(false);
                   onEdit();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaEdit className="text-green-500" />
+                <FaEdit className="text-success-content" />
                 <span className="text-sm font-medium">Edit Property</span>
               </button>
               
@@ -248,15 +248,15 @@ const MobilePropertyCard = ({
                   setShowActions(false);
                   onToggleFeatured();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaStar className={property.featured ? 'text-yellow-500' : 'text-gray-400'} />
+                <FaStar className={property.featured ? 'text-accent' : 'text-content-subtle'} />
                 <span className="text-sm font-medium">
                   {property.featured ? 'Remove Featured' : 'Make Featured'}
                 </span>
               </button>
               
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-line" />
               
               <button
                 onClick={(e) => {
@@ -265,7 +265,7 @@ const MobilePropertyCard = ({
                   setShowActions(false);
                   onDelete();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 active:bg-red-100"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-danger-content hover:bg-danger-surface active:bg-danger-surface"
               >
                 <FaTrash />
                 <span className="text-sm font-medium">Delete</span>

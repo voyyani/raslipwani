@@ -21,7 +21,7 @@ import { BOOKING_STATUS_INTENT } from './tokens.js';
  * Tailwind classes for a status pill, from the semantic status tokens.
  *
  * Deliberately returns tokens (`bg-warning-surface`) rather than literals
- * (`bg-yellow-100`): these classes have to work in both themes, and a literal
+ * (`bg-warning-surface`): these classes have to work in both themes, and a literal
  * has already decided which one it is for.
  */
 export const INTENT_CLASSES = {

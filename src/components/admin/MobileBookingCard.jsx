@@ -98,7 +98,7 @@ const MobileBookingCard = ({
     >
       {/* Left action (Confirm) */}
       <motion.div 
-        className="absolute inset-y-0 left-0 w-24 bg-green-500 flex items-center justify-center"
+        className="absolute inset-y-0 left-0 w-24 bg-success-content flex items-center justify-center"
         style={{ opacity: leftActionOpacity }}
       >
         <button
@@ -112,7 +112,7 @@ const MobileBookingCard = ({
 
       {/* Right action (Cancel) */}
       <motion.div 
-        className="absolute inset-y-0 right-0 w-24 bg-red-500 flex items-center justify-center"
+        className="absolute inset-y-0 right-0 w-24 bg-danger-content flex items-center justify-center"
         style={{ opacity: rightActionOpacity }}
       >
         <button
@@ -136,7 +136,7 @@ const MobileBookingCard = ({
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className={`
-          relative bg-white rounded-xl shadow-sm 
+          relative bg-surface-raised rounded-xl shadow-sm 
           ${priorityColors[booking.priority] || priorityColors.normal}
           active:shadow-md transition-shadow
         `}
@@ -146,19 +146,19 @@ const MobileBookingCard = ({
           {/* Header Row */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate text-base">
+              <h3 className="font-semibold text-content truncate text-base">
                 {booking.name}
               </h3>
               <div className="flex items-center gap-2 mt-1">
                 <BookingStatusBadge status={booking.status} size="sm" />
                 {booking.priority === 'urgent' && (
-                  <span className="flex items-center text-xs text-red-600 font-medium">
+                  <span className="flex items-center text-xs text-danger-content font-medium">
                     <FaExclamationTriangle className="mr-1" />
                     Urgent
                   </span>
                 )}
                 {booking.priority === 'high' && (
-                  <span className="flex items-center text-xs text-orange-600 font-medium">
+                  <span className="flex items-center text-xs text-warning-content font-medium">
                     <FaExclamationTriangle className="mr-1" />
                     High
                   </span>
@@ -170,7 +170,7 @@ const MobileBookingCard = ({
                 e.stopPropagation();
                 onView();
               }}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-content-subtle hover:text-brand hover:bg-brand-subtle rounded-lg transition-colors"
             >
               <FaEye className="text-lg" />
             </button>
@@ -179,9 +179,9 @@ const MobileBookingCard = ({
           {/* Appointment Time */}
           <div className={`
             flex items-center gap-2 p-2 rounded-lg mb-3
-            ${isAppointmentToday ? 'bg-blue-50 text-blue-700' : 
-              isAppointmentTomorrow ? 'bg-yellow-50 text-yellow-700' :
-              isPastAppointment ? 'bg-gray-100 text-gray-500' : 'bg-gray-50 text-gray-600'}
+            ${isAppointmentToday ? 'bg-brand-subtle text-brand' : 
+              isAppointmentTomorrow ? 'bg-warning-surface text-warning-content' :
+              isPastAppointment ? 'bg-surface-sunken text-content-subtle' : 'bg-surface text-content-muted'}
           `}>
             <FaClock className="text-sm flex-shrink-0" />
             <span className="text-sm font-medium">{getRelativeTime()}</span>
@@ -189,14 +189,14 @@ const MobileBookingCard = ({
 
           {/* Property/Service Info */}
           {booking.property_interest && (
-            <div className="flex items-center gap-2 text-gray-600 mb-3">
-              <FaMapMarkerAlt className="text-sm text-gray-400" />
+            <div className="flex items-center gap-2 text-content-muted mb-3">
+              <FaMapMarkerAlt className="text-sm text-content-subtle" />
               <span className="text-sm truncate">{booking.property_interest}</span>
             </div>
           )}
 
           {/* Quick Actions */}
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-2 pt-2 border-t border-line">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -204,8 +204,8 @@ const MobileBookingCard = ({
                 onCall();
               }}
               className="flex-1 flex items-center justify-center gap-2 py-2 px-3 
-                bg-green-50 text-green-700 rounded-lg text-sm font-medium
-                active:bg-green-100 transition-colors"
+                bg-success-surface text-success-content rounded-lg text-sm font-medium
+                active:bg-success-surface transition-colors"
             >
               <FaPhone className="text-xs" />
               Call
@@ -217,8 +217,8 @@ const MobileBookingCard = ({
                 onEmail();
               }}
               className="flex-1 flex items-center justify-center gap-2 py-2 px-3 
-                bg-blue-50 text-blue-700 rounded-lg text-sm font-medium
-                active:bg-blue-100 transition-colors"
+                bg-brand-subtle text-brand rounded-lg text-sm font-medium
+                active:bg-brand-subtle transition-colors"
             >
               <FaEnvelope className="text-xs" />
               Email
@@ -235,7 +235,7 @@ const MobileBookingCard = ({
               exit={{ opacity: 0 }}
               className="absolute bottom-1 left-1/2 -translate-x-1/2"
             >
-              <div className="w-10 h-1 bg-gray-200 rounded-full" />
+              <div className="w-10 h-1 bg-surface-sunken rounded-full" />
             </motion.div>
           )}
         </AnimatePresence>

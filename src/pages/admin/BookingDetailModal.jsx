@@ -216,10 +216,10 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
   const getPriorityColor = (priority) => {
     const colors = {
-      low: 'text-gray-600',
-      medium: 'text-blue-600',
-      high: 'text-orange-600',
-      urgent: 'text-red-600'
+      low: 'text-content-muted',
+      medium: 'text-brand',
+      high: 'text-warning-content',
+      urgent: 'text-danger-content'
     };
     return colors[priority] || colors.medium;
   };
@@ -260,14 +260,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               onClose();
             }
           }}
-          className="bg-white w-full md:max-w-4xl md:rounded-lg shadow-xl 
+          className="bg-surface-raised w-full md:max-w-4xl md:rounded-lg shadow-xl 
             h-[95vh] md:h-auto md:max-h-[90vh] 
             overflow-hidden flex flex-col
             rounded-t-2xl md:rounded-lg"
         >
           {/* Mobile Drag Handle */}
           <div className="md:hidden flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            <div className="w-10 h-1 bg-surface-sunken rounded-full" />
           </div>
 
           {/* Header */}
@@ -283,7 +283,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               </button>
               <h2 className="text-lg md:text-2xl font-bold mb-2">Booking Details</h2>
               <div className="flex items-center gap-2 md:gap-4 flex-wrap">
-                <BookingStatusBadge status={booking.status} className="bg-white bg-opacity-20 border-white border-opacity-30 text-xs md:text-sm" />
+                <BookingStatusBadge status={booking.status} className="bg-surface-raised bg-opacity-20 border-white border-opacity-30 text-xs md:text-sm" />
                 {booking.priority && (
                   <span className={`text-xs md:text-sm font-semibold ${getPriorityColor(booking.priority)}`}>
                     {booking.priority.toUpperCase()} Priority
@@ -301,14 +301,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="border-b bg-gray-50 overflow-x-auto">
+          <div className="border-b bg-surface overflow-x-auto">
             <div className="flex gap-1 px-3 md:px-6 min-w-max">
               <button
                 onClick={() => setActiveTab('overview')}
                 className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
                   activeTab === 'overview'
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-brand border-b-2 border-brand bg-surface-raised'
+                    : 'text-content-muted hover:text-content'
                 }`}
               >
                 Overview
@@ -317,8 +317,8 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 onClick={() => setActiveTab('notes')}
                 className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
                   activeTab === 'notes'
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-brand border-b-2 border-brand bg-surface-raised'
+                    : 'text-content-muted hover:text-content'
                 }`}
               >
                 Notes ({notes.length})
@@ -327,8 +327,8 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 onClick={() => setActiveTab('history')}
                 className={`px-3 md:px-4 py-2.5 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
                   activeTab === 'history'
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-brand border-b-2 border-brand bg-surface-raised'
+                    : 'text-content-muted hover:text-content'
                 }`}
               >
                 Activity Log
@@ -343,34 +343,34 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
             <div className="space-y-6">
               {/* Customer Information */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-content mb-4">Customer Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface p-4 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FaUser className="text-gray-400" />
+                    <FaUser className="text-content-subtle" />
                     <div>
-                      <div className="text-sm text-gray-600">Name</div>
-                      <div className="font-medium text-gray-900">{booking.name}</div>
+                      <div className="text-sm text-content-muted">Name</div>
+                      <div className="font-medium text-content">{booking.name}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaEnvelope className="text-gray-400" />
+                    <FaEnvelope className="text-content-subtle" />
                     <div>
-                      <div className="text-sm text-gray-600">Email</div>
-                      <div className="font-medium text-gray-900">{booking.email}</div>
+                      <div className="text-sm text-content-muted">Email</div>
+                      <div className="font-medium text-content">{booking.email}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaPhone className="text-gray-400" />
+                    <FaPhone className="text-content-subtle" />
                     <div>
-                      <div className="text-sm text-gray-600">Phone</div>
-                      <div className="font-medium text-gray-900">{booking.phone}</div>
+                      <div className="text-sm text-content-muted">Phone</div>
+                      <div className="font-medium text-content">{booking.phone}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaCalendar className="text-gray-400" />
+                    <FaCalendar className="text-content-subtle" />
                     <div>
-                      <div className="text-sm text-gray-600">Appointment</div>
-                      <div className="font-medium text-gray-900">
+                      <div className="text-sm text-content-muted">Appointment</div>
+                      <div className="font-medium text-content">
                         {format(new Date(booking.appointment_at), 'PPp')}
                       </div>
                     </div>
@@ -380,26 +380,26 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
               {/* Booking Details */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Details</h3>
-                <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-content mb-4">Booking Details</h3>
+                <div className="space-y-3 bg-surface p-4 rounded-lg">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Service</span>
-                    <span className="font-medium text-gray-900">{booking.service || 'N/A'}</span>
+                    <span className="text-content-muted">Service</span>
+                    <span className="font-medium text-content">{booking.service || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Property ID</span>
-                    <span className="font-medium text-gray-900">{booking.property_id || 'N/A'}</span>
+                    <span className="text-content-muted">Property ID</span>
+                    <span className="font-medium text-content">{booking.property_id || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Created</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-content-muted">Created</span>
+                    <span className="font-medium text-content">
                       {format(new Date(booking.created_at), 'PPp')}
                     </span>
                   </div>
                   {booking.last_modified_at && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Last Modified</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-content-muted">Last Modified</span>
+                      <span className="font-medium text-content">
                         {format(new Date(booking.last_modified_at), 'PPp')}
                       </span>
                     </div>
@@ -409,27 +409,27 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
               {/* Status Management */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Status Management</h3>
+                <h3 className="text-lg font-semibold text-content mb-4">Status Management</h3>
                 {!isEditingStatus ? (
                   <div className="flex items-center gap-3">
                     <BookingStatusBadge status={booking.status} />
                     <button
                       onClick={() => setIsEditingStatus(true)}
-                      className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-2"
+                      className="text-brand hover:text-brand font-medium text-sm flex items-center gap-2"
                     >
                       <FaEdit /> Change Status
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                  <div className="space-y-3 bg-surface p-4 rounded-lg">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-content-muted mb-2">
                         New Status
                       </label>
                       <select
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                       >
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
@@ -439,14 +439,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                     </div>
                     {newStatus === 'cancelled' && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-content-muted mb-2">
                           Cancellation Reason *
                         </label>
                         <textarea
                           value={cancellationReason}
                           onChange={(e) => setCancellationReason(e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                           placeholder="Please provide a reason for cancellation..."
                         />
                       </div>
@@ -455,7 +455,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                       <button
                         onClick={handleStatusChange}
                         disabled={updateStatusMutation.isPending}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                        className="px-4 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
                       >
                         Save Status
                       </button>
@@ -465,7 +465,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           setNewStatus(booking.status);
                           setCancellationReason('');
                         }}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
+                        className="px-4 py-2 bg-surface-sunken text-content-muted rounded-md hover:bg-surface-sunken transition"
                       >
                         Cancel
                       </button>
@@ -476,7 +476,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
               {/* Priority Management */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Priority Level</h3>
+                <h3 className="text-lg font-semibold text-content mb-4">Priority Level</h3>
                 <div className="flex gap-2">
                   {['low', 'medium', 'high', 'urgent'].map((priority) => (
                     <button
@@ -485,8 +485,8 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                       disabled={updatePriorityMutation.isPending}
                       className={`px-4 py-2 rounded-md font-medium transition ${
                         booking.priority === priority
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-brand text-white'
+                          : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
                       }`}
                     >
                       {priority.charAt(0).toUpperCase() + priority.slice(1)}
@@ -498,9 +498,9 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               {/* Customer Notes */}
               {booking.notes && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Notes</h3>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-gray-700">{booking.notes}</p>
+                  <h3 className="text-lg font-semibold text-content mb-4">Customer Notes</h3>
+                  <div className="bg-brand-subtle border border-brand-subtle rounded-lg p-4">
+                    <p className="text-content-muted">{booking.notes}</p>
                   </div>
                 </div>
               )}
@@ -508,12 +508,12 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               {/* Cancellation Info */}
               {booking.status === 'cancelled' && booking.cancellation_reason && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaExclamationTriangle className="text-red-600" />
+                  <h3 className="text-lg font-semibold text-content mb-4 flex items-center gap-2">
+                    <FaExclamationTriangle className="text-danger-content" />
                     Cancellation Information
                   </h3>
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-gray-700">{booking.cancellation_reason}</p>
+                  <div className="bg-danger-surface border border-danger-border rounded-lg p-4">
+                    <p className="text-content-muted">{booking.cancellation_reason}</p>
                   </div>
                 </div>
               )}
@@ -524,19 +524,19 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
           {activeTab === 'notes' && (
             <div className="space-y-4">
               {/* Add Note Form */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Add Internal Note</h3>
+              <div className="bg-surface p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-content mb-3">Add Internal Note</h3>
                 <textarea
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                  className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring mb-3"
                   placeholder="Add a note visible only to admins..."
                 />
                 <button
                   onClick={handleAddNote}
                   disabled={addNoteMutation.isPending || !newNote.trim()}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
                 >
                   <FaPlus /> Add Note
                 </button>
@@ -545,14 +545,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               {/* Notes List */}
               <div className="space-y-3">
                 {notes.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-content-subtle">
                     No internal notes yet. Add one above to get started.
                   </div>
                 ) : (
                   notes.map((note) => (
-                    <div key={note.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div key={note.id} className="bg-surface-raised border border-line rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-content-muted">
                           {format(new Date(note.created_at), 'PPp')}
                         </div>
                         <button
@@ -571,7 +571,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           <FaTrash />
                         </button>
                       </div>
-                      <p className="text-gray-700">{note.note_text}</p>
+                      <p className="text-content-muted">{note.note_text}</p>
                     </div>
                   ))
                 )}
@@ -584,19 +584,19 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
             <div className="space-y-3">
               {booking.status_history && Array.isArray(booking.status_history) && booking.status_history.length > 0 ? (
                 booking.status_history.map((entry, index) => (
-                  <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 flex items-start gap-4">
+                  <div key={index} className="bg-surface-raised border border-line rounded-lg p-4 flex items-start gap-4">
                     <div className="flex-shrink-0">
                       <BookingStatusBadge status={entry.status} />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-content">
                         Status changed to {entry.status}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-content-muted">
                         {entry.changed_at && format(new Date(entry.changed_at), 'PPp')}
                       </div>
                       {entry.reason && (
-                        <div className="text-sm text-gray-700 mt-1">
+                        <div className="text-sm text-content-muted mt-1">
                           Reason: {entry.reason}
                         </div>
                       )}
@@ -604,7 +604,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-content-subtle">
                   No activity history available
                 </div>
               )}
@@ -613,14 +613,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         </div>
 
         {/* Footer with Quick Actions */}
-        <div className="border-t bg-gray-50 p-4 md:p-6 safe-area-pb">
+        <div className="border-t bg-surface p-4 md:p-6 safe-area-pb">
           {/* Mobile Actions - Full Width Buttons */}
           <div className="md:hidden space-y-2">
             {booking.status === 'pending' && (
               <button
                 onClick={handleConfirm}
                 disabled={updateStatusMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium active:bg-blue-700 transition disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-brand text-content-on-brand rounded-xl font-medium active:bg-brand-hover transition disabled:opacity-50"
               >
                 <FaCheck /> Confirm Booking
               </button>
@@ -629,7 +629,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               <button
                 onClick={handleComplete}
                 disabled={updateStatusMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-medium active:bg-green-700 transition disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-success-content text-content-on-brand rounded-xl font-medium active:bg-success-content transition disabled:opacity-50"
               >
                 <FaCheck /> Mark Completed
               </button>
@@ -638,7 +638,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               <button
                 onClick={handleCancel}
                 disabled={updateStatusMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-white text-red-600 border border-red-200 rounded-xl font-medium active:bg-red-50 transition disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-surface-raised text-danger-content border border-danger-border rounded-xl font-medium active:bg-danger-surface transition disabled:opacity-50"
               >
                 <FaBan /> Cancel Booking
               </button>
@@ -651,7 +651,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               <button
                 onClick={handleConfirm}
                 disabled={updateStatusMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
               >
                 <FaCheck /> Confirm Booking
               </button>
@@ -660,7 +660,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               <button
                 onClick={handleComplete}
                 disabled={updateStatusMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-success-content text-content-on-brand rounded-md hover:bg-success-content transition disabled:opacity-50"
               >
                 <FaCheck /> Mark Completed
               </button>
@@ -669,14 +669,14 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               <button
                 onClick={handleCancel}
                 disabled={updateStatusMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-danger-content text-content-on-brand rounded-md hover:bg-danger-content transition disabled:opacity-50"
               >
                 <FaBan /> Cancel Booking
               </button>
             )}
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
+              className="px-4 py-2 bg-surface-sunken text-content-muted rounded-md hover:bg-surface-sunken transition"
             >
               Close
             </button>

@@ -150,7 +150,7 @@ const EmailSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
@@ -158,8 +158,8 @@ const EmailSettings = () => {
       {/* Notification Preferences */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Notification Preferences</h3>
-          <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold text-content mb-4">Email Notification Preferences</h3>
+          <div className="space-y-3 bg-surface p-4 rounded-lg">
             {[
               { key: 'new_booking', label: 'New Booking Notifications' },
               { key: 'status_change', label: 'Booking Status Changes' },
@@ -172,26 +172,26 @@ const EmailSettings = () => {
                   type="checkbox"
                   checked={formData[key]}
                   onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 text-brand rounded focus:ring-2 focus:ring-focus-ring"
                 />
-                <span className="text-gray-700">{label}</span>
+                <span className="text-content-muted">{label}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-content-muted mb-1">
             Email Recipients (comma-separated)
           </label>
           <input
             type="text"
             value={formData.recipients}
             onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
             placeholder="admin@raslipwani.com, manager@raslipwani.com"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-content-subtle mt-1">
             Multiple email addresses can be added, separated by commas
           </p>
         </div>
@@ -200,7 +200,7 @@ const EmailSettings = () => {
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
           >
             {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
             Save Changes
@@ -210,22 +210,22 @@ const EmailSettings = () => {
 
       {/* Email Templates */}
       <div className="border-t pt-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Templates</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Email Templates</h3>
         <div className="space-y-3">
           {templates.map((template) => (
-            <div key={template.id} className="bg-white border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+            <div key={template.id} className="bg-surface-raised border border-line rounded-lg p-4 flex justify-between items-center">
               <div>
-                <h4 className="font-medium text-gray-900">{template.template_name}</h4>
-                <p className="text-sm text-gray-600 mt-1">Subject: {template.subject}</p>
+                <h4 className="font-medium text-content">{template.template_name}</h4>
+                <p className="text-sm text-content-muted mt-1">Subject: {template.subject}</p>
                 {template.variables && template.variables.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-content-subtle mt-1">
                     Variables: {template.variables.map(v => `{${v}}`).join(', ')}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => handleEditTemplate(template)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-brand-subtle text-brand rounded-md hover:bg-brand-subtle transition"
               >
                 <FaEdit /> Edit
               </button>

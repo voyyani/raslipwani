@@ -351,7 +351,7 @@ const PropertyDetail = () => {
       <>
         <main className="flex-grow container mx-auto px-4 py-8">
           {error ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-danger-surface border border-danger-border text-danger-content px-4 py-3 rounded mb-6">
               {error}
             </div>
           ) : (
@@ -412,8 +412,8 @@ const PropertyDetail = () => {
                 <meta itemProp="position" content="2" />
               </li>
               <span className="mx-2">/</span>
-              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="text-gray-600">
-                <Link to={pageUrl} itemProp="item" className="text-gray-600">
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="text-content-muted">
+                <Link to={pageUrl} itemProp="item" className="text-content-muted">
                   <span itemProp="name">{property.title}</span>
                 </Link>
                 <meta itemProp="position" content="3" />
@@ -427,7 +427,7 @@ const PropertyDetail = () => {
           
           {/* Enhanced Image Viewer */}
           <div 
-            className={`bg-white rounded-xl shadow-md overflow-hidden mb-8 relative ${
+            className={`bg-surface-raised rounded-xl shadow-md overflow-hidden mb-8 relative ${
               isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
             }`}
           >
@@ -437,7 +437,7 @@ const PropertyDetail = () => {
                 className={`relative ${
                   isFullscreen 
                     ? 'h-screen w-full bg-black cursor-grab' 
-                    : 'h-[50vh] min-h-[400px] bg-gray-100 cursor-pointer'
+                    : 'h-[50vh] min-h-[400px] bg-surface-sunken cursor-pointer'
                 }`}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
@@ -515,7 +515,7 @@ const PropertyDetail = () => {
                       className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-20 ${
                         isFullscreen 
                           ? 'bg-black/50 hover:bg-black/70 text-white' 
-                          : 'bg-white/80 hover:bg-white text-gray-800'
+                          : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -531,7 +531,7 @@ const PropertyDetail = () => {
                       className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-20 ${
                         isFullscreen 
                           ? 'bg-black/50 hover:bg-black/70 text-white' 
-                          : 'bg-white/80 hover:bg-white text-gray-800'
+                          : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors backdrop-blur-sm`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -553,7 +553,7 @@ const PropertyDetail = () => {
                       <div 
                         key={i}
                         className={`w-2 h-2 mx-1 rounded-full transition-all ${
-                          i === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                          i === currentImageIndex ? 'bg-surface-raised scale-125' : 'bg-surface-raised/50'
                         }`}
                       />
                     ))}
@@ -594,8 +594,8 @@ const PropertyDetail = () => {
                 )}
               </div>
             ) : (
-              <div className="bg-gray-200 border-2 border-dashed w-full h-96 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500 text-lg">No Image Available</span>
+              <div className="bg-surface-sunken border-2 border-dashed w-full h-96 rounded-lg flex items-center justify-center">
+                <span className="text-content-subtle text-lg">No Image Available</span>
               </div>
             )}
           </div>
@@ -604,15 +604,15 @@ const PropertyDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="flex justify-between items-start mb-4">
-                <h1 className="text-3xl font-bold text-gray-800">{property.title}</h1>
+                <h1 className="text-3xl font-bold text-content">{property.title}</h1>
                 {property.featured && (
-                  <span className="bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full">
+                  <span className="bg-warning-surface text-warning-content text-sm font-medium px-3 py-1 rounded-full">
                     Featured Property
                   </span>
                 )}
               </div>
               
-              <p className="text-gray-700 mb-6 flex items-center">
+              <p className="text-content-muted mb-6 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -621,33 +621,33 @@ const PropertyDetail = () => {
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
-                  <p className="text-sm text-gray-600">Bedrooms</p>
+                <div className="bg-surface p-4 rounded-lg text-center border border-line">
+                  <p className="text-sm text-content-muted">Bedrooms</p>
                   <p className="text-xl font-bold">{property.bedrooms}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
-                  <p className="text-sm text-gray-600">Bathrooms</p>
+                <div className="bg-surface p-4 rounded-lg text-center border border-line">
+                  <p className="text-sm text-content-muted">Bathrooms</p>
                   <p className="text-xl font-bold">{property.bathrooms}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
-                  <p className="text-sm text-gray-600">Area</p>
+                <div className="bg-surface p-4 rounded-lg text-center border border-line">
+                  <p className="text-sm text-content-muted">Area</p>
                   <p className="text-xl font-bold">{property.area_sqft} sqft</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
-                  <p className="text-sm text-gray-600">Price</p>
+                <div className="bg-surface p-4 rounded-lg text-center border border-line">
+                  <p className="text-sm text-content-muted">Price</p>
                   <p className="text-xl font-bold text-primary">{formatPrice(property.price)}</p>
                 </div>
               </div>
               
               <h2 className="text-2xl font-semibold mb-3">Property Description</h2>
-              <p className="text-gray-700 mb-6 whitespace-pre-line">
+              <p className="text-content-muted mb-6 whitespace-pre-line">
                 {property.description}
               </p>
               
               <h2 className="text-2xl font-semibold mb-3">Property Features</h2>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {property.amenities?.map((amenity, i) => (
-                  <div key={i} className="flex items-center bg-gray-50 px-4 py-2.5 rounded-lg">
+                  <div key={i} className="flex items-center bg-surface px-4 py-2.5 rounded-lg">
                     <span className="text-primary mr-2">✓</span>
                     <span className="capitalize">{amenity.replace('-', ' ')}</span>
                   </div>
@@ -658,19 +658,19 @@ const PropertyDetail = () => {
                 <h2 className="text-2xl font-semibold mb-3">Property Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-600">Property Type</p>
+                    <p className="text-content-muted">Property Type</p>
                     <p className="font-medium capitalize">{property.property_type}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Year Built</p>
+                    <p className="text-content-muted">Year Built</p>
                     <p className="font-medium">{property.year_built || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Lot Size</p>
+                    <p className="text-content-muted">Lot Size</p>
                     <p className="font-medium">{property.lot_size_sqft ? `${property.lot_size_sqft} sqft` : 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Status</p>
+                    <p className="text-content-muted">Status</p>
                     <p className="font-medium capitalize">{property.status}</p>
                   </div>
                 </div>
@@ -678,10 +678,10 @@ const PropertyDetail = () => {
               
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold mb-3">Location Details</h2>
-                <p className="text-gray-700 mb-4">
+                <p className="text-content-muted mb-4">
                   {property.address}, {property.city}, {property.state} {property.zip_code}
                 </p>
-                <div className="bg-gray-100 rounded-lg p-4">
+                <div className="bg-surface-sunken rounded-lg p-4">
                   <p className="font-medium mb-2">Coastal Kenya Location Highlights:</p>
                   <ul className="list-disc pl-5 space-y-1">
                     <li>Proximity to pristine beaches</li>
@@ -693,33 +693,33 @@ const PropertyDetail = () => {
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-md h-fit border border-gray-100">
+            <div className="bg-surface-raised p-6 rounded-xl shadow-md h-fit border border-line">
               <h2 className="text-2xl font-semibold mb-4">Schedule a Viewing</h2>
-              <p className="mb-4 text-gray-600">Interested in this coastal property? Contact us to arrange a private viewing.</p>
+              <p className="mb-4 text-content-muted">Interested in this coastal property? Contact us to arrange a private viewing.</p>
               
-              <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="bg-brand-subtle rounded-lg p-4 mb-6">
                 <div className="flex items-center mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <span className="font-medium">Call Us</span>
                 </div>
-                <p className="text-gray-700">+254 758 066 526</p>
+                <p className="text-content-muted">+254 758 066 526</p>
               </div>
               
-              <button className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors mb-4 font-medium">
+              <button className="w-full bg-primary text-content-on-brand py-3 rounded-lg hover:bg-primary-dark transition-colors mb-4 font-medium">
                 Book Viewing
               </button>
-              <button className="w-full border border-primary text-primary py-3 rounded-lg hover:bg-blue-50 transition-colors font-medium">
+              <button className="w-full border border-primary text-primary py-3 rounded-lg hover:bg-brand-subtle transition-colors font-medium">
                 Contact Agent
               </button>
               
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-line">
                 <h3 className="font-semibold mb-3">Property Status</h3>
                 <div className="flex items-center">
                   <div className={`h-3 w-3 rounded-full mr-2 ${
-                    property.status === 'available' ? 'bg-green-500' : 
-                    property.status === 'pending' ? 'bg-yellow-500' : 
+                    property.status === 'available' ? 'bg-success-content' : 
+                    property.status === 'pending' ? 'bg-accent' : 
                     'bg-gray-500'
                   }`}></div>
                   <span className="capitalize">
@@ -730,19 +730,19 @@ const PropertyDetail = () => {
                 </div>
               </div>
               
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-line">
                 <h3 className="font-semibold mb-3">Share This Property</h3>
                 <div className="flex space-x-4">
-                  <button className="text-gray-600 hover:text-blue-600">
+                  <button className="text-content-muted hover:text-brand">
                     <Icon name="facebook" size={20} />
                   </button>
-                  <button className="text-gray-600 hover:text-blue-400">
+                  <button className="text-content-muted hover:text-blue-400">
                     <Icon name="twitter" size={20} />
                   </button>
-                  <button className="text-gray-600 hover:text-red-600">
+                  <button className="text-content-muted hover:text-danger-content">
                     <Icon name="pinterest" size={20} />
                   </button>
-                  <button className="text-gray-600 hover:text-blue-400">
+                  <button className="text-content-muted hover:text-blue-400">
                     <Icon name="linkedin" size={20} />
                   </button>
                 </div>

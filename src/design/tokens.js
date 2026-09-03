@@ -4,7 +4,7 @@
  * Two rules govern everything in this file.
  *
  * 1. **Tokens are named for their role, never for their value.** `surface-raised`
- *    survives a theme swap; `bg-white` cannot, because a literal name has already
+ *    survives a theme swap; `bg-surface-raised` cannot, because a literal name has already
  *    decided what it looks like. The ~3,000 raw palette classes this codebase
  *    accumulated are literal names, and every one of them has to be touched twice
  *    if the replacement is also literal.
