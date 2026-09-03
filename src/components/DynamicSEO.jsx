@@ -62,8 +62,17 @@ const DynamicSEO = () => {
   return (
     <Helmet>
       <html lang="en" />
-      <link rel="canonical" href="https://raslipwani.co.ke" />
-      
+      {/*
+        No canonical here. This component renders once, above the router, so a
+        canonical written at this level named the homepage on *every* route —
+        telling search engines that each property listing, service page and
+        statutory page was a duplicate of `/` and should not be indexed on its
+        own. `PublicLayout` now emits a route-aware canonical, and the two pages
+        with a better answer than the pathname (Properties, which strips query
+        params; PropertyDetail, which prefers the slug) override it from their
+        own Helmet.
+      */}
+
       {/* Organization Schema */}
       <script type="application/ld+json">
         {JSON.stringify(organizationSchema)}

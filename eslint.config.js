@@ -5,6 +5,8 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 
+import noRawPaletteClasses from './eslint-rules/no-raw-palette-classes.js'
+
 export default [
   // 'coverage' and the agent worktree root are generated or foreign trees.
   // Linting them reports thousands of errors in minified vendor output and in
@@ -29,6 +31,10 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       'jsx-a11y': jsxA11y,
+      // Local rules live in `eslint-rules/`. A flat config can register a plugin
+      // object inline, so there is no package to publish for a rule that only
+      // makes sense inside this repo.
+      design: { rules: { 'no-raw-palette-classes': noRawPaletteClasses } },
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -49,11 +55,30 @@ export default [
         Object.keys(jsxA11y.flatConfigs.recommended.rules).map((rule) => [rule, 'warn'])
       ),
 
+      // Literal Tailwind colours: warn, counted, and ratcheted in CI by
+      // `scripts/palette-ratchet.mjs`. See the rule's own header for why this is
+      // not an error. Slice 4C lowers the ceiling surface by surface.
+      'design/no-raw-palette-classes': 'warn',
+
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
+    },
+  },
+
+  // The token layer is where literal colour is supposed to live — it is the file
+  // whose entire job is to map roles onto values. Linting it against itself would
+  // be circular, and the contrast test names literal hexes on purpose.
+  {
+    files: [
+      'src/design/**/*.{js,jsx}',
+      'eslint-rules/**/*.js',
+      'scripts/**/*.mjs',
+    ],
+    rules: {
+      'design/no-raw-palette-classes': 'off',
     },
   },
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle } from 'react-icons/fi';
 import { MdDashboard } from 'react-icons/md';
 
+import Icon from '../../components/Icon';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -362,10 +363,10 @@ const Header = () => {
                 {/* Social Links */}
                 <div className="flex justify-center space-x-4 mt-6 pt-6 border-t border-gray-200">
                   {[
-                    { icon: 'fab fa-whatsapp', href: 'https://wa.me/254758066526', color: 'hover:text-green-500' },
-                    { icon: 'fab fa-instagram', href: 'https://www.instagram.com/raslipwani/', color: 'hover:text-pink-500' },
-                    { icon: 'fab fa-facebook', href: 'https://www.facebook.com/raslipwani/', color: 'hover:text-blue-500' },
-                    { icon: 'fab fa-tiktok', href: 'https://www.tiktok.com/@raslipwani0', color: 'hover:text-gray-800' }
+                    { icon: 'whatsapp', href: 'https://wa.me/254758066526', color: 'hover:text-green-500' },
+                    { icon: 'instagram', href: 'https://www.instagram.com/raslipwani/', color: 'hover:text-pink-500' },
+                    { icon: 'facebook', href: 'https://www.facebook.com/raslipwani/', color: 'hover:text-blue-500' },
+                    { icon: 'tiktok', href: 'https://www.tiktok.com/@raslipwani0', color: 'hover:text-gray-800' }
                   ].map((social, index) => (
                     <a
                       key={index}
@@ -375,7 +376,7 @@ const Header = () => {
                       className={`text-gray-400 ${social.color} transition-colors duration-300 text-xl`}
                       aria-label={social.icon.split('-')[1]}
                     >
-                      <i className={social.icon}></i>
+                      <Icon name={social.icon} />
                     </a>
                   ))}
                 </div>

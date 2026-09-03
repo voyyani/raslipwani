@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
-import { supabase } from '../../utils/supabaseClient';
+import toast from 'react-hot-toast';
 
+import { supabase } from '../../utils/supabaseClient';
+import { notifyBookingReceived } from '../../utils/bookingNotifications';
+
+import { logger } from '../../utils/logger';
+import Icon from '../Icon';
+import Modal from '../ui/Modal';
 const ViewingExperience = () => {
   const [properties, setProperties] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
@@ -38,7 +44,7 @@ const ViewingExperience = () => {
     title: "In-Person Viewing", 
     description: "Personalized tour with our agent",
     duration: "1 hour",
-    icon: "fas fa-walking",
+    icon: "walking",
     price: "Free",
     features: [
       "On-site property inspection",
@@ -52,7 +58,7 @@ const ViewingExperience = () => {
     title: "Virtual Tour", 
     description: "Live video walkthrough",
     duration: "30 minutes",
-    icon: "fas fa-video",
+    icon: "video",
     price: "Free",
     features: [
       "Live guided video tour",
@@ -66,7 +72,7 @@ const ViewingExperience = () => {
     title: "3D Viewing Experience", 
     description: "3D virtual tour of the property, and drone footage",
     duration: "Unlimited access for 7 days",
-    icon: "fas fa-vr-cardboard",
+    icon: "vr-cardboard",
     price: "Ksh 5,000",
     features: [
       "360° property view",
@@ -93,7 +99,7 @@ const ViewingExperience = () => {
       setFilteredProperties(data);
       setShowResults(true);
     } catch (err) {
-      console.error('Error fetching properties:', err);
+      logger.error('Error fetching properties:', err);
     } finally {
       setLoading(false);
     }
@@ -199,15 +205,52 @@ const ViewingExperience = () => {
     });
   };
 
+  /**
+   * Submit a viewing booking.
+   *
+   * 🔴 This handler previously contained the comment `// Booking submission
+   * logic` and nothing else, followed by an `alert()` reading "Your viewing has
+   * been booked successfully!". No row was ever written and no notification was
+   * ever sent: the customer was told their viewing was confirmed, and it did not
+   * exist. Every viewing booked through this component since it shipped was lost
+   * at the moment of submission.
+   *
+   * It now writes the same `bookings` shape `ServicesMain` writes — including
+   * `type`, which is NOT NULL with no default — and sends the same notification.
+   */
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // Booking submission logic
-      alert("Your viewing has been booked successfully! We'll send confirmation details shortly.");
-      
-      // Reset booking flow
+      const record = {
+        type: 'viewing',
+        name: bookingData.name,
+        email: bookingData.email,
+        phone: bookingData.phone,
+        service: 'viewing',
+        property_id: selectedProperty?.id ?? null,
+        viewing_type: viewingType,
+        appointment_at: bookingData.date
+          ? new Date(`${bookingData.date}T${bookingData.time || '00:00'}`).toISOString()
+          : null,
+        notes: bookingData.notes,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase.from('bookings').insert([record]);
+
+      if (error) throw error;
+
+      // Best-effort, exactly as on the services path: the booking is already
+      // saved, so a mail outage must not be reported to the customer as failure.
+      await notifyBookingReceived(record);
+
+      toast.success('Viewing booked. We will send confirmation details shortly.', {
+        duration: 6000,
+      });
+
       setSelectedProperty(null);
       setBookingStep(0);
       setBookingData({
@@ -218,10 +261,9 @@ const ViewingExperience = () => {
         time: '',
         notes: '',
       });
-      
     } catch (error) {
-      console.error('Booking error:', error);
-      alert('Failed to submit booking. Please try again.');
+      logger.error('Booking error:', error);
+      toast.error('We could not book that viewing. Please try again, or call us directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -235,6 +277,12 @@ const ViewingExperience = () => {
     }));
   };
 
+  /** Leaving the booking flow resets both pieces of its state together. */
+  const closeBooking = () => {
+    setSelectedProperty(null);
+    setBookingStep(0);
+  };
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -244,7 +292,10 @@ const ViewingExperience = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    // `flex-grow`, not `min-h-screen`: this page now sits inside the layout
+    // route's flex column, which already fills the viewport. Keeping
+    // `min-h-screen` here would push the footer a full screen down the page.
+    <main className="flex-grow bg-gradient-to-b from-blue-50 to-white">
       {/* Viewing Options Section */}
       <section id="viewing-options" className="py-12">
         <div className="container mx-auto px-4">
@@ -286,7 +337,7 @@ const ViewingExperience = () => {
                         ? 'bg-primary text-white' 
                         : 'bg-gray-100 text-primary'
                     }`}>
-                      <i className={`${option.icon} text-xl`}></i>
+                      <Icon name={option.icon} size={20} />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold">{option.title}</h3>
@@ -312,7 +363,7 @@ const ViewingExperience = () => {
                   <ul className="space-y-2 mb-4 text-sm">
                     {option.features.map((feature, i) => (
                       <li key={i} className="flex items-start">
-                        <i className="fas fa-check-circle text-green-500 mt-0.5 mr-2 text-xs"></i>
+                        <Icon name="check-circle" size={12} className="text-green-500 mt-0.5 mr-2" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -473,7 +524,7 @@ const ViewingExperience = () => {
           
           {showResults && !loading && filteredProperties.length === 0 && (
             <div className="bg-white rounded-xl shadow-md p-8 text-center">
-              <i className="fas fa-search text-3xl text-gray-400 mb-3"></i>
+              <Icon name="search" size={30} className="text-gray-400 mb-3" />
               <h3 className="text-lg font-bold mb-1">No properties match your criteria</h3>
               <p className="text-gray-600 mb-4 text-sm">Try adjusting your filters or check back later</p>
               <button 
@@ -505,7 +556,7 @@ const ViewingExperience = () => {
                       />
                     ) : (
                       <div className="absolute inset-0 w-full h-full bg-gray-200 border-2 border-dashed rounded-xl flex items-center justify-center text-gray-500">
-                        <i className="fas fa-home text-3xl"></i>
+                        <Icon name="home" size={30} />
                       </div>
                     )}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
@@ -520,13 +571,13 @@ const ViewingExperience = () => {
                       </span>
                       <div className="flex gap-2 text-gray-600 text-xs">
                         <span>
-                          <i className="fas fa-bed mr-1"></i> {property.bedrooms || '-'}
+                          <Icon name="bed" className="mr-1" /> {property.bedrooms || '-'}
                         </span>
                         <span>
-                          <i className="fas fa-bath mr-1"></i> {property.bathrooms || '-'}
+                          <Icon name="bath" className="mr-1" /> {property.bathrooms || '-'}
                         </span>
                         <span>
-                          <i className="fas fa-ruler-combined mr-1"></i> {property.area_sqft || '-'} sqft
+                          <Icon name="ruler-combined" className="mr-1" /> {property.area_sqft || '-'} sqft
                         </span>
                       </div>
                     </div>
@@ -543,7 +594,7 @@ const ViewingExperience = () => {
                         }}
                         className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors text-sm flex items-center justify-center"
                       >
-                        <i className="fas fa-calendar-check mr-1.5"></i> Book Viewing
+                        <Icon name="calendar-check" className="mr-1.5" /> Book Viewing
                       </button>
                     </div>
                   </div>
@@ -555,35 +606,22 @@ const ViewingExperience = () => {
       </section>
 
       {/* Booking Flow Modal */}
-      <AnimatePresence>
-        {(bookingStep > 0 && selectedProperty) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            >
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">
-                    {bookingStep === 1 ? 'Confirm Viewing Details' : 'Schedule Your Viewing'}
-                  </h2>
-                  <button 
-                    onClick={() => {
-                      setSelectedProperty(null);
-                      setBookingStep(0);
-                    }}
-                    className="text-gray-500 hover:text-primary"
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
-                
+      {/*
+        The viewing booking dialog — the moment a visitor becomes a customer.
+        It was a hand-rolled overlay: focus stayed behind it, Tab left the form
+        for the page underneath, Escape did nothing and closing returned focus
+        to the top of the document. `Modal` handles all four, once.
+      */}
+      {/* The guard is at the call site, not inside `Modal`: JSX evaluates
+          children before the component can decide not to render them, and the
+          body below dereferences `selectedProperty`. */}
+      {bookingStep > 0 && selectedProperty && (
+      <Modal
+        isOpen
+        onClose={closeBooking}
+        title={bookingStep === 1 ? 'Confirm Viewing Details' : 'Schedule Your Viewing'}
+        size="lg"
+      >
                 {bookingStep === 1 ? (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
@@ -598,7 +636,7 @@ const ViewingExperience = () => {
                             />
                           ) : (
                             <div className="bg-gray-200 border-2 border-dashed rounded-xl w-20 h-20 flex items-center justify-center text-gray-500 mr-3">
-                              <i className="fas fa-home"></i>
+                              <Icon name="home" />
                             </div>
                           )}
                           <div>
@@ -615,7 +653,7 @@ const ViewingExperience = () => {
                         <h4 className="font-bold mb-2 text-md">Selected Viewing Experience</h4>
                         <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                           <div className="flex items-center mb-1">
-                            <i className={`${viewingOptions.find(o => o.type === viewingType)?.icon} text-primary mr-2`}></i>
+                            <Icon name={viewingOptions.find(o => o.type === viewingType)?.icon} className="text-primary mr-2" />
                             <h5 className="font-bold">
                               {viewingOptions.find(o => o.type === viewingType)?.title}
                             </h5>
@@ -653,7 +691,7 @@ const ViewingExperience = () => {
                         <div className="bg-white border border-gray-200 rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
-                              <i className="fas fa-clock text-primary text-sm"></i>
+                              <Icon name="clock" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Preparation</h4>
@@ -667,7 +705,7 @@ const ViewingExperience = () => {
                         <div className="bg-white border border-gray-200 rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
-                              <i className="fas fa-user text-primary text-sm"></i>
+                              <Icon name="user" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Dedicated Agent</h4>
@@ -681,7 +719,7 @@ const ViewingExperience = () => {
                         <div className="bg-white border border-gray-200 rounded-lg p-3">
                           <div className="flex items-start">
                             <div className="bg-primary/10 p-1.5 rounded mr-2">
-                              <i className="fas fa-file-alt text-primary text-sm"></i>
+                              <Icon name="file-alt" size={14} className="text-primary" />
                             </div>
                             <div>
                               <h4 className="font-bold mb-1 text-sm">Follow-Up</h4>
@@ -780,7 +818,7 @@ const ViewingExperience = () => {
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center">
-                            <i className="fas fa-spinner fa-spin mr-2"></i> Booking...
+                            <Icon name="spinner" className="animate-spin mr-2" /> Booking...
                           </span>
                         ) : (
                           `Confirm ${viewingOptions.find(o => o.type === viewingType)?.title}`
@@ -789,12 +827,9 @@ const ViewingExperience = () => {
                     </div>
                   </form>
                 )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      </Modal>
+      )}
+    </main>
   );
 };
 

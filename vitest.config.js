@@ -30,15 +30,20 @@ export default defineConfig({
       // Ratcheting floor: raise these as coverage grows, never lower them.
       // Phase 3 of ROADMAP.md targets 70%.
       //
-      // Set from the real measurement on 2026-09-02 (61.00 lines / 59.92
-      // statements / 46.21 functions / 47.06 branches), a couple of points
-      // below each so ordinary refactoring does not trip CI while a genuine
-      // regression does. They sat at 0 until now, and 0 enforces nothing.
+      // Set from the real measurement on 2026-09-02, after Release 4 Slice 4A
+      // (62.59 lines / 61.51 statements / 47.14 functions / 48.75 branches),
+      // a couple of points below each so ordinary refactoring does not trip CI
+      // while a genuine regression does. They sat at 0 until Release 3, and 0
+      // enforces nothing.
+      // Ratcheted at the end of Release 4 Slice 4B, which measured
+      // 63.26 lines / 62.38 statements / 49.45 functions / 49.47 branches.
+      // Each floor sits ~1 point under its measurement: enough headroom that
+      // ordinary work does not trip CI, tight enough that deleting a suite does.
       thresholds: {
-        lines: 58,
-        functions: 44,
-        branches: 45,
-        statements: 57
+        lines: 62,
+        functions: 48,
+        branches: 48,
+        statements: 61
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

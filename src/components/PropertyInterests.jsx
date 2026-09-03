@@ -3,9 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../utils/supabaseClient';
 import { formatDate } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
+
+import useConfirm from './ui/useConfirm';
 import { Home, Plus, X, Save, Trash2, MapPin, DollarSign, Bed, Bath } from 'lucide-react';
 
 const PropertyInterests = ({ clientId }) => {
+  const [confirm, confirmDialog] = useConfirm();
   const queryClient = useQueryClient();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -391,13 +394,18 @@ const PropertyInterests = ({ clientId }) => {
                   </select>
 
                   <button
-                    onClick={() => {
-                      if (confirm('Remove this property interest?')) {
-                        deleteInterestMutation.mutate(interest.id);
-                      }
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: 'Remove property interest',
+                        message: `${
+                          interest.properties?.title || 'This property'
+                        } will be removed from this client's interests.`,
+                        confirmLabel: 'Remove interest',
+                      });
+                      if (ok) deleteInterestMutation.mutate(interest.id);
                     }}
-                    className="px-3 py-1 text-red-600 hover:bg-red-50 rounded"
-                    title="Remove"
+                    className="px-3 py-1 text-danger-content hover:bg-danger-surface rounded"
+                    aria-label="Remove property interest"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -407,6 +415,8 @@ const PropertyInterests = ({ clientId }) => {
           ))}
         </div>
       )}
+
+      {confirmDialog}
     </div>
   );
 };

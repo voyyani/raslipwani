@@ -1,4 +1,4 @@
 {
-  "firstLoadGzipKb": 235,
-  "note": "Measured 229.8 kB gzip on 2026-09-02 after Phase 6.1 lazy-loaded the admin console (the regression peaked near 446 kB). The budget carries ~5 kB of headroom so ordinary work does not trip CI, while a new top-level vendor import does. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
+  "firstLoadGzipKb": 219,
+  "note": "Measured 213.2 kB gzip on 2026-09-02 after Release 4 Slice 4A removed FontAwesome (999 kB of icon fonts, and ~72 kB of the CSS bundle) and moved the admin-only stylesheet into the lazy admin chunk. The previous budget was 235 kB against a 229.8 kB measurement. This one carries ~6 kB of headroom so ordinary work does not trip CI, while a new top-level vendor import does. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
 }

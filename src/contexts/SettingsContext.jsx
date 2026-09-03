@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
+import { logger } from '../utils/logger';
 // Default fallback values for settings (used while loading or on error)
 const DEFAULT_SETTINGS = {
   // Branding
@@ -81,21 +82,21 @@ export const SettingsProvider = ({ children }) => {
       if (fetchError) {
         // If no rows exist, that's okay - use defaults
         if (fetchError.code === 'PGRST116') {
-          console.warn('[SettingsContext] No settings row found, using defaults');
+          logger.warn('[SettingsContext] No settings row found, using defaults');
           setLoading(false);
           return;
         }
-        console.error('[SettingsContext] Fetch error:', fetchError);
+        logger.error('[SettingsContext] Fetch error:', fetchError);
         setError(fetchError.message);
         return;
       }
 
       if (!data) {
-        console.warn('[SettingsContext] No settings found, using defaults');
+        logger.warn('[SettingsContext] No settings found, using defaults');
         return;
       }
 
-      console.log('[SettingsContext] Raw data from DB:', data);
+      logger.debug('[SettingsContext] Raw data from DB:', data);
 
       // Merge fetched settings with defaults (fetched values take precedence)
       const mergedSettings = {
@@ -110,12 +111,12 @@ export const SettingsProvider = ({ children }) => {
         notification_settings: data.notification_settings || null,
       };
 
-      console.log('[SettingsContext] Merged settings:', mergedSettings);
+      logger.debug('[SettingsContext] Merged settings:', mergedSettings);
       setSettings(mergedSettings);
       setLastUpdated(new Date());
-      console.log('[SettingsContext] Settings loaded successfully');
+      logger.debug('[SettingsContext] Settings loaded successfully');
     } catch (err) {
-      console.error('[SettingsContext] Unexpected error:', err);
+      logger.error('[SettingsContext] Unexpected error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -126,7 +127,7 @@ export const SettingsProvider = ({ children }) => {
    * Refresh settings - can be called after admin makes changes
    */
   const refreshSettings = useCallback(async () => {
-    console.log('[SettingsContext] Refreshing settings...');
+    logger.debug('[SettingsContext] Refreshing settings...');
     await fetchSettings();
   }, [fetchSettings]);
 
@@ -210,7 +211,7 @@ export const SettingsProvider = ({ children }) => {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'admin_settings' },
         (payload) => {
-          console.log('[SettingsContext] Realtime update detected:', payload);
+          logger.debug('[SettingsContext] Realtime update detected:', payload);
           refreshSettings();
         }
       )
@@ -257,9 +258,9 @@ export const SettingsProvider = ({ children }) => {
  * @example
  * // Use convenience getters (they are functions)
  * const { siteName, phone, socialMedia } = useSettings();
- * console.log(siteName()); // "Raslipwani Properties"
- * console.log(phone()); // "+254758066526"
- * console.log(socialMedia().facebook); // "https://facebook.com/..."
+ * logger.debug(siteName()); // "Raslipwani Properties"
+ * logger.debug(phone()); // "+254758066526"
+ * logger.debug(socialMedia().facebook); // "https://facebook.com/..."
  * 
  * @example
  * // Access raw setting by key

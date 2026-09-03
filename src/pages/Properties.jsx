@@ -4,8 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiSearch, FiFilter, FiMapPin } from 'react-icons/fi';
 import { supabase } from '../../src/utils/supabaseClient';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import PropertyModal from '../components/PropertyModal';
 
 const Properties = () => {
@@ -257,9 +255,7 @@ const Properties = () => {
         </script>
       </Helmet>
       
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        
+      <>
         {/* Enhanced Hero Section */}
         <section className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-primary pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
           {/* Background Pattern */}
@@ -604,8 +600,6 @@ const Properties = () => {
           </div>
         </main>
         
-        <Footer />
-
         {/* Property Modal */}
         <AnimatePresence>
           {isModalOpen && selectedProperty && (
@@ -615,7 +609,7 @@ const Properties = () => {
             />
           )}
         </AnimatePresence>
-      </div>
+      </>
     </>
   );
 };

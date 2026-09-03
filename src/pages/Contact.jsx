@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { supabase } from '../utils/supabaseClient';
 import { useSettings } from '../hooks/useSettings';
 import { notifyBookingReceived } from '../utils/bookingNotifications';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTriangle, FaBuilding, FaCity, FaHome, FaMap } from 'react-icons/fa';
 
+import { logger } from '../utils/logger';
 const Contact = () => {
   // Get settings
   const { phone, email, address, serviceLocations } = useSettings();
@@ -130,7 +129,7 @@ const Contact = () => {
       
     } catch (err) {
       setError('Failed to submit your message. Please try again later.');
-      console.error('Submission error:', err);
+      logger.error('Submission error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -180,10 +179,8 @@ const Contact = () => {
         </script>
       </Helmet>
       
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-        <Header />
-        
-        <main className="flex-grow">
+      <>
+        <main className="flex-grow bg-gradient-to-b from-white to-gray-50">
           <section className="bg-gradient-to-r from-blue-800 to-primary py-24 md:py-32 relative overflow-hidden">
             <div className="absolute inset-0 bg-black opacity-20"></div>
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/10 to-blue-600/10"></div>
@@ -713,8 +710,7 @@ const Contact = () => {
           </section>
         </main>
         
-        <Footer />
-      </div>
+      </>
     </>
   );
 };

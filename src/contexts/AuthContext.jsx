@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
+import { logger } from '../utils/logger';
 const AuthContext = createContext(null);
 
 /**
@@ -17,7 +18,7 @@ async function fetchIsAdmin(userId) {
 
   if (error) {
     // Fail closed. A lookup failure must never be read as "is an admin".
-    console.error('[AuthContext] admin lookup failed:', error.message);
+    logger.error('[AuthContext] admin lookup failed:', error.message);
     return false;
   }
   return Boolean(data);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
@@ -23,12 +23,19 @@ import {
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import toast from 'react-hot-toast';
 
+import useConfirm from '../../components/ui/useConfirm';
+import usePrompt from '../../components/ui/usePrompt';
+import useDialog from '../../components/ui/useDialog';
+
 /**
  * BookingDetailModal - Comprehensive booking detail and management modal
  * Features: Status workflow, internal notes, quick actions, activity log
  */
 const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
+  const [confirm, confirmDialog] = useConfirm();
+  const [prompt, promptDialog] = usePrompt();
   const queryClient = useQueryClient();
+  const panelRef = useRef(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [newNote, setNewNote] = useState('');
   const [isEditingStatus, setIsEditingStatus] = useState(false);
@@ -167,9 +174,26 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
     }
   };
 
-  const handleCancel = () => {
-    const reason = prompt('Please provide a cancellation reason:');
-    if (reason) {
+  /**
+   * Cancel the booking, with a reason.
+   *
+   * This used `prompt()`, whose empty-submission and dismissal cases are both
+   * falsy — so an admin who pressed OK without typing cancelled nothing and was
+   * told nothing. `usePrompt` requires the value and keeps the dialog open until
+   * it has one; `null` still means dismissed.
+   */
+  const handleCancel = async () => {
+    const reason = await prompt({
+      title: 'Cancel booking',
+      label: 'Cancellation reason',
+      hint: 'Recorded against the booking and shown in its history.',
+      multiline: true,
+      confirmLabel: 'Cancel booking',
+      cancelLabel: 'Keep booking',
+      requiredMessage: 'A cancellation reason is required.',
+    });
+
+    if (reason !== null) {
       updateStatusMutation.mutate({ status: 'cancelled', reason });
     }
   };
@@ -200,6 +224,15 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
     return colors[priority] || colors.medium;
   };
 
+  /**
+   * This sheet cannot wear `Modal`'s chrome: on mobile it is a drag-to-dismiss
+   * bottom sheet with a gradient header and a back affordance, and a titled
+   * panel would fight all three. `useDialog` is the half it does need — focus
+   * enters and is trapped, Escape closes, and focus returns to the row that
+   * opened it. It had none of those.
+   */
+  useDialog({ isOpen: true, onClose, panelRef });
+
   return (
     <AnimatePresence>
       <motion.div 
@@ -209,7 +242,12 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
-        <motion.div 
+        <motion.div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Booking details"
+          tabIndex={-1}
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
@@ -518,12 +556,17 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           {format(new Date(note.created_at), 'PPp')}
                         </div>
                         <button
-                          onClick={() => {
-                            if (window.confirm('Delete this note?')) {
-                              deleteNoteMutation.mutate(note.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: 'Delete note',
+                              message:
+                                'This note will be permanently deleted from the booking.',
+                              confirmLabel: 'Delete note',
+                            });
+                            if (ok) deleteNoteMutation.mutate(note.id);
                           }}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-danger-content hover:opacity-80"
+                          aria-label="Delete note"
                         >
                           <FaTrash />
                         </button>
@@ -641,6 +684,9 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
         </div>
         </motion.div>
       </motion.div>
+
+      {confirmDialog}
+      {promptDialog}
     </AnimatePresence>
   );
 };

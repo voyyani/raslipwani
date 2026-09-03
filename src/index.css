@@ -1,5 +1,10 @@
+/* The semantic token layer must land before Tailwind's utilities, because every
+   colour utility in this build resolves to one of its custom properties.
+   Generated from src/design/tokens.js — see scripts/generate-tokens.mjs. */
+@import './styles/tokens.css';
+
 /* Poppins is linked from index.html so the browser discovers it in the initial
-   HTML rather than after this bundle parses. Do not re-add an @import here. */
+   HTML rather than after this bundle parses. Do not re-add a font @import here. */
 
 /* Tailwind layers */
 @tailwind base;
@@ -12,9 +17,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
-  color: #213547;
-  background-color: #ffffff;
+  /* color-scheme and every --token come from styles/tokens.css. */
+  color: rgb(var(--content));
+  background-color: rgb(var(--surface));
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -30,8 +35,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  color: #1f2937; /* Tailwind's text-gray-800 */
-  background-color: #f8fafc; /* Tailwind's bg-light (use #f8fafc for light background) */
+  color: rgb(var(--content));
+  background-color: rgb(var(--surface));
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
@@ -43,11 +48,11 @@ body {
 
 a {
   font-weight: 500;
-  color: #1A7CA5; /* using your 'secondary' color */
+  color: rgb(var(--brand));
   text-decoration: none;
 }
 a:hover {
-  color: #0D4B6E; /* using your 'primary' color */
+  color: rgb(var(--brand-hover));
 }
 
 h1 {
@@ -60,22 +65,17 @@ h1 {
    button and only ever showed up on ones that had not been styled yet. */
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid rgb(var(--focus-ring));
+  outline-offset: 2px;
 }
 
-/* Optional: Dark mode (Tailwind can also handle this via `dark:` variants) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-  }
-  a:hover {
-    color: #FFC107; /* accent */
-  }
-  button {
-    background-color: #333;
-  }
-}
+/* The Vite scaffold's dark block used to live here. It flipped bare `:root` to
+   #242424 under `prefers-color-scheme: dark` with no token layer beneath it, so a
+   visitor on a dark OS got a dark page ground behind components that were still
+   painting themselves light — dark backgrounds leaking behind light cards, which
+   has been shipping. It is deleted rather than extended: the token layer above
+   replaces what it was reaching for, and dark mode arrives by class in Slice 4D
+   so the choice is the visitor's rather than the operating system's alone. */
 /* Calendar styling */
 .custom-calendar .react-calendar__tile--has-bookings {
   background-color: #dbeafe;

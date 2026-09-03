@@ -1,4 +1,6 @@
 import React from 'react';
+
+import { statusClasses, statusLabel } from '../design/status';
 import { 
   FaCheck, 
   FaTimes, 
@@ -41,13 +43,11 @@ const BookingRow = ({
           </div>
         </td>
         <td className="px-6 py-4">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-            'bg-yellow-100 text-yellow-800'
-          }`}>
-            {booking.status}
-          </span>
+          <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
+                    </span>
         </td>
         <td className="px-6 py-4">
           <div className="flex space-x-3">
@@ -112,13 +112,11 @@ const BookingRow = ({
             <div className="text-sm text-gray-500">{booking.email}</div>
             <div className="text-sm text-gray-500">{booking.phone}</div>
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-            'bg-yellow-100 text-yellow-800'
-          }`}>
-            {booking.status}
-          </span>
+          <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClasses(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
+                    </span>
         </div>
         
         <div className="mt-3">

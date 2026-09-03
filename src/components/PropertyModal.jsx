@@ -3,7 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
+import toast from 'react-hot-toast';
+
+import { logger } from '../utils/logger';
+import useDialog from './ui/useDialog';
+
+/** The office number, in one place: it appeared as a literal in three. */
+const OFFICE_PHONE = '+254758066526';
 const PropertyModal = ({ property, closeModal }) => {
+  const panelRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const navigate = useNavigate();
@@ -93,22 +101,32 @@ const PropertyModal = ({ property, closeModal }) => {
     }
   };
 
-  // Keyboard navigation
+  /**
+   * The gallery is a lightbox, not a titled panel: `Modal`'s header bar would
+   * sit on top of the photograph it exists to show. So it takes the behaviour
+   * without the chrome — see `useDialog`. Focus enters the panel and is
+   * trapped, and closing returns it to the card that opened the gallery.
+   *
+   * Escape is handled here rather than by the hook, because this dialog has two
+   * layers to leave: fullscreen first, then the dialog itself. The hook's
+   * handler runs on the capture phase, so this one has to stop it before it
+   * closes the gallery out from under a viewer who only wanted to leave
+   * fullscreen.
+   */
+  useDialog({ isOpen: true, onClose: closeModal, panelRef });
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') handlePrev();
       if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'Escape') {
-        if (isFullscreen) {
-          setIsFullscreen(false);
-        } else {
-          closeModal();
-        }
+      if (e.key === 'Escape' && isFullscreen) {
+        e.stopPropagation();
+        setIsFullscreen(false);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isFullscreen]);
 
   // Handle Contact Agent button click
@@ -116,10 +134,22 @@ const PropertyModal = ({ property, closeModal }) => {
     setShowPhone(true);
   };
 
-  // Copy phone number to clipboard
-  const copyPhoneNumber = () => {
-    navigator.clipboard.writeText('+254758066526');
-    alert('Phone number copied to clipboard!');
+  /**
+   * Copy the office number.
+   *
+   * `writeText` returns a promise and rejects when the clipboard permission is
+   * denied or the page is not in a secure context. The previous version ignored
+   * it and announced success unconditionally, so a denied copy still told the
+   * visitor the number was on their clipboard when it was not.
+   */
+  const copyPhoneNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(OFFICE_PHONE);
+      toast.success('Phone number copied.');
+    } catch (error) {
+      logger.error('Clipboard write failed:', error);
+      toast.error(`Could not copy. Our number is ${OFFICE_PHONE}.`);
+    }
   };
 
   // Handle Schedule Tour button click
@@ -180,7 +210,7 @@ const PropertyModal = ({ property, closeModal }) => {
   // Handle image error
   const handleImageError = () => {
     setIsImageLoading(false);
-    console.error('Error loading image:', property.images[currentImageIndex]);
+    logger.error('Error loading image:', property.images[currentImageIndex]);
   };
 
   // Tap gestures
@@ -217,6 +247,11 @@ const PropertyModal = ({ property, closeModal }) => {
       onClick={closeModal}
     >
       <motion.div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={property?.title ? `${property.title} — photos and details` : 'Property details'}
+        tabIndex={-1}
         className={`relative bg-white ${isFullscreen ? 'fixed inset-0 !m-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
         initial={{ scale: 0.9 }}
         animate={{ scale: 1 }}
@@ -474,7 +509,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     <h4 className="text-lg font-semibold">Contact Agent</h4>
                   </div>
                   <a 
-                    href="tel:+254758066526" 
+                    href={`tel:${OFFICE_PHONE}`} 
                     className="text-2xl font-bold text-primary mb-3 hover:underline"
                   >
                     +254 758 066 526
@@ -491,7 +526,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      href="tel:+254758066526"
+                      href={`tel:${OFFICE_PHONE}`}
                       className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-2 px-4 rounded-lg shadow-md"
                     >
                       Call Now

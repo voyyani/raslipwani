@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import Icon from '../../../components/Icon';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Modal from '../../../components/ui/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../utils/supabaseClient';
 import { FaSave, FaSpinner, FaEnvelope, FaEdit, FaTimes } from 'react-icons/fa';
@@ -230,71 +234,75 @@ const EmailSettings = () => {
         </div>
       </div>
 
-      {/* Template Editor Modal */}
+      {/* Guarded at the call site: the body below reads `selectedTemplate`, and
+          JSX evaluates children before `Modal` can decline to render them. */}
       {showTemplateEditor && selectedTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-              <h3 className="text-xl font-bold">Edit Template: {selectedTemplate.template_name}</h3>
-              <button onClick={() => setShowTemplateEditor(false)} className="text-white hover:text-gray-200">
-                <FaTimes size={24} />
-              </button>
-            </div>
+        <Modal
+          isOpen
+          onClose={() => setShowTemplateEditor(false)}
+          title={`Edit Template: ${selectedTemplate.template_name}`}
+          size="lg"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setShowTemplateEditor(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveTemplate}
+                loading={updateTemplateMutation.isPending}
+                disabled={updateTemplateMutation.isPending}
+              >
+                {!updateTemplateMutation.isPending && <Icon name="save" size={16} />}
+                Save Template
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <Input
+              label="Subject"
+              value={templateContent.subject}
+              onChange={(e) =>
+                setTemplateContent({ ...templateContent, subject: e.target.value })
+              }
+            />
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                <input
-                  type="text"
-                  value={templateContent.subject}
-                  onChange={(e) => setTemplateContent({ ...templateContent, subject: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Body</label>
+            <div>
+              {/* ReactQuill renders its own contenteditable, so it cannot take
+                  an id from `Field`; the label is associated by `aria-labelledby`
+                  on the editor's container instead of by `htmlFor`. */}
+              <p id="template-body-label" className="block mb-1.5 text-sm font-medium text-content">
+                Body
+              </p>
+              <div aria-labelledby="template-body-label">
                 <ReactQuill
                   theme="snow"
                   value={templateContent.body}
                   onChange={(value) => setTemplateContent({ ...templateContent, body: value })}
                   modules={modules}
-                  className="bg-white"
                 />
               </div>
+            </div>
 
-              {selectedTemplate.variables && selectedTemplate.variables.length > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-sm font-medium text-yellow-900 mb-2">Available Variables:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTemplate.variables.map(variable => (
-                      <code key={variable} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
-                        {`{${variable}}`}
-                      </code>
-                    ))}
-                  </div>
+            {selectedTemplate.variables?.length > 0 && (
+              <div className="bg-warning-subtle border border-warning-border rounded-lg p-3">
+                <p className="text-sm font-medium text-warning-content mb-2">
+                  Available Variables:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.variables.map((variable) => (
+                    <code
+                      key={variable}
+                      className="px-2 py-1 bg-warning-subtle text-warning-content rounded text-xs"
+                    >
+                      {`{${variable}}`}
+                    </code>
+                  ))}
                 </div>
-              )}
-            </div>
-
-            <div className="border-t bg-gray-50 p-4 flex justify-end gap-3">
-              <button
-                onClick={() => setShowTemplateEditor(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveTemplate}
-                disabled={updateTemplateMutation.isPending}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-              >
-                {updateTemplateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
-                Save Template
-              </button>
-            </div>
+              </div>
+            )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
+import { logger } from '../utils/logger';
 const BookingCalendar = ({
   bookings,
   selectedDate,
@@ -90,7 +91,7 @@ const BookingCalendar = ({
       
       return [];
     } catch (error) {
-      console.error("Error getting appointments:", error);
+      logger.error("Error getting appointments:", error);
       return [];
     }
   };

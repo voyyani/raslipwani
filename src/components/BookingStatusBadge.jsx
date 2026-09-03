@@ -1,54 +1,42 @@
 import React from 'react';
-import { 
-  FaClock, 
-  FaCheckCircle, 
-  FaTimesCircle, 
-  FaCheck 
-} from 'react-icons/fa';
+import PropTypes from 'prop-types';
+import { FaClock, FaCheckCircle, FaTimesCircle, FaCheck } from 'react-icons/fa';
+
+import { statusClasses, statusLabel } from '../design/status';
 
 /**
- * BookingStatusBadge - Reusable status badge component
- * Displays booking status with appropriate color and icon
+ * The one badge that renders a booking status.
+ *
+ * It used to carry its own colour map, and so did `BookingList`, `BookingRow` and
+ * the pill in `AdminBookings` — four maps that disagreed. Colour and label now
+ * come from `src/design/status.js`; this component owns only the icon and the
+ * shape. See that file for what the four maps got wrong.
  */
+const STATUS_ICONS = {
+  pending: FaClock,
+  confirmed: FaCheckCircle,
+  completed: FaCheck,
+  cancelled: FaTimesCircle,
+};
+
 const BookingStatusBadge = ({ status, className = '' }) => {
-  const getStatusConfig = (status) => {
-    const configs = {
-      pending: {
-        label: 'Pending',
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        icon: FaClock
-      },
-      confirmed: {
-        label: 'Confirmed',
-        color: 'bg-blue-100 text-blue-800 border-blue-300',
-        icon: FaCheckCircle
-      },
-      completed: {
-        label: 'Completed',
-        color: 'bg-green-100 text-green-800 border-green-300',
-        icon: FaCheck
-      },
-      cancelled: {
-        label: 'Cancelled',
-        color: 'bg-red-100 text-red-800 border-red-300',
-        icon: FaTimesCircle
-      }
-    };
-
-    return configs[status] || configs.pending;
-  };
-
-  const config = getStatusConfig(status);
-  const Icon = config.icon;
+  const Icon = STATUS_ICONS[status] ?? STATUS_ICONS.pending;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${config.color} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusClasses(
+        status
+      )} ${className}`}
     >
-      <Icon className="text-sm" />
-      {config.label}
+      <Icon className="text-sm" aria-hidden="true" />
+      {statusLabel(status)}
     </span>
   );
+};
+
+BookingStatusBadge.propTypes = {
+  status: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default BookingStatusBadge;

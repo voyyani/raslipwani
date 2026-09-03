@@ -1,192 +1,160 @@
 import React from 'react';
-import { 
-  FaUser,
-  FaPhone,
-  FaStickyNote,
-  FaCalendarAlt,
-  FaArchive,
-  FaTrashRestore,
-  FaFileExport,
-  FaTimes
-} from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
-const BookingModal = ({ 
-  isOpen, 
-  booking, 
-  viewFilter,
-  onClose,
-  onArchive,
-  onExport
-}) => {
-  if (!isOpen || !booking) return null;
+import Icon from './Icon';
+import Badge from './ui/Badge';
+import Button from './ui/Button';
+import Modal from './ui/Modal';
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not scheduled';
-    
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+/**
+ * A booking, read-only, with the two actions an operator takes on one.
+ *
+ * It used to render its own overlay: a `fixed inset-0` div, a white panel, and
+ * a close button — and, like the other ten hand-rolled dialogs, no focus trap,
+ * no focus restoration and no Escape. `ServicesMain` opens this one from the
+ * public site, so that gap was not confined to the admin console.
+ *
+ * The status pill is `Badge status=` rather than a local ternary. Four
+ * components previously each decided what "confirmed" looked like and two of
+ * them disagreed; the pill's colour and label now come from `design/status.js`
+ * and the caller gets no say.
+ */
+
+/** One definition, because the two blocks below formatted dates differently. */
+const formatDate = (value) => {
+  if (!value) return 'Not scheduled';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not scheduled';
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+/** A labelled read-only value. `-` is the empty state, never a blank gap. */
+const Detail = ({ label, children }) => (
+  <div>
+    <p className="text-sm text-content-muted">{label}</p>
+    <div className="font-medium text-content">{children ?? '-'}</div>
+  </div>
+);
+
+Detail.propTypes = { label: PropTypes.string.isRequired, children: PropTypes.node };
+
+const Section = ({ icon, title, children }) => (
+  <section className="bg-surface-sunken p-4 rounded-lg">
+    <h4 className="font-medium text-content mb-4 flex items-center gap-2">
+      <Icon name={icon} size={16} className="text-brand-content" />
+      {title}
+    </h4>
+    {children}
+  </section>
+);
+
+Section.propTypes = {
+  icon: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node,
+};
+
+const BookingModal = ({ isOpen, booking, viewFilter, onClose, onArchive, onExport }) => {
+  // `Modal` handles the closed case, but `booking` is read unconditionally
+  // below, so the null check has to happen before the render.
+  if (!booking) return null;
+
+  const archived = viewFilter !== 'active';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-800">Booking Details</h3>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <FaTimes className="w-6 h-6" />
-            </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Booking Details"
+      size="md"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+          <Button
+            variant={archived ? 'primary' : 'secondary'}
+            onClick={() => onArchive(booking.id, !archived)}
+          >
+            <Icon name={archived ? 'trash-restore' : 'archive'} size={16} />
+            {archived ? 'Restore Booking' : 'Archive Booking'}
+          </Button>
+          <Button variant="accent" onClick={onExport}>
+            <Icon name="file-export" size={16} />
+            Export Details
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-6">
+        <Section icon="user" title="Client Information">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Detail label="Full Name">{booking.name}</Detail>
+            <Detail label="Email">{booking.email}</Detail>
+            <Detail label="Phone">{booking.phone}</Detail>
+            <Detail label="Booking ID">
+              {booking.id ? <span className="text-sm">{booking.id}</span> : null}
+            </Detail>
           </div>
-          
-          <div className="space-y-6">
-            {/* Client Information */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-4 flex items-center">
-                <FaUser className="mr-2 text-blue-500" />
-                Client Information
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Full Name</p>
-                  <p className="font-medium">{booking.name || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{booking.email || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phone</p>
-                  <p className="font-medium">{booking.phone || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Booking ID</p>
-                  <p className="font-medium text-sm">{booking.id || '-'}</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Booking Information */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-4 flex items-center">
-                <FaCalendarAlt className="mr-2 text-blue-500" />
-                Booking Information
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Booking Type</p>
-                  <p className="font-medium">{booking.type || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  <p className="font-medium capitalize">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {booking.status || '-'}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Service/Viewing Type</p>
-                  <p className="font-medium">
-                    {booking.service || booking.viewing_type || '-'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Appointment Date</p>
-                  <p className="font-medium">
-                    {formatDate(booking.appointment_at)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Created At</p>
-                  <p className="font-medium">
-                    {formatDate(booking.created_at)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Subject</p>
-                  <p className="font-medium">{booking.subject || '-'}</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Messages */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-4 flex items-center">
-                <FaStickyNote className="mr-2 text-blue-500" />
-                Messages & Notes
-              </h4>
-              <div className="space-y-4">
-                {booking.message && (
-                  <div>
-                    <p className="text-sm text-gray-500">Client Message</p>
-                    <p className="mt-1 p-3 bg-white border rounded-lg">
-                      {booking.message}
-                    </p>
-                  </div>
-                )}
-                {booking.notes && (
-                  <div>
-                    <p className="text-sm text-gray-500">Internal Notes</p>
-                    <p className="mt-1 p-3 bg-white border rounded-lg">
-                      {booking.notes}
-                    </p>
-                  </div>
-                )}
-                {!booking.message && !booking.notes && (
-                  <p className="text-gray-500 italic">No messages or notes available</p>
-                )}
-              </div>
-            </div>
+        </Section>
+
+        <Section icon="calendar-check" title="Booking Information">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Detail label="Booking Type">{booking.type}</Detail>
+            <Detail label="Status">
+              {booking.status ? <Badge status={booking.status} /> : null}
+            </Detail>
+            <Detail label="Service/Viewing Type">
+              {booking.service || booking.viewing_type}
+            </Detail>
+            <Detail label="Appointment Date">{formatDate(booking.appointment_at)}</Detail>
+            <Detail label="Created At">{formatDate(booking.created_at)}</Detail>
+            <Detail label="Subject">{booking.subject}</Detail>
           </div>
-          
-          <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-              Close
-            </button>
-            
-            {viewFilter === 'active' ? (
-              <button
-                onClick={() => onArchive(booking.id, true)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-              >
-                <FaArchive className="inline mr-2" /> Archive Booking
-              </button>
-            ) : (
-              <button
-                onClick={() => onArchive(booking.id, false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <FaTrashRestore className="inline mr-2" /> Restore Booking
-              </button>
+        </Section>
+
+        <Section icon="sticky-note" title="Messages & Notes">
+          <div className="space-y-4">
+            {booking.message && (
+              <div>
+                <p className="text-sm text-content-muted">Client Message</p>
+                <p className="mt-1 p-3 bg-surface border border-line rounded-lg text-content">
+                  {booking.message}
+                </p>
+              </div>
             )}
-            
-            <button
-              onClick={onExport}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              <FaFileExport className="inline mr-2" /> Export Details
-            </button>
+            {booking.notes && (
+              <div>
+                <p className="text-sm text-content-muted">Internal Notes</p>
+                <p className="mt-1 p-3 bg-surface border border-line rounded-lg text-content">
+                  {booking.notes}
+                </p>
+              </div>
+            )}
+            {!booking.message && !booking.notes && (
+              <p className="text-content-muted italic">No messages or notes available</p>
+            )}
           </div>
-        </div>
+        </Section>
       </div>
-    </div>
+    </Modal>
   );
+};
+
+BookingModal.propTypes = {
+  isOpen: PropTypes.bool,
+  booking: PropTypes.object,
+  /** `'active'` shows Archive; anything else shows Restore. */
+  viewFilter: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  onArchive: PropTypes.func.isRequired,
+  onExport: PropTypes.func.isRequired,
 };
 
 export default BookingModal;
