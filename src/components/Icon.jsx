@@ -35,6 +35,7 @@ import {
   Phone,
   Rocket,
   Ruler,
+  Save,
   Search,
   Share2,
   ShieldCheck,
@@ -128,6 +129,7 @@ const REGISTRY = {
   'file-contract': FileSignature,
   'sticky-note': StickyNote,
   'file-export': Download,
+  'save': Save,
 
   // Record keeping
   'archive': Archive,

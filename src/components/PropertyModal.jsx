@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { logger } from '../utils/logger';
+import useDialog from './ui/useDialog';
 
 /** The office number, in one place: it appeared as a literal in three. */
 const OFFICE_PHONE = '+254758066526';
 const PropertyModal = ({ property, closeModal }) => {
+  const panelRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const navigate = useNavigate();
@@ -99,22 +101,32 @@ const PropertyModal = ({ property, closeModal }) => {
     }
   };
 
-  // Keyboard navigation
+  /**
+   * The gallery is a lightbox, not a titled panel: `Modal`'s header bar would
+   * sit on top of the photograph it exists to show. So it takes the behaviour
+   * without the chrome — see `useDialog`. Focus enters the panel and is
+   * trapped, and closing returns it to the card that opened the gallery.
+   *
+   * Escape is handled here rather than by the hook, because this dialog has two
+   * layers to leave: fullscreen first, then the dialog itself. The hook's
+   * handler runs on the capture phase, so this one has to stop it before it
+   * closes the gallery out from under a viewer who only wanted to leave
+   * fullscreen.
+   */
+  useDialog({ isOpen: true, onClose: closeModal, panelRef });
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') handlePrev();
       if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'Escape') {
-        if (isFullscreen) {
-          setIsFullscreen(false);
-        } else {
-          closeModal();
-        }
+      if (e.key === 'Escape' && isFullscreen) {
+        e.stopPropagation();
+        setIsFullscreen(false);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isFullscreen]);
 
   // Handle Contact Agent button click
@@ -235,6 +247,11 @@ const PropertyModal = ({ property, closeModal }) => {
       onClick={closeModal}
     >
       <motion.div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={property?.title ? `${property.title} — photos and details` : 'Property details'}
+        tabIndex={-1}
         className={`relative bg-white ${isFullscreen ? 'fixed inset-0 !m-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
         initial={{ scale: 0.9 }}
         animate={{ scale: 1 }}

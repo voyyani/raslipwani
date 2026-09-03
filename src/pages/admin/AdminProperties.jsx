@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -924,28 +926,45 @@ const AdminProperties = () => {
         </div>
       )}
       
-      {/* Property Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b p-6 z-10">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
-                  {currentProperty ? 'Edit Property' : 'Add New Property'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    resetForm();
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6">
+      {/*
+        The property form. It was a hand-rolled overlay with a sticky header:
+        focus never entered it, Tab left the form for the table behind, and
+        Escape did nothing. `Modal` supplies all three. The fields inside are
+        still hand-written and still carry unassociated labels — they move to
+        `Input`/`Select` with this surface's own migration, which is a larger
+        change than putting the dialog in the right shell.
+      */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetForm();
+        }}
+        title={currentProperty ? 'Edit Property' : 'Add New Property'}
+        size="xl"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} loading={loading} disabled={loading}>
+              {loading
+                ? currentProperty
+                  ? 'Updating...'
+                  : 'Adding...'
+                : currentProperty
+                  ? 'Update Property'
+                  : 'Add Property'}
+            </Button>
+          </>
+        }
+      >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Left Column */}
                 <div className="space-y-4">
@@ -1266,33 +1285,7 @@ const AdminProperties = () => {
                 </div>
               </div>
               
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    resetForm();
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                      {currentProperty ? 'Updating...' : 'Adding...'}
-                    </div>
-                  ) : currentProperty ? 'Update Property' : 'Add Property'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {confirmDialog}
     </>
