@@ -1,61 +1,69 @@
 # Raslipwani Properties — Remaining Work to World-Class
 
-> **Version 9 — rewritten 2026-09-02.** This document contains **only what is still
-> outstanding**. Everything verified complete has been removed; what survives is work,
-> not history. Supersedes Versions 1–8.
+> **Version 10 — rewritten 2026-09-03.** This document contains **only what is still
+> outstanding**. Work that is verifiably finished is compressed into the ledger below and
+> then never mentioned again. Supersedes Versions 1–9.
 >
-> **Score:** audited **3.8/10** (2026-09-01) → **~5.5/10** today → target **9/10**.
-> The score does not move past 6 by writing code — see **Block 1**, which is the only
+> **Score:** audited **3.8/10** (2026-09-01) → **~6.5/10** today → target **9/10**.
+> The score does not move past 7 by writing code. See **Block 1**, which remains the only
 > outstanding work with a live consequence and the only work an agent cannot do for you.
 >
 > **Sources:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md);
 > live introspection of project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1) on
-> 2026-09-01 and 2026-09-02; counts below re-measured against the working tree on 2026-09-02.
+> 2026-09-01 and 2026-09-02. **Every count below was re-measured against the working tree
+> on 2026-09-03**, except the database facts in Block 1, which are carried forward from
+> 2026-09-02 and are marked where they need re-confirming.
 
 ---
 
 ## Where this actually stands
 
-Three separate things are true at once, and conflating them is how the last two
-iterations of this roadmap went stale:
+Version 9 opened by saying three things were true at once. One of them has changed, and
+saying so precisely is the point of this document.
 
-1. **The code has moved a long way.** Clerk is gone, the test suite exists and runs, CI
-   gates six checks, every page is routed, the token layer is built and proven.
-2. **The newest and most visible half of it has not shipped.** Releases 1–3 are merged and
-   pushed to `origin/main`. **Release 4 — Slices 4A and 4B — is not.** It sits unmerged and
-   unpushed on `worktree-release4-slice-4a` and carries the 999 kB font removal, the
-   canonical fix, the layout route and the entire token layer.
-3. **The database is still open.** `007` and `008` are applied. `009`–`012` are not.
-   Until they are, anyone holding the public anon key can still read customer PII and
-   write through an unauthenticated RPC.
+1. **The code has moved a long way, and it has now landed.** Version 9's second point —
+   "the newest and most visible half of it has not shipped" — is **no longer true**.
+   Release 4 was merged to `main` in `18e82a9`. The font removal, the canonical fix, the
+   layout route, the token layer and the primitives are all on one line of history.
+2. **The design system is now spent, not just built.** Version 9 described a proven token
+   layer painting exactly one theme, with 2,772 literal colour classes standing between it
+   and a second. That gap is closed: **95 literal classes remain, and both themes ship.**
+3. **The database is still open.** `007` and `008` are applied. `009`–`012` are written,
+   dry-run inside a rolled-back transaction, and **not applied**. Until they are, anyone
+   holding the public anon key can still read customer PII and write through an
+   unauthenticated RPC.
 
-**Block 1 is the only work with a live consequence. Everything else is preparation.**
+**Block 1 is still the only work with a live consequence, and it has not moved in a day.
+Everything an agent can do is preparation for it.**
 
 ### Already true — do not re-do, do not re-litigate
 
 <sub>Kept deliberately short. A roadmap with no record of finished work invites redoing it.</sub>
 
-| | Verified |
+| | Verified 2026-09-03 |
 |---|---|
 | Identity | One stack. Clerk removed from code and `package.json`; Supabase Auth, `admin_users`, `is_admin()` |
 | Privileged keys in bundle | Zero JWT-shaped strings in `dist/`, enforced at build time |
-| Tests | 227 passing / 19 files (0 at baseline), ratcheting coverage floor at 62% lines |
-| Lint errors | 0 (baseline 77) |
-| CI | lint · test · coverage floor · palette ratchet · token freshness · build · bundle budget · no-console-in-dist · gitleaks |
+| Tests | 315 passing / 28 files (0 at baseline); coverage **70.3% statements**, past the 70% target |
+| Lint errors | 0 (baseline 77). Warnings 395, every one of them counted and budgeted |
+| CI | lint · test · coverage floor · palette ratchet · **label ratchet** · token freshness · build · bundle budget · no-console-in-dist · gitleaks |
 | Routing | 0 unreachable pages, guarded by a test; 0 broken nav links; one `PublicLayout`, header mounts once |
-| Design tokens | 32 semantic roles, both themes, generated from one source, 102 contrast assertions AA |
-| Bundle | 213.9 kB gzip first load (from 275 kB), budget 219 kB |
-| Icon fonts | 0 bytes (FontAwesome's 999 kB removed); CSS 146 kB → 76.7 kB raw |
+| Design tokens | 32 role tokens + 5 fixed tokens, both themes, one source, 129 contrast assertions at AA |
+| **Themes** | **Two, shipped.** Light / dark / system, persisted, applied before first paint |
+| Primitives | `Button`, `Field`, `Input`/`Textarea`/`Select`, `Card`, `Badge`, `Modal`, `Toast`, `ConfirmDialog`, `ThemeToggle` |
+| Native dialogs | 0 `alert()`/`confirm()`/`prompt()`; 0 hand-rolled overlays. Both held by tests |
+| Literal palette classes | **95**, from 3,005. Ceiling live and blocking in CI |
+| Unlabelled controls | **67**, from 96 — and **0 on every public, visitor-facing form** |
+| Bundle | 215 kB gzip first load (from 275 kB), budget 219 kB |
+| Icon fonts | 0 bytes (FontAwesome's 999 kB removed); CSS 146 kB → 75.6 kB raw |
 | Canonicals | Route-aware. Every page previously declared the homepage as its canonical |
-| Zoom | `user-scalable=no` removed; SC 1.4.4 no longer failed at the viewport tag |
 | Booking email | Resend pipeline built and tested end-to-end 🔑 *awaiting keys* |
 
-> **Correction carried forward:** a note in `docs/HANDOFF-phase1-apply.md` records
-> `AdminBookings.jsx:70` and `AdminLayout.jsx:49` as broken because they filter
-> `bookings.is_archived`. The 2026-09-02 introspection proved the column **exists** in the
-> live database — `000_baseline.sql` was the thing that was wrong, and it has since been
-> rewritten by transcription from `information_schema`. **Those queries are fine.**
-> Nothing to do.
+> **Correction carried forward:** `docs/HANDOFF-phase1-apply.md` records `AdminBookings.jsx:70`
+> and `AdminLayout.jsx:49` as broken because they filter `bookings.is_archived`. The
+> 2026-09-02 introspection proved the column **exists**; `000_baseline.sql` was the thing
+> that was wrong and has been rewritten from `information_schema`. **Those queries are
+> fine.** Nothing to do.
 
 ---
 
@@ -64,27 +72,27 @@ iterations of this roadmap went stale:
 | | Block | Owner | Effort | Blocks |
 |---|---|---|---|---|
 | **1** | Close the database | 🔑 **you** | ~1 day | *everything downstream in production* |
-| **2** | Land what already exists | you + agent | ~half a day | any visible improvement at all |
-| **3** | Release 4C — primitives, and the migration they carry | agent | ~5 days | Block 6 |
-| **4** | Release 4D — ship the theme, fix the accessibility it exposes | agent | ~4 days | Block 6 |
-| **5** | Release 5 — data layer, decomposition, the rest of the budget | agent | ~7 days | Block 6 (partly) |
-| **6** | Phase 9 — the UI revamp | agent | ~3 weeks | — |
-| **7** | Phase 8 — SEO and discovery | agent | ~1 week + investigation | — |
-| **8** | Phase 10 — platform maturity | ongoing | — | — |
+| **2** | Finish 4C/4D — the long tail of the migration | agent | ~3 days | Block 5 |
+| **3** | Release 5 — data layer, decomposition, the rest of the budget | agent | ~7 days | Block 4 (partly) |
+| **4** | Phase 9 — the UI revamp | agent | ~3 weeks | — |
+| **5** | Phase 8 — SEO and discovery | agent | ~1 week + one investigation | — |
+| **6** | Phase 10 — platform maturity | ongoing | — | — |
 
-Blocks 1 → 2 are strictly sequential. 3 → 4 are sequential. 5 and 7 parallelise with 3–4.
-6 depends on 3, 4, and the budget half of 5.
+Block 1 blocks production, not the agents. Block 2 → 4 are sequential. 3 and 5 parallelise
+with 2. **Version 9's Block 2 ("land what already exists") is deleted — it is done.**
 
 ---
 
 ## ⛔ Block 1 — Close the database (owner only) · **the only blocking work**
 
 **Status: `007` and `008` are applied. `009`, `010`, `011`, `012` are written, dry-run
-against production inside a rolled-back transaction, and not applied.**
+against production inside a rolled-back transaction, and not applied.** Unchanged since
+2026-09-02, and unverified since — **re-run the preconditions below rather than trusting
+this paragraph.**
 
-`007` already revoked the blanket `anon` grants, so the raw destruction vector is
-narrower than the original audit described. What remains open is still serious, and two
-of the four items were found only by introspection — they are invisible from the repo.
+`007` already revoked the blanket `anon` grants, so the raw destruction vector is narrower
+than the original audit described. What remains is still serious, and two of the four
+items were found only by introspection — they are invisible from the repo.
 
 ### 1.1 — Apply `009_auth_rls_policies.sql` 🔑
 
@@ -92,8 +100,8 @@ Real policies on `auth.uid()`; `assigned_agent_id` and `confirmed_by` converted 
 `uuid` with foreign keys to `auth.users`.
 
 - Take a backup first (Dashboard → Database → Backups).
-- Verified preconditions: both identity columns are `text`, **0 of 12 rows populated**,
-  `client_id` already `uuid`. Re-confirm immediately before applying:
+- Verified preconditions as of 2026-09-02: both identity columns are `text`, **0 of 12
+  rows populated**, `client_id` already `uuid`. Re-confirm immediately before applying:
   ```sql
   SELECT count(assigned_agent_id) AS agents, count(confirmed_by) AS confirmers FROM bookings; -- expect 0, 0
   ```
@@ -120,8 +128,8 @@ schema-wide, and changes `ALTER DEFAULT PRIVILEGES` so the next table is not bor
 
 ### 1.4 — Apply `010_consolidate_settings.sql` 🔑
 
-Consolidates `settings` into `admin_settings` (preserving values) and secures the
-orphaned tables. Apply after `009`.
+Consolidates `settings` into `admin_settings` (preserving values) and secures the orphaned
+tables. Apply after `009`.
 
 ### 1.5 — Rotate what has already been published 🔑
 
@@ -182,122 +190,69 @@ you and were never contacted back.
 - [ ] **Contact the 8 stranded enquiries by hand.** This is a business action, not a
       deployment one, and nothing in the codebase will do it for you.
 
-**Exit criteria for Block 1:** anon cannot read customer PII, cannot write through any
-RPC, and cannot delete or truncate anything. All 7 tables have RLS enabled with real
-policies. Zero `USING (true)` policies except the documented public SELECT. Every
-published credential rotated. All six curl assertions above behave as commented.
+**Exit criteria for Block 1:** anon cannot read customer PII, cannot write through any RPC,
+and cannot delete or truncate anything. All 7 tables have RLS enabled with real policies.
+Zero `USING (true)` policies except the documented public SELECT. Every published
+credential rotated. All six curl assertions above behave as commented.
 
 ---
 
-## Block 2 — Land what already exists
+## Block 2 — Finish the migration's long tail *(≈3 days)*
 
-Release 4's two finished slices sit on `worktree-release4-slice-4a`, unpushed, and the
-branch has **diverged** from `main` — `main` has since gained the database corrections
-(`6726207`, `62fc033`, `8b1abb9`) that the branch does not carry, and the branch carries
-a `ROADMAP.md` that predates them.
+Version 9 gave 4C five days to migrate surfaces one PR at a time and 4D four days to build
+a theme on top. Both are substantially done, and the reason is worth keeping, because it
+generalises: **the 2,772 literal colour classes were never 2,772 decisions.** They were
+~240 distinct classes, the top twenty carrying two thirds of every occurrence. Written
+down once in `scripts/codemod-palette.mjs` and applied mechanically, they took one
+afternoon instead of 59 review rounds — and produced a *consistent* result, which
+hand-migration would not have.
 
-- [ ] **Merge `worktree-release4-slice-4a` into `main`.** Both sides are green; the
-      divergence is a documentation and migration overlap, not a code conflict. Merging
-      brings the 999 kB font removal, the layout route, the canonical fix, the console
-      strip and the whole token layer onto one line of history.
-- [ ] **Revert the accidental typo in `docs/HANDOFF-phase1-apply.md`** — an uncommitted
-      edit introduced `supabase/m igrations/007_...` (stray space) into the apply table.
-      That table is a checklist a human follows under pressure.
-- [ ] **Push and deploy.** The bundle, font, canonical and layout wins in the "already
-      true" table above are the ones a visitor would actually feel, and they are the ones
-      still sitting on the unpushed branch.
-- [ ] Retire `docs/HANDOFF-phase1-apply.md` in favour of Block 1, which supersedes it and
-      is current. Keep one owner-facing checklist, not two that disagree.
+What is left is the genuine remainder: the parts a table could not decide.
 
-**Exit:** `main` contains all agent work to date, the site is deployed from it, and there
-is exactly one document telling the owner what to run.
-
----
-
-## Block 3 — Release 4C · Primitives, and the migration they carry *(≈5 days)*
-
-The token layer is built and proven. 4C is where the layer gets spent.
-
-**Progress, measured 2026-09-03.** The primitive layer and the whole dialog problem are
-done; what remains is the long tail — migrating surfaces through the primitives, which is
-also what collapses the palette count and finishes the icon consolidation.
-
-- [x] **Primitives on the token layer:** `Button`, `Input`/`Textarea`/`Select` (over a
-      shared `Field`), `Card`, `Badge`, `Modal`, `Toast`, `ConfirmDialog`, plus
-      `useConfirm`/`usePrompt` and the `useDialog` hook the two chrome-less dialogs need.
-      Keyboard-complete from the first commit.
-- [x] **Retire the native browser dialogs.** The count was **eleven**, not ten: the
-      roadmap missed a `window.prompt()` collecting a cancellation reason, where a
-      cancelled dialog and an empty string were indistinguishable. Both customer-facing
-      ones are gone. `noNativeDialogs.test.js` fails the build on the twelfth.
-- [x] **Every dialog rendered by one primitive.** The count here was **eleven**, not the
-      four this document named — `PropertyModal`, `BookingModal`, `BookingDetailModal`,
-      `ClientForm`, `ClientManagement`, `AdminProperties`, `EmailSettings`,
-      `Bookings`, `ServicesMain`, `International`, `ViewingExperience`. All eleven were
-      missing the same four things: focus never entered the panel, Tab walked out of it,
-      focus was never returned to the opener, Escape did nothing. `noBespokeDialogs.test.js`
-      holds the line. Block 4's focus-trap requirement is satisfied by this, once.
-- [x] **Two duplications removed on the way through.** `Bookings.jsx` carried a 170-line
-      inline copy of `BookingModal` that had already drifted from it, and `ServicesMain`
-      computed its step count in two places that could disagree.
-- [ ] **Migrate surfaces through the primitives**, highest-traffic first: Home →
-      Properties → PropertyDetail → booking flow → Contact/About → admin. **One PR per
-      surface, each dropping the palette ratchet ceiling.** Admin last: it has one user,
-      and it is where a mistake costs least.
-      *Started: the ratchet is at **2,772**, down from 3,005, without a surface pass yet —
-      that fall is entirely the dialog work.*
-- [ ] **Finish the AdminProperties form.** Its dialog is behind `Modal`, but its 1,284
-      lines of hand-written fields still carry unassociated labels. Deliberately deferred:
-      it belongs with that surface's pass, not smuggled into a dialog commit.
+- [ ] **The last 95 literal classes.** These are the indigo, purple and pink decoration on
+      the marketing surfaces — mostly gradients on `International.jsx` (**37**),
+      `DebugPanel.jsx` (**12**) and `Settings.jsx` (**6**). They have no role in the token
+      layer, and inventing one for decoration is a design decision, not a mechanical one.
+      **Decide it in Block 4, where those surfaces are redesigned anyway** — or add a
+      `decor-*` scale if they survive the redesign. Do not force them into `brand`.
+- [ ] **Audit both themes on every surface.** The tokens are proven by contrast test; what
+      no test covers is third-party chrome. **FullCalendar, react-quill and the four
+      hardcoded hex values in the `.custom-calendar` block have not been looked at in dark
+      mode.** Property imagery and the hero scrims should be checked by eye.
 - [ ] **Finish the icon consolidation.** `react-icons` is imported in **29 files** against
-      `lucide-react` in 11. The `<Icon>` registry built in 4A is the seam: migrate call
-      sites through it as each surface is touched, rather than as a separate sweep.
-- [ ] Bring the CSS bundle under 50 kB raw as the raw classes collapse into primitives
-      (**80.9 kB** today — it rose slightly as the primitives added their own utilities,
-      and falls when the surfaces stop hand-writing theirs).
+      `lucide-react` in 11 — unchanged, because the plan was to migrate call sites as each
+      surface was touched, and the codemod meant surfaces were never touched one by one.
+      This now needs its own pass through the `<Icon>` registry built in 4A. It removes a
+      whole dependency and shrinks `vendor-icons`.
+- [ ] **Label the remaining 67 controls**, all in the admin console. `label-budget.json`
+      holds the ceiling; `AdminProperties.jsx` (19) and `GeneralSettings.jsx` (13) are the
+      bulk. Route them through the `Field` primitive rather than hand-pairing `htmlFor`,
+      since `Field` cannot produce an unlabelled control.
+- [ ] **`axe-core` in CI, failing the build on violations.** Deliberately sequenced after
+      the labels: turning it on today would fail on 67 known violations and be switched
+      off within a day. Turn it on when the ratchet reaches zero, and it becomes the
+      guard that keeps it there.
+- [ ] **Skip-to-content link; live regions for async status and toasts.**
+- [ ] Bring the CSS bundle under 50 kB raw (**75.6 kB** today, from 146 kB).
+- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` once the labels are done. It is
+      deprecated and double-counts `label-has-associated-control`; **turning it off today
+      would drop the warning count by a third and fix nothing**, which is exactly why it
+      is listed last rather than first.
 
-**Exit:** raw-palette ratchet **below 400** (the ceiling is **2,772** today and blocking
-in CI) · ~~zero `alert()`/`confirm()` in `src/`~~ ✅ · ~~every modal rendered by one
-primitive~~ ✅ · CSS under 50 kB raw.
-
----
-
-## Block 4 — Release 4D · Ship the theme, and the accessibility it exposes *(≈4 days)*
-
-- [ ] **Theme provider** — `light`/`dark`/`system`, persisted, respecting
-      `prefers-color-scheme`, with a toggle in the header and the admin shell.
-- [ ] Audit every surface in both themes, including property imagery, FullCalendar, Quill,
-      and the four hardcoded hex values in the `.custom-calendar` block.
-- [ ] **Pair `htmlFor`/`id` across all 134 form controls.** Re-verified 2026-09-02:
-      **134 `<label>` elements, 11 `htmlFor` attributes, 134 `input`/`select`/`textarea`.**
-      Roughly **123 labels are associated with nothing** — a screen reader announces an
-      unlabelled control on effectively every form on the site. This is the largest real
-      accessibility defect in the codebase, and it hides behind an inflated warning count:
-      of 365 `jsx-a11y` warnings, 134 come from `jsx-a11y/label-has-for`, a **deprecated
-      rule that double-counts** `label-has-associated-control`. Turning that rule off
-      drops the number by a third and fixes nothing.
-- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` **after** the pairing lands,
-      so the remaining count means something.
-- [ ] **`aria-expanded`/`aria-controls` on header dropdowns and the mobile menu.**
-      Measured: **2 `aria-expanded` in the entire codebase**, both on the mobile toggle.
-      The `/international` dropdown announces nothing.
-- [ ] Skip-to-content link; live regions for async status and toasts.
-- [ ] **`axe-core` in CI**, failing the build on violations, plus a keyboard-only pass
-      over the booking flow in both themes.
-
-**Exit:** two themes, both AA by contrast test **and** by axe · **zero** axe violations,
-enforced in CI · every public flow completable by keyboard in both themes.
+**Exit:** raw-palette ratchet at **0** or a documented `decor` scale · label ratchet at
+**0** · **zero axe violations, enforced in CI** · every public flow completable by keyboard
+in both themes · one icon library · CSS under 50 kB raw.
 
 ---
 
-## Block 5 — Release 5 · Data layer, decomposition, and the rest of the budget *(≈7 days)*
+## Block 3 — Release 5 · Data layer, decomposition, and the rest of the budget *(≈7 days)*
 
-Invisible to users, and the thing that makes Block 6 a design exercise rather than a
+Invisible to users, and the thing that makes Block 4 a design exercise rather than a
 rewrite.
 
-### 5.1 — Data-access layer
+### 3.1 — Data-access layer
 
-**23 files under `src/components` and `src/pages` import the Supabase client directly.**
+**24 files under `src/components` and `src/pages` import the Supabase client directly.**
 
 - [ ] `src/services/` — one module per domain: `properties`, `bookings`, `clients`,
       `settings`, `auth`. Every query behind a named, testable function.
@@ -307,29 +262,29 @@ rewrite.
       with the global default in `App.jsx`.
 - [ ] **Exit:** `grep -rl supabaseClient src/components src/pages` returns nothing.
 
-### 5.2 — Decompose the largest components *(after 5.1 — they shrink on their own)*
+### 3.2 — Decompose the largest components *(after 3.1 — they shrink on their own)*
 
-**8 files still exceed 700 lines**; `AdminProperties.jsx` is 1,284.
+**8 files still exceed 700 lines**; `AdminProperties.jsx` is 1,294.
 
 - [ ] Split `AdminProperties.jsx`, `AdminBookings.jsx`, `ServicesMain.jsx`. Target: none
       over 300 lines.
 - [ ] Extract `usePagination`, `useFilters`, `useCsvExport`.
 
-### 5.3 — Finish the performance budget
+### 3.3 — Finish the performance budget
 
-First load is **213.9 kB gzip** against a **< 100 kB** target.
+First load is **215 kB gzip** against a **< 100 kB** target.
 
-- [ ] **Split the Supabase client.** `vendor-supabase` is 56 kB gzip — the single largest
+- [ ] **Split the Supabase client.** `vendor-supabase` is 55 kB gzip — the single largest
       item in first load, and the dominant one now that the fonts are gone.
 - [ ] Route-level code splitting on the public side (admin is already lazy).
 - [ ] Lighthouse in CI as a gate, mobile profile.
 
-### 5.4 — Move `UNHousing.jsx`'s hardcoded inventory into the database
+### 3.4 — Move `UNHousing.jsx`'s hardcoded inventory into the database
 
 `UNHousing.jsx:27+` embeds a literal `unProperties` array with Unsplash placeholders,
 invented prices and fixed dates (`2026-02-01`) that will silently go stale. Model these as
-`properties` rows with a segment tag so the admin CRM manages them. **Needs a migration,
-so it is blocked on Block 1.** Until then the page ships placeholder inventory: a known,
+`properties` rows with a segment tag so the admin CRM manages them. **Needs a migration, so
+it is blocked on Block 1.** Until then the page ships placeholder inventory: a known,
 temporary defect, not a finished state.
 
 **Exit:** zero direct Supabase imports in components and pages · no file over 300 lines ·
@@ -338,13 +293,15 @@ served from the database.
 
 ---
 
-## Block 6 — Phase 9 · The client-side UI revamp *(≈3 weeks)*
+## Block 4 — Phase 9 · The client-side UI revamp *(≈3 weeks)*
 
 **This was the original request, and it is deliberately last.** A revamp built on open
-grants, no tokens and a 275 kB bundle inherits all of it. Blocks 3, 4 and 5.3 exist so
-this one can be about design rather than archaeology.
+grants, no tokens and a 275 kB bundle inherits all of it. Blocks 2 and 3.3 exist so this
+one can be about design rather than archaeology — and they have now largely paid out: the
+revamp starts with a proven two-theme token system, a primitive set, and 96% of the colour
+debt gone.
 
-### 6.1 — Direction
+### 4.1 — Direction
 
 - [ ] Capture product truth: local buyers, diaspora investors, UN/embassy tenants — the
       job each is doing, and what makes Raslipwani different from a generic listings site.
@@ -352,7 +309,7 @@ this one can be about design rather than archaeology.
 - [ ] Mode per surface: **Persuade** (home, services, international), **Operate** (search,
       booking), **Read** (about, guides).
 
-### 6.2 — Surfaces
+### 4.2 — Surfaces
 
 - [ ] **Home** — the hero is a stock photo under a dark overlay with generic copy ("Your
       Trusted Real Estate Partner in Kenya"). Replace it with a point of view and a search
@@ -362,13 +319,15 @@ this one can be about design rather than archaeology.
       booking flow that converts.
 - [ ] **International** — UN/diplomatic housing and diaspora investment are the things a
       generic competitor cannot copy. The section is routed now and still under-treated.
-      **Likely the highest-return product change in this document.**
-- [ ] **Booking flow** — end to end, with the confirmation experience Block 3 unlocks and
+      **Likely the highest-return product change in this document.** It also carries 37 of
+      the 95 remaining literal colours, so the two jobs are the same job.
+- [ ] **Booking flow** — end to end, with the confirmation experience Block 2 unlocks and
       the Resend emails actually firing.
-- [ ] **Admin login and console** — the first impression of the tool used daily.
+- [ ] **Admin login and console** — the first impression of the tool used daily, and now
+      the only place unlabelled controls remain.
 - [ ] **Contact, About, 404.**
 
-### 6.3 — Craft
+### 4.3 — Craft
 
 - [ ] Purposeful motion. Today's framer-motion usage is a uniform fade-up on nearly
       everything, which reads as a default rather than a decision.
@@ -379,64 +338,65 @@ this one can be about design rather than archaeology.
       already correct.
 
 **Exit:** every public surface rebuilt against the design system, in both themes, within
-the Block 5.3 budget, passing the Block 4 accessibility bar.
+the Block 3.3 budget, passing the Block 2 accessibility bar.
 
 ---
 
-## Block 7 — Phase 8 · SEO and discovery *(≈1 week + one investigation)*
+## Block 5 — Phase 8 · SEO and discovery *(≈1 week + one investigation)*
 
-### 7.1 — Consolidate on one domain
+### 5.1 — Consolidate on one domain
 
 - [ ] 301 `.com` → `.co.ke` permanently; keep the redirect and do not let the domain lapse.
 - [ ] Make canonical, JSON-LD `@id`/`url`, JSON-LD image, `robots.txt` and OG agree.
-- [ ] **Fix the JSON-LD coordinates.** `Home.jsx:90-91` reads `-1.2921, 36.8219` —
-      Nairobi city centre — while the `address` in the same block is Kikambala Road,
-      Kilifi. **~500 km apart**, which breaks local-business indexing outright.
+- [ ] **Fix the JSON-LD coordinates.** `Home.jsx:90-91` reads `-1.2921, 36.8219` — Nairobi
+      city centre — while the `address` in the same block is Kikambala Road, Kilifi.
+      **~500 km apart**, which breaks local-business indexing outright.
 
-### 7.2 — Dynamic sitemap
+### 5.2 — Dynamic sitemap
 
 `public/sitemap.xml` is static with **7 URLs** and omits **every property detail page** —
 precisely the pages that should rank.
 
 - [ ] Generate it at build time from the property list, with `lastmod`.
 
-### 7.3 — Structured data, and the rendering constraint
+### 5.3 — Structured data, and the rendering constraint
 
-- [ ] Per-property `RealEstateListing` JSON-LD; real OG images per property; route the
-      last remaining Helmet blocks through `DynamicSEO`.
+- [ ] Per-property `RealEstateListing` JSON-LD; real OG images per property; route the last
+      remaining Helmet blocks through `DynamicSEO`.
 - [ ] **Investigate the SPA rendering constraint properly.** As a pure client-side SPA,
       crawlers see an empty shell for all property content. This is plausibly the single
       largest limit on organic acquisition. Prerendering the listing routes, or moving to
       an SSR framework, is **a project in its own right** — scope it honestly rather than
       bolting it onto a release.
 
-### 7.4 — Nairobuild cross-brand
+### 5.4 — Nairobuild cross-brand
 
 Construction is now a separate business (`nairobuild.co.ke`) with genuinely adjacent
 audiences — land buyers need builders, builders need land.
 
-- [ ] Footer sister-brand block, styled as a deliberate cross-brand reference rather than
-      a stray outbound link. `rel="noopener"`, external affordance.
+- [ ] Footer sister-brand block, styled as a deliberate cross-brand reference rather than a
+      stray outbound link. `rel="noopener"`, external affordance.
 - [ ] Contextual links where the journey warrants it — land listings, plot pages.
 - [ ] Consider reciprocal linking from Nairobuild; cross-domain links between genuinely
       related businesses are legitimate SEO.
 - [ ] **Decide: primary nav or footer?** Nav says "part of our offering"; footer says
       "sister business we recommend." A positioning call, not a technical one.
 
-### 7.5 — Database-driven maintenance mode
+### 5.5 — Database-driven maintenance mode
 
 `App.jsx:78` reads `VITE_MAINTENANCE_MODE` at build time, requiring a **rebuild** to
-toggle — while `SettingsContext` already carries a `maintenance_mode` field that could
-flip instantly.
+toggle — while `SettingsContext` already carries a `maintenance_mode` field that could flip
+instantly.
 
 - [ ] Switch to the DB flag; keep the env var as an emergency override.
 
 ---
 
-## Block 8 — Phase 10 · Platform maturity *(ongoing)*
+## Block 6 — Phase 10 · Platform maturity *(ongoing)*
 
-- [ ] **TypeScript, incrementally.** **Zero `.ts`/`.tsx` files; `prop-types` in 4 of 96.**
-      Essentially no shape checking anywhere.
+- [ ] **TypeScript, incrementally.** **Zero `.ts`/`.tsx` files; `prop-types` in 18 of 103
+      components.** Version 9 recorded 4 of 96 — the primitives added since carry their
+      own, so the habit is spreading, but 85 components still check nothing.
 - [ ] **Replace `react-quill`** — unmaintained since 2023, React 16/17 peers, and it
       depends on `findDOMNode`, which React 19 removed. **It blocks the React 19 path.**
       `quill` 2 is already a dependency; `tiptap` is the alternative.
@@ -459,66 +419,76 @@ flip instantly.
 
 ## The gaps that remain — numeric, and checkable
 
-Only metrics with distance left to travel appear here. Anything already at target was
-removed along with the rest of the finished work.
+Only metrics with distance left to travel appear here. Anything at target moved to the
+ledger at the top.
 
-| Metric | Today (2026-09-02) | Target | Block |
-|---|---|---|---|
-| Tables where anon can `DELETE`/`TRUNCATE` | narrowed by `007`; `admin_users` still truncatable by any signed-in user | 0 | 1 |
-| `SECURITY DEFINER` RPCs granted to `anon` | **2** (`update_setting`, `get_setting`) | 0 | 1 |
-| Policies that are `USING (true)` | 19 → 1 after `009` (the documented public SELECT) | 1 | 1 |
-| Published secrets not yet rotated | **3** (service key, Cloudinary secret, `sbp_` token) | 0 | 1 |
-| Release 4 work reaching production | **0 of 2 slices** (unmerged, unpushed) | both | 2 |
-| Raw palette classes in `src/` | **2,772** (from 3,005), ceiling live and blocking | **< 400** → 0 | 3 |
-| Native `alert()`/`confirm()`/`prompt()` | **0** (there were 11, not 10) | 0 | ✅ 3 |
-| Hand-rolled dialog overlays | **0** (there were 11, not the 4 recorded) | 0 | ✅ 3 |
-| Icon libraries | **2** (`react-icons` in 29 files, `lucide-react` in 11) | 1 | 3 |
-| Booking notification delivery | **0%** — 8 enquiries stranded | 100% | 1 |
-| CSS bundle (raw) | **80.9 kB** | < 50 kB | 3 |
-| Themes shipped | **1** (the layer for 2 exists; the provider does not) | 2, both AA | 4 |
-| `<label>` without an associated control | **96** (from ~123), falling structurally via `Field` | 0 | 4 |
-| `aria-expanded` in the codebase | **2** | every disclosure control | 4 |
-| axe violations | **not measured** | 0, enforced in CI | 4 |
-| Files importing Supabase directly | **23** | 0 | 5 |
-| Files over 700 lines | **8** (largest 1,284) | 0 over 300 | 5 |
-| First-load JS (gzip) | **213.9 kB** | < 100 kB | 5 |
-| Lighthouse Performance (mobile) | **not measured** | ≥ 90 | 5 |
-| Property pages in the sitemap | **0** | all | 7 |
-| JSON-LD geo error | **~500 km** from the stated address | correct | 7 |
-| `.ts`/`.tsx` files | **0** | incremental adoption | 8 |
-| Test coverage | **62.4% statements** (297 tests, from 227) | ≥ 70% | ongoing |
-| Overall audit score | **~5.5 / 10** | **9 / 10** | — |
+| Metric | 2026-09-02 | **Today** | Target | Block |
+|---|---|---|---|---|
+| `SECURITY DEFINER` RPCs granted to `anon` | 2 | **2** | 0 | 1 |
+| Policies that are `USING (true)` | 19 | **19** → 1 after `009` | 1 | 1 |
+| Published secrets not yet rotated | 3 | **3** | 0 | 1 |
+| Booking notification delivery | 0% | **0%** — 8 enquiries stranded | 100% | 1 |
+| Raw palette classes in `src/` | 2,772 | **95** | 0 or a `decor` scale | 2 |
+| Unlabelled form controls | 96 | **67** (0 on public surfaces) | 0 | 2 |
+| Icon libraries | 2 | **2** (`react-icons` in 29 files, `lucide-react` in 11) | 1 | 2 |
+| axe violations | not measured | **not measured** | 0, enforced in CI | 2 |
+| `aria-expanded` in the codebase | 2 | **3** | every disclosure control | 2 |
+| CSS bundle (raw) | 80.9 kB | **75.6 kB** | < 50 kB | 2 |
+| Files importing Supabase directly | 23 | **24** | 0 | 3 |
+| Files over 700 lines | 8 | **8** (largest 1,294) | 0 over 300 | 3 |
+| First-load JS (gzip) | 213.9 kB | **215 kB** | < 100 kB | 3 |
+| Lighthouse Performance (mobile) | not measured | **not measured** | ≥ 90 | 3 |
+| Property pages in the sitemap | 0 | **0** | all | 5 |
+| JSON-LD geo error | ~500 km | **~500 km** | correct | 5 |
+| `.ts`/`.tsx` files | 0 | **0** | incremental adoption | 6 |
+| Themes shipped | 1 | **2** ✅ | 2, both AA | ✅ |
+| Test coverage | 62.4% | **70.3% statements** ✅ | ≥ 70% | ✅ |
+| Overall audit score | ~5.5 / 10 | **~6.5 / 10** | **9 / 10** | — |
 
-**The score is capped at roughly 6 until Block 1 is executed, and no amount of further
+Three of those numbers went **up**, and they are left visible rather than quietly
+re-baselined: direct Supabase imports (23 → 24) and first-load JS (213.9 → 215 kB) both
+drifted because this release added a provider and a component without touching Block 3,
+and `aria-expanded` rose only because one dropdown was fixed — the denominator is still
+every disclosure control on the site.
+
+**The score is capped at roughly 7 until Block 1 is executed, and no amount of further
 coding lifts it.**
 
 ---
 
 ## How to execute this
 
-This roadmap is strategic — *what*, *why*, in what order, with numeric exit criteria. It
-is deliberately not task-level. **Do not generate plans for all blocks up front**; each
-block changes the codebase enough that a plan written today for Block 6 would be stale
-before it started.
+This roadmap is strategic — *what*, *why*, in what order, with numeric exit criteria. It is
+deliberately not task-level. **Do not generate plans for all blocks up front**; each block
+changes the codebase enough that a plan written today for Block 4 would be stale before it
+started.
 
-**Blocks 1 and 2 need no plan.** Block 1 is a checklist run against the Supabase
-dashboard; Block 2 is a merge and a deploy.
+**Block 1 needs no plan** — it is a checklist run against the Supabase dashboard.
 
 **For each agent-executable block, generate the plan when you start it:**
 
 ```
-/superpowers:writing-plans Block 3 of ROADMAP.md — primitives on the token layer,
-retire the 10 native dialogs, migrate surfaces and lower the palette ratchet
+/superpowers:writing-plans Block 2 of ROADMAP.md — the last 95 literal colours,
+the admin labels, axe in CI, and the icon consolidation
 ```
 
-**Three rules that have held so far and should keep holding:**
+**Four rules that have held so far and should keep holding.**
 
-1. **Every block ends deployable.** Not "ends written" — ends *deployed*. Release 4's two
-   finished slices have been sitting on an unpushed branch, which is why "merged" is not
-   the finish line.
-2. **Guard rails land with the work, not after it.** Every number in the gaps table that
-   is currently held — bundle budget, coverage floor, palette ratchet, console-in-dist —
-   is held by CI, not by intention.
-3. **Measure, don't assert.** Every count in this document was re-measured on 2026-09-02.
-   A roadmap that gets more accurate is working; one whose numbers only ever improve is
-   being marked by the person who wrote it.
+1. **Every block ends deployable.** Not "ends written" — ends *deployed*. Version 9 existed
+   partly because two finished slices sat on an unpushed branch for a week.
+2. **Guard rails land with the work, not after it.** Every number in the gaps table that is
+   currently held — bundle budget, coverage floor, palette ratchet, label ratchet,
+   console-in-dist — is held by CI, not by intention. When a defect is too large to fix at
+   once, ship a ratchet rather than an error: a rule that fails the build on arrival with
+   96 violations gets switched off within a day, and then nothing is enforced at all.
+3. **Measure, don't assert.** Every count here was re-measured on 2026-09-03. A roadmap
+   that gets more accurate is working; one whose numbers only ever improve is being marked
+   by the person who wrote it.
+4. **Prefer one written-down decision to many repeated ones.** The colour migration was
+   scoped at five days of surface-by-surface PRs and took an afternoon, because the work
+   was a vocabulary, not a sequence of judgements. Before grinding through a long list, ask
+   whether the list is actually short and repeated. **But hold the line on what a table may
+   decide:** the same codemod, run without that discipline, quietly rewrote four doc
+   comments, flattened a gradient to pure black, and leaked a brand ground onto the wrong
+   half of a ternary — all three found by reading its output, none by a test. Mechanise the
+   repetition; keep the judgement.
