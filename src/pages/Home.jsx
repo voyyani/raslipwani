@@ -85,8 +85,8 @@ const Home = () => {
             },
             "geo": {
               "@type": "GeoCoordinates",
-              "latitude": "-1.2921",
-              "longitude": "36.8219"
+              "latitude": "-3.8667",
+              "longitude": "39.7833"
             },
             "openingHoursSpecification": {
               "@type": "OpeningHoursSpecification",

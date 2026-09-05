@@ -11,7 +11,7 @@ export default defineConfig(({ command }) => ({
         manualChunks: {
           // Split vendor libraries into separate chunks
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['framer-motion', '@headlessui/react', 'react-calendar'],
+          'vendor-ui': ['framer-motion', 'react-calendar'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-icons': ['react-icons', 'lucide-react'],
         }
