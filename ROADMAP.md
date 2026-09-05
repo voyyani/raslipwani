@@ -1,16 +1,17 @@
 # Raslipwani Properties — Remaining Work to World-Class
 
-> **Version 9 — rewritten 2026-09-02.** This document contains **only what is still
+> **Version 10 — revised 2026-09-05.** This document contains **only what is still
 > outstanding**. Everything verified complete has been removed; what survives is work,
-> not history. Supersedes Versions 1–8.
+> not history. Supersedes Versions 1–9.
 >
-> **Score:** audited **3.8/10** (2026-09-01) → **~5.5/10** today → target **9/10**.
+> **Score:** audited **3.8/10** (2026-09-01) → **~6/10** today → target **9/10**.
 > The score does not move past 6 by writing code — see **Block 1**, which is the only
 > outstanding work with a live consequence and the only work an agent cannot do for you.
 >
 > **Sources:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md);
 > live introspection of project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1) on
-> 2026-09-01 and 2026-09-02; counts below re-measured against the working tree on 2026-09-02.
+> 2026-09-01 and 2026-09-02; **every count below re-measured against the working tree on
+> 2026-09-05.**
 
 ---
 
@@ -20,16 +21,17 @@ Three separate things are true at once, and conflating them is how the last two
 iterations of this roadmap went stale:
 
 1. **The code has moved a long way.** Clerk is gone, the test suite exists and runs, CI
-   gates six checks, every page is routed, the token layer is built and proven.
-2. **The newest and most visible half of it has not shipped.** Releases 1–3 are merged and
-   pushed to `origin/main`. **Release 4 — Slices 4A and 4B — is not.** It sits unmerged and
-   unpushed on `worktree-release4-slice-4a` and carries the 999 kB font removal, the
-   canonical fix, the layout route and the entire token layer.
+   gates six checks, every page is routed, the token layer is built, proven, and now
+   **spent across every public surface**.
+2. **It has shipped as far as `main`.** Release 4 — Slices 4A, 4B and the 4C primitive
+   layer — merged at `18e82a9`. Block 2 is closed. What Version 9 described as "sitting
+   on an unpushed branch" is no longer true.
 3. **The database is still open.** `007` and `008` are applied. `009`–`012` are not.
    Until they are, anyone holding the public anon key can still read customer PII and
    write through an unauthenticated RPC.
 
 **Block 1 is the only work with a live consequence. Everything else is preparation.**
+It has not moved since Version 9, because nothing in it is agent-executable.
 
 ### Already true — do not re-do, do not re-litigate
 
@@ -44,11 +46,17 @@ iterations of this roadmap went stale:
 | CI | lint · test · coverage floor · palette ratchet · token freshness · build · bundle budget · no-console-in-dist · gitleaks |
 | Routing | 0 unreachable pages, guarded by a test; 0 broken nav links; one `PublicLayout`, header mounts once |
 | Design tokens | 32 semantic roles, both themes, generated from one source, 102 contrast assertions AA |
-| Bundle | 213.9 kB gzip first load (from 275 kB), budget 219 kB |
+| Bundle | 215.5 kB gzip first load (from 275 kB), budget 219 kB |
 | Icon fonts | 0 bytes (FontAwesome's 999 kB removed); CSS 146 kB → 76.7 kB raw |
 | Canonicals | Route-aware. Every page previously declared the homepage as its canonical |
 | Zoom | `user-scalable=no` removed; SC 1.4.4 no longer failed at the viewport tag |
 | Booking email | Resend pipeline built and tested end-to-end 🔑 *awaiting keys* |
+| Public surfaces on tokens | Home, Properties, PropertyDetail, About, Contact, International, UNHousing — **0 literal colour classes** between them, bar one documented decorative gradient |
+| Contact form | Behind `Input`/`Select`/`Textarea`/`Button`; errors announced, not just visible |
+| Nav disclosures | Dropdown operable by keyboard (it was not), `aria-expanded`/`aria-controls` on all five disclosures |
+| Skip link | First in the tab order, target focusable, asserted by test |
+| Cloudinary secret | Form can no longer write it to an anon-readable column; guarded by test |
+| JSON-LD geo | Corrected from Nairobi to Kikambala; guarded by test |
 
 > **Correction carried forward:** a note in `docs/HANDOFF-phase1-apply.md` records
 > `AdminBookings.jsx:70` and `AdminLayout.jsx:49` as broken because they filter
@@ -57,6 +65,19 @@ iterations of this roadmap went stale:
 > rewritten by transcription from `information_schema`. **Those queries are fine.**
 > Nothing to do.
 
+> **Two further corrections, found 2026-09-05.**
+>
+> 1. **Block 1.8 named "the email API key" alongside the Cloudinary secret.** There is no
+>    API-key field in `EmailSettings.jsx` and never was in this tree — the Resend key is
+>    read only by `api/send-email.js` from the environment. Only the Cloudinary
+>    credentials were ever at risk, and they are now gone from the form.
+> 2. **The `htmlFor` count is not a usable metric any more, and Version 9's target was
+>    built on it.** Migrating a form to `Field` *removes* `htmlFor` from the call site —
+>    the primitive renders the association internally — so the raw grep fell from 15 to 7
+>    while labelling got strictly better. Counting `<label>` against `htmlFor` now
+>    punishes the fix. The honest measure is the eslint rule, and that is what the gaps
+>    table below records.
+
 ---
 
 ## Order of remaining work
@@ -64,16 +85,17 @@ iterations of this roadmap went stale:
 | | Block | Owner | Effort | Blocks |
 |---|---|---|---|---|
 | **1** | Close the database | 🔑 **you** | ~1 day | *everything downstream in production* |
-| **2** | Land what already exists | you + agent | ~half a day | any visible improvement at all |
-| **3** | Release 4C — primitives, and the migration they carry | agent | ~5 days | Block 6 |
+| ~~2~~ | ~~Land what already exists~~ | — | — | ✅ **done** — merged at `18e82a9` |
+| **3** | Release 4C — the admin half of the surface migration | agent | ~2 days | Block 4 |
 | **4** | Release 4D — ship the theme, fix the accessibility it exposes | agent | ~4 days | Block 6 |
 | **5** | Release 5 — data layer, decomposition, the rest of the budget | agent | ~7 days | Block 6 (partly) |
 | **6** | Phase 9 — the UI revamp | agent | ~3 weeks | — |
-| **7** | Phase 8 — SEO and discovery | agent | ~1 week + investigation | — |
+| **7** | Phase 8 — SEO and discovery | agent | ~4 days + investigation | — |
 | **8** | Phase 10 — platform maturity | ongoing | — | — |
 
-Blocks 1 → 2 are strictly sequential. 3 → 4 are sequential. 5 and 7 parallelise with 3–4.
-6 depends on 3, 4, and the budget half of 5.
+3 → 4 are sequential, and 3 is now mostly done. 5 and 7 parallelise with 3–4. 6 depends
+on 3, 4, and the budget half of 5. **Block 1 is independent of all of them** and gates
+only production, which is exactly why it has not blocked the work above it.
 
 ---
 
@@ -163,12 +185,19 @@ curl -s "$U/rest/v1/properties?select=id,title&limit=1" -H "apikey: $K" -H "Auth
 curl -s "$U/rest/v1/admin_settings?select=business_name" -H "apikey: $K" -H "Authorization: Bearer $K" # MUST succeed
 ```
 
-### 1.8 — One paired code change, before or with 1.5 *(agent work)*
+### ~~1.8 — One paired code change~~ ✅ **done** *(agent work)*
 
-`CloudinarySettings.jsx:61` writes `cloudinary_api_secret` (and the email API key) into
-`admin_settings`, whose columns are anon-readable. They are `NULL` today — **saving that
-form publishes the secret.** Move both to server-side configuration and remove the fields
-from the form. This must land before the form is used again.
+`CloudinarySettings.jsx` read and wrote `cloudinary_api_key` and `cloudinary_api_secret`
+on `admin_settings`, whose columns are anon-readable. Both were `NULL`, so nothing had
+leaked — the form was one save away from publishing a live secret. Both fields are gone
+from the form, the read and the write; the form now says the credentials belong in
+server-side configuration. Unsigned uploads, which is all this site performs, need only
+the cloud name and preset. `noSecretsInAnonTables.test.js` fails the build if any
+client-side file names those columns again.
+
+**This does not reduce 1.5.** The Cloudinary secret still sat in an anon-readable column
+historically and **still needs rotating**; closing the write path does not un-publish
+anything that was already served.
 
 ### 1.9 — Turn the booking notifications on 🔑
 
@@ -189,101 +218,114 @@ published credential rotated. All six curl assertions above behave as commented.
 
 ---
 
-## Block 2 — Land what already exists
+## ~~Block 2 — Land what already exists~~ ✅ **done**
 
-Release 4's two finished slices sit on `worktree-release4-slice-4a`, unpushed, and the
-branch has **diverged** from `main` — `main` has since gained the database corrections
-(`6726207`, `62fc033`, `8b1abb9`) that the branch does not carry, and the branch carries
-a `ROADMAP.md` that predates them.
+Release 4's slices merged onto `main` at `18e82a9`, bringing the 999 kB font removal, the
+canonical fix, the layout route, the console strip and the whole token layer onto one line
+of history. The typo in `docs/HANDOFF-phase1-apply.md` was fixed at `97e81e1`.
 
-- [ ] **Merge `worktree-release4-slice-4a` into `main`.** Both sides are green; the
-      divergence is a documentation and migration overlap, not a code conflict. Merging
-      brings the 999 kB font removal, the layout route, the canonical fix, the console
-      strip and the whole token layer onto one line of history.
-- [ ] **Revert the accidental typo in `docs/HANDOFF-phase1-apply.md`** — an uncommitted
-      edit introduced `supabase/m igrations/007_...` (stray space) into the apply table.
-      That table is a checklist a human follows under pressure.
-- [ ] **Push and deploy.** The bundle, font, canonical and layout wins in the "already
-      true" table above are the ones a visitor would actually feel, and they are the ones
-      still sitting on the unpushed branch.
-- [ ] Retire `docs/HANDOFF-phase1-apply.md` in favour of Block 1, which supersedes it and
-      is current. Keep one owner-facing checklist, not two that disagree.
-
-**Exit:** `main` contains all agent work to date, the site is deployed from it, and there
-is exactly one document telling the owner what to run.
+**Still outstanding from this block, and owner-side:** `main` is merged but a deploy from
+it has not been confirmed, and `docs/HANDOFF-phase1-apply.md` has not been retired in
+favour of Block 1. Two documents still tell the owner what to run, and they disagree.
 
 ---
 
-## Block 3 — Release 4C · Primitives, and the migration they carry *(≈5 days)*
+## Block 3 — Release 4C · Primitives, and the migration they carry *(≈2 days left)*
 
-The token layer is built and proven. 4C is where the layer gets spent.
-
-**Progress, measured 2026-09-03.** The primitive layer and the whole dialog problem are
-done; what remains is the long tail — migrating surfaces through the primitives, which is
-also what collapses the palette count and finishes the icon consolidation.
+**Progress, measured 2026-09-05.** The primitive layer, the whole dialog problem, and the
+**entire public surface** are done. What remains is admin and the shared components admin
+leans on, plus the icon consolidation, which has not started.
 
 - [x] **Primitives on the token layer:** `Button`, `Input`/`Textarea`/`Select` (over a
       shared `Field`), `Card`, `Badge`, `Modal`, `Toast`, `ConfirmDialog`, plus
       `useConfirm`/`usePrompt` and the `useDialog` hook the two chrome-less dialogs need.
-      Keyboard-complete from the first commit.
-- [x] **Retire the native browser dialogs.** The count was **eleven**, not ten: the
-      roadmap missed a `window.prompt()` collecting a cancellation reason, where a
-      cancelled dialog and an empty string were indistinguishable. Both customer-facing
-      ones are gone. `noNativeDialogs.test.js` fails the build on the twelfth.
-- [x] **Every dialog rendered by one primitive.** The count here was **eleven**, not the
-      four this document named — `PropertyModal`, `BookingModal`, `BookingDetailModal`,
-      `ClientForm`, `ClientManagement`, `AdminProperties`, `EmailSettings`,
-      `Bookings`, `ServicesMain`, `International`, `ViewingExperience`. All eleven were
-      missing the same four things: focus never entered the panel, Tab walked out of it,
-      focus was never returned to the opener, Escape did nothing. `noBespokeDialogs.test.js`
-      holds the line. Block 4's focus-trap requirement is satisfied by this, once.
-- [x] **Two duplications removed on the way through.** `Bookings.jsx` carried a 170-line
-      inline copy of `BookingModal` that had already drifted from it, and `ServicesMain`
-      computed its step count in two places that could disagree.
-- [ ] **Migrate surfaces through the primitives**, highest-traffic first: Home →
-      Properties → PropertyDetail → booking flow → Contact/About → admin. **One PR per
-      surface, each dropping the palette ratchet ceiling.** Admin last: it has one user,
-      and it is where a mistake costs least.
-      *Started: the ratchet is at **2,772**, down from 3,005, without a surface pass yet —
-      that fall is entirely the dialog work.*
-- [ ] **Finish the AdminProperties form.** Its dialog is behind `Modal`, but its 1,284
-      lines of hand-written fields still carry unassociated labels. Deliberately deferred:
-      it belongs with that surface's pass, not smuggled into a dialog commit.
-- [ ] **Finish the icon consolidation.** `react-icons` is imported in **29 files** against
-      `lucide-react` in 11. The `<Icon>` registry built in 4A is the seam: migrate call
-      sites through it as each surface is touched, rather than as a separate sweep.
-- [ ] Bring the CSS bundle under 50 kB raw as the raw classes collapse into primitives
-      (**80.9 kB** today — it rose slightly as the primitives added their own utilities,
-      and falls when the surfaces stop hand-writing theirs).
+- [x] **Retire the native browser dialogs.** The count was **eleven**, not ten.
+      `noNativeDialogs.test.js` fails the build on the twelfth.
+- [x] **Every dialog rendered by one primitive.** Eleven, not the four this document once
+      named. `noBespokeDialogs.test.js` holds the line. Block 4's focus-trap requirement
+      is satisfied by this, once.
+- [x] **Migrate the public surfaces.** Home, Properties, PropertyDetail, About, Contact,
+      International and UNHousing carry **zero literal colour classes** between them, bar
+      one documented decorative gradient on About. Contact's form went through the
+      primitives as well as the tokens, which is what linked its error text to its fields.
+      Ratchet **3,005 → 2,163**, banked at each step and blocking in CI.
+- [ ] **Migrate the admin surfaces.** Everything left in the ratchet's top ten is admin or
+      a component admin owns: `AdminProperties` (214), `ClientManagement` (128),
+      `BookingDetailModal` (127), `AdminBookings` (124), `BookingCalendar` (101),
+      `ServicesMain` (94), `BookingList` (92), `InvestmentCalculator` (86). Admin last was
+      always the plan: it has one user, and it is where a mistake costs least.
+- [ ] **Finish the AdminProperties form.** Its dialog is behind `Modal`, but its 1,294
+      lines of hand-written fields still carry unassociated labels. It belongs with that
+      surface's pass.
+- [ ] **Finish the icon consolidation. Not started.** `react-icons` is imported in **29
+      files** against `lucide-react` in 11 — unchanged since Version 9, because the public
+      surface passes touched colour, not icons. The `<Icon>` registry built in 4A is the
+      seam.
+- [ ] Bring the CSS bundle under 50 kB raw.
 
-**Exit:** raw-palette ratchet **below 400** (the ceiling is **2,772** today and blocking
-in CI) · ~~zero `alert()`/`confirm()` in `src/`~~ ✅ · ~~every modal rendered by one
-primitive~~ ✅ · CSS under 50 kB raw.
+### Two findings from the public passes that change what "done" means here
+
+**1. The CSS bundle rose, and will keep rising until admin lands.** 80.9 kB → **84.9 kB**
+raw. This is not a regression to chase: a partial migration carries both vocabularies at
+once, because the public pages now emit token utilities while the admin files still emit
+the grey and blue literals, and Tailwind generates both. **The `< 50 kB` exit criterion is
+unreachable until the admin migration finishes**, and any attempt to chase it before then
+is measuring the wrong thing.
+
+**2. The token layer has no vocabulary for decorative colour, and 57 classes are stuck on
+it.** `International.jsx`, `UNHousing.jsx` and `About.jsx` carry deliberate multi-hue
+gradients — purple, indigo, orange, pink, emerald, cyan. The layer has 32 semantic roles,
+all of which answer "what job does this colour do", and none of which answer "which of six
+decorative hues is this". Mapping them onto `brand` would flatten a deliberate visual into
+one hue, which is a redesign. **This is a real dependency in the wrong direction: Block 3
+cannot reach zero without a decision that belongs to Block 6.** Either Block 6 commits to
+a visual world that names these roles, or it removes the gradients. Inventing decorative
+tokens by codemod now would pre-empt that choice, so the eslint rule keeps reporting them
+— the correct state for something known and not yet decided.
+
+**Exit:** raw-palette ratchet **below 400** (the ceiling is **2,163** today and blocking in
+CI; ~57 of the remainder are blocked on Block 6 as above) · ~~zero `alert()`/`confirm()` in
+`src/`~~ ✅ · ~~every modal rendered by one primitive~~ ✅ · ~~every public surface on
+tokens~~ ✅ · one icon library · CSS under 50 kB raw.
 
 ---
 
-## Block 4 — Release 4D · Ship the theme, and the accessibility it exposes *(≈4 days)*
+## Block 4 — Release 4D · Ship the theme, and the accessibility it exposes *(≈3 days)*
+
+The two cheapest items are done. The theme provider — the item everything else in this
+block is really waiting on — is not started.
 
 - [ ] **Theme provider** — `light`/`dark`/`system`, persisted, respecting
-      `prefers-color-scheme`, with a toggle in the header and the admin shell.
+      `prefers-color-scheme`, with a toggle in the header and the admin shell. **This is
+      now the single highest-value remaining agent task**: the token layer is built, both
+      themes are defined and contrast-tested, and every public surface is on tokens. The
+      provider is the switch that turns all of that into something a visitor can see.
 - [ ] Audit every surface in both themes, including property imagery, FullCalendar, Quill,
       and the four hardcoded hex values in the `.custom-calendar` block.
-- [ ] **Pair `htmlFor`/`id` across all 134 form controls.** Re-verified 2026-09-02:
-      **134 `<label>` elements, 11 `htmlFor` attributes, 134 `input`/`select`/`textarea`.**
-      Roughly **123 labels are associated with nothing** — a screen reader announces an
-      unlabelled control on effectively every form on the site. This is the largest real
-      accessibility defect in the codebase, and it hides behind an inflated warning count:
-      of 365 `jsx-a11y` warnings, 134 come from `jsx-a11y/label-has-for`, a **deprecated
-      rule that double-counts** `label-has-associated-control`. Turning that rule off
-      drops the number by a third and fixes nothing.
-- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` **after** the pairing lands,
-      so the remaining count means something.
-- [ ] **`aria-expanded`/`aria-controls` on header dropdowns and the mobile menu.**
-      Measured: **2 `aria-expanded` in the entire codebase**, both on the mobile toggle.
-      The `/international` dropdown announces nothing.
-- [ ] Skip-to-content link; live regions for async status and toasts.
+- [ ] **Associate the remaining labels.** Re-measured 2026-09-05 by rule rather than by
+      grep: **94 `jsx-a11y/label-has-associated-control`** (from 134 at the audit
+      baseline) and **87 `jsx-a11y/control-has-associated-label`**. Nearly all of what is
+      left is admin, and most of it is inside `AdminProperties.jsx` — so this lands with
+      the Block 3 admin passes rather than as a sweep of its own. Every form that has gone
+      through `Field` is correct and cannot regress.
+- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` **after** the pairing lands.
+      It is a deprecated rule that double-counts `label-has-associated-control`; it
+      contributes **109** of the current warnings and turning it off fixes nothing.
+- [x] **`aria-expanded`/`aria-controls` on header dropdowns and the mobile menu.**
+      **2 → 10.** This was recorded as an attribute gap and was not one: the desktop
+      dropdown trigger was a `<button>` with no `onClick`, opening only on the wrapper's
+      `onMouseEnter`. A keyboard visitor could focus it, press Enter, and watch nothing
+      happen — the International section, which this document calls the highest-return
+      part of the product, was unreachable without a mouse. It now toggles on activation,
+      closes on Escape and returns focus to the trigger. `Header.disclosure.test.jsx`
+      drives it by keyboard on purpose.
+- [x] **Skip-to-content link.** In `PublicLayout`, asserted to be *first* in the tab order
+      and to point at a target carrying `tabIndex={-1}` — a fragment link whose target is
+      not focusable scrolls the page and leaves focus behind in the nav.
+- [ ] Live regions for async status and toasts.
 - [ ] **`axe-core` in CI**, failing the build on violations, plus a keyboard-only pass
-      over the booking flow in both themes.
+      over the booking flow in both themes. Still **not measured** — and until it runs,
+      every claim in this block is an argument rather than a number.
 
 **Exit:** two themes, both AA by contrast test **and** by axe · **zero** axe violations,
 enforced in CI · every public flow completable by keyboard in both themes.
@@ -317,7 +359,8 @@ rewrite.
 
 ### 5.3 — Finish the performance budget
 
-First load is **213.9 kB gzip** against a **< 100 kB** target.
+First load is **215.5 kB gzip** against a **< 100 kB** target, with a 219 kB budget
+blocking in CI.
 
 - [ ] **Split the Supabase client.** `vendor-supabase` is 56 kB gzip — the single largest
       item in first load, and the dominant one now that the fonts are gone.
@@ -389,9 +432,13 @@ the Block 5.3 budget, passing the Block 4 accessibility bar.
 
 - [ ] 301 `.com` → `.co.ke` permanently; keep the redirect and do not let the domain lapse.
 - [ ] Make canonical, JSON-LD `@id`/`url`, JSON-LD image, `robots.txt` and OG agree.
-- [ ] **Fix the JSON-LD coordinates.** `Home.jsx:90-91` reads `-1.2921, 36.8219` —
-      Nairobi city centre — while the `address` in the same block is Kikambala Road,
-      Kilifi. **~500 km apart**, which breaks local-business indexing outright.
+- [x] **Fix the JSON-LD coordinates.** Was `-1.2921, 36.8219` — Nairobi city centre —
+      while the `address` in the same block reads Kikambala Road, Kilifi. ~500 km apart,
+      which breaks local-business indexing outright. Now `-3.8667, 39.7833`.
+      `structuredData.test.js` asserts the point falls inside Kilifi County and that
+      `@id` and `url` agree. **🔑 Worth one owner check:** the new coordinates are
+      Kikambala as a locality, not a surveyed pin on the office door. If the exact
+      location matters for a map card, confirm it and tighten the value.
 
 ### 7.2 — Dynamic sitemap
 
@@ -440,13 +487,16 @@ flip instantly.
 - [ ] **Replace `react-quill`** — unmaintained since 2023, React 16/17 peers, and it
       depends on `findDOMNode`, which React 19 removed. **It blocks the React 19 path.**
       `quill` 2 is already a dependency; `tiptap` is the alternative.
-- [ ] **Remove `@headlessui/react`** — declared in `package.json` and in `manualChunks`,
-      with **zero imports in `src/`**.
+- [x] **Remove `@headlessui/react`** — done. Worth recording what it did *not* buy:
+      because it was never imported it was never bundled, so removing it shortened the
+      dependency list and deleted a stale `manualChunks` hint, and moved the bundle by
+      **zero bytes**. Version 9 listed it under budget work; it was housekeeping.
 - [ ] **Consolidate the two calendar libraries.**
 - [ ] **Error tracking** (Sentry) wired into the existing error boundaries.
-- [ ] **Documentation hygiene** — **14 status docs in `src/Docs/`** plus several at root;
-      `README.md` advertises React 18.2.0 / Vite 4.4.5 against an actual 18.3.1 / 6.3.5.
-      They ship in the repo and contradict the code.
+- [ ] **Documentation hygiene** — **14 status docs in `src/Docs/`** plus several at root,
+      shipping in the repo and contradicting the code. ~~`README.md` advertises React
+      18.2.0 / Vite 4.4.5~~ ✅ corrected to the actual 18.3.1 / 6.3.5, in both the badges
+      and the stack table. The 14 status docs remain.
 - [ ] **Staging environment** — possible now that the schema is reproducible.
 - [ ] **Diaspora owner portal** (`/portal`). `DiasporaPortal.jsx` was deleted rather than
       routed, because it rendered fabricated portfolio figures from a hardcoded array.
@@ -462,32 +512,41 @@ flip instantly.
 Only metrics with distance left to travel appear here. Anything already at target was
 removed along with the rest of the finished work.
 
-| Metric | Today (2026-09-02) | Target | Block |
+| Metric | Today (2026-09-05) | Target | Block |
 |---|---|---|---|
 | Tables where anon can `DELETE`/`TRUNCATE` | narrowed by `007`; `admin_users` still truncatable by any signed-in user | 0 | 1 |
 | `SECURITY DEFINER` RPCs granted to `anon` | **2** (`update_setting`, `get_setting`) | 0 | 1 |
 | Policies that are `USING (true)` | 19 → 1 after `009` (the documented public SELECT) | 1 | 1 |
-| Published secrets not yet rotated | **3** (service key, Cloudinary secret, `sbp_` token) | 0 | 1 |
-| Release 4 work reaching production | **0 of 2 slices** (unmerged, unpushed) | both | 2 |
-| Raw palette classes in `src/` | **2,772** (from 3,005), ceiling live and blocking | **< 400** → 0 | 3 |
+| Published secrets not yet rotated | **3** (service key, Cloudinary secret, `sbp_` token) — *unchanged; closing the write path does not un-publish* | 0 | 1 |
+| Client code that can write a secret to an anon-readable column | **0** (was 1), guarded by test | 0 | ✅ 1.8 |
+| Release 4 work reaching production | **merged to `main`** at `18e82a9`; deploy unconfirmed | deployed | ✅ 2 (merge) |
+| Raw palette classes in `src/` | **2,163** (from 3,005), ceiling live and blocking | **< 400** → 0 | 3 |
+| — of which blocked on a Block 6 design decision | **~57** (decorative multi-hue gradients, no token role exists) | decided, then 0 | 6 → 3 |
+| Public surfaces with literal colour classes | **0 of 7** | 0 | ✅ 3 |
+| Admin surfaces with literal colour classes | **all of them**; top file 214 | 0 | 3 |
 | Native `alert()`/`confirm()`/`prompt()` | **0** (there were 11, not 10) | 0 | ✅ 3 |
 | Hand-rolled dialog overlays | **0** (there were 11, not the 4 recorded) | 0 | ✅ 3 |
-| Icon libraries | **2** (`react-icons` in 29 files, `lucide-react` in 11) | 1 | 3 |
+| Icon libraries | **2** (`react-icons` in 29 files, `lucide-react` in 11) — *unchanged; not started* | 1 | 3 |
 | Booking notification delivery | **0%** — 8 enquiries stranded | 100% | 1 |
-| CSS bundle (raw) | **80.9 kB** | < 50 kB | 3 |
-| Themes shipped | **1** (the layer for 2 exists; the provider does not) | 2, both AA | 4 |
-| `<label>` without an associated control | **96** (from ~123), falling structurally via `Field` | 0 | 4 |
-| `aria-expanded` in the codebase | **2** | every disclosure control | 4 |
+| CSS bundle (raw) | **84.9 kB** — *rose from 80.9; both vocabularies coexist mid-migration* | < 50 kB | 3 |
+| Themes shipped | **1** (layer complete, every public surface on it, provider still absent) | 2, both AA | 4 |
+| `jsx-a11y/label-has-associated-control` | **94** (from 134 at baseline), nearly all admin | 0 | 4 |
+| `jsx-a11y/control-has-associated-label` | **87** | 0 | 4 |
+| `jsx-a11y/label-has-for` (deprecated, double-counts) | **109** | rule removed after pairing | 4 |
+| `aria-expanded` in the codebase | **10** (from 2) | every disclosure control | ✅ 4 (nav) |
+| Nav dropdown operable by keyboard | **yes** (it was not — no `onClick` at all) | yes | ✅ 4 |
+| Skip-to-content link | **present**, first in tab order, asserted | present | ✅ 4 |
 | axe violations | **not measured** | 0, enforced in CI | 4 |
-| Files importing Supabase directly | **23** | 0 | 5 |
-| Files over 700 lines | **8** (largest 1,284) | 0 over 300 | 5 |
-| First-load JS (gzip) | **213.9 kB** | < 100 kB | 5 |
+| Files importing Supabase directly | **24** | 0 | 5 |
+| Files over 700 lines | **7** (largest 1,294) | 0 over 300 | 5 |
+| First-load JS (gzip) | **215.5 kB** (budget 219) | < 100 kB | 5 |
 | Lighthouse Performance (mobile) | **not measured** | ≥ 90 | 5 |
 | Property pages in the sitemap | **0** | all | 7 |
-| JSON-LD geo error | **~500 km** from the stated address | correct | 7 |
+| JSON-LD geo error | **corrected** (~500 km → Kikambala), guarded by test | correct | ✅ 7 |
 | `.ts`/`.tsx` files | **0** | incremental adoption | 8 |
-| Test coverage | **62.4% statements** (297 tests, from 227) | ≥ 70% | ongoing |
-| Overall audit score | **~5.5 / 10** | **9 / 10** | — |
+| Test coverage | **69.8% statements / 70.6% lines** (307 tests, from 297) — floors ratcheted | ≥ 70% | ✅ ongoing |
+| Lint errors | **0** (2,477 warnings, from 3,105) | 0 | ongoing |
+| Overall audit score | **~6 / 10** | **9 / 10** | — |
 
 **The score is capped at roughly 6 until Block 1 is executed, and no amount of further
 coding lifts it.**
@@ -501,24 +560,44 @@ is deliberately not task-level. **Do not generate plans for all blocks up front*
 block changes the codebase enough that a plan written today for Block 6 would be stale
 before it started.
 
-**Blocks 1 and 2 need no plan.** Block 1 is a checklist run against the Supabase
-dashboard; Block 2 is a merge and a deploy.
+**Block 1 needs no plan** — it is a checklist run against the Supabase dashboard.
+**Block 2 is closed.**
+
+**What to do next, in order of value:**
+
+1. **Block 1**, by the owner. It has not moved in three revisions of this document, and
+   it is still the only outstanding work with a live consequence.
+2. **The Block 4 theme provider.** Everything it needs now exists: the token layer, both
+   palettes, the contrast tests, and every public surface migrated onto them. It is the
+   switch that makes all of Release 4 visible to a visitor, and it is one focused task.
+3. **The Block 3 admin passes.** They unblock the CSS budget, carry most of the remaining
+   label defects with them, and are low-risk because admin has one user.
 
 **For each agent-executable block, generate the plan when you start it:**
 
 ```
-/superpowers:writing-plans Block 3 of ROADMAP.md — primitives on the token layer,
-retire the 10 native dialogs, migrate surfaces and lower the palette ratchet
+/superpowers:writing-plans Block 4 of ROADMAP.md — the theme provider, and the
+both-theme audit of the surfaces the token migration has already prepared
 ```
 
 **Three rules that have held so far and should keep holding:**
 
-1. **Every block ends deployable.** Not "ends written" — ends *deployed*. Release 4's two
-   finished slices have been sitting on an unpushed branch, which is why "merged" is not
-   the finish line.
+1. **Every block ends deployable.** Not "ends written" — ends *deployed*. Release 4's
+   slices sat on an unpushed branch for two revisions of this document, which is why
+   "merged" is not the finish line. They are on `main` now; **a deploy from it has still
+   not been confirmed**, so the rule has not finished being earned.
 2. **Guard rails land with the work, not after it.** Every number in the gaps table that
    is currently held — bundle budget, coverage floor, palette ratchet, console-in-dist —
    is held by CI, not by intention.
-3. **Measure, don't assert.** Every count in this document was re-measured on 2026-09-02.
+3. **Measure, don't assert.** Every count in this document was re-measured on 2026-09-05.
    A roadmap that gets more accurate is working; one whose numbers only ever improve is
    being marked by the person who wrote it.
+
+   This revision earns that claim on three counts, all of which moved the wrong way:
+   the **CSS bundle rose** 80.9 → 84.9 kB, and will keep rising until the admin
+   migration lands; **`@headlessui/react` bought zero bytes**, not the budget win it was
+   filed under; and the **`htmlFor` metric this document has used since Version 1 turned
+   out to punish the fix**, falling 15 → 7 while labelling improved. A fourth: Version 9
+   recorded the nav disclosures as an attribute gap, and they were a **keyboard trap** —
+   the roadmap had understated a defect, which is the rarer and more useful kind of
+   error to find.
