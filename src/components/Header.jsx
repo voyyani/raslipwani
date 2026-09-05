@@ -6,6 +6,12 @@ import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo
 import { useSettings } from '../hooks/useSettings';
 
 import Icon from './Icon';
+/**
+ * A stable DOM id from a nav label, so `aria-controls` on the trigger and the
+ * `id` on the menu it opens are derived from one source and cannot drift.
+ */
+const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
 const Header = () => {
   const { logo, siteName, tagline } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -116,14 +122,31 @@ const Header = () => {
               
               // Handle dropdown menus
               if (item.dropdown) {
+                const isOpen = openDropdown === item.label;
+                const menuId = `nav-dropdown-${slug(item.label)}`;
+
                 return (
                   <div 
                     key={item.label} 
                     className="relative"
                     onMouseEnter={() => setOpenDropdown(item.label)}
                     onMouseLeave={() => setOpenDropdown(null)}
+                    onKeyDown={(e) => {
+                      // Escape closes the menu and puts focus back on the
+                      // control that opened it, rather than stranding it on a
+                      // link that has just been unmounted.
+                      if (e.key === 'Escape' && isOpen) {
+                        setOpenDropdown(null);
+                        e.currentTarget.querySelector('button')?.focus();
+                      }
+                    }}
                   >
                     <button
+                      type="button"
+                      onClick={() => setOpenDropdown(isOpen ? null : item.label)}
+                      aria-expanded={isOpen}
+                      aria-controls={menuId}
+                      aria-haspopup="true"
                       className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-gray-700 hover:text-primary hover:bg-gray-50/80"
                     >
                       <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
@@ -131,13 +154,13 @@ const Header = () => {
                       }`} />
                       <span className="relative">{item.label}</span>
                       <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${
-                        openDropdown === item.label ? 'rotate-180' : ''
+                        isOpen ? 'rotate-180' : ''
                       }`} />
                     </button>
                     
                     {/* Dropdown Menu */}
-                    {openDropdown === item.label && (
-                      <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                    {isOpen && (
+                      <div id={menuId} className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
                         {item.dropdown.map((subItem) => (
                           <Link
                             key={subItem.path}
@@ -219,6 +242,7 @@ const Header = () => {
               whileTap={{ scale: 0.95 }}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
+              aria-controls="mobile-nav"
             >
               <div className="relative w-6 h-6">
                 <motion.span
@@ -294,7 +318,7 @@ const Header = () => {
               </div>
               
               {/* Navigation */}
-              <nav className="flex flex-col py-2">
+              <nav id="mobile-nav" className="flex flex-col py-2">
                 {navItems.map((item) => {
                   const IconComponent = item.icon;
                   const isActive = location.pathname === item.path;
@@ -305,7 +329,10 @@ const Header = () => {
                     return (
                       <div key={item.label} className="border-b border-gray-100 last:border-b-0">
                         <button
+                          type="button"
                           onClick={() => setOpenMobileDropdown(isDropdownOpen ? null : item.label)}
+                          aria-expanded={isDropdownOpen}
+                          aria-controls={`mobile-nav-dropdown-${slug(item.label)}`}
                           className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-gray-700 hover:text-primary hover:bg-gray-50 w-full"
                         >
                           <div className="p-2 rounded-lg transition-colors bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary">
@@ -321,7 +348,7 @@ const Header = () => {
                         
                         {/* Dropdown items */}
                         {isDropdownOpen && (
-                          <div className="bg-gray-50 py-2">
+                          <div id={`mobile-nav-dropdown-${slug(item.label)}`} className="bg-gray-50 py-2">
                             {item.dropdown.map((subItem) => (
                               <Link
                                 key={subItem.path}
