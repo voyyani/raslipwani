@@ -63,6 +63,23 @@ export default [
       // these controls carry `htmlFor` and a matching `id` as well as nesting.
       'jsx-a11y/label-has-associated-control': ['warn', { depth: 3 }],
 
+      // Deprecated by the plugin, and it double-counts the rule above: every
+      // control it flags is either already reported there, or is a label whose
+      // control is a sibling rather than a child — which
+      // `label-has-associated-control` with `depth: 3` decides correctly.
+      //
+      // It is off now rather than earlier, on purpose. Turning it off while
+      // controls were genuinely unlabelled would have deleted warnings and
+      // fixed nothing: the deprecated rule was noise, but it was noise sitting
+      // on top of a real defect. That defect reached 0 first — see
+      // label-budget.json — and only then was this safe to remove.
+      //
+      // ROADMAP.md costed this at 100 warnings. By the time the labels landed
+      // it was 39, because migrating a field onto the Field primitives
+      // silences this rule as a side effect of satisfying the real one. That
+      // is the argument for fixing the defect before deleting its symptom.
+      'jsx-a11y/label-has-for': 'off',
+
       // Literal Tailwind colours: warn, counted, and ratcheted in CI by
       // `scripts/palette-ratchet.mjs`. See the rule's own header for why this is
       // not an error. Slice 4C lowers the ceiling surface by surface.

@@ -276,10 +276,19 @@ What is left is the genuine remainder: the parts a table could not decide.
       stored React components inside content-shaped arrays and now hold registry name
       strings. Those are maintenance wins. It is not a bundle win, and the ~600 bytes of
       gzip it costs are the price of them.
-- [ ] **Label the remaining 65 controls**, all in the admin console. `label-budget.json`
-      holds the ceiling; `AdminProperties.jsx` (19) and `GeneralSettings.jsx` (13) are
-      the bulk. Route them through the `Field` primitive rather than hand-pairing
-      `htmlFor`, since `Field` cannot produce an unlabelled control.
+- [x] **Label the remaining 65 controls**, all in the admin console. ✅ Done on
+      2026-09-06; `label-budget.json` is at **0** and is now a floor rather than a
+      ceiling. Routed through the `Field` primitives, plus a new `Checkbox` for the four
+      controls whose label belongs beside the box rather than above it.
+
+      **Eleven of the 65 were not labelling defects at all**, and forcing them through
+      `Field` would have been wrong. Seven `<label>` elements captioned groups of toggle
+      buttons or a bare button — a `<button>` is not a labellable control, so those
+      labels named nothing; they are now `role="group"` with `aria-labelledby`, or plain
+      `<span>` captions. The same pattern appeared in both `AdminProperties` and
+      `AdminBookings`, which suggests it was copied. Two more captioned a file drop zone
+      whose real control was already correctly paired. **A count of a lint rule is not a
+      count of one defect.**
 - [x] **`axe-core` in CI, failing the build on violations.** ✅ Done, and the sequencing
       argument that deferred it turned out to be wrong in a useful way. The plan was to
       wait for the label ratchet to reach zero, on the theory that a gate arriving with
@@ -296,10 +305,13 @@ What is left is the genuine remainder: the parts a table could not decide.
       should have been expected, since icons are JavaScript and never touched the CSS.
       **The only remaining lead is unused-utility pruning, and it should be measured
       before it is scheduled** — that is two wrong predictions in a row on this line.
-- [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` once the labels are done. It
-      is deprecated and double-counts `label-has-associated-control`; it contributes
-      **100** of the 375 warnings and **turning it off today would fix nothing**, which
-      is why it is listed last rather than first.
+- [x] Retire `jsx-a11y/label-has-for` in `eslint.config.js`. ✅ Done on 2026-09-06, and
+      listing it last was right for a reason worth keeping. It was costed at **100 of
+      375** warnings. By the time the labels landed it was **39 of 207**, because
+      routing a field through the primitives silences this rule as a side effect of
+      satisfying the real one. Turning it off first would have deleted 100 warnings and
+      fixed nothing; turning it off last removed 39 that had become genuinely redundant.
+      Total warnings: **375 → 168**.
 
 **Exit:** raw-palette ratchet at **0** or a documented exemption for developer chrome ·
 label ratchet at **0** · axe extended over the admin console, still at zero · every
@@ -495,11 +507,11 @@ ledger at the top.
 | Published secrets not yet rotated | 3 | **3** | 0 | 1 |
 | Booking notification delivery | 0% | **0%** — 8 enquiries stranded | 100% | 1 |
 | Raw palette classes in `src/` | 95 | **94** | 0 or a documented exemption | 2 |
-| Unlabelled form controls | 67 | **65** (0 on public surfaces) | 0 | 2 |
+| Unlabelled form controls | 67 | **0** ✅ | 0 | ✅ 2 |
 | Icon libraries | 2 | **1** ✅ `lucide-react` only | 1 | ✅ 2 |
 | CSS bundle (raw) | 75.6 kB | **76.3 kB** — unmoved by the icon work, as it should have been | < 50 kB | 2 |
-| `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **100** | rule removed after pairing | 2 |
-| `jsx-a11y/control-has-associated-label` | 87 | **87** | 0 | 2 |
+| `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **rule removed** ✅ | rule removed after pairing | ✅ 2 |
+| `jsx-a11y/control-has-associated-label` | 87 | **45** — halved as a side effect, not targeted | 0 | 2 |
 | Files importing Supabase directly | 24 | **24** | 0 | 3 |
 | Files over 700 lines | 8 | **7** (largest 1,294) | 0 over 300 | 3 |
 | First-load JS (gzip) | 215 kB | **215.3 kB** | < 100 kB | 3 |
