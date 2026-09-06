@@ -65,7 +65,7 @@ vi.mock('@/services/bookings', () => ({
     })),
     notes: vi.fn((bookingId) => ({
       queryKey: ['bookings', 'notes', String(bookingId)],
-      queryFn: () => Promise.resolve([]),
+      queryFn: () => Promise.resolve(bookingsService.__mockNotes),
       enabled: Boolean(bookingId),
     })),
   },
@@ -79,6 +79,7 @@ vi.mock('@/services/bookings', () => ({
   // per-test fixtures without re-mocking the whole module each time.
   __mockBookings: [],
   __mockStats: { total: 0, byStatus: {}, byPriority: {} },
+  __mockNotes: [],
 }));
 
 describe('AdminBookings', () => {
@@ -118,6 +119,7 @@ describe('AdminBookings', () => {
       byStatus: { pending: 1, confirmed: 1 },
       byPriority: { medium: 1, high: 1 },
     });
+    bookingsService.__mockNotes.length = 0;
   });
 
   it('renders bookings calendar view', async () => {
@@ -218,6 +220,34 @@ describe('AdminBookings', () => {
     await waitFor(() => {
       expect(screen.getAllByText('john@example.com').length).toBeGreaterThan(0);
     });
+  });
+
+  it("renders a booking note's text from the real note_text column, not note", async () => {
+    // The bug this prevents: the service writes booking_notes.note_text (the
+    // only real column, per migration 003b), but the modal used to read
+    // note.note — a field that column never populates. Fixed together, the
+    // write and the read must agree, or a saved note renders as nothing.
+    bookingsService.__mockNotes.push({
+      id: 1,
+      booking_id: 1,
+      note_text: 'Client confirmed by phone',
+      created_by: 'admin-user-id',
+      created_at: '2026-01-18T10:00:00Z',
+      is_internal: true,
+    });
+
+    const user = userEvent.setup();
+    render(<AdminBookings />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('event-1')).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId('event-1'));
+
+    const notesTab = await screen.findByRole('button', { name: /notes \(1\)/i });
+    await user.click(notesTab);
+
+    expect(await screen.findByText('Client confirmed by phone')).toBeInTheDocument();
   });
 
   it('invalidates the whole bookings domain after a status change, not two named keys', async () => {

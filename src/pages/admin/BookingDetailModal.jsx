@@ -509,7 +509,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           <Icon name="trash" />
                         </button>
                       </div>
-                      <p className="text-content-muted">{note.note}</p>
+                      <p className="text-content-muted">{note.note_text}</p>
                     </div>
                   ))
                 )}
