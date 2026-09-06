@@ -5,6 +5,8 @@ import { formatDate } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from './ui/useConfirm';
+import Select from './ui/Select';
+import Textarea from './ui/Textarea';
 import { Home, Plus, X, Save, Trash2, MapPin, DollarSign, Bed, Bath } from 'lucide-react';
 
 const PropertyInterests = ({ clientId }) => {
@@ -200,95 +202,75 @@ const PropertyInterests = ({ clientId }) => {
         <form onSubmit={handleSubmit} className="bg-surface rounded-lg p-4 mb-6">
           <div className="space-y-4">
             {/* Property Search */}
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">
-                Search Property
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
-                placeholder="Search by title or location..."
+            <Input
+              label="Search Property"
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by title or location..."
               />
-
               {/* Search Results */}
               {searchLoading && searchTerm.length >= 2 && (
-                <div className="mt-2 text-sm text-content-subtle">Searching...</div>
+              <div className="mt-2 text-sm text-content-subtle">Searching...</div>
               )}
-
               {searchResults && searchResults.length > 0 && !selectedProperty && (
-                <div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg">
-                  {searchResults.map((property) => (
-                    <button
-                      key={property.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedProperty(property);
-                        setSearchTerm('');
-                      }}
-                      className="w-full text-left p-3 hover:bg-surface-sunken border-b last:border-b-0"
-                    >
-                      <div className="font-medium text-content">{property.title}</div>
-                      <div className="text-sm text-content-muted">{property.location}</div>
-                      <div className="text-sm text-brand">{formatCurrency(property.price)}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Selected Property */}
-            {selectedProperty && (
-              <div className="bg-surface-raised border border-brand-subtle rounded-lg p-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium text-content">{selectedProperty.title}</h4>
-                    <p className="text-sm text-content-muted">{selectedProperty.location}</p>
-                    <p className="text-sm text-brand">{formatCurrency(selectedProperty.price)}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedProperty(null)}
-                    className="text-content-subtle hover:text-content-muted"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+              <div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg">
+              {searchResults.map((property) => (
+              <button
+              key={property.id}
+              type="button"
+              onClick={() => {
+              setSelectedProperty(property);
+              setSearchTerm('');
+              }}
+              className="w-full text-left p-3 hover:bg-surface-sunken border-b last:border-b-0"
+              >
+              <div className="font-medium text-content">{property.title}</div>
+              <div className="text-sm text-content-muted">{property.location}</div>
+              <div className="text-sm text-brand">{formatCurrency(property.price)}</div>
+              </button>
+              ))}
               </div>
-            )}
-
-            {/* Interest Level */}
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">
-                Interest Level
-              </label>
-              <select
+              )}
+              </div>
+              {/* Selected Property */}
+              {selectedProperty && (
+              <div className="bg-surface-raised border border-brand-subtle rounded-lg p-3">
+              <div className="flex justify-between items-start">
+              <div>
+              <h4 className="font-medium text-content">{selectedProperty.title}</h4>
+              <p className="text-sm text-content-muted">{selectedProperty.location}</p>
+              <p className="text-sm text-brand">{formatCurrency(selectedProperty.price)}</p>
+              </div>
+              <button
+              type="button"
+              onClick={() => setSelectedProperty(null)}
+              className="text-content-subtle hover:text-content-muted"
+              >
+              <X className="w-5 h-5" />
+              </button>
+              </div>
+              </div>
+              )}
+              {/* Interest Level */}
+              <Select
+                label="Interest Level"
+                required
                 value={interestLevel}
                 onChange={(e) => setInterestLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
-                required
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
-              </select>
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">
-                Notes
-              </label>
-              <textarea
+              </Select>
+              {/* Notes */}
+              <Textarea
+                label="Notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Any specific requirements or notes..."
               />
-            </div>
-          </div>
 
           <div className="flex justify-end gap-2 mt-4">
             <button

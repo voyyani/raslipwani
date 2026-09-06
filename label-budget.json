@@ -1,4 +1,4 @@
 {
-  "max": 16,
-  "note": "Form controls with no associated label, counted by jsx-a11y/label-has-associated-control. This number only falls. From 96 at the start of Release 4, to 65 after the public-surface pass, to 35 when the six admin settings tabs moved onto the Field primitives, to 16 on 2026-09-06 when AdminProperties followed. Every public, visitor-facing form is at zero. What remains is AdminBookings, CommunicationTimeline, PropertyInterests and BookingDetailModal. Note that jsx-a11y/label-has-for is deliberately excluded \u2014 it is deprecated and double-counts this same rule, which is how the raw warning total came to overstate this defect by a third."
+  "max": 0,
+  "note": "Form controls with no associated label, counted by jsx-a11y/label-has-associated-control. Reached 0 on 2026-09-06, from 96 at the start of Release 4. It stays at 0: every control in this codebase now goes through the Field primitives in src/components/ui, which mint the id with useId and hand it to both the label and the control, so an unlabelled control is not something a caller can produce by forgetting. A rise here means someone hand-wrote a field — route it through Input/Select/Textarea/Checkbox instead of pairing htmlFor by hand. This file changes meaning with the commit that zeroed it: it was a ceiling being spent down, and it is now a floor that must not rise."
 }

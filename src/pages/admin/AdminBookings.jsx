@@ -17,6 +17,8 @@ import { exportToCSV } from '../../utils/exportUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from '../../components/ui/useConfirm';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 import Icon from '../../components/Icon';
 
 /**
@@ -522,8 +524,13 @@ const AdminBookings = () => {
           >
             <div className="bg-surface-raised rounded-lg shadow p-3 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-content-muted mb-1">Status</label>
-                <div className="flex flex-wrap gap-2">
+                {/* A named group, not a label: these are toggle buttons, and a
+                    <button> cannot be labelled. See AdminProperties for the
+                    same fix. */}
+                <span id="booking-status-filter" className="block text-xs font-medium text-content-muted mb-1">
+                  Status
+                </span>
+                <div role="group" aria-labelledby="booking-status-filter" className="flex flex-wrap gap-2">
                   {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(status => (
                     <button
                       key={status}
@@ -540,8 +547,13 @@ const AdminBookings = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-content-muted mb-1">Priority</label>
-                <div className="flex flex-wrap gap-2">
+                {/* A named group, not a label: these are toggle buttons, and a
+                    <button> cannot be labelled. See AdminProperties for the
+                    same fix. */}
+                <span id="booking-priority-filter" className="block text-xs font-medium text-content-muted mb-1">
+                  Priority
+                </span>
+                <div role="group" aria-labelledby="booking-priority-filter" className="flex flex-wrap gap-2">
                   {['all', 'low', 'normal', 'high', 'urgent'].map(priority => (
                     <button
                       key={priority}
@@ -708,46 +720,37 @@ const AdminBookings = () => {
         {/* Filters Panel */}
         {showFilters && (
           <div className="mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-content-muted mb-1">Search</label>
-              <input
-                type="text"
-                placeholder="Name, email, phone..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              />
-            </div>
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-content-muted mb-1">Status</label>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Priority</label>
-              <select
+            <Input
+              label="Search"
+              type="text"
+              placeholder="Name, email, phone..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+            <Select
+              label="Status"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </Select>
+              <Select
+                label="Priority"
                 value={filters.priority}
                 onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
               >
                 <option value="all">All Priorities</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
                 <option value="urgent">Urgent</option>
-              </select>
-            </div>
+              </Select>
             <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Actions</label>
+              <span className="block text-sm font-medium text-content-muted mb-1">Actions</span>
               <button
                 onClick={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
                 className="w-full px-3 py-2 bg-gray-600 text-content-on-media rounded-md hover:bg-gray-700 transition"

@@ -4,6 +4,9 @@ import { supabase } from '@/utils/supabaseClient';
 import { formatDateTime } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
+import Input from './ui/Input';
+import Select from './ui/Select';
+import Textarea from './ui/Textarea';
 import useConfirm from './ui/useConfirm';
 import { 
   Phone, Mail, Video, MessageSquare, Calendar, 
@@ -200,63 +203,50 @@ const CommunicationTimeline = ({ clientId }) => {
       {isAddingNew && (
         <form onSubmit={handleSubmit} className="bg-surface rounded-lg p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Type</label>
-              <select
+              <Select
+                label="Type"
+                required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
-                required
               >
                 <option value="call">Phone Call</option>
                 <option value="email">Email</option>
                 <option value="meeting">Meeting</option>
                 <option value="viewing">Property Viewing</option>
                 <option value="note">Note</option>
-              </select>
-            </div>
+              </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Date & Time</label>
-              <input
+              <Input
+                label="Date & Time"
+                required
                 type="datetime-local"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
-                required
               />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Subject</label>
-              <input
+              <Input
+                label="Subject"
+                required
                 type="text"
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Brief subject..."
-                required
               />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-content-muted mb-1">Duration (minutes)</label>
-              <input
+              <Input
+                label="Duration (minutes)"
                 type="number"
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Optional"
               />
-            </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-content-muted mb-1">Notes</label>
-              <textarea
+              <Textarea
+                label="Notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Detailed notes about this communication..."
               />
             </div>

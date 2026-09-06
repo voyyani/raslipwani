@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 import useConfirm from '../../components/ui/useConfirm';
 import usePrompt from '../../components/ui/usePrompt';
 import useDialog from '../../components/ui/useDialog';
+import Select from '../../components/ui/Select';
+import Textarea from '../../components/ui/Textarea';
 import Icon from '../../components/Icon';
 
 /**
@@ -406,34 +408,25 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 bg-surface p-4 rounded-lg">
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">
-                        New Status
-                      </label>
-                      <select
-                        value={newStatus}
-                        onChange={(e) => setNewStatus(e.target.value)}
-                        className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </div>
+                    <Select
+                      label="New Status"
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </Select>
                     {newStatus === 'cancelled' && (
-                      <div>
-                        <label className="block text-sm font-medium text-content-muted mb-2">
-                          Cancellation Reason *
-                        </label>
-                        <textarea
-                          value={cancellationReason}
-                          onChange={(e) => setCancellationReason(e.target.value)}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-                          placeholder="Please provide a reason for cancellation..."
-                        />
-                      </div>
+                      <Textarea
+                        label="Cancellation Reason"
+                        required
+                        value={cancellationReason}
+                        onChange={(e) => setCancellationReason(e.target.value)}
+                        rows={3}
+                        placeholder="Please provide a reason for cancellation..."
+                      />
                     )}
                     <div className="flex gap-2">
                       <button
