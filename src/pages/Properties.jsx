@@ -2,15 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
+import { propertyQueries } from '@/services/properties';
 import PropertyModal from '../components/PropertyModal';
 import Icon from '../components/Icon';
 
+// A stable reference: the "Apply filters and sorting" effect below depends on
+// `properties`, and a fresh `[]` literal on every render (the natural way to
+// default an unresolved query's `data`) would give that effect a new
+// dependency identity every render, re-running it and re-rendering forever.
+const EMPTY_PROPERTIES = [];
+
 const Properties = () => {
-  const [properties, setProperties] = useState([]);
+  const { data: properties = EMPTY_PROPERTIES, isLoading: loading, error } = useQuery(
+    propertyQueries.all()
+  );
   const [filteredProperties, setFilteredProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [filterOption, setFilterOption] = useState('all');
   const [purposeFilter, setPurposeFilter] = useState('all');
@@ -36,33 +43,6 @@ const Properties = () => {
   const canonicalUrl = baseUrl; // Keep canonical clean without query params to avoid duplicate content
   const listTitle = 'Properties for Sale & Rent Across Kenya | Raslipwani Properties';
   const listDescription = 'Browse premium properties across Kenya. Filter by type, purpose, and location. Find apartments, villas, land, and commercial listings.';
-
-  // Fetch properties from Supabase
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        // `data` is null on more than one PostgREST response, and every
-        // consumer below treats this as an array — the filter effect calls
-        // .filter on it and the JSON-LD block calls .slice, so a null here
-        // took the whole page down rather than rendering an empty list.
-        setProperties(data ?? []);
-        setFilteredProperties(data ?? []);
-      } catch (err) {
-        setError('Failed to load properties: ' + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProperties();
-  }, []);
 
   // Initialize from URL params
   useEffect(() => {

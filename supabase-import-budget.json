@@ -1,4 +1,4 @@
 {
-  "max": 22,
+  "max": 19,
   "note": "Files under src/components and src/pages that import the Supabase client directly. Measured 22 on 2026-09-06. ROADMAP.md Block 3.1 drives this to 0, at which point scripts/supabase-import-ratchet.mjs is deleted and eslint.config.js enforces it as an error instead. This ceiling only falls."
 }

@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { propertyQueries } from '@/services/properties';
 import PropertyModal from '../components/PropertyModal';
 
 import Icon from '../components/Icon';
@@ -15,21 +15,16 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch featured properties with React Query for automatic cache invalidation
-  const { data: featuredProperties = [], isLoading: loading, error } = useQuery({
-    queryKey: ['featured-properties'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('featured', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    staleTime: 1000 * 60, // 1 minute - refetch if data is older than 1 minute
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
+  const {
+    data: featuredProperties = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    ...propertyQueries.featured(),
+    // The home page is the one screen where a returning visitor should see a new
+    // listing immediately, so it opts into a refetch on focus. The lifetime
+    // itself comes from cachePolicy — this file no longer sets its own.
+    refetchOnWindowFocus: true,
   });
 
   // Handle scroll to services section

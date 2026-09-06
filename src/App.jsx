@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { 
   BrowserRouter as Router, 
   Routes, 
@@ -13,17 +13,16 @@ import { Helmet } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
-import { supabase } from '@/utils/supabaseClient';
+import { propertyQueries } from '@/services/properties';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';
 import MaintenancePage from './pages/MaintenancePage';
-import { logger } from './utils/logger';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -237,30 +236,8 @@ const NotFound = () => (
 const PropertyModalRoute = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchProperty = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', id)
-          .single();
-        
-        if (error) throw error;
-        setProperty(data);
-      } catch (err) {
-        logger.error('Failed to load property:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (id) fetchProperty();
-  }, [id]);
+  const { data: property, isLoading: loading } = useQuery(propertyQueries.detail(id));
 
   const closeModal = () => {
     navigate(-1);

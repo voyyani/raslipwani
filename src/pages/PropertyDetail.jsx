@@ -2,14 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
+import { propertyQueries } from '@/services/properties';
 
 import Icon from '../components/Icon';
 const PropertyDetail = () => {
   const { id } = useParams();
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data: property, isLoading: loading, error } = useQuery(propertyQueries.detail(id));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
@@ -31,29 +30,6 @@ const PropertyDetail = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
-
-  // Fetch property details
-  useEffect(() => {
-    const fetchProperty = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', id)
-          .single();
-        
-        if (error) throw error;
-        setProperty(data);
-      } catch (err) {
-        setError('Failed to load property details: ' + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (id) fetchProperty();
-  }, [id]);
 
   // Derived SEO fields
   const pageUrl = property ? `https://raslipwani.co.ke/properties/${property.slug || property.id}` : `https://raslipwani.co.ke/properties/${id}`;
