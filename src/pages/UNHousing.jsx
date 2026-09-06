@@ -146,7 +146,7 @@ const UNHousing = () => {
       
       <main className="flex-grow">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-content-on-brand py-20">
+      <section className="relative bg-gradient-to-br from-brand-hover via-brand-hover to-indigo-900 text-content-on-brand py-20">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEyYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-pulse"></div>
         </div>
@@ -181,7 +181,7 @@ const UNHousing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <a 
                 href="#properties"
-                className="bg-warning-content hover:bg-yellow-400 text-content px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
+                className="bg-warning-content hover:bg-accent text-content px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
               >
                 View Available Properties
               </a>
@@ -196,15 +196,15 @@ const UNHousing = () => {
             {/* Key Stats */}
             <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
               <div>
-                <div className="text-4xl font-bold text-yellow-400">48hrs</div>
+                <div className="text-4xl font-bold text-accent">48hrs</div>
                 <div className="text-sm text-content-on-brand/80">Average Approval Time</div>
               </div>
               <div>
-                <div className="text-4xl font-bold text-yellow-400">50+</div>
+                <div className="text-4xl font-bold text-accent">50+</div>
                 <div className="text-sm text-content-on-brand/80">UN Staff Housed</div>
               </div>
               <div>
-                <div className="text-4xl font-bold text-yellow-400">100%</div>
+                <div className="text-4xl font-bold text-accent">100%</div>
                 <div className="text-sm text-content-on-brand/80">Furnished Options</div>
               </div>
             </div>
@@ -380,7 +380,7 @@ const UNHousing = () => {
               <div key={index} className="bg-surface-raised p-8 rounded-xl shadow-lg">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    <Star key={i} className="w-5 h-5 fill-accent text-accent" />
                   ))}
                 </div>
                 <p className="text-content text-lg mb-4 italic">"{testimonial.text}"</p>
@@ -457,7 +457,7 @@ const UNHousing = () => {
             </Link>
             <a
               href="#properties"
-              className="bg-brand-hover hover:bg-blue-900 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
+              className="bg-brand-hover hover:bg-brand-hover px-8 py-4 rounded-lg font-semibold text-lg transition-all"
             >
               View Properties
             </a>

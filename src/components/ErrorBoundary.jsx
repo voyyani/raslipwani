@@ -59,13 +59,13 @@ class ErrorBoundary extends React.Component {
     return (
       <div
         role="alert"
-        className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-16 text-center"
+        className="min-h-screen flex flex-col items-center justify-center bg-surface px-4 py-16 text-center"
       >
         <div className="max-w-md">
           <h1 className="text-3xl font-bold text-primary mb-4">
             Something went wrong
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-content-muted mb-8">
             This part of the page failed to load. Your data is safe — nothing you
             submitted has been lost.
           </p>
@@ -74,7 +74,7 @@ class ErrorBoundary extends React.Component {
             <button
               type="button"
               onClick={this.handleRetry}
-              className="bg-primary text-white font-semibold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
+              className="bg-primary text-content-on-brand font-semibold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
             >
               Try again
             </button>
@@ -83,14 +83,14 @@ class ErrorBoundary extends React.Component {
                 the app's own render tree has just failed. */}
             <a
               href="/"
-              className="border border-gray-300 text-gray-700 font-semibold py-3 px-8 rounded-md hover:bg-gray-100 transition-colors"
+              className="border border-line-strong text-content-muted font-semibold py-3 px-8 rounded-md hover:bg-surface-sunken transition-colors"
             >
               Return home
             </a>
           </div>
 
           {import.meta.env.DEV && (
-            <pre className="mt-8 text-left text-xs text-red-700 bg-red-50 border border-red-200 rounded-md p-4 overflow-x-auto">
+            <pre className="mt-8 text-left text-xs text-danger-content bg-danger-surface border border-danger-border rounded-md p-4 overflow-x-auto">
               {error.message}
             </pre>
           )}

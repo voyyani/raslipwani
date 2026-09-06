@@ -4,9 +4,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
+import { ThemeProvider } from '../../contexts/ThemeContext';
+
 /**
  * Custom render function that wraps components with necessary providers
- * for testing (React Query, Router, Helmet)
+ * for testing (React Query, Router, Helmet, Theme).
+ *
+ * ThemeProvider is here rather than in individual tests because the header and
+ * the admin shell both render the theme control, so a component test that omits
+ * it fails on a missing context rather than on anything it meant to assert.
  */
 export function renderWithProviders(
   ui,
@@ -32,9 +38,11 @@ export function renderWithProviders(
     return (
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            {children}
-          </BrowserRouter>
+          <ThemeProvider>
+            <BrowserRouter>
+              {children}
+            </BrowserRouter>
+          </ThemeProvider>
         </QueryClientProvider>
       </HelmetProvider>
     );

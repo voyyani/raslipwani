@@ -143,6 +143,44 @@ export const STATUS_TOKENS = {
   },
 };
 
+/**
+ * Fixed tokens — roles that are deliberately identical in both themes.
+ *
+ * Every other token in this file flips, because the ground beneath it flips. A
+ * hero photograph does not. Neither does the brand gradient behind a call to
+ * action. Text over those grounds has to stay light in dark mode, and a token
+ * that inverts would make it unreadable in exactly the theme it was added for.
+ *
+ * This group exists because the migration found ~180 white text and border sites
+ * over photography and no honest token to send them to. `content-inverse`
+ * was the tempting answer and the wrong one: it is near-white in the light theme
+ * and near-black in the dark one, so it would have painted dark text onto a dark
+ * photograph the first time anyone switched themes.
+ *
+ * Naming them is the actual win. A literal white said nothing about intent, so the
+ * next reader could not tell a considered exception from a missed migration.
+ * `text-content-on-media` says "not themed, on purpose" — and the theme
+ * invariance is asserted in `contrast.test.js` rather than merely intended.
+ *
+ * `scrim` is here for the same reason: the overlay that makes text legible over
+ * a photograph is black in both themes, because it is darkening an image, not
+ * expressing a surface.
+ */
+export const FIXED_TOKENS = {
+  'content-on-media': '#FFFFFF',
+  'line-on-media': '#FFFFFF',
+  scrim: '#000000',
+
+  // Deliberately dark chrome — the admin sidebar, the site footer. These were
+  // `bg-gray-900` and neither obvious token fitted: `scrim` flattened a
+  // three-stop gradient to pure black, and `surface-inverse` would have turned
+  // the chrome near-white in the dark theme while the light text over it stayed
+  // light. A chrome that is dark in both themes is its own role, so it gets its
+  // own name. `content-on-media` reads on it at about 13:1.
+  'surface-chrome': '#0A2E46',
+  'surface-chrome-raised': '#123A54',
+};
+
 /** The statuses the app models, in the order a booking moves through them. */
 export const STATUSES = ['pending', 'confirmed', 'completed', 'cancelled'];
 
@@ -166,4 +204,5 @@ export const THEMES = ['light', 'dark'];
 export const tokensFor = (theme) => ({
   ...THEME_TOKENS[theme],
   ...STATUS_TOKENS[theme],
+  ...FIXED_TOKENS,
 });

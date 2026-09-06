@@ -24,10 +24,10 @@ const Pagination = ({
         <button
           key={i}
           onClick={() => onPageChange(i)}
-          className={`px-4 py-2 border-y border-gray-300 text-sm ${
+          className={`px-4 py-2 border-y border-line-strong text-sm ${
             currentPage === i
-              ? 'bg-blue-600 text-white border-blue-700'
-              : 'bg-white text-gray-700 hover:bg-gray-50'
+              ? 'bg-brand text-content-on-brand border-brand'
+              : 'bg-surface-raised text-content-muted hover:bg-surface'
           } ${i === startPage ? 'border-l rounded-l-md' : ''} ${
             i === endPage ? 'border-r rounded-r-md' : ''
           }`}
@@ -43,16 +43,16 @@ const Pagination = ({
           <>
             <button
               onClick={() => onPageChange(1)}
-              className={`px-4 py-2 border border-gray-300 text-sm ${
+              className={`px-4 py-2 border border-line-strong text-sm ${
                 1 === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand text-content-on-brand'
+                  : 'bg-surface-raised text-content-muted hover:bg-surface'
               } border-r-0 rounded-l-md`}
             >
               1
             </button>
             {startPage > 2 && (
-              <span className="px-3 py-2 border-y border-gray-300 text-gray-500">...</span>
+              <span className="px-3 py-2 border-y border-line-strong text-content-subtle">...</span>
             )}
           </>
         )}
@@ -62,14 +62,14 @@ const Pagination = ({
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && (
-              <span className="px-3 py-2 border-y border-gray-300 text-gray-500">...</span>
+              <span className="px-3 py-2 border-y border-line-strong text-content-subtle">...</span>
             )}
             <button
               onClick={() => onPageChange(totalPages)}
-              className={`px-4 py-2 border border-gray-300 text-sm ${
+              className={`px-4 py-2 border border-line-strong text-sm ${
                 totalPages === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand text-content-on-brand'
+                  : 'bg-surface-raised text-content-muted hover:bg-surface'
               } border-l-0 rounded-r-md`}
             >
               {totalPages}
@@ -81,8 +81,8 @@ const Pagination = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-gray-50 border-t gap-4">
-      <p className="text-sm text-gray-600">
+    <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-surface border-t gap-4">
+      <p className="text-sm text-content-muted">
         Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, totalItems)} of {totalItems} items
       </p>
       <div className="flex items-center gap-2">
@@ -91,8 +91,8 @@ const Pagination = ({
           disabled={currentPage === 1}
           className={`px-4 py-2 rounded-md text-sm ${
             currentPage === 1 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              ? 'bg-surface-sunken text-content-subtle cursor-not-allowed' 
+              : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
           }`}
         >
           Previous
@@ -107,8 +107,8 @@ const Pagination = ({
           disabled={currentPage === totalPages}
           className={`px-4 py-2 rounded-md text-sm ${
             currentPage === totalPages 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              ? 'bg-surface-sunken text-content-subtle cursor-not-allowed' 
+              : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
           }`}
         >
           Next

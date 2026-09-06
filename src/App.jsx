@@ -20,6 +20,7 @@ import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
 import { supabase } from './utils/supabaseClient';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';
 import MaintenancePage from './pages/MaintenancePage';
 import { logger } from './utils/logger';
@@ -109,6 +110,7 @@ function App() {
   return (
     <ErrorBoundary name="root">
       <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
       <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
@@ -203,6 +205,7 @@ function App() {
       </Router>
       </SettingsProvider>
     </AuthProvider>
+      </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
@@ -224,7 +227,7 @@ const NotFound = () => (
     <p className="text-xl mb-8">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
     <Link
       to="/"
-      className="inline-block bg-primary text-white font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
+      className="inline-block bg-primary text-content-on-brand font-bold py-3 px-8 rounded-md hover:bg-primary-dark transition-colors"
     >
       Return to Homepage
     </Link>
@@ -265,23 +268,23 @@ const PropertyModalRoute = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      <div className="fixed inset-0 bg-scrim/80 z-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-line-media"></div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-scrim/80 z-50 flex items-center justify-center">
       {property ? (
         <PropertyModal property={property} closeModal={closeModal} />
       ) : (
-        <div className="bg-white p-8 rounded-xl max-w-md text-center">
+        <div className="bg-surface-raised p-8 rounded-xl max-w-md text-center">
           <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
           <p>The property you requested doesn't exist or has been removed.</p>
           <button 
             onClick={closeModal}
-            className="mt-6 bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary-dark"
+            className="mt-6 bg-primary text-content-on-brand py-2 px-6 rounded-lg hover:bg-primary-dark"
           >
             Close
           </button>

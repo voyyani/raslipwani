@@ -158,7 +158,7 @@ const Privacy = () => {
         </p>
       </LegalSection>
 
-      <p className="text-sm text-gray-500 border-t border-gray-100 pt-6">
+      <p className="text-sm text-content-subtle border-t border-line pt-6">
         See also our <Link className="text-primary hover:underline" to="/terms">Terms of Service</Link>.
         This policy describes our actual practices; it is not legal advice, and it should be reviewed by
         a qualified Kenyan advocate before being relied upon for regulatory compliance.

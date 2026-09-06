@@ -20,7 +20,7 @@ const PropertyValuation = () => {
           <div className="text-center">
             <a 
               href="/services" 
-              className="inline-block bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary-dark"
+              className="inline-block bg-primary text-content-on-brand py-3 px-6 rounded-lg hover:bg-primary-dark"
             >
               Back to Services
             </a>

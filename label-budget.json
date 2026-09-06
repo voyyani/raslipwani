@@ -1,0 +1,4 @@
+{
+  "max": 67,
+  "note": "Form controls with no associated label, counted by jsx-a11y/label-has-associated-control on 2026-09-03 after Release 4D's public-surface pass took this from 96. This number only falls. What remains is entirely in the admin console and is scheduled with its own surface pass; every public, visitor-facing form is at zero. Note that jsx-a11y/label-has-for is deliberately excluded — it is deprecated and double-counts this same rule, which is how the raw warning total came to overstate this defect by a third."
+}

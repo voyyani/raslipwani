@@ -250,7 +250,7 @@ const International = () => {
 
       <main className="flex-grow">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-content-on-brand py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-brand-hover via-indigo-900 to-purple-900 text-content-on-brand py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEyYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-pulse"></div>
         </div>
@@ -481,7 +481,7 @@ const International = () => {
                 <div className="p-8">
                   <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-success-border rounded-xl p-4 mb-6">
                     <div className="text-sm text-success-content font-medium mb-1">From</div>
-                    <div className="text-3xl font-bold text-green-900">{opp.minInvestment}</div>
+                    <div className="text-3xl font-bold text-success-content">{opp.minInvestment}</div>
                   </div>
                   
                   <p className="text-content-muted mb-6 leading-relaxed">{opp.description}</p>
@@ -509,7 +509,7 @@ const International = () => {
       </section>
 
       {/* Diaspora Section */}
-      <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-surface via-blue-50 to-indigo-50">
+      <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-surface via-brand-subtle to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-brand-subtle px-6 py-3 rounded-full mb-6">
@@ -615,7 +615,7 @@ const International = () => {
                   viewport={{ once: true }}
                   className="p-8 border-2 border-line rounded-2xl hover:border-brand hover:shadow-xl transition-all bg-gradient-to-br from-surface-raised to-surface group"
                 >
-                  <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <div className="bg-gradient-to-br from-brand-subtle to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <Icon className="w-7 h-7 text-brand-content" />
                   </div>
                   <h3 className="text-xl font-bold text-content mb-3">{service.title}</h3>
@@ -732,7 +732,7 @@ const International = () => {
             </Link>
             <button
               onClick={() => setShowCalculator(true)}
-              className="bg-brand-hover hover:bg-blue-900 px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2"
+              className="bg-brand-hover hover:bg-brand-hover px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2"
             >
               <TrendingUp className="w-5 h-5" />
               Calculate Returns

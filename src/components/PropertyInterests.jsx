@@ -144,9 +144,9 @@ const PropertyInterests = ({ clientId }) => {
 
   const getInterestBadge = (level) => {
     const colors = {
-      low: 'bg-gray-100 text-gray-800',
-      medium: 'bg-blue-100 text-blue-800',
-      high: 'bg-green-100 text-green-800',
+      low: 'bg-surface-sunken text-content',
+      medium: 'bg-brand-subtle text-brand-content',
+      high: 'bg-success-surface text-success-content',
     };
     return (
       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colors[level]}`}>
@@ -167,7 +167,7 @@ const PropertyInterests = ({ clientId }) => {
   if (interestsLoading) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand mx-auto"></div>
       </div>
     );
   }
@@ -176,10 +176,10 @@ const PropertyInterests = ({ clientId }) => {
     <div>
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Property Interests</h3>
+        <h3 className="text-lg font-semibold text-content">Property Interests</h3>
         <button
           onClick={() => setIsAddingNew(!isAddingNew)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover"
         >
           {isAddingNew ? (
             <>
@@ -197,28 +197,28 @@ const PropertyInterests = ({ clientId }) => {
 
       {/* Add Form */}
       {isAddingNew && (
-        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg p-4 mb-6">
+        <form onSubmit={handleSubmit} className="bg-surface rounded-lg p-4 mb-6">
           <div className="space-y-4">
             {/* Property Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Search Property
               </label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Search by title or location..."
               />
 
               {/* Search Results */}
               {searchLoading && searchTerm.length >= 2 && (
-                <div className="mt-2 text-sm text-gray-500">Searching...</div>
+                <div className="mt-2 text-sm text-content-subtle">Searching...</div>
               )}
 
               {searchResults && searchResults.length > 0 && !selectedProperty && (
-                <div className="mt-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                <div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg">
                   {searchResults.map((property) => (
                     <button
                       key={property.id}
@@ -227,11 +227,11 @@ const PropertyInterests = ({ clientId }) => {
                         setSelectedProperty(property);
                         setSearchTerm('');
                       }}
-                      className="w-full text-left p-3 hover:bg-gray-100 border-b last:border-b-0"
+                      className="w-full text-left p-3 hover:bg-surface-sunken border-b last:border-b-0"
                     >
-                      <div className="font-medium text-gray-900">{property.title}</div>
-                      <div className="text-sm text-gray-600">{property.location}</div>
-                      <div className="text-sm text-blue-600">{formatCurrency(property.price)}</div>
+                      <div className="font-medium text-content">{property.title}</div>
+                      <div className="text-sm text-content-muted">{property.location}</div>
+                      <div className="text-sm text-brand">{formatCurrency(property.price)}</div>
                     </button>
                   ))}
                 </div>
@@ -240,17 +240,17 @@ const PropertyInterests = ({ clientId }) => {
 
             {/* Selected Property */}
             {selectedProperty && (
-              <div className="bg-white border border-blue-200 rounded-lg p-3">
+              <div className="bg-surface-raised border border-brand-subtle rounded-lg p-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-medium text-gray-900">{selectedProperty.title}</h4>
-                    <p className="text-sm text-gray-600">{selectedProperty.location}</p>
-                    <p className="text-sm text-blue-600">{formatCurrency(selectedProperty.price)}</p>
+                    <h4 className="font-medium text-content">{selectedProperty.title}</h4>
+                    <p className="text-sm text-content-muted">{selectedProperty.location}</p>
+                    <p className="text-sm text-brand">{formatCurrency(selectedProperty.price)}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedProperty(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-content-subtle hover:text-content-muted"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -260,13 +260,13 @@ const PropertyInterests = ({ clientId }) => {
 
             {/* Interest Level */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Interest Level
               </label>
               <select
                 value={interestLevel}
                 onChange={(e) => setInterestLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 required
               >
                 <option value="low">Low</option>
@@ -277,14 +277,14 @@ const PropertyInterests = ({ clientId }) => {
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-content-muted mb-1">
                 Notes
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Any specific requirements or notes..."
               />
             </div>
@@ -294,14 +294,14 @@ const PropertyInterests = ({ clientId }) => {
             <button
               type="button"
               onClick={resetForm}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-line-strong rounded-lg text-content-muted hover:bg-surface"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!selectedProperty || addInterestMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover disabled:opacity-50 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               Add Interest
@@ -312,18 +312,18 @@ const PropertyInterests = ({ clientId }) => {
 
       {/* Interests List */}
       {interests.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <Home className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No property interests yet</h3>
-          <p className="text-gray-600">Track which properties this client is interested in</p>
+        <div className="text-center py-12 bg-surface rounded-lg">
+          <Home className="w-12 h-12 text-content-subtle mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-content mb-2">No property interests yet</h3>
+          <p className="text-content-muted">Track which properties this client is interested in</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {interests.map((interest) => (
-            <div key={interest.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={interest.id} className="bg-surface-raised border border-line rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
               {/* Property Image */}
               {interest.properties?.images?.[0] && (
-                <div className="h-48 bg-gray-200">
+                <div className="h-48 bg-surface-sunken">
                   <img
                     src={interest.properties.images[0]}
                     alt={interest.properties.title}
@@ -334,23 +334,23 @@ const PropertyInterests = ({ clientId }) => {
 
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-gray-900">{interest.properties?.title}</h4>
+                  <h4 className="font-semibold text-content">{interest.properties?.title}</h4>
                   {getInterestBadge(interest.interest_level)}
                 </div>
 
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-content-muted">
                     <MapPin className="w-4 h-4" />
                     {interest.properties?.location}
                   </div>
 
-                  <div className="flex items-center gap-2 text-blue-600 font-semibold">
+                  <div className="flex items-center gap-2 text-brand font-semibold">
                     <DollarSign className="w-4 h-4" />
                     {formatCurrency(interest.properties?.price)}
                   </div>
 
                   {(interest.properties?.bedrooms || interest.properties?.bathrooms) && (
-                    <div className="flex items-center gap-4 text-gray-600">
+                    <div className="flex items-center gap-4 text-content-muted">
                       {interest.properties.bedrooms && (
                         <div className="flex items-center gap-1">
                           <Bed className="w-4 h-4" />
@@ -367,10 +367,10 @@ const PropertyInterests = ({ clientId }) => {
                   )}
 
                   {interest.notes && (
-                    <p className="text-gray-700 mt-2">{interest.notes}</p>
+                    <p className="text-content-muted mt-2">{interest.notes}</p>
                   )}
 
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-content-subtle mt-2">
                     Added {formatDate(interest.created_at)}
                   </p>
                 </div>
@@ -386,7 +386,7 @@ const PropertyInterests = ({ clientId }) => {
                         notes: interest.notes,
                       });
                     }}
-                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-1 text-sm border border-line-strong rounded focus:ring-2 focus:ring-focus-ring"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>

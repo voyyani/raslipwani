@@ -240,7 +240,7 @@ const PropertyModal = ({ property, closeModal }) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/80"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -252,7 +252,7 @@ const PropertyModal = ({ property, closeModal }) => {
         aria-modal="true"
         aria-label={property?.title ? `${property.title} — photos and details` : 'Property details'}
         tabIndex={-1}
-        className={`relative bg-white ${isFullscreen ? 'fixed inset-0 !m-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
+        className={`relative bg-surface-raised ${isFullscreen ? 'fixed inset-0 !m-0' : 'max-w-6xl w-full max-h-[90vh] rounded-2xl'}`}
         initial={{ scale: 0.9 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.9 }}
@@ -261,7 +261,7 @@ const PropertyModal = ({ property, closeModal }) => {
       >
         {/* Image Carousel */}
         <div 
-          className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-[50vh] min-h-[300px]'} bg-black`}
+          className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-[50vh] min-h-[300px]'} bg-scrim`}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -284,7 +284,7 @@ const PropertyModal = ({ property, closeModal }) => {
                   >
                     {isImageLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-line-media"></div>
                       </div>
                     )}
                     <motion.img
@@ -330,7 +330,7 @@ const PropertyModal = ({ property, closeModal }) => {
                   <div 
                     key={i}
                     className={`w-2 h-2 mx-1 rounded-full transition-all ${
-                      i === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                      i === currentImageIndex ? 'bg-surface-raised scale-125' : 'bg-surface-raised/50'
                     }`}
                   />
                 ))}
@@ -345,7 +345,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className={`absolute left-4 top-1/2 transform -translate-y-1/2 z-10 ${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -362,7 +362,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className={`absolute right-4 top-1/2 transform -translate-y-1/2 z-10 ${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-3 shadow-lg transition-colors`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -388,7 +388,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       exit={{ opacity: 0 }}
                       onClick={toggleFullscreen}
                       className={`${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                     >
@@ -400,7 +400,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       exit={{ opacity: 0 }}
                       onClick={isFullscreen ? toggleFullscreen : closeModal}
                       className={`${
-                        isFullscreen ? 'bg-black/50 hover:bg-black/70 text-white' : 'bg-white/80 hover:bg-white text-gray-800'
+                        isFullscreen ? 'bg-scrim/50 hover:bg-scrim/70 text-content-on-media' : 'bg-surface-raised/80 hover:bg-surface-raised text-content'
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Close modal"}
                     >
@@ -413,7 +413,7 @@ const PropertyModal = ({ property, closeModal }) => {
               {/* Zoom Indicator */}
               {zoomLevel > 1 && (
                 <motion.div 
-                  className="absolute top-4 left-4 z-20 bg-black/50 text-white text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm"
+                  className="absolute top-4 left-4 z-20 bg-scrim/50 text-content-on-media text-sm font-medium px-3 py-1 rounded-full backdrop-blur-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
@@ -422,7 +422,7 @@ const PropertyModal = ({ property, closeModal }) => {
               )}
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+            <div className="absolute inset-0 flex items-center justify-center text-content-subtle">
               <span className="text-xl">No images available</span>
             </div>
           )}
@@ -439,10 +439,10 @@ const PropertyModal = ({ property, closeModal }) => {
           >
             <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-content mb-2">
                   {property.title}
                 </h2>
-                <p className="text-gray-600 flex items-center">
+                <p className="text-content-muted flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -457,19 +457,19 @@ const PropertyModal = ({ property, closeModal }) => {
             
             {/* Property Features */}
             <div className="flex flex-wrap gap-4 mb-6">
-              <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+              <div className="flex items-center bg-surface-sunken rounded-full px-4 py-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
                 <span className="text-sm font-medium">{property.bedrooms || 0} Beds</span>
               </div>
-              <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+              <div className="flex items-center bg-surface-sunken rounded-full px-4 py-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-sm font-medium">{property.bathrooms || 0} Baths</span>
               </div>
-              <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+              <div className="flex items-center bg-surface-sunken rounded-full px-4 py-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" />
                 </svg>
@@ -480,7 +480,7 @@ const PropertyModal = ({ property, closeModal }) => {
             {/* Property Description */}
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">Description</h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-content-muted leading-relaxed whitespace-pre-line">
                 {property.description || 'No description available.'}
               </p>
             </div>
@@ -491,7 +491,7 @@ const PropertyModal = ({ property, closeModal }) => {
                 <h3 className="text-xl font-semibold mb-4">Property Features</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {property.amenities.map((amenity, i) => (
-                    <div key={i} className="flex items-center bg-gray-50 px-4 py-2.5 rounded-lg">
+                    <div key={i} className="flex items-center bg-surface px-4 py-2.5 rounded-lg">
                       <span className="text-primary mr-2">✓</span>
                       <span className="capitalize">{amenity.replace('-', ' ')}</span>
                     </div>
@@ -503,9 +503,9 @@ const PropertyModal = ({ property, closeModal }) => {
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4">
               {showPhone ? (
-                <div className="bg-blue-50 rounded-xl p-4 w-full flex flex-col items-center">
+                <div className="bg-brand-subtle rounded-xl p-4 w-full flex flex-col items-center">
                   <div className="flex items-center mb-3">
-                    <FiPhone className="text-blue-600 text-xl mr-2" />
+                    <FiPhone className="text-brand text-xl mr-2" />
                     <h4 className="text-lg font-semibold">Contact Agent</h4>
                   </div>
                   <a 
@@ -519,7 +519,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={copyPhoneNumber}
-                      className="bg-white border border-primary text-primary font-medium py-2 px-4 rounded-lg shadow-md"
+                      className="bg-surface-raised border border-primary text-primary font-medium py-2 px-4 rounded-lg shadow-md"
                     >
                       Copy Number
                     </motion.button>
@@ -527,7 +527,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       href={`tel:${OFFICE_PHONE}`}
-                      className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-2 px-4 rounded-lg shadow-md"
+                      className="bg-gradient-to-r from-primary to-secondary text-content-on-media font-medium py-2 px-4 rounded-lg shadow-md"
                     >
                       Call Now
                     </motion.a>
@@ -539,7 +539,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleContactAgent}
-                    className="bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                    className="bg-gradient-to-r from-primary to-secondary text-content-on-media font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
                   >
                     Contact Agent
                   </motion.button>
@@ -547,7 +547,7 @@ const PropertyModal = ({ property, closeModal }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleScheduleTour}
-                    className="bg-white border border-primary text-primary font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                    className="bg-surface-raised border border-primary text-primary font-medium py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-shadow"
                   >
                     Schedule Tour
                   </motion.button>

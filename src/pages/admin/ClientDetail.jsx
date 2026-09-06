@@ -66,8 +66,8 @@ const ClientDetail = () => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error loading client: {error.message}</p>
+        <div className="bg-danger-surface border border-danger-border rounded-lg p-4">
+          <p className="text-danger-content">Error loading client: {error.message}</p>
         </div>
       </div>
     );
@@ -92,10 +92,10 @@ const ClientDetail = () => {
 
   const StatusBadge = ({ status }) => {
     const colors = {
-      lead: 'bg-blue-100 text-blue-800',
-      prospect: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-green-100 text-green-800',
-      inactive: 'bg-gray-100 text-gray-800'
+      lead: 'bg-brand-subtle text-brand-content',
+      prospect: 'bg-warning-surface text-warning-content',
+      active: 'bg-success-surface text-success-content',
+      inactive: 'bg-surface-sunken text-content'
     };
     return (
       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${colors[status] || colors.lead}`}>
@@ -117,36 +117,36 @@ const ClientDetail = () => {
       <div className="mb-6">
         <button
           onClick={() => navigate('/admin/clients')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="flex items-center gap-2 text-content-muted hover:text-content mb-4"
         >
           <ArrowLeft className="w-5 h-5" />
           Back to Clients
         </button>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface-raised rounded-lg shadow p-6">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-2xl">
+              <div className="w-20 h-20 bg-brand-subtle rounded-full flex items-center justify-center">
+                <span className="text-brand font-bold text-2xl">
                   {client.first_name?.[0]}{client.last_name?.[0]}
                 </span>
               </div>
 
               {/* Info */}
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-content">
                   {client.first_name} {client.last_name}
                 </h1>
                 {client.company && (
-                  <p className="text-gray-600 mt-1 flex items-center gap-2">
+                  <p className="text-content-muted mt-1 flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
                     {client.company}
                   </p>
                 )}
                 <div className="flex items-center gap-3 mt-2">
                   <StatusBadge status={client.status} />
-                  <span className="text-sm text-gray-500 capitalize">
+                  <span className="text-sm text-content-subtle capitalize">
                     {client.client_type || 'Individual'}
                   </span>
                 </div>
@@ -156,7 +156,7 @@ const ClientDetail = () => {
             {/* Actions */}
             <button
               onClick={() => setIsEditFormOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover"
             >
               <Edit2 className="w-4 h-4" />
               Edit Client
@@ -166,16 +166,16 @@ const ClientDetail = () => {
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{stats?.interests || 0}</p>
-              <p className="text-sm text-gray-600">Property Interests</p>
+              <p className="text-2xl font-bold text-brand">{stats?.interests || 0}</p>
+              <p className="text-sm text-content-muted">Property Interests</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{stats?.communications || 0}</p>
-              <p className="text-sm text-gray-600">Communications</p>
+              <p className="text-2xl font-bold text-success-content">{stats?.communications || 0}</p>
+              <p className="text-sm text-content-muted">Communications</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-yellow-600">{stats?.bookings || 0}</p>
-              <p className="text-sm text-gray-600">Bookings</p>
+              <p className="text-2xl font-bold text-warning-content">{stats?.bookings || 0}</p>
+              <p className="text-sm text-content-muted">Bookings</p>
             </div>
           </div>
         </div>
@@ -183,8 +183,8 @@ const ClientDetail = () => {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="border-b border-gray-200">
+        <div className="bg-surface-raised rounded-lg shadow">
+          <div className="border-b border-line">
             <nav className="flex -mb-px">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -194,14 +194,14 @@ const ClientDetail = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-6 py-4 border-b-2 font-medium text-sm ${
                       activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-brand text-brand'
+                        : 'border-transparent text-content-subtle hover:text-content-muted hover:border-line-strong'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
                     {tab.label}
                     {tab.count !== undefined && (
-                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-surface-sunken text-content-muted">
                         {tab.count}
                       </span>
                     )}
@@ -217,31 +217,31 @@ const ClientDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Contact Information */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  <h3 className="text-lg font-semibold text-content mb-4">Contact Information</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Mail className="w-5 h-5 text-gray-400" />
+                    <div className="flex items-center gap-3 text-content-muted">
+                      <Mail className="w-5 h-5 text-content-subtle" />
                       <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <a href={`mailto:${client.email}`} className="text-blue-600 hover:underline">
+                        <p className="text-sm text-content-subtle">Email</p>
+                        <a href={`mailto:${client.email}`} className="text-brand hover:underline">
                           {client.email}
                         </a>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-gray-700">
-                      <Phone className="w-5 h-5 text-gray-400" />
+                    <div className="flex items-center gap-3 text-content-muted">
+                      <Phone className="w-5 h-5 text-content-subtle" />
                       <div>
-                        <p className="text-sm text-gray-500">Phone</p>
-                        <a href={`tel:${client.phone}`} className="text-blue-600 hover:underline">
+                        <p className="text-sm text-content-subtle">Phone</p>
+                        <a href={`tel:${client.phone}`} className="text-brand hover:underline">
                           {client.phone}
                         </a>
                       </div>
                     </div>
                     {client.preferred_contact_method && (
-                      <div className="flex items-center gap-3 text-gray-700">
-                        <MessageSquare className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 text-content-muted">
+                        <MessageSquare className="w-5 h-5 text-content-subtle" />
                         <div>
-                          <p className="text-sm text-gray-500">Preferred Contact</p>
+                          <p className="text-sm text-content-subtle">Preferred Contact</p>
                           <p className="capitalize">{client.preferred_contact_method}</p>
                         </div>
                       </div>
@@ -251,13 +251,13 @@ const ClientDetail = () => {
 
                 {/* Budget & Preferences */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget & Preferences</h3>
+                  <h3 className="text-lg font-semibold text-content mb-4">Budget & Preferences</h3>
                   <div className="space-y-3">
                     {(client.budget_min || client.budget_max) && (
-                      <div className="flex items-center gap-3 text-gray-700">
-                        <DollarSign className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 text-content-muted">
+                        <DollarSign className="w-5 h-5 text-content-subtle" />
                         <div>
-                          <p className="text-sm text-gray-500">Budget Range</p>
+                          <p className="text-sm text-content-subtle">Budget Range</p>
                           <p className="font-medium">
                             {formatCurrency(client.budget_min)} - {formatCurrency(client.budget_max)}
                           </p>
@@ -265,19 +265,19 @@ const ClientDetail = () => {
                       </div>
                     )}
                     {client.preferred_locations && (
-                      <div className="flex items-center gap-3 text-gray-700">
-                        <MapPin className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 text-content-muted">
+                        <MapPin className="w-5 h-5 text-content-subtle" />
                         <div>
-                          <p className="text-sm text-gray-500">Preferred Locations</p>
+                          <p className="text-sm text-content-subtle">Preferred Locations</p>
                           <p>{client.preferred_locations}</p>
                         </div>
                       </div>
                     )}
                     {client.source && (
-                      <div className="flex items-center gap-3 text-gray-700">
-                        <Activity className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 text-content-muted">
+                        <Activity className="w-5 h-5 text-content-subtle" />
                         <div>
-                          <p className="text-sm text-gray-500">Source</p>
+                          <p className="text-sm text-content-subtle">Source</p>
                           <p className="capitalize">{client.source}</p>
                         </div>
                       </div>
@@ -288,9 +288,9 @@ const ClientDetail = () => {
                 {/* Property Preferences */}
                 {client.property_preferences && (
                   <div className="md:col-span-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Preferences</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-gray-700">{client.property_preferences}</p>
+                    <h3 className="text-lg font-semibold text-content mb-4">Property Preferences</h3>
+                    <div className="bg-surface rounded-lg p-4">
+                      <p className="text-content-muted">{client.property_preferences}</p>
                     </div>
                   </div>
                 )}
@@ -298,7 +298,7 @@ const ClientDetail = () => {
                 {/* Tags */}
                 {client.tags && client.tags.length > 0 && (
                   <div className="md:col-span-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-content mb-4 flex items-center gap-2">
                       <Tag className="w-5 h-5" />
                       Tags
                     </h3>
@@ -306,7 +306,7 @@ const ClientDetail = () => {
                       {client.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                          className="px-3 py-1 bg-brand-subtle text-brand-content rounded-full text-sm"
                         >
                           {tag}
                         </span>
@@ -318,16 +318,16 @@ const ClientDetail = () => {
                 {/* Notes */}
                 {client.notes && (
                   <div className="md:col-span-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Notes</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-gray-700 whitespace-pre-wrap">{client.notes}</p>
+                    <h3 className="text-lg font-semibold text-content mb-4">Notes</h3>
+                    <div className="bg-surface rounded-lg p-4">
+                      <p className="text-content-muted whitespace-pre-wrap">{client.notes}</p>
                     </div>
                   </div>
                 )}
 
                 {/* Metadata */}
                 <div className="md:col-span-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-content-subtle">
                     <Calendar className="w-4 h-4" />
                     <span>Created on {formatDate(client.created_at)}</span>
                     {client.updated_at && client.updated_at !== client.created_at && (
@@ -351,9 +351,9 @@ const ClientDetail = () => {
 
             {activeTab === 'activity' && (
               <div className="text-center py-12">
-                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Activity Log</h3>
-                <p className="text-gray-600">
+                <Clock className="w-12 h-12 text-content-subtle mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-content mb-2">Activity Log</h3>
+                <p className="text-content-muted">
                   Activity tracking will be available soon.
                 </p>
               </div>

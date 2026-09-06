@@ -50,6 +50,14 @@ jobs:
       - name: Palette ratchet
         run: npm run palette:ratchet
 
+      # The same instrument, pointed at the largest accessibility defect here: a
+      # form control with no associated label is announced as nothing at all, so
+      # a form full of them is unusable rather than merely degraded. There were
+      # 96; a rule that failed the build on arrival would have been switched off
+      # within a day, so this is a ceiling that only falls. See label-budget.json.
+      - name: Label ratchet
+        run: npm run label:ratchet
+
       # `prebuild` runs the secret-shaped-env-name guard and asserts that
       # src/styles/tokens.css is still what src/design/tokens.js generates. A
       # build that paints from a stale stylesheet is worse than one that fails,

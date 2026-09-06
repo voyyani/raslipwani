@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   THEME_TOKENS,
   STATUS_TOKENS,
+  FIXED_TOKENS,
   THEMES,
   STATUSES,
   BOOKING_STATUS_INTENT,
@@ -169,6 +170,29 @@ describe('the token layer is complete and coherent', () => {
         expect(() => hexToRgb(value), `${theme}.${name} = ${value}`).not.toThrow();
       }
     }
+  });
+
+  it('keeps the fixed tokens identical in both themes — that is their whole job', () => {
+    // These sit on photographs and brand gradients, which do not flip when the
+    // theme does. A token that inverted here would paint dark text onto a dark
+    // hero image in exactly the theme it was introduced for.
+    for (const name of Object.keys(FIXED_TOKENS)) {
+      expect(tokensFor('light')[name], `${name} must not flip`).toBe(
+        tokensFor('dark')[name]
+      );
+    }
+  });
+
+  it('guarantees text over media only where the scrim carries it', () => {
+    // Legibility over a photograph is a property of the scrim, not of the text.
+    // This asserts the pair we actually ship — light text on the darkening
+    // layer — and, by omission, that unscrimmed media is not a covered case.
+    expectContrast(
+      FIXED_TOKENS['content-on-media'],
+      FIXED_TOKENS.scrim,
+      WCAG.AA_TEXT,
+      'text over media'
+    );
   });
 
   it('actually differs between themes — a "dark" theme that is a copy is not one', () => {

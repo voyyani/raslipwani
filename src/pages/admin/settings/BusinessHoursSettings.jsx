@@ -90,18 +90,18 @@ const BusinessHoursSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-blue-600" /></div>;
+    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Operating Hours</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Operating Hours</h3>
         <div className="space-y-4">
           {days.map(day => (
-            <div key={day} className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
+            <div key={day} className="flex items-center gap-4 bg-surface p-4 rounded-lg">
               <div className="w-28">
-                <span className="font-medium text-gray-900 capitalize">{day}</span>
+                <span className="font-medium text-content capitalize">{day}</span>
               </div>
               
               <label className="flex items-center gap-2">
@@ -109,29 +109,29 @@ const BusinessHoursSettings = () => {
                   type="checkbox"
                   checked={businessHours[day].closed}
                   onChange={(e) => handleDayChange(day, 'closed', e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-4 h-4 text-brand rounded focus:ring-2 focus:ring-focus-ring"
                 />
-                <span className="text-sm text-gray-700">Closed</span>
+                <span className="text-sm text-content-muted">Closed</span>
               </label>
 
               {!businessHours[day].closed && (
                 <>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600">Open:</label>
+                    <label className="text-sm text-content-muted">Open:</label>
                     <input
                       type="time"
                       value={businessHours[day].open}
                       onChange={(e) => handleDayChange(day, 'open', e.target.value)}
-                      className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-1 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600">Close:</label>
+                    <label className="text-sm text-content-muted">Close:</label>
                     <input
                       type="time"
                       value={businessHours[day].close}
                       onChange={(e) => handleDayChange(day, 'close', e.target.value)}
-                      className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-1 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
                     />
                   </div>
                 </>
@@ -142,11 +142,11 @@ const BusinessHoursSettings = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Timezone</h3>
+        <h3 className="text-lg font-semibold text-content mb-4">Timezone</h3>
         <select
           value={timezone}
           onChange={(e) => setTimezone(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
         >
           <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
           <option value="UTC">UTC</option>
@@ -160,7 +160,7 @@ const BusinessHoursSettings = () => {
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
           {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
           Save Changes

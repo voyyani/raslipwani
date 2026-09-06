@@ -65,12 +65,12 @@ const AdminBreadcrumb = () => {
         {breadcrumbs.map((crumb, index) => (
           <li key={crumb.path} className="flex items-center">
             {index > 0 && (
-              <FaChevronRight className="w-3 h-3 mx-2 text-gray-400" />
+              <FaChevronRight className="w-3 h-3 mx-2 text-content-subtle" />
             )}
             
             {crumb.isLast ? (
               <span 
-                className="font-medium text-gray-900"
+                className="font-medium text-content"
                 aria-current="page"
               >
                 {crumb.label}
@@ -78,7 +78,7 @@ const AdminBreadcrumb = () => {
             ) : (
               <Link
                 to={crumb.path}
-                className="text-gray-500 hover:text-blue-600 hover:underline transition-colors"
+                className="text-content-subtle hover:text-brand hover:underline transition-colors"
               >
                 {index === 0 ? (
                   <span className="flex items-center gap-1">
@@ -100,13 +100,13 @@ const AdminBreadcrumb = () => {
           <>
             <Link
               to={breadcrumbs[breadcrumbs.length - 2].path}
-              className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="flex items-center text-brand hover:text-brand font-medium"
             >
               <FaChevronRight className="w-3 h-3 mr-1 rotate-180" />
               <span>Back</span>
             </Link>
-            <span className="mx-2 text-gray-400">|</span>
-            <span className="font-medium text-gray-900 truncate max-w-[200px]">
+            <span className="mx-2 text-content-subtle">|</span>
+            <span className="font-medium text-content truncate max-w-[200px]">
               {breadcrumbs[breadcrumbs.length - 1].label}
             </span>
           </>

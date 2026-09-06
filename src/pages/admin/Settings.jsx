@@ -85,21 +85,21 @@ const Settings = () => {
   ];
 
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
+    blue: 'bg-brand-subtle text-brand',
     purple: 'bg-purple-100 text-purple-600',
-    green: 'bg-green-100 text-green-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
+    green: 'bg-success-surface text-success-content',
+    yellow: 'bg-warning-surface text-warning-content',
     indigo: 'bg-indigo-100 text-indigo-600',
-    red: 'bg-red-100 text-red-600'
+    red: 'bg-danger-surface text-danger-content'
   };
 
   const borderColorClasses = {
-    blue: 'border-blue-500',
+    blue: 'border-brand',
     purple: 'border-purple-500',
-    green: 'border-green-500',
-    yellow: 'border-yellow-500',
+    green: 'border-success-border',
+    yellow: 'border-warning-border',
     indigo: 'border-indigo-500',
-    red: 'border-red-500'
+    red: 'border-danger-border'
   };
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component;
@@ -117,15 +117,15 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6 pb-20 md:pb-6">
+    <div className="min-h-screen bg-surface p-3 sm:p-4 lg:p-6 pb-20 md:pb-6">
       <Helmet>
         <title>Settings - Raslipwani Properties Admin</title>
       </Helmet>
 
       {/* Header */}
       <div className="mb-4 md:mb-6">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm md:text-base text-gray-600 mt-1">Manage system configuration</p>
+        <h1 className="text-xl md:text-3xl font-bold text-content">Settings</h1>
+        <p className="text-sm md:text-base text-content-muted mt-1">Manage system configuration</p>
       </div>
 
       {/* Mobile Accordion View */}
@@ -139,8 +139,8 @@ const Settings = () => {
             return (
               <div 
                 key={tab.id} 
-                className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all ${
-                  isExpanded ? `border-l-4 ${borderColorClasses[tab.color]}` : 'border border-gray-100'
+                className={`bg-surface-raised rounded-xl shadow-sm overflow-hidden transition-all ${
+                  isExpanded ? `border-l-4 ${borderColorClasses[tab.color]}` : 'border border-line'
                 }`}
               >
                 {/* Accordion Header */}
@@ -155,13 +155,13 @@ const Settings = () => {
                     <Icon className="text-lg" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-base">{tab.label}</h3>
-                    <p className="text-xs text-gray-500 truncate">{tab.description}</p>
+                    <h3 className="font-semibold text-content text-base">{tab.label}</h3>
+                    <p className="text-xs text-content-subtle truncate">{tab.description}</p>
                   </div>
                   <motion.div
                     animate={{ rotate: isExpanded ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-gray-400"
+                    className="text-content-subtle"
                   >
                     <FaChevronDown />
                   </motion.div>
@@ -177,7 +177,7 @@ const Settings = () => {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-4 pb-4 border-t border-gray-100">
+                      <div className="px-4 pb-4 border-t border-line">
                         <div className="pt-4">
                           <Component />
                         </div>
@@ -193,9 +193,9 @@ const Settings = () => {
 
       {/* Desktop Tabbed View */}
       {!isMobile && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-surface-raised rounded-lg shadow-md overflow-hidden">
           {/* Tab Navigation */}
-          <div className="border-b bg-gray-50">
+          <div className="border-b bg-surface">
             <div className="flex gap-1 px-4 lg:px-6">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -205,8 +205,8 @@ const Settings = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-4 py-3 font-medium transition border-b-2 -mb-[2px] ${
                       activeTab === tab.id
-                        ? `text-blue-600 border-blue-600 bg-white`
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-transparent'
+                        ? `text-brand border-brand bg-surface-raised`
+                        : 'text-content-muted hover:text-content hover:bg-surface-sunken border-transparent'
                     }`}
                   >
                     <Icon className="text-lg" />

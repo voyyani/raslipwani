@@ -55,6 +55,14 @@ export default [
         Object.keys(jsxA11y.flatConfigs.recommended.rules).map((rule) => [rule, 'warn'])
       ),
 
+      // The booking flow renders its radio options as cards: the input is a
+      // direct child of the label, but the option's text sits inside a heading
+      // two levels further in. The default depth of 2 cannot see that text and
+      // reports a correctly-labelled control as unlabelled. Raising it to 3
+      // keeps the rule meaningful instead of teaching people to ignore it —
+      // these controls carry `htmlFor` and a matching `id` as well as nesting.
+      'jsx-a11y/label-has-associated-control': ['warn', { depth: 3 }],
+
       // Literal Tailwind colours: warn, counted, and ratcheted in CI by
       // `scripts/palette-ratchet.mjs`. See the rule's own header for why this is
       // not an error. Slice 4C lowers the ceiling surface by surface.

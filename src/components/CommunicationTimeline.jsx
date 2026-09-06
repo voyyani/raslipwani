@@ -156,11 +156,11 @@ const CommunicationTimeline = ({ clientId }) => {
 
   const getColor = (type) => {
     const colors = {
-      call: 'bg-blue-100 text-blue-600',
-      email: 'bg-green-100 text-green-600',
+      call: 'bg-brand-subtle text-brand',
+      email: 'bg-success-surface text-success-content',
       meeting: 'bg-purple-100 text-purple-600',
-      note: 'bg-gray-100 text-gray-600',
-      viewing: 'bg-yellow-100 text-yellow-600',
+      note: 'bg-surface-sunken text-content-muted',
+      viewing: 'bg-warning-surface text-warning-content',
     };
     return colors[type] || colors.note;
   };
@@ -168,7 +168,7 @@ const CommunicationTimeline = ({ clientId }) => {
   if (isLoading) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand mx-auto"></div>
       </div>
     );
   }
@@ -177,10 +177,10 @@ const CommunicationTimeline = ({ clientId }) => {
     <div>
       {/* Add Button */}
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Communication History</h3>
+        <h3 className="text-lg font-semibold text-content">Communication History</h3>
         <button
           onClick={() => setIsAddingNew(!isAddingNew)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover"
         >
           {isAddingNew ? (
             <>
@@ -198,14 +198,14 @@ const CommunicationTimeline = ({ clientId }) => {
 
       {/* Add/Edit Form */}
       {isAddingNew && (
-        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg p-4 mb-6">
+        <form onSubmit={handleSubmit} className="bg-surface rounded-lg p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Type</label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 required
               >
                 <option value="call">Phone Call</option>
@@ -217,46 +217,46 @@ const CommunicationTimeline = ({ clientId }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Date & Time</label>
               <input
                 type="datetime-local"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Subject</label>
               <input
                 type="text"
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Brief subject..."
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Duration (minutes)</label>
               <input
                 type="number"
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Optional"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label className="block text-sm font-medium text-content-muted mb-1">Notes</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus-ring"
                 placeholder="Detailed notes about this communication..."
               />
             </div>
@@ -266,14 +266,14 @@ const CommunicationTimeline = ({ clientId }) => {
             <button
               type="button"
               onClick={resetForm}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-line-strong rounded-lg text-content-muted hover:bg-surface"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover disabled:opacity-50 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               {editingComm ? 'Update' : 'Add'} Communication
@@ -284,15 +284,15 @@ const CommunicationTimeline = ({ clientId }) => {
 
       {/* Timeline */}
       {communications.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No communications yet</h3>
-          <p className="text-gray-600">Start tracking your interactions with this client</p>
+        <div className="text-center py-12 bg-surface rounded-lg">
+          <MessageSquare className="w-12 h-12 text-content-subtle mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-content mb-2">No communications yet</h3>
+          <p className="text-content-muted">Start tracking your interactions with this client</p>
         </div>
       ) : (
         <div className="space-y-4">
           {communications.map((comm) => (
-            <div key={comm.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={comm.id} className="bg-surface-raised border border-line rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
                 {/* Icon */}
                 <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getColor(comm.type)}`}>
@@ -303,8 +303,8 @@ const CommunicationTimeline = ({ clientId }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="text-base font-semibold text-gray-900">{comm.subject}</h4>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                      <h4 className="text-base font-semibold text-content">{comm.subject}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-sm text-content-subtle">
                         <span className="capitalize">{comm.type}</span>
                         <span>•</span>
                         <span>{formatDateTime(comm.communication_date)}</span>
@@ -321,7 +321,7 @@ const CommunicationTimeline = ({ clientId }) => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(comm)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-brand hover:text-brand-content"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -344,7 +344,7 @@ const CommunicationTimeline = ({ clientId }) => {
                   </div>
 
                   {comm.notes && (
-                    <p className="mt-2 text-gray-700 text-sm">{comm.notes}</p>
+                    <p className="mt-2 text-content-muted text-sm">{comm.notes}</p>
                   )}
                 </div>
               </div>

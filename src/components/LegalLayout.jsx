@@ -21,11 +21,11 @@ const LegalLayout = ({ title, description, updatedOn, children }) => {
       </Helmet>
 
       <>
-        <main className="flex-grow bg-gray-50">
-          <div className="bg-primary text-white py-14 md:py-20">
+        <main className="flex-grow bg-surface">
+          <div className="bg-primary text-content-on-brand py-14 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl">
               <h1 className="text-3xl md:text-4xl font-bold">{title}</h1>
-              <p className="mt-3 text-white/80 text-sm">
+              <p className="mt-3 text-content-on-media/80 text-sm">
                 Last updated{' '}
                 <time dateTime={updatedOn}>
                   {new Date(`${updatedOn}T00:00:00Z`).toLocaleDateString('en-KE', {
@@ -40,7 +40,7 @@ const LegalLayout = ({ title, description, updatedOn, children }) => {
           </div>
 
           <div className="container mx-auto px-4 py-12 md:py-16">
-            <article className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 space-y-8 text-gray-700 leading-relaxed">
+            <article className="max-w-3xl mx-auto bg-surface-raised rounded-2xl shadow-sm border border-line p-6 md:p-10 space-y-8 text-content-muted leading-relaxed">
               {children}
             </article>
           </div>
@@ -62,7 +62,7 @@ LegalLayout.propTypes = {
 /** A titled block within a legal document. */
 export const LegalSection = ({ heading, children }) => (
   <section className="space-y-3">
-    <h2 className="text-xl font-bold text-gray-900">{heading}</h2>
+    <h2 className="text-xl font-bold text-content">{heading}</h2>
     {children}
   </section>
 );

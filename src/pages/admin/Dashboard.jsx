@@ -123,7 +123,7 @@ const Dashboard = () => {
             title: property.title,
             action: isNew ? 'added' : 'updated',
             timestamp: isNew ? property.created_at : property.updated_at,
-            icon: isNew ? <FaPlusCircle className="text-green-500" /> : <FaEdit className="text-blue-500" />,
+            icon: isNew ? <FaPlusCircle className="text-success-content" /> : <FaEdit className="text-brand" />,
             type: 'property'
           };
         }) || [];
@@ -174,15 +174,15 @@ const Dashboard = () => {
   const StatCard = ({ title, value, icon, color, link }) => (
     <Link 
       to={link || '#'} 
-      className={`bg-white border border-${color}-100 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group`}
+      className={`bg-surface-raised border border-${color}-100 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group`}
     >
       <div className="flex items-start">
         <div className={`bg-${color}-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4 group-hover:bg-${color}-200 transition-colors flex-shrink-0`}>
           {React.cloneElement(icon, { className: `text-${color}-600 text-lg sm:text-xl` })}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-1 truncate">{title}</h3>
-          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">{value}</p>
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-content-muted mb-1 truncate">{title}</h3>
+          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-content">{value}</p>
         </div>
       </div>
     </Link>
@@ -207,13 +207,13 @@ const Dashboard = () => {
       </Helmet>
       
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-1">Monitor your property portfolio and business performance</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-content">Dashboard Overview</h1>
+        <p className="text-content-muted mt-1">Monitor your property portfolio and business performance</p>
       </div>
       
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
         </div>
       ) : (
         <div className="space-y-6">
@@ -279,38 +279,38 @@ const Dashboard = () => {
           {/* Data Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Recent Activity */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-surface-raised border border-line rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Recent Activity</h3>
-                <Link to="/admin/properties" className="text-blue-600 hover:underline text-sm">
+                <h3 className="text-xl font-semibold text-content">Recent Activity</h3>
+                <Link to="/admin/properties" className="text-brand hover:underline text-sm">
                   View All
                 </Link>
               </div>
               
               {recentActivities.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No recent activity</p>
+                  <p className="text-content-subtle">No recent activity</p>
                 </div>
               ) : (
                 <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2">
                   {recentActivities.map(activity => (
                     <div 
                       key={activity.id} 
-                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                      className="flex items-start border-b border-line pb-4 last:border-0 last:pb-0 group hover:bg-surface p-2 rounded-lg transition-colors"
                     >
-                      <div className="bg-gray-100 p-3 rounded-lg mr-4 mt-1 group-hover:bg-gray-200 transition-colors">
+                      <div className="bg-surface-sunken p-3 rounded-lg mr-4 mt-1 group-hover:bg-surface-sunken transition-colors">
                         {activity.icon}
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-gray-800">
+                        <p className="font-medium text-content">
                           <span className="capitalize">
                             {activity.type === 'property' ? 'Property ' : ''}
                             {activity.action}: 
                           </span>
-                          <span className="text-blue-600 ml-1">{activity.title}</span>
+                          <span className="text-brand ml-1">{activity.title}</span>
                         </p>
-                        <p className="text-sm text-gray-500 flex items-center mt-1">
-                          <FaClock className="mr-1.5 text-gray-400 text-xs" />
+                        <p className="text-sm text-content-subtle flex items-center mt-1">
+                          <FaClock className="mr-1.5 text-content-subtle text-xs" />
                           {timeAgo(activity.timestamp)}
                         </p>
                       </div>
@@ -321,37 +321,37 @@ const Dashboard = () => {
             </div>
             
             {/* Upcoming Viewings */}
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-surface-raised border border-line rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Upcoming Viewings</h3>
-                <Link to="/admin/viewings" className="text-blue-600 hover:underline text-sm">
+                <h3 className="text-xl font-semibold text-content">Upcoming Viewings</h3>
+                <Link to="/admin/viewings" className="text-brand hover:underline text-sm">
                   View All
                 </Link>
               </div>
               
               {activeBookings.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No upcoming viewings scheduled</p>
+                  <p className="text-content-subtle">No upcoming viewings scheduled</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {activeBookings.map(booking => (
                     <div 
                       key={booking.id} 
-                      className="flex items-start border-b border-gray-100 pb-4 last:border-0 last:pb-0 group hover:bg-gray-50 p-3 rounded-lg transition-colors"
+                      className="flex items-start border-b border-line pb-4 last:border-0 last:pb-0 group hover:bg-surface p-3 rounded-lg transition-colors"
                     >
                       <div className="bg-purple-100 p-3 rounded-lg mr-4">
                         <FaCalendarAlt className="text-purple-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-gray-800">
+                        <p className="font-medium text-content">
                           {booking.name || 'Client'}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1 flex items-center">
-                          <FaClock className="mr-1.5 text-gray-400 text-xs" />
+                        <p className="text-sm text-content-subtle mt-1 flex items-center">
+                          <FaClock className="mr-1.5 text-content-subtle text-xs" />
                           {formatDate(booking.appointment_at)}
                         </p>
-                        <p className="text-sm text-gray-700 mt-2">
+                        <p className="text-sm text-content-muted mt-2">
                           {booking.service || booking.viewing_type || 'Property Viewing'}
                         </p>
                       </div>

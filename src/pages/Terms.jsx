@@ -60,7 +60,7 @@ const Terms = () => {
           to send money to a personal mobile-money number or a bank account communicated only by email
           or social media.
         </p>
-        <p className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-900">
+        <p className="bg-warning-surface border border-warning-border rounded-lg p-4 text-warning-content">
           <strong>If you receive payment instructions claiming to be from us, telephone us on a number
           you obtained independently and confirm them before sending anything.</strong> We are not liable
           for money sent to accounts we did not confirm to you by voice.
@@ -148,7 +148,7 @@ const Terms = () => {
         </ul>
       </LegalSection>
 
-      <p className="text-sm text-gray-500 border-t border-gray-100 pt-6">
+      <p className="text-sm text-content-subtle border-t border-line pt-6">
         These terms describe how we operate; they are not legal advice, and they should be reviewed by a
         qualified Kenyan advocate before being relied upon.
       </p>

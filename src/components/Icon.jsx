@@ -31,6 +31,8 @@ import {
   Download,
   Map,
   MapPin,
+  Monitor,
+  Moon,
   MessageSquare,
   Phone,
   Rocket,
@@ -41,6 +43,7 @@ import {
   ShieldCheck,
   Star,
   StickyNote,
+  Sun,
   Target,
   TrendingUp,
   Twitter,
@@ -142,6 +145,11 @@ const REGISTRY = {
   'chevron-down': ChevronDown,
   'chevron-up': ChevronUp,
   'spinner': Loader2,
+
+  // Theme control
+  'sun': Sun,
+  'moon': Moon,
+  'desktop': Monitor,
 
   // Brand marks. Lucide carries these four; it has no mark for TikTok,
   // WhatsApp or Pinterest, so those three come from `react-icons/si`

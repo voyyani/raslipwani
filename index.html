@@ -17,6 +17,31 @@
     -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
     <title>Raslipwani Properties — Real Estate Across Kenya</title>
+
+    <!--
+      Applies the saved theme before the first paint.
+
+      This has to be inline and blocking. React mounts after the browser has
+      already painted, so a theme applied in an effect arrives a frame late and
+      every page load flashes white at someone who chose dark. The storage key
+      and the class are the same ones src/contexts/ThemeContext.jsx uses; that
+      provider is the authority from mount onwards, this is only the first frame.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('raslipwani:theme');
+          var dark =
+            stored === 'dark' ||
+            ((stored === 'system' || !stored) &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {
+          /* Blocked storage or no matchMedia: the light default is already correct. */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
