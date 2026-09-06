@@ -510,7 +510,7 @@ const Properties = () => {
                       <div className="w-6 h-6 bg-danger-surface rounded-full flex items-center justify-center mr-3">
                         <Icon name="times" className="text-danger-content" aria-hidden="true" />
                       </div>
-                      {error}
+                      {`Failed to load properties: ${error.message}`}
                     </div>
                   </motion.div>
                 )}

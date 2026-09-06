@@ -328,7 +328,7 @@ const PropertyDetail = () => {
         <main className="flex-grow container mx-auto px-4 py-8">
           {error ? (
             <div className="bg-danger-surface border border-danger-border text-danger-content px-4 py-3 rounded mb-6">
-              {error}
+              {`Failed to load property details: ${error.message}`}
             </div>
           ) : (
             <div className="text-center py-12">
