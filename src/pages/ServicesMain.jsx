@@ -18,10 +18,6 @@ const EMPTY_PROPERTIES = [];
 const ServicesMain = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeFAQ, setActiveFAQ] = useState(null);
-  const {
-    data: properties = EMPTY_PROPERTIES,
-    isLoading: loadingProperties,
-  } = useQuery(propertyQueries.available());
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -32,6 +28,13 @@ const ServicesMain = () => {
     serviceType: 'viewing',
     propertyId: '',
     viewingType: 'physical'
+  });
+  const {
+    data: properties = EMPTY_PROPERTIES,
+    isLoading: loadingProperties,
+  } = useQuery({
+    ...propertyQueries.available(),
+    enabled: activeModal === 'booking' && bookingData.serviceType === 'viewing',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);

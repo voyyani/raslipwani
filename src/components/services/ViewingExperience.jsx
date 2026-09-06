@@ -16,7 +16,10 @@ import Modal from '../ui/Modal';
 const EMPTY_PROPERTIES = [];
 
 const ViewingExperience = () => {
-  const { data: properties = EMPTY_PROPERTIES, refetch } = useQuery(propertyQueries.all());
+  const { data: properties = EMPTY_PROPERTIES, refetch } = useQuery({
+    ...propertyQueries.all(),
+    enabled: false,
+  });
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
