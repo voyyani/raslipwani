@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { supabase } from '@/utils/supabaseClient';
+import { createBooking } from '@/services/bookings';
 import { useSettings } from '../hooks/useSettings';
 import { notifyBookingReceived } from '../utils/bookingNotifications';
 
@@ -112,9 +112,7 @@ const Contact = () => {
         created_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('bookings').insert([record]);
-
-      if (error) throw error;
+      await createBooking(record);
 
       // Best-effort: the enquiry is already saved, so a mail outage must not
       // turn a successful submission into an error for the customer.

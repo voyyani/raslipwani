@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { notifyBookingReceived } from '../utils/bookingNotifications';
+import { createBooking } from '@/services/bookings';
+import { propertyQueries } from '@/services/properties';
 import Modal from '../components/ui/Modal';
 
 import { logger } from '../utils/logger';
+
+// A stable reference, so an unresolved query does not hand the render below a
+// fresh `[]` identity on every pass (see src/pages/Properties.jsx).
+const EMPTY_PROPERTIES = [];
+
 const ServicesMain = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeFAQ, setActiveFAQ] = useState(null);
-  const [properties, setProperties] = useState([]);
-  const [loadingProperties, setLoadingProperties] = useState(true);
+  const {
+    data: properties = EMPTY_PROPERTIES,
+    isLoading: loadingProperties,
+  } = useQuery(propertyQueries.available());
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -26,31 +35,6 @@ const ServicesMain = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-
-  // Fetch properties from Supabase
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('status', 'available')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setProperties(data || []);
-      } catch (error) {
-        logger.error('Error fetching properties:', error);
-      } finally {
-        setLoadingProperties(false);
-      }
-    };
-
-    if (activeModal === 'booking' && bookingData.serviceType === 'viewing') {
-      setLoadingProperties(true);
-      fetchProperties();
-    }
-  }, [activeModal, bookingData.serviceType]);
 
   const services = [
     {
@@ -158,9 +142,7 @@ const ServicesMain = () => {
         created_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('bookings').insert([record]);
-
-      if (error) throw error;
+      await createBooking(record);
 
       // Notification is best-effort and never blocks the confirmation: the
       // booking is already saved, so a mail outage must not read as a failure.

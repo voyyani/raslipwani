@@ -2,14 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
 import { notifyBookingReceived } from '../../utils/bookingNotifications';
+import { createBooking } from '@/services/bookings';
+import { propertyQueries } from '@/services/properties';
 
 import { logger } from '../../utils/logger';
 import Icon from '../Icon';
 import Modal from '../ui/Modal';
+
+// A stable reference, so an unresolved query does not hand the render below a
+// fresh `[]` identity on every pass (see src/pages/Properties.jsx).
+const EMPTY_PROPERTIES = [];
+
 const ViewingExperience = () => {
-  const [properties, setProperties] = useState([]);
+  const { data: properties = EMPTY_PROPERTIES, refetch } = useQuery(propertyQueries.all());
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -87,15 +94,11 @@ const ViewingExperience = () => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setProperties(data);
-      setFilteredProperties(data);
+      const result = await refetch();
+
+      if (result.error) throw result.error;
+
+      setFilteredProperties(result.data ?? []);
       setShowResults(true);
     } catch (err) {
       logger.error('Error fetching properties:', err);
@@ -238,9 +241,7 @@ const ViewingExperience = () => {
         created_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from('bookings').insert([record]);
-
-      if (error) throw error;
+      await createBooking(record);
 
       // Best-effort, exactly as on the services path: the booking is already
       // saved, so a mail outage must not be reported to the customer as failure.
