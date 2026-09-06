@@ -137,6 +137,35 @@ describe('FontAwesome stays gone', () => {
   });
 });
 
+describe('react-icons stays gone', () => {
+  it('is not imported anywhere in src/', () => {
+    const offenders = [];
+    for (const file of sourceFiles()) {
+      // Icon.jsx, BrandMarks.jsx and this file all name react-icons in prose,
+      // explaining what replaced it. An import is the thing that matters.
+      if (/from 'react-icons/.test(fs.readFileSync(file, 'utf8'))) {
+        offenders.push(path.relative(repoRoot, file));
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('is not a dependency', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+
+    expect(deps['react-icons']).toBeUndefined();
+  });
+
+  it('is not named in the vendor-icons chunk', () => {
+    // vite.config.js pins the chunk contents by package name, so leaving
+    // react-icons listed there keeps it in the bundle even after the last
+    // import goes — which is exactly what happened between two tasks here.
+    const config = fs.readFileSync(path.join(repoRoot, 'vite.config.js'), 'utf8');
+    expect(config).not.toMatch(/'react-icons'/);
+  });
+});
+
 describe('console output stays out of shipping source', () => {
   it('routes diagnostics through the logger, not `console`', () => {
     // The production build drops bare `console.*` (vite.config.js `esbuild.drop`)

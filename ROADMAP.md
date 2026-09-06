@@ -251,11 +251,31 @@ What is left is the genuine remainder: the parts a table could not decide.
       test; what no test covers is third-party chrome. **FullCalendar, react-quill and
       the four hardcoded hex values in the `.custom-calendar` block have not been looked
       at in dark mode.** Property imagery and the hero scrims need a human.
-- [ ] **Finish the icon consolidation.** `react-icons` is imported in **29 files**
-      against `lucide-react` in **10** — unchanged, because the plan was to migrate call
-      sites as each surface was touched, and the codemod meant surfaces were never
-      touched one by one. This needs its own pass through the `<Icon>` registry built in
-      4A. It removes a whole dependency and shrinks `vendor-icons` (32 kB raw).
+- [x] **Finish the icon consolidation.** ✅ Done on 2026-09-06. All 29 files now go
+      through the `<Icon>` registry; `react-icons` is gone from `package.json`, and the
+      three brand marks lucide does not carry (WhatsApp, TikTok, Pinterest) are drawn
+      locally from Simple Icons path data in `BrandMarks.jsx`.
+
+      **The bundle rationale in the previous revision was wrong, and it is worth saying
+      so.** This was expected to *shrink* `vendor-icons` (32 kB raw). It grew it:
+
+      | | icons bundled | `vendor-icons` raw | gzip | first load |
+      |---|---|---:|---:|---:|
+      | before | 51 lucide + 74 react-icons | 32.0 kB | 7.6 kB | 215.3 kB |
+      | after | **85 lucide** + 3 local paths | **40.9 kB** | **8.6 kB** | **215.9 kB** |
+
+      Fewer icons, bigger chunk, because a lucide glyph costs roughly **481 bytes** —
+      it is a stroke-based, multi-element SVG — where a FontAwesome glyph is one filled
+      path. Consolidating onto the *larger* per-icon library and then widening the
+      registry from 54 names to 91 to cover admin was always going to cost space; nobody
+      checked the per-icon cost before writing the prediction down.
+
+      **The work still earns its place, just not for the stated reason.** What it bought
+      is one library, one vocabulary, one sizing idiom (an explicit `size` prop rather
+      than three competing conventions), and icon data that is serialisable — seven files
+      stored React components inside content-shaped arrays and now hold registry name
+      strings. Those are maintenance wins. It is not a bundle win, and the ~600 bytes of
+      gzip it costs are the price of them.
 - [ ] **Label the remaining 65 controls**, all in the admin console. `label-budget.json`
       holds the ceiling; `AdminProperties.jsx` (19) and `GeneralSettings.jsx` (13) are
       the bulk. Route them through the `Field` primitive rather than hand-pairing
@@ -268,11 +288,14 @@ What is left is the genuine remainder: the parts a table could not decide.
       already at zero. Scoping the gate to what is clean, rather than delaying it until
       everything is, turned it on two blocks early. Extend it to admin as the labels land.
 - [ ] **Live regions for async status and toasts.** The skip link is done.
-- [ ] Bring the CSS bundle under 50 kB raw (**76.3 kB** today, from 146 kB). Note that
-      this did not fall as far as expected when the admin migration landed: both
-      vocabularies no longer coexist, so what remains is the token layer's own breadth
-      rather than duplication. **The remaining win is the icon consolidation and
-      unused-utility pruning, not more migration.**
+- [ ] Bring the CSS bundle under 50 kB raw (**76.3 kB** today, from 146 kB). Two theories
+      about where the excess lives have now been retired by measurement. It was not the
+      two colour vocabularies coexisting — the bundle *rose* when the admin migration
+      landed. And it was not the icons: the consolidation is done and the stylesheet did
+      not move by a single byte (76.3 kB before, 76.3 kB after), which is exactly what
+      should have been expected, since icons are JavaScript and never touched the CSS.
+      **The only remaining lead is unused-utility pruning, and it should be measured
+      before it is scheduled** — that is two wrong predictions in a row on this line.
 - [ ] Retire `jsx-a11y/label-has-for` in `eslint.config.js` once the labels are done. It
       is deprecated and double-counts `label-has-associated-control`; it contributes
       **100** of the 375 warnings and **turning it off today would fix nothing**, which
@@ -473,8 +496,8 @@ ledger at the top.
 | Booking notification delivery | 0% | **0%** — 8 enquiries stranded | 100% | 1 |
 | Raw palette classes in `src/` | 95 | **94** | 0 or a documented exemption | 2 |
 | Unlabelled form controls | 67 | **65** (0 on public surfaces) | 0 | 2 |
-| Icon libraries | 2 | **2** (`react-icons` in 29 files, `lucide-react` in 10) | 1 | 2 |
-| CSS bundle (raw) | 75.6 kB | **76.3 kB** | < 50 kB | 2 |
+| Icon libraries | 2 | **1** ✅ `lucide-react` only | 1 | ✅ 2 |
+| CSS bundle (raw) | 75.6 kB | **76.3 kB** — unmoved by the icon work, as it should have been | < 50 kB | 2 |
 | `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **100** | rule removed after pairing | 2 |
 | `jsx-a11y/control-has-associated-label` | 87 | **87** | 0 | 2 |
 | Files importing Supabase directly | 24 | **24** | 0 | 3 |
