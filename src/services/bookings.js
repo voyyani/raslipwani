@@ -137,11 +137,23 @@ export async function listBookingNotes(bookingId) {
   );
 }
 
+/**
+ * `booking_notes` may not exist in production: migration 003b's
+ * `CREATE POLICY IF NOT EXISTS` is a PostgreSQL syntax error that aborts the
+ * migration before the table (and its `booking_id INTEGER` — against a UUID
+ * `bookings.id`) is ever created. This is a known condition, not a TODO for
+ * this function; the fix is a migration, owned elsewhere.
+ *
+ * The column names below are the only schema of record — 003b's
+ * `CREATE TABLE booking_notes` — regardless of whether that table has ever
+ * actually been applied.
+ */
 export async function addBookingNote({ bookingId, note, author }) {
   return unwrap(
     await supabase
       .from(NOTES_TABLE)
-      .insert({ booking_id: bookingId, note, author })
+      // `is_internal` is left unset so the column default (TRUE) applies.
+      .insert({ booking_id: bookingId, note_text: note, created_by: author })
       .select()
       .single(),
     { table: NOTES_TABLE, operation: 'addBookingNote' }

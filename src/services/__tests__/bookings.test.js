@@ -134,13 +134,16 @@ describe('writes', () => {
     expect(updates.appointment_at).toBe('2026-10-01T09:00:00.000Z');
   });
 
-  it('writes a note against the booking', async () => {
+  it('writes a note against the booking using the real booking_notes columns', async () => {
+    // The bug this prevents: booking_notes' only schema of record (migration
+    // 003b) is note_text/created_by/is_internal. Writing 'note'/'author'
+    // instead inserts into columns that don't exist.
     const builders = mockFrom(supabase, { booking_notes: { data: { id: 1 }, error: null } });
     await addBookingNote({ bookingId: 'x', note: 'called back', author: 'admin' });
     expect(builders.booking_notes.insert).toHaveBeenCalledWith({
       booking_id: 'x',
-      note: 'called back',
-      author: 'admin',
+      note_text: 'called back',
+      created_by: 'admin',
     });
   });
 });
