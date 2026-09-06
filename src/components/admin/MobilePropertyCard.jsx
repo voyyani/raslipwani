@@ -1,19 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaBed, 
-  FaBath, 
-  FaRuler, 
-  FaEdit, 
-  FaTrash, 
-  FaStar,
-  FaEye,
-  FaMapMarkerAlt,
-  FaHome,
-  FaBuilding,
-  FaLandmark,
-  FaEllipsisV
-} from 'react-icons/fa';
+import Icon from '../Icon';
 
 /**
  * MobilePropertyCard - Touch-optimized property card for mobile admin
@@ -31,15 +18,15 @@ const MobilePropertyCard = ({
 
   // Property type icons
   const typeIcons = {
-    residential: FaHome,
-    apartment: FaBuilding,
-    land: FaLandmark,
-    villa: FaHome,
-    commercial: FaBuilding,
-    office: FaBuilding
+    residential: 'home',
+    apartment: 'building',
+    land: 'landmark',
+    villa: 'home',
+    commercial: 'building',
+    office: 'building'
   };
 
-  const TypeIcon = typeIcons[property.property_type] || FaHome;
+  const typeIconName = typeIcons[property.property_type] || 'home';
 
   // Status colors
   const statusColors = {
@@ -99,7 +86,7 @@ const MobilePropertyCard = ({
           </motion.div>
         ) : (
           <div className="flex items-center justify-center h-full text-content-subtle">
-            <TypeIcon className="text-4xl" />
+            <Icon name={typeIconName} size={36} />
           </div>
         )}
 
@@ -120,7 +107,7 @@ const MobilePropertyCard = ({
         {/* Featured Badge */}
         {property.featured && (
           <div className="absolute top-2 left-2 bg-accent text-content-on-media px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
-            <FaStar className="text-[10px]" />
+            <Icon name="star" className="text-[10px]" />
             Featured
           </div>
         )}
@@ -145,7 +132,7 @@ const MobilePropertyCard = ({
           }}
           className="absolute bottom-2 right-2 w-8 h-8 bg-surface-raised/90 rounded-full flex items-center justify-center shadow-lg"
         >
-          <FaEllipsisV className="text-content-muted text-sm" />
+          <Icon name="ellipsis-v" size={14} className="text-content-muted" />
         </button>
       </div>
 
@@ -158,7 +145,7 @@ const MobilePropertyCard = ({
               {property.title}
             </h3>
             <div className="flex items-center gap-2 text-sm text-content-muted mt-0.5">
-              <TypeIcon className="text-xs" />
+              <Icon name={typeIconName} size={12} />
               <span className="capitalize">{property.property_type}</span>
               <span className="text-content-on-media/80">•</span>
               <span className="capitalize">{property.purpose}</span>
@@ -168,7 +155,7 @@ const MobilePropertyCard = ({
 
         {/* Location */}
         <div className="flex items-center gap-1.5 text-content-muted mb-3">
-          <FaMapMarkerAlt className="text-xs text-content-subtle" />
+          <Icon name="map-marker-alt" size={12} className="text-content-subtle" />
           <span className="text-sm truncate">{property.location}</span>
         </div>
 
@@ -176,19 +163,19 @@ const MobilePropertyCard = ({
         <div className="flex items-center gap-4 text-sm text-content-muted">
           {property.bedrooms && (
             <div className="flex items-center gap-1">
-              <FaBed className="text-content-subtle" />
+              <Icon name="bed" className="text-content-subtle" />
               <span>{property.bedrooms}</span>
             </div>
           )}
           {property.bathrooms && (
             <div className="flex items-center gap-1">
-              <FaBath className="text-content-subtle" />
+              <Icon name="bath" className="text-content-subtle" />
               <span>{property.bathrooms}</span>
             </div>
           )}
           {property.area_sqft && (
             <div className="flex items-center gap-1">
-              <FaRuler className="text-content-subtle" />
+              <Icon name="ruler-combined" className="text-content-subtle" />
               <span>{property.area_sqft.toLocaleString()} sqft</span>
             </div>
           )}
@@ -224,7 +211,7 @@ const MobilePropertyCard = ({
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaEye className="text-brand" />
+                <Icon name="eye" className="text-brand" />
                 <span className="text-sm font-medium">View Details</span>
               </button>
               
@@ -237,7 +224,7 @@ const MobilePropertyCard = ({
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaEdit className="text-success-content" />
+                <Icon name="edit" className="text-success-content" />
                 <span className="text-sm font-medium">Edit Property</span>
               </button>
               
@@ -250,7 +237,7 @@ const MobilePropertyCard = ({
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left text-content-muted hover:bg-surface active:bg-surface-sunken"
               >
-                <FaStar className={property.featured ? 'text-accent' : 'text-content-subtle'} />
+                <Icon name="star" className={property.featured ? 'text-accent' : 'text-content-subtle'} />
                 <span className="text-sm font-medium">
                   {property.featured ? 'Remove Featured' : 'Make Featured'}
                 </span>
@@ -267,7 +254,7 @@ const MobilePropertyCard = ({
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left text-danger-content hover:bg-danger-surface active:bg-danger-surface"
               >
-                <FaTrash />
+                <Icon name="trash" />
                 <span className="text-sm font-medium">Delete</span>
               </button>
             </motion.div>

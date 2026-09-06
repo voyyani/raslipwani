@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FaClock, FaCheckCircle, FaTimesCircle, FaCheck } from 'react-icons/fa';
 
 import { statusClasses, statusLabel } from '../design/status';
+import Icon from './Icon';
 
 /**
  * The one badge that renders a booking status.
@@ -13,14 +13,14 @@ import { statusClasses, statusLabel } from '../design/status';
  * shape. See that file for what the four maps got wrong.
  */
 const STATUS_ICONS = {
-  pending: FaClock,
-  confirmed: FaCheckCircle,
-  completed: FaCheck,
-  cancelled: FaTimesCircle,
+  pending: 'clock',
+  confirmed: 'check-circle',
+  completed: 'check',
+  cancelled: 'times-circle',
 };
 
 const BookingStatusBadge = ({ status, className = '' }) => {
-  const Icon = STATUS_ICONS[status] ?? STATUS_ICONS.pending;
+  const iconName = STATUS_ICONS[status] ?? STATUS_ICONS.pending;
 
   return (
     <span
@@ -28,7 +28,7 @@ const BookingStatusBadge = ({ status, className = '' }) => {
         status
       )} ${className}`}
     >
-      <Icon className="text-sm" aria-hidden="true" />
+      <Icon name={iconName} size={14} />
       {statusLabel(status)}
     </span>
   );

@@ -1,14 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  FaHome, 
-  FaBuilding, 
-  FaCalendarAlt, 
-  FaUsers, 
-  FaBars,
-  FaCog
-} from 'react-icons/fa';
+import Icon from '../../components/Icon';
 
 /**
  * AdminBottomNav - Mobile bottom navigation bar for admin dashboard
@@ -26,31 +19,31 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
       path: '/admin',
       exact: true,
       label: 'Dashboard',
-      icon: FaHome,
+      icon: 'home',
       badge: null
     },
     {
       path: '/admin/properties',
       label: 'Properties',
-      icon: FaBuilding,
+      icon: 'building',
       badge: null
     },
     {
       path: '/admin/bookings',
       label: 'Bookings',
-      icon: FaCalendarAlt,
+      icon: 'calendar',
       badge: pendingBookingsCount > 0 ? pendingBookingsCount : null
     },
     {
       path: '/admin/clients',
       label: 'Clients',
-      icon: FaUsers,
+      icon: 'users',
       badge: null
     },
     {
       path: null, // Special "More" button
       label: 'More',
-      icon: FaBars,
+      icon: 'bars',
       badge: null,
       action: 'openSidebar'
     }
@@ -79,7 +72,6 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
     >
       <div className="flex items-center justify-around h-14 px-1 max-w-screen-sm mx-auto">
         {navItems.map((item) => {
-          const Icon = item.icon;
           const active = isActive(item);
           
           // Special handling for "More" button
@@ -94,7 +86,7 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
                 className="flex flex-col items-center justify-center flex-1 h-full py-1 group"
                 aria-label="Open more options"
               >
-                <Icon className="w-5 h-5 text-content-subtle group-active:text-brand" />
+                <Icon name={item.icon} size={20} className="text-content-subtle group-active:text-brand" />
                 <span className="text-[10px] font-medium text-content-subtle mt-0.5">
                   {item.label}
                 </span>
@@ -121,7 +113,7 @@ const AdminBottomNav = ({ onOpenSidebar, pendingBookingsCount = 0 }) => {
               )}
               
               <div className="relative">
-                <Icon className={`w-5 h-5 ${active ? 'text-brand' : 'text-content-subtle'}`} />
+                <Icon name={item.icon} size={20} className={active ? 'text-brand' : 'text-content-subtle'} />
                 
                 {/* Badge */}
                 {item.badge && (

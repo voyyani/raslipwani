@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle } from 'react-icons/fi';
-import { MdDashboard } from 'react-icons/md';
 
 import Icon from '../../components/Icon';
 const Header = () => {
@@ -35,37 +33,37 @@ const Header = () => {
     ...(!isOnAdminDashboard ? [{ 
       path: '/admin', 
       label: 'Dashboard', 
-      icon: MdDashboard 
+      icon: 'tachometer-alt' 
     }] : []),
     { 
       path: '/', 
       label: 'Home', 
-      icon: FiHome 
+      icon: 'home' 
     },
     { 
       path: '/properties', 
       label: 'Listings', 
-      icon: FiGrid 
+      icon: 'th' 
     },
     { 
       path: '/services', 
       label: 'Services', 
-      icon: FiTool 
+      icon: 'tools' 
     },
     { 
       path: '/international', 
       label: 'International', 
-      icon: FiGrid 
+      icon: 'th' 
     },
     { 
       path: '/about', 
       label: 'About', 
-      icon: FiInfo 
+      icon: 'info-circle' 
     },
     { 
       path: '/construction-support', 
       label: 'Construction', 
-      icon: FiHelpCircle 
+      icon: 'question-circle' 
     },
   ];
 
@@ -112,7 +110,6 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => {
-              const IconComponent = item.icon;
               
               // Handle dropdown menus
               if (item.dropdown) {
@@ -126,11 +123,11 @@ const Header = () => {
                     <button
                       className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
                     >
-                      <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                      <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
                         isScrolled ? 'scale-90' : 'scale-100'
                       }`} />
                       <span className="relative">{item.label}</span>
-                      <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${
+                      <Icon name="chevron-down" size={16} className={`transition-transform duration-300 ${
                         openDropdown === item.label ? 'rotate-180' : ''
                       }`} />
                     </button>
@@ -166,7 +163,7 @@ const Header = () => {
                           : 'text-content-muted hover:text-primary hover:bg-surface/80'}`
                     }
                   >
-                    <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                    <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
                       isScrolled ? 'scale-90' : 'scale-100'
                     }`} />
                     <span className="relative">
@@ -255,7 +252,7 @@ const Header = () => {
                     className="p-2 rounded-lg bg-surface-raised/20 hover:bg-surface-raised/30 transition-colors"
                     aria-label="Close menu"
                   >
-                    <FiX className="w-5 h-5" />
+                    <Icon name="times" size={20} />
                   </button>
                 </div>
                 
@@ -269,8 +266,7 @@ const Header = () => {
               {/* Navigation */}
               <nav id="admin-mobile-nav" className="flex flex-col py-2">
                 {navItems.map((item) => {
-                  const IconComponent = item.icon;
-                  const isActive = location.pathname === item.path;
+                      const isActive = location.pathname === item.path;
                   
                   // Handle dropdown menus
                   if (item.dropdown) {
@@ -282,13 +278,13 @@ const Header = () => {
                           className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-content-muted hover:text-primary hover:bg-surface w-full"
                         >
                           <div className="p-2 rounded-lg transition-colors bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary">
-                            <IconComponent className="w-5 h-5" />
+                            <Icon name={item.icon} size={20} />
                           </div>
                           <span className="flex-1 text-left">{item.label}</span>
                           {isDropdownOpen ? (
-                            <FiChevronUp className="w-5 h-5" />
+                            <Icon name="chevron-up" size={20} />
                           ) : (
-                            <FiChevronDown className="w-5 h-5" />
+                            <Icon name="chevron-down" size={20} />
                           )}
                         </button>
                         
@@ -325,7 +321,7 @@ const Header = () => {
                         <div className={`p-2 rounded-lg transition-colors ${
                           isActive ? 'bg-primary/10 text-primary' : 'bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary'
                         }`}>
-                          <IconComponent className="w-5 h-5" />
+                          <Icon name={item.icon} size={20} />
                         </div>
                         <span className="flex-1">{item.label}</span>
                         <div className={`w-2 h-2 rounded-full transition-colors ${

@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaCog,
-  FaCloud,
-  FaEnvelope,
-  FaClock,
-  FaGlobe,
-  FaTools,
-  FaChevronDown
-} from 'react-icons/fa';
+import Icon from '../../components/Icon';
 import GeneralSettings from './settings/GeneralSettings';
 import CloudinarySettings from './settings/CloudinarySettings';
 import EmailSettings from './settings/EmailSettings';
@@ -38,7 +30,7 @@ const Settings = () => {
       id: 'general', 
       label: 'General', 
       description: 'Basic site settings and branding',
-      icon: FaCog, 
+      icon: 'cog', 
       component: GeneralSettings,
       color: 'blue'
     },
@@ -46,7 +38,7 @@ const Settings = () => {
       id: 'cloudinary', 
       label: 'Cloudinary', 
       description: 'Image storage and CDN settings',
-      icon: FaCloud, 
+      icon: 'cloud', 
       component: CloudinarySettings,
       color: 'purple'
     },
@@ -54,7 +46,7 @@ const Settings = () => {
       id: 'email', 
       label: 'Email', 
       description: 'Email notifications and templates',
-      icon: FaEnvelope, 
+      icon: 'envelope', 
       component: EmailSettings,
       color: 'green'
     },
@@ -62,7 +54,7 @@ const Settings = () => {
       id: 'business', 
       label: 'Business Hours', 
       description: 'Operating hours and availability',
-      icon: FaClock, 
+      icon: 'clock', 
       component: BusinessHoursSettings,
       color: 'yellow'
     },
@@ -70,7 +62,7 @@ const Settings = () => {
       id: 'localization', 
       label: 'Localization', 
       description: 'Language and regional settings',
-      icon: FaGlobe, 
+      icon: 'globe', 
       component: LocalizationSettings,
       color: 'indigo'
     },
@@ -78,7 +70,7 @@ const Settings = () => {
       id: 'advanced', 
       label: 'Advanced', 
       description: 'Developer and advanced options',
-      icon: FaTools, 
+      icon: 'tools', 
       component: AdvancedSettings,
       color: 'red'
     }
@@ -132,7 +124,6 @@ const Settings = () => {
       {isMobile && (
         <div className="space-y-2">
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const Component = tab.component;
             const isExpanded = expandedAccordion === tab.id;
             
@@ -152,7 +143,7 @@ const Settings = () => {
                   className="w-full flex items-center gap-3 p-4 text-left"
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses[tab.color]}`}>
-                    <Icon className="text-lg" />
+                    <Icon name={tab.icon} size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-content text-base">{tab.label}</h3>
@@ -198,7 +189,6 @@ const Settings = () => {
           <div className="border-b bg-surface">
             <div className="flex gap-1 px-4 lg:px-6">
               {tabs.map((tab) => {
-                const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
@@ -209,7 +199,7 @@ const Settings = () => {
                         : 'text-content-muted hover:text-content hover:bg-surface-sunken border-transparent'
                     }`}
                   >
-                    <Icon className="text-lg" />
+                    <Icon name={tab.icon} size={18} />
                     <span>{tab.label}</span>
                   </button>
                 );

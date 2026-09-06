@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthButtons from './AuthButtons';
-import { FiX, FiChevronDown, FiChevronUp, FiMenu, FiHome, FiGrid, FiTool, FiInfo, FiHelpCircle, FiExternalLink, FiGlobe } from 'react-icons/fi';
 import { useSettings } from '../hooks/useSettings';
 
 import Icon from './Icon';
@@ -39,22 +38,22 @@ const Header = () => {
     { 
       path: '/', 
       label: 'Home', 
-      icon: FiHome 
+      icon: 'home' 
     },
     { 
       path: '/properties', 
       label: 'Listings', 
-      icon: FiGrid 
+      icon: 'th' 
     },
     { 
       path: '/services', 
       label: 'Services', 
-      icon: FiTool 
+      icon: 'tools' 
     },
     {
       path: '/international',
       label: 'International',
-      icon: FiGlobe,
+      icon: 'globe',
       dropdown: [
         { path: '/international', label: 'Overview' },
         { path: '/international/un-housing', label: 'UN & Diplomatic Housing' },
@@ -63,14 +62,14 @@ const Header = () => {
     {
       path: '/about',
       label: 'About',
-      icon: FiInfo
+      icon: 'info-circle'
     },
     {
       // Construction support was shelved here and shipped as its own brand.
       // The route never existed, so this link 404'd on every page.
       path: 'https://nairobuild.co.ke',
       label: 'Construction',
-      icon: FiHelpCircle,
+      icon: 'question-circle',
       external: true,
     },
   ];
@@ -118,7 +117,6 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => {
-              const IconComponent = item.icon;
               
               // Handle dropdown menus
               if (item.dropdown) {
@@ -149,11 +147,11 @@ const Header = () => {
                       aria-haspopup="true"
                       className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
                     >
-                      <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                      <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
                         isScrolled ? 'scale-90' : 'scale-100'
                       }`} />
                       <span className="relative">{item.label}</span>
-                      <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${
+                      <Icon name="chevron-down" size={16} className={`transition-transform duration-300 ${
                         isOpen ? 'rotate-180' : ''
                       }`} />
                     </button>
@@ -188,14 +186,14 @@ const Header = () => {
                       rel="noopener noreferrer"
                       className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
                     >
-                      <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                      <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
                         isScrolled ? 'scale-90' : 'scale-100'
                       }`} />
                       <span className="relative">
                         {item.label}
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                       </span>
-                      <FiExternalLink className="w-3.5 h-3.5 text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
+                      <Icon name="external-link-alt" className="w-3.5 h-3.5 text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
                     </a>
                   </div>
                 );
@@ -213,7 +211,7 @@ const Header = () => {
                           : 'text-content-muted hover:text-primary hover:bg-surface/80'}`
                     }
                   >
-                    <IconComponent className={`w-4 h-4 transition-transform duration-300 ${
+                    <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
                       isScrolled ? 'scale-90' : 'scale-100'
                     }`} />
                     <span className="relative">
@@ -306,7 +304,7 @@ const Header = () => {
                     className="p-2 rounded-lg bg-surface-raised/20 hover:bg-surface-raised/30 transition-colors"
                     aria-label="Close menu"
                   >
-                    <FiX className="w-5 h-5" />
+                    <Icon name="times" size={20} />
                   </button>
                 </div>
                 
@@ -320,7 +318,6 @@ const Header = () => {
               {/* Navigation */}
               <nav id="mobile-nav" className="flex flex-col py-2">
                 {navItems.map((item) => {
-                  const IconComponent = item.icon;
                   const isActive = location.pathname === item.path;
                   
                   // Handle dropdown menus
@@ -336,13 +333,13 @@ const Header = () => {
                           className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-content-muted hover:text-primary hover:bg-surface w-full"
                         >
                           <div className="p-2 rounded-lg transition-colors bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary">
-                            <IconComponent className="w-5 h-5" />
+                            <Icon name={item.icon} size={20} />
                           </div>
                           <span className="flex-1 text-left">{item.label}</span>
                           {isDropdownOpen ? (
-                            <FiChevronUp className="w-5 h-5" />
+                            <Icon name="chevron-up" size={20} />
                           ) : (
-                            <FiChevronDown className="w-5 h-5" />
+                            <Icon name="chevron-down" size={20} />
                           )}
                         </button>
                         
@@ -376,10 +373,10 @@ const Header = () => {
                           className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-content-muted hover:text-primary hover:bg-surface"
                         >
                           <div className="p-2 rounded-lg transition-colors bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary">
-                            <IconComponent className="w-5 h-5" />
+                            <Icon name={item.icon} size={20} />
                           </div>
                           <span className="flex-1">{item.label}</span>
-                          <FiExternalLink className="w-4 h-4 text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
+                          <Icon name="external-link-alt" size={16} className="text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
                         </a>
                       </div>
                     );
@@ -399,7 +396,7 @@ const Header = () => {
                         <div className={`p-2 rounded-lg transition-colors ${
                           isActive ? 'bg-primary/10 text-primary' : 'bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary'
                         }`}>
-                          <IconComponent className="w-5 h-5" />
+                          <Icon name={item.icon} size={20} />
                         </div>
                         <span className="flex-1">{item.label}</span>
                         <div className={`w-2 h-2 rounded-full transition-colors ${

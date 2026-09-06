@@ -4,18 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabaseClient';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  FaHome, 
-  FaBuilding, 
-  FaCalendarAlt, 
-  FaUsers, 
-  FaSignOutAlt, 
-  FaTimes,
-  FaCog,
-  FaChevronLeft,
-  FaChevronRight,
-  FaEye
-} from 'react-icons/fa';
 import Header from './AdminHeader';
 import AdminBottomNav from './AdminBottomNav';
 import AdminBreadcrumb from './AdminBreadcrumb';
@@ -28,6 +16,7 @@ import ThemeToggle from '../../components/ui/ThemeToggle';
 // rules were redundant: `index.css` already sets `overflow-x: hidden` on html
 // and body, and Tailwind's preflight already sets `box-sizing: border-box`.
 import '../../styles/admin-mobile.css';
+import Icon from '../../components/Icon';
 
 /**
  * AdminLayout - World-class admin layout with mobile-first navigation
@@ -122,29 +111,28 @@ const AdminLayout = ({ children }) => {
     {
       title: 'Main',
       items: [
-        { path: '', label: 'Dashboard', icon: FaHome, badge: null }
+        { path: '', label: 'Dashboard', icon: 'home', badge: null }
       ]
     },
     {
       title: 'Management',
       items: [
-        { path: '/properties', label: 'Properties', icon: FaBuilding, badge: null },
-        { path: '/bookings', label: 'Bookings', icon: FaCalendarAlt, badge: pendingCount > 0 ? pendingCount : null },
-        { path: '/viewings', label: 'Viewings', icon: FaEye, badge: null },
-        { path: '/clients', label: 'Clients', icon: FaUsers, badge: null }
+        { path: '/properties', label: 'Properties', icon: 'building', badge: null },
+        { path: '/bookings', label: 'Bookings', icon: 'calendar', badge: pendingCount > 0 ? pendingCount : null },
+        { path: '/viewings', label: 'Viewings', icon: 'eye', badge: null },
+        { path: '/clients', label: 'Clients', icon: 'users', badge: null }
       ]
     },
     {
       title: 'System',
       items: [
-        { path: '/settings', label: 'Settings', icon: FaCog, badge: null }
+        { path: '/settings', label: 'Settings', icon: 'cog', badge: null }
       ]
     }
   ];
 
   // Sidebar link component
   const SidebarLink = ({ item }) => {
-    const Icon = item.icon;
     const active = isActive(item.path);
     
     return (
@@ -159,7 +147,7 @@ const AdminLayout = ({ children }) => {
         title={isSidebarCollapsed ? item.label : undefined}
       >
         <div className="relative flex-shrink-0">
-          <Icon className={`w-5 h-5 ${active ? 'text-content-on-media' : 'text-content-on-media/70'}`} />
+          <Icon name={item.icon} size={20} className={active ? 'text-content-on-media' : 'text-content-on-media/70'} />
           {/* Badge */}
           {item.badge && (
             <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center bg-danger-content text-content-on-brand text-[10px] font-bold rounded-full px-1">
@@ -235,7 +223,7 @@ const AdminLayout = ({ children }) => {
                 className="lg:hidden p-2 rounded-lg hover:bg-surface-chrome-raised transition-colors"
                 aria-label="Close sidebar"
               >
-                <FaTimes className="w-5 h-5 text-content-subtle" />
+                <Icon name="times" size={20} className="text-content-subtle" />
               </button>
               
               {/* Collapse button for desktop */}
@@ -246,9 +234,9 @@ const AdminLayout = ({ children }) => {
                 title={isSidebarCollapsed ? "Expand (Ctrl+[)" : "Collapse (Ctrl+[)"}
               >
                 {isSidebarCollapsed ? (
-                  <FaChevronRight className="w-4 h-4 text-content-subtle" />
+                  <Icon name="chevron-right" size={16} className="text-content-subtle" />
                 ) : (
-                  <FaChevronLeft className="w-4 h-4 text-content-subtle" />
+                  <Icon name="chevron-left" size={16} className="text-content-subtle" />
                 )}
               </button>
             </div>
@@ -304,7 +292,7 @@ const AdminLayout = ({ children }) => {
               }`}
               title={isSidebarCollapsed ? "Sign Out" : undefined}
             >
-              <FaSignOutAlt className="w-5 h-5 flex-shrink-0" />
+              <Icon name="sign-out-alt" size={20} className="flex-shrink-0" />
               {!isSidebarCollapsed && <span className="ml-3">Sign Out</span>}
             </button>
           </div>
