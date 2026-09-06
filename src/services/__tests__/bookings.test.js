@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/utils/supabaseClient';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
-  listBookings, getBookingStats, countPendingBookings, createBooking,
+  listBookings, getBookingStats, countPendingBookings, countBookings, createBooking,
   setBookingStatus, rescheduleBooking, addBookingNote, bookingQueries,
 } from '../bookings';
 import { queryKeys } from '../queryKeys';
@@ -74,6 +74,38 @@ describe('countPendingBookings', () => {
     expect(builders.bookings.select).toHaveBeenCalledWith('*', { count: 'exact', head: true });
     expect(builders.bookings.eq).toHaveBeenCalledWith('status', 'pending');
     expect(builders.bookings.eq).toHaveBeenCalledWith('is_archived', false);
+  });
+});
+
+describe('countBookings', () => {
+  it('counts every booking with no filter', async () => {
+    const builders = mockFrom(supabase, { bookings: { data: null, count: 20, error: null } });
+    await expect(countBookings()).resolves.toBe(20);
+    expect(builders.bookings.select).toHaveBeenCalledWith('*', { count: 'exact', head: true });
+    expect(builders.bookings.eq).not.toHaveBeenCalled();
+    expect(builders.bookings.gt).not.toHaveBeenCalled();
+  });
+
+  it('filters by status when given', async () => {
+    const builders = mockFrom(supabase, { bookings: { data: null, count: 3, error: null } });
+    await expect(countBookings({ status: 'pending' })).resolves.toBe(3);
+    expect(builders.bookings.eq).toHaveBeenCalledWith('status', 'pending');
+  });
+
+  // Additive: the dashboard's "New Bookings" tile has always meant bookings
+  // created in the last 7 days, a `created_at` cutoff — not a status.
+  it('filters by a created-after cutoff when given, independent of status', async () => {
+    const builders = mockFrom(supabase, { bookings: { data: null, count: 8, error: null } });
+    const cutoff = '2026-08-30T00:00:00.000Z';
+    await expect(countBookings({ createdAfter: cutoff })).resolves.toBe(8);
+    expect(builders.bookings.gt).toHaveBeenCalledWith('created_at', cutoff);
+    expect(builders.bookings.eq).not.toHaveBeenCalled();
+  });
+
+  it('ignores an "all" status the same way listBookings does', async () => {
+    const builders = mockFrom(supabase, { bookings: { data: null, count: 20, error: null } });
+    await countBookings({ status: 'all' });
+    expect(builders.bookings.eq).not.toHaveBeenCalledWith('status', 'all');
   });
 });
 

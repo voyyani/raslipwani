@@ -18,6 +18,18 @@ export async function listFeatured({ limit = 3 } = {}) {
   );
 }
 
+/** The five most recently touched rows for the admin dashboard's activity feed. */
+export async function listRecentProperties({ limit = 5 } = {}) {
+  return unwrapList(
+    await supabase
+      .from(TABLE)
+      .select('id, title, created_at, updated_at')
+      .order('created_at', { ascending: false })
+      .limit(limit),
+    { table: TABLE, operation: 'listRecentProperties' }
+  );
+}
+
 /** Everything a visitor may book a viewing on. */
 export async function listAvailable() {
   return unwrapList(

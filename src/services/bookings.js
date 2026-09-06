@@ -63,9 +63,10 @@ export async function countPendingBookings() {
   ).count;
 }
 
-export async function countBookings({ status } = {}) {
+export async function countBookings({ status, createdAfter } = {}) {
   let query = supabase.from(TABLE).select('*', { count: 'exact', head: true });
   if (isSet(status)) query = query.eq('status', status);
+  if (isSet(createdAfter)) query = query.gt('created_at', createdAfter);
   return unwrapCount(await query, { table: TABLE, operation: 'countBookings' }).count;
 }
 

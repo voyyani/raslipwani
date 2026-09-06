@@ -15,7 +15,7 @@ const EMPTY_BOOKINGS = [];
 const EMPTY_ACTIVITIES = [];
 const EMPTY_STATS = {
   properties: { total: 0, featured: 0, pending: 0, sold: 0, available: 0 },
-  bookings: { total: 0, pending: 0 },
+  bookings: { total: 0, last7Days: 0 },
   upcoming: EMPTY_BOOKINGS,
   recentProperties: EMPTY_ACTIVITIES,
   recentBookings: EMPTY_ACTIVITIES,
@@ -194,7 +194,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="New Bookings" 
-              value={stats.bookings.pending} 
+              value={stats.bookings.last7Days} 
               icon={<Icon name="user-friends" />} 
               color="indigo" 
               link="/admin/bookings?filter=recent"

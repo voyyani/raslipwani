@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/utils/supabaseClient';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
-  listFeatured, listAll, listPage, getById, updateProperty, setFeatured, propertyQueries,
+  listFeatured, listAll, listRecentProperties, listPage, getById, updateProperty, setFeatured, propertyQueries,
 } from '../properties';
 import { ServiceError } from '../unwrap';
 import { queryKeys } from '../queryKeys';
@@ -52,6 +52,24 @@ describe('listAll', () => {
 
     await listAll({ sortField: 'price', sortDirection: 'asc' });
     expect(builders.properties.order).toHaveBeenCalledWith('price', { ascending: true });
+  });
+});
+
+describe('listRecentProperties', () => {
+  it('asks for four columns, newest first, five of them', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], error: null } });
+
+    await expect(listRecentProperties()).resolves.toEqual([row]);
+
+    expect(builders.properties.select).toHaveBeenCalledWith('id, title, created_at, updated_at');
+    expect(builders.properties.order).toHaveBeenCalledWith('created_at', { ascending: false });
+    expect(builders.properties.limit).toHaveBeenCalledWith(5);
+  });
+
+  it('honours an explicit limit', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [], error: null } });
+    await listRecentProperties({ limit: 8 });
+    expect(builders.properties.limit).toHaveBeenCalledWith(8);
   });
 });
 
