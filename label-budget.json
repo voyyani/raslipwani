@@ -1,4 +1,4 @@
 {
-  "max": 65,
-  "note": "Form controls with no associated label, counted by jsx-a11y/label-has-associated-control on 2026-09-03 after Release 4D's public-surface pass took this from 96. This number only falls. What remains is entirely in the admin console and is scheduled with its own surface pass; every public, visitor-facing form is at zero. Note that jsx-a11y/label-has-for is deliberately excluded — it is deprecated and double-counts this same rule, which is how the raw warning total came to overstate this defect by a third."
+  "max": 35,
+  "note": "Form controls with no associated label, counted by jsx-a11y/label-has-associated-control. This number only falls. From 96 at the start of Release 4, to 65 after the public-surface pass, to 35 on 2026-09-06 when all six admin settings tabs moved onto the Field primitives in src/components/ui — which mint the id with useId and hand it to both the label and the control, so an unlabelled control is not something a caller can produce by forgetting. Every public, visitor-facing form is at zero. What remains is AdminProperties and four smaller admin surfaces. Note that jsx-a11y/label-has-for is deliberately excluded — it is deprecated and double-counts this same rule, which is how the raw warning total came to overstate this defect by a third."
 }

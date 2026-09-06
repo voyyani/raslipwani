@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabaseClient';
 import toast from 'react-hot-toast';
 import Icon from '../../../components/Icon';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
+import Checkbox from '../../../components/ui/Checkbox';
 
 /**
  * AdvancedSettings - Maintenance mode and advanced configuration
@@ -149,18 +152,13 @@ const AdvancedSettings = () => {
             </div>
           </label>
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Maintenance Message
-            </label>
-            <textarea
-              value={formData.maintenanceMessage}
-              onChange={(e) => setFormData({ ...formData, maintenanceMessage: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="Message displayed to visitors during maintenance"
-            />
-          </div>
+          <Textarea
+            label="Maintenance Message"
+            value={formData.maintenanceMessage}
+            onChange={(e) => setFormData({ ...formData, maintenanceMessage: e.target.value })}
+            rows={3}
+            placeholder="Message displayed to visitors during maintenance"
+          />
         </div>
       </div>
 
@@ -168,37 +166,23 @@ const AdvancedSettings = () => {
       <div>
         <h3 className="text-lg font-semibold text-content mb-4">Analytics & Tracking</h3>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Google Analytics Tracking ID
-            </label>
-            <input
-              type="text"
-              value={formData.googleAnalytics}
-              onChange={(e) => setFormData({ ...formData, googleAnalytics: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
-            />
-            <p className="text-xs text-content-subtle mt-1">
-              Optional: Add Google Analytics to track website traffic
-            </p>
-          </div>
+          <Input
+            label="Google Analytics Tracking ID"
+            type="text"
+            value={formData.googleAnalytics}
+            onChange={(e) => setFormData({ ...formData, googleAnalytics: e.target.value })}
+            placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
+            hint="Optional: Add Google Analytics to track website traffic"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Facebook Pixel ID
-            </label>
-            <input
-              type="text"
-              value={formData.facebookPixel}
-              onChange={(e) => setFormData({ ...formData, facebookPixel: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="1234567890123456"
-            />
-            <p className="text-xs text-content-subtle mt-1">
-              Optional: Add Facebook Pixel for conversion tracking
-            </p>
-          </div>
+          <Input
+            label="Facebook Pixel ID"
+            type="text"
+            value={formData.facebookPixel}
+            onChange={(e) => setFormData({ ...formData, facebookPixel: e.target.value })}
+            placeholder="1234567890123456"
+            hint="Optional: Add Facebook Pixel for conversion tracking"
+          />
         </div>
       </div>
 
@@ -206,31 +190,21 @@ const AdvancedSettings = () => {
       <div>
         <h3 className="text-lg font-semibold text-content mb-4">Legal Pages</h3>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Terms of Service URL
-            </label>
-            <input
-              type="text"
-              value={formData.termsUrl}
-              onChange={(e) => setFormData({ ...formData, termsUrl: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="/terms"
-            />
-          </div>
+          <Input
+            label="Terms of Service URL"
+            type="text"
+            value={formData.termsUrl}
+            onChange={(e) => setFormData({ ...formData, termsUrl: e.target.value })}
+            placeholder="/terms"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Privacy Policy URL
-            </label>
-            <input
-              type="text"
-              value={formData.privacyUrl}
-              onChange={(e) => setFormData({ ...formData, privacyUrl: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="/privacy"
-            />
-          </div>
+          <Input
+            label="Privacy Policy URL"
+            type="text"
+            value={formData.privacyUrl}
+            onChange={(e) => setFormData({ ...formData, privacyUrl: e.target.value })}
+            placeholder="/privacy"
+          />
         </div>
       </div>
 

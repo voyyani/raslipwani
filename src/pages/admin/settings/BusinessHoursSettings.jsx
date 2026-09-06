@@ -116,9 +116,23 @@ const BusinessHoursSettings = () => {
 
               {!businessHours[day].closed && (
                 <>
+                  {/*
+                    Hand-paired rather than routed through `Field`, which is the
+                    default everywhere else in this console. `Field` stacks the
+                    label above a full-width control; this is an inline
+                    "Open: [time] Close: [time]" row inside a seven-row grid,
+                    and stacking would break the alignment that makes the week
+                    readable at a glance. The ids come from the loop's `day`
+                    key, so they are unique by construction rather than by
+                    someone remembering — which is the property `Field` exists
+                    to guarantee.
+                  */}
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-content-muted">Open:</label>
+                    <label htmlFor={`${day}-open`} className="text-sm text-content-muted">
+                      Open:
+                    </label>
                     <input
+                      id={`${day}-open`}
                       type="time"
                       value={businessHours[day].open}
                       onChange={(e) => handleDayChange(day, 'open', e.target.value)}
@@ -126,8 +140,11 @@ const BusinessHoursSettings = () => {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-content-muted">Close:</label>
+                    <label htmlFor={`${day}-close`} className="text-sm text-content-muted">
+                      Close:
+                    </label>
                     <input
+                      id={`${day}-close`}
                       type="time"
                       value={businessHours[day].close}
                       onChange={(e) => handleDayChange(day, 'close', e.target.value)}

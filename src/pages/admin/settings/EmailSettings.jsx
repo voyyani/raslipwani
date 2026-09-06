@@ -179,21 +179,14 @@ const EmailSettings = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-content-muted mb-1">
-            Email Recipients (comma-separated)
-          </label>
-          <input
-            type="text"
-            value={formData.recipients}
-            onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
-            className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-            placeholder="admin@raslipwani.com, manager@raslipwani.com"
-          />
-          <p className="text-xs text-content-subtle mt-1">
-            Multiple email addresses can be added, separated by commas
-          </p>
-        </div>
+        <Input
+          label="Email Recipients (comma-separated)"
+          type="text"
+          value={formData.recipients}
+          onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
+          placeholder="admin@raslipwani.com, manager@raslipwani.com"
+          hint="Multiple email addresses can be added, separated by commas"
+        />
 
         <div className="flex gap-3 pt-4 border-t">
           <button

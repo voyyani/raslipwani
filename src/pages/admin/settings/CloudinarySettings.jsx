@@ -6,6 +6,7 @@ import { useSettings } from '../../../hooks/useSettings';
 
 import { logger } from '../../../utils/logger';
 import Icon from '../../../components/Icon';
+import Input from '../../../components/ui/Input';
 /**
  * CloudinarySettings - Cloudinary configuration for image uploads
  * Works with flat table structure (single row with columns)
@@ -162,52 +163,40 @@ const CloudinarySettings = () => {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-content-muted mb-1">
-          Cloud Name <span className="text-danger-content">*</span>
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={formData.cloud_name}
-            onChange={(e) => setFormData({ ...formData, cloud_name: e.target.value })}
-            className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-            placeholder="your-cloud-name"
-            required
-          />
-          {formData.cloud_name && (
-            <span className="flex items-center text-xs text-success-content bg-success-surface px-2 rounded">
-              ✓ Set
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-content-subtle mt-1">
-          Found in your Cloudinary Dashboard under "Cloud Name"
-        </p>
+      <div className="flex items-start gap-2">
+        <Input
+          label="Cloud Name"
+          required
+          className="flex-1"
+          type="text"
+          value={formData.cloud_name}
+          onChange={(e) => setFormData({ ...formData, cloud_name: e.target.value })}
+          placeholder="your-cloud-name"
+          hint={'Found in your Cloudinary Dashboard under "Cloud Name"'}
+        />
+        {formData.cloud_name && (
+          <span className="flex items-center mt-7 text-xs text-success-content bg-success-surface px-2 py-2.5 rounded">
+            ✓ Set
+          </span>
+        )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-content-muted mb-1">
-          Upload Preset <span className="text-danger-content">*</span>
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={formData.upload_preset}
-            onChange={(e) => setFormData({ ...formData, upload_preset: e.target.value })}
-            className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-            placeholder="unsigned_preset"
-            required
-          />
-          {formData.upload_preset && (
-            <span className="flex items-center text-xs text-success-content bg-success-surface px-2 rounded">
-              ✓ Set
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-content-subtle mt-1">
-          Create an unsigned upload preset in Cloudinary Settings → Upload → Upload Presets
-        </p>
+      <div className="flex items-start gap-2">
+        <Input
+          label="Upload Preset"
+          required
+          className="flex-1"
+          type="text"
+          value={formData.upload_preset}
+          onChange={(e) => setFormData({ ...formData, upload_preset: e.target.value })}
+          placeholder="unsigned_preset"
+          hint="Create an unsigned upload preset in Cloudinary Settings → Upload → Upload Presets"
+        />
+        {formData.upload_preset && (
+          <span className="flex items-center mt-7 text-xs text-success-content bg-success-surface px-2 py-2.5 rounded">
+            ✓ Set
+          </span>
+        )}
       </div>
 
       <div className="border-t pt-4">

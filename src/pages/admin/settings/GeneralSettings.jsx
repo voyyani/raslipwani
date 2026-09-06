@@ -6,6 +6,8 @@ import { useSettings } from '../../../hooks/useSettings';
 
 import { logger } from '../../../utils/logger';
 import Icon from '../../../components/Icon';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
 /**
  * GeneralSettings - General site configuration
  * Works with flat table structure (single row with columns)
@@ -159,57 +161,53 @@ const GeneralSettings = () => {
         <h3 className="text-lg font-semibold text-content mb-4">Basic Information</h3>
         <p className="text-sm text-content-subtle mb-4">These settings appear in the Header, Footer, and throughout the site.</p>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Business Name <span className="text-xs text-brand">(Header &amp; Footer)</span>
-            </label>
-            <input
-              type="text"
-              value={formData.business_name}
-              onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="Raslipwani Properties"
-            />
-          </div>
+          <Input
+            label={
+              <>
+                Business Name <span className="text-xs text-brand">(Header &amp; Footer)</span>
+              </>
+            }
+            type="text"
+            value={formData.business_name}
+            onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+            placeholder="Raslipwani Properties"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Company Tagline <span className="text-xs text-brand">(Header subtitle)</span>
-            </label>
-            <input
-              type="text"
-              value={formData.company_tagline}
-              onChange={(e) => setFormData({ ...formData, company_tagline: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="Your Premier Real Estate Partner"
-            />
-            <p className="text-xs text-content-subtle mt-1">A short slogan that appears under your logo in the header</p>
-          </div>
+          <Input
+            label={
+              <>
+                Company Tagline <span className="text-xs text-brand">(Header subtitle)</span>
+              </>
+            }
+            type="text"
+            value={formData.company_tagline}
+            onChange={(e) => setFormData({ ...formData, company_tagline: e.target.value })}
+            placeholder="Your Premier Real Estate Partner"
+            hint="A short slogan that appears under your logo in the header"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Company Logo URL <span className="text-xs text-brand">(Header &amp; Footer)</span>
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={formData.company_logo}
-                onChange={(e) => setFormData({ ...formData, company_logo: e.target.value })}
-                className="flex-1 px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-                placeholder="https://example.com/logo.png"
+          <div className="flex items-end gap-2">
+            <Input
+              label={
+                <>
+                  Company Logo URL <span className="text-xs text-brand">(Header &amp; Footer)</span>
+                </>
+              }
+              className="flex-1"
+              type="url"
+              value={formData.company_logo}
+              onChange={(e) => setFormData({ ...formData, company_logo: e.target.value })}
+              placeholder="https://example.com/logo.png"
+              hint={formData.company_logo ? '✓ Custom logo set' : 'Using default logo — paste a URL above to change'}
+            />
+            <div className="flex-shrink-0 w-12 h-12 mb-6 border-2 border-line rounded-lg overflow-hidden bg-surface">
+              <img
+                src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'}
+                alt="Logo preview"
+                className="w-full h-full object-cover"
+                onError={(e) => { e.target.src = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'; }}
               />
-              <div className="flex-shrink-0 w-12 h-12 border-2 border-line rounded-lg overflow-hidden bg-surface">
-                <img 
-                  src={formData.company_logo || 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'} 
-                  alt="Logo preview" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = 'https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg'; }}
-                />
-              </div>
             </div>
-            <p className="text-xs text-content-subtle mt-1">
-              {formData.company_logo ? '✓ Custom logo set' : 'Using default logo - paste a URL above to change'}
-            </p>
           </div>
         </div>
       </div>
@@ -217,142 +215,92 @@ const GeneralSettings = () => {
       <div>
         <h3 className="text-lg font-semibold text-content mb-4">Contact Information</h3>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Business Email
-            </label>
-            <input
-              type="email"
-              value={formData.business_email}
-              onChange={(e) => setFormData({ ...formData, business_email: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="info@raslipwani.com"
-            />
-          </div>
+          <Input
+            label="Business Email"
+            type="email"
+            value={formData.business_email}
+            onChange={(e) => setFormData({ ...formData, business_email: e.target.value })}
+            placeholder="info@raslipwani.com"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Business Phone
-            </label>
-            <input
-              type="tel"
-              value={formData.business_phone}
-              onChange={(e) => setFormData({ ...formData, business_phone: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="+254712345678"
-            />
-          </div>
+          <Input
+            label="Business Phone"
+            type="tel"
+            value={formData.business_phone}
+            onChange={(e) => setFormData({ ...formData, business_phone: e.target.value })}
+            placeholder="+254712345678"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              WhatsApp Number
-            </label>
-            <input
-              type="tel"
-              value={formData.whatsapp_number}
-              onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="+254712345678"
-            />
-            <p className="text-xs text-content-subtle mt-1">Used for the WhatsApp chat button</p>
-          </div>
+          <Input
+            label="WhatsApp Number"
+            type="tel"
+            value={formData.whatsapp_number}
+            onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+            placeholder="+254712345678"
+            hint="Used for the WhatsApp chat button"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Business Address
-            </label>
-            <textarea
-              value={formData.business_address}
-              onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="Kilifi, Kenya"
-            />
-          </div>
+          <Textarea
+            label="Business Address"
+            value={formData.business_address}
+            onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
+            rows={3}
+            placeholder="Kilifi, Kenya"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Service Locations
-            </label>
-            <textarea
-              value={formData.service_locations}
-              onChange={(e) => setFormData({ ...formData, service_locations: e.target.value })}
-              rows={2}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi"
-            />
-            <p className="text-xs text-content-subtle mt-1">Comma-separated list of locations you serve</p>
-          </div>
+          <Textarea
+            label="Service Locations"
+            value={formData.service_locations}
+            onChange={(e) => setFormData({ ...formData, service_locations: e.target.value })}
+            rows={2}
+            placeholder="Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi"
+            hint="Comma-separated list of locations you serve"
+          />
         </div>
       </div>
 
       <div>
         <h3 className="text-lg font-semibold text-content mb-4">Social Media</h3>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Facebook URL
-            </label>
-            <input
-              type="url"
-              value={formData.social_facebook}
-              onChange={(e) => setFormData({ ...formData, social_facebook: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="https://facebook.com/raslipwani"
-            />
-          </div>
+          <Input
+            label="Facebook URL"
+            type="url"
+            value={formData.social_facebook}
+            onChange={(e) => setFormData({ ...formData, social_facebook: e.target.value })}
+            placeholder="https://facebook.com/raslipwani"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Twitter URL
-            </label>
-            <input
-              type="url"
-              value={formData.social_twitter}
-              onChange={(e) => setFormData({ ...formData, social_twitter: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="https://twitter.com/raslipwani"
-            />
-          </div>
+          <Input
+            label="Twitter URL"
+            type="url"
+            value={formData.social_twitter}
+            onChange={(e) => setFormData({ ...formData, social_twitter: e.target.value })}
+            placeholder="https://twitter.com/raslipwani"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              Instagram URL
-            </label>
-            <input
-              type="url"
-              value={formData.social_instagram}
-              onChange={(e) => setFormData({ ...formData, social_instagram: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="https://instagram.com/raslipwani"
-            />
-          </div>
+          <Input
+            label="Instagram URL"
+            type="url"
+            value={formData.social_instagram}
+            onChange={(e) => setFormData({ ...formData, social_instagram: e.target.value })}
+            placeholder="https://instagram.com/raslipwani"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              LinkedIn URL
-            </label>
-            <input
-              type="url"
-              value={formData.social_linkedin}
-              onChange={(e) => setFormData({ ...formData, social_linkedin: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="https://linkedin.com/company/raslipwani"
-            />
-          </div>
+          <Input
+            label="LinkedIn URL"
+            type="url"
+            value={formData.social_linkedin}
+            onChange={(e) => setFormData({ ...formData, social_linkedin: e.target.value })}
+            placeholder="https://linkedin.com/company/raslipwani"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-content-muted mb-1">
-              TikTok URL
-            </label>
-            <input
-              type="url"
-              value={formData.social_tiktok}
-              onChange={(e) => setFormData({ ...formData, social_tiktok: e.target.value })}
-              className="w-full px-3 py-2 border border-line-strong rounded-md focus:outline-none focus:ring-2 focus:ring-focus-ring"
-              placeholder="https://tiktok.com/@raslipwani"
-            />
-          </div>
+          <Input
+            label="TikTok URL"
+            type="url"
+            value={formData.social_tiktok}
+            onChange={(e) => setFormData({ ...formData, social_tiktok: e.target.value })}
+            placeholder="https://tiktok.com/@raslipwani"
+          />
         </div>
       </div>
 
