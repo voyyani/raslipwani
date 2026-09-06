@@ -74,6 +74,43 @@ describe('Icon registry', () => {
   });
 });
 
+describe('brand marks are local, not a dependency', () => {
+  it('draws them without reaching for react-icons', () => {
+    // The point of this task. react-icons was a whole dependency held open by
+    // three glyphs lucide does not carry, and the other three tests here pass
+    // either way — react-icons honours a numeric `size` prop too — so this is
+    // the assertion that actually distinguishes before from after.
+    const source = fs.readFileSync(path.join(repoRoot, 'src/components/Icon.jsx'), 'utf8');
+    expect(source).not.toMatch(/from 'react-icons/);
+  });
+
+  it('sizes a brand mark the same way it sizes a lucide icon', () => {
+    // The bug this catches: a brand mark that ignores `size` renders at its
+    // viewBox default and is visibly wrong next to its neighbours, which no
+    // snapshot in this repo would notice.
+    const { container: brand } = render(<Icon name="whatsapp" size={32} />);
+    const { container: lucide } = render(<Icon name="facebook" size={32} />);
+
+    expect(brand.querySelector('svg')).toHaveAttribute('width', '32');
+    expect(lucide.querySelector('svg')).toHaveAttribute('width', '32');
+  });
+
+  it('hides a brand mark from assistive technology by default', () => {
+    const { container } = render(<Icon name="tiktok" />);
+    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('draws all three marks that lucide does not carry', () => {
+    for (const name of ['whatsapp', 'tiktok', 'pinterest']) {
+      const { container, unmount } = render(<Icon name={name} />);
+      const path = container.querySelector('svg path');
+      expect(path, `<Icon name="${name}"> drew no path`).not.toBeNull();
+      expect(path.getAttribute('d').length).toBeGreaterThan(100);
+      unmount();
+    }
+  });
+});
+
 describe('FontAwesome stays gone', () => {
   // Phase 6.2/5.6. One CSS import emitted 999 kB of icon fonts. Removing it is
   // only durable if re-adding it fails something, so: this.

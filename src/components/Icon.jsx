@@ -87,7 +87,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { SiPinterest, SiTiktok, SiWhatsapp } from 'react-icons/si';
+import { Pinterest, TikTok, WhatsApp } from './BrandMarks';
 
 /**
  * The single icon seam for the application.
@@ -233,15 +233,15 @@ const REGISTRY = {
   'user-friends': UsersRound,
 
   // Brand marks. Lucide carries these four; it has no mark for TikTok,
-  // WhatsApp or Pinterest, so those three come from `react-icons/si`
-  // (Simple Icons), which is already a dependency and ships as SVG.
+  // WhatsApp or Pinterest, so those three are drawn locally from Simple Icons
+  // path data — see BrandMarks.jsx.
   'facebook': Facebook,
   'instagram': Instagram,
   'twitter': Twitter,
   'linkedin': Linkedin,
-  'whatsapp': SiWhatsapp,
-  'tiktok': SiTiktok,
-  'pinterest': SiPinterest,
+  'whatsapp': WhatsApp,
+  'tiktok': TikTok,
+  'pinterest': Pinterest,
 };
 
 /** The names this registry answers to — exported so a test can assert coverage. */
