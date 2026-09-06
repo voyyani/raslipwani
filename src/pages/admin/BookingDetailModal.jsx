@@ -1,7 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/utils/supabaseClient';
+import {
+  bookingQueries,
+  updateBooking,
+  setBookingPriority,
+  addBookingNote,
+  deleteBookingNote,
+} from '@/services/bookings';
+import { queryKeys } from '@/services/queryKeys';
 import { format } from 'date-fns';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import toast from 'react-hot-toast';
@@ -29,50 +36,30 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
   const [cancellationReason, setCancellationReason] = useState('');
 
   // Fetch booking notes
-  const { data: notes = [] } = useQuery({
-    queryKey: ['booking-notes', booking.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('booking_notes')
-        .select('*')
-        .eq('booking_id', booking.id)
-        .order('created_at', { ascending: false });
+  const { data: notes = [] } = useQuery(bookingQueries.notes(booking.id));
 
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  // Update booking status mutation
+  // Update booking status mutation.
+  //
+  // This writes more than `status`: a cancellation also records
+  // `cancellation_reason` and `cancelled_by`, which `setBookingStatus` (a
+  // fixed two-field write) has no way to carry — so this calls the more
+  // general `updateBooking` directly instead, the same way the previous
+  // inline Supabase call built up its own `updates` object.
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ status, reason }) => {
-      const updates = {
-        status,
-        last_modified_at: new Date().toISOString()
-      };
-
+    mutationFn: ({ status, reason }) => {
+      const updates = { status };
       if (status === 'cancelled') {
         updates.cancellation_reason = reason;
         updates.cancelled_by = 'admin-user-id'; // Replace with actual user ID
       }
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .update(updates)
-        .eq('id', booking.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      return updateBooking(booking.id, updates);
     },
     onSuccess: () => {
       toast.success('Status updated successfully');
       setIsEditingStatus(false);
       setCancellationReason('');
       onUpdate();
-      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-      queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
     onError: () => {
       toast.error('Failed to update status');
@@ -81,25 +68,15 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
   // Add note mutation
   const addNoteMutation = useMutation({
-    mutationFn: async (noteText) => {
-      const { data, error } = await supabase
-        .from('booking_notes')
-        .insert({
-          booking_id: booking.id,
-          note_text: noteText,
-          created_by: 'admin-user-id', // Replace with actual user ID
-          is_internal: true
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: (noteText) =>
+      addBookingNote({ bookingId: booking.id, note: noteText, author: 'admin-user-id' }),
     onSuccess: () => {
       toast.success('Note added successfully');
       setNewNote('');
-      queryClient.invalidateQueries({ queryKey: ['booking-notes', booking.id] });
+      // Invalidating the whole domain (not just this booking's notes) is
+      // deliberate: this is the call site that used to forget the stats key,
+      // which is exactly the bug this migration's own test guards against.
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
     onError: () => {
       toast.error('Failed to add note');
@@ -108,17 +85,10 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
   // Delete note mutation
   const deleteNoteMutation = useMutation({
-    mutationFn: async (noteId) => {
-      const { error } = await supabase
-        .from('booking_notes')
-        .delete()
-        .eq('id', noteId);
-
-      if (error) throw error;
-    },
+    mutationFn: (noteId) => deleteBookingNote(noteId),
     onSuccess: () => {
       toast.success('Note deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['booking-notes', booking.id] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
     onError: () => {
       toast.error('Failed to delete note');
@@ -127,20 +97,11 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
 
   // Update booking priority
   const updatePriorityMutation = useMutation({
-    mutationFn: async (priority) => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({ priority, last_modified_at: new Date().toISOString() })
-        .eq('id', booking.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: (priority) => setBookingPriority(booking.id, priority),
     onSuccess: () => {
       toast.success('Priority updated successfully');
       onUpdate();
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
     onError: () => {
       toast.error('Failed to update priority');
@@ -548,7 +509,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           <Icon name="trash" />
                         </button>
                       </div>
-                      <p className="text-content-muted">{note.note_text}</p>
+                      <p className="text-content-muted">{note.note}</p>
                     </div>
                   ))
                 )}

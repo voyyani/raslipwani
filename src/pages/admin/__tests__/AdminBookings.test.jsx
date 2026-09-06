@@ -1,29 +1,45 @@
+import { readFileSync } from 'fs';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '../../../test/utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import AdminBookings from '../AdminBookings';
-import { supabase } from '@/utils/supabaseClient';
 import { exportToCSV } from '../../../utils/exportUtils';
+import * as bookingsService from '@/services/bookings';
 
-// Mock Supabase
-// No local Supabase mock: src/test/setup.jsx already mocks this module with a
-// full client, realtime included, and the cases below override `supabase.from`
-// per test anyway. A bare `vi.mock(path)` here would automock over that and
-// take `channel()` with it, which SettingsProvider calls on mount.
-
-// Mock FullCalendar
+// Mock FullCalendar. `data-start` and the `simulate-drop` button exist only so
+// the rollback test below can drive `eventDrop` the same way a real drag
+// would, without a real drag-and-drop library in jsdom.
 vi.mock('@fullcalendar/react', () => ({
-  default: ({ events, eventClick, initialView }) => (
+  default: ({ events, eventClick, eventDrop, initialView }) => (
     <div data-testid="fullcalendar" data-view={initialView}>
       {events.map((event) => (
         <div
           key={event.id}
           data-testid={`event-${event.id}`}
+          data-start={event.start}
           onClick={() => eventClick({ event: { id: event.id, ...event } })}
         >
           {event.title}
         </div>
       ))}
+      {eventDrop && events[0] && (
+        <button
+          type="button"
+          data-testid="simulate-drop"
+          onClick={() =>
+            eventDrop({
+              event: {
+                id: events[0].id,
+                title: events[0].title,
+                start: new Date('2026-03-01T09:00:00.000Z'),
+              },
+              revert: vi.fn(),
+            })
+          }
+        >
+          Simulate drop
+        </button>
+      )}
     </div>
   )
 }));
@@ -32,6 +48,37 @@ vi.mock('@fullcalendar/react', () => ({
 vi.mock('../../../utils/exportUtils', () => ({
   exportToCSV: vi.fn(),
   formatBookingsForExport: vi.fn((rows) => rows)
+}));
+
+// The bookings service replaces the hand-stubbed Supabase builder chain: the
+// component now consumes query options and mutation functions, not a table
+// mock, so the test doubles them directly.
+vi.mock('@/services/bookings', () => ({
+  bookingQueries: {
+    list: vi.fn((filters = {}) => ({
+      queryKey: ['bookings', 'list', filters],
+      queryFn: () => Promise.resolve(bookingsService.__mockBookings),
+    })),
+    stats: vi.fn(() => ({
+      queryKey: ['bookings', 'stats'],
+      queryFn: () => Promise.resolve(bookingsService.__mockStats),
+    })),
+    notes: vi.fn((bookingId) => ({
+      queryKey: ['bookings', 'notes', String(bookingId)],
+      queryFn: () => Promise.resolve([]),
+      enabled: Boolean(bookingId),
+    })),
+  },
+  setBookingStatus: vi.fn(() => Promise.resolve({})),
+  setBookingPriority: vi.fn(() => Promise.resolve({})),
+  rescheduleBooking: vi.fn(() => Promise.resolve({})),
+  updateBooking: vi.fn(() => Promise.resolve({})),
+  addBookingNote: vi.fn(() => Promise.resolve({})),
+  deleteBookingNote: vi.fn(() => Promise.resolve({})),
+  // Test-only escape hatch so the mocked query options above can read
+  // per-test fixtures without re-mocking the whole module each time.
+  __mockBookings: [],
+  __mockStats: { total: 0, byStatus: {}, byPriority: {} },
 }));
 
 describe('AdminBookings', () => {
@@ -64,17 +111,13 @@ describe('AdminBookings', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock Supabase queries
-    supabase.from = vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      or: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      then: vi.fn((callback) => callback({ data: mockBookings, error: null }))
-    }));
+    bookingsService.__mockBookings.length = 0;
+    bookingsService.__mockBookings.push(...mockBookings);
+    Object.assign(bookingsService.__mockStats, {
+      total: mockBookings.length,
+      byStatus: { pending: 1, confirmed: 1 },
+      byPriority: { medium: 1, high: 1 },
+    });
   });
 
   it('renders bookings calendar view', async () => {
@@ -88,26 +131,6 @@ describe('AdminBookings', () => {
   });
 
   it('displays booking statistics', async () => {
-    // Mock stats query
-    supabase.from = vi.fn((table) => {
-      if (table === 'bookings') {
-        const chainable = {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          order: vi.fn().mockReturnThis()
-        };
-
-        chainable.then = vi.fn((callback) => {
-          const data = table === 'bookings' && chainable.eq.mock.calls[0]?.[0] === 'is_archived'
-            ? mockBookings
-            : mockBookings;
-          return callback({ data, error: null });
-        });
-
-        return chainable;
-      }
-    });
-
     render(<AdminBookings />);
 
     await waitFor(() => {
@@ -194,6 +217,52 @@ describe('AdminBookings', () => {
     // The detail modal renders the booking it was handed, not a placeholder.
     await waitFor(() => {
       expect(screen.getAllByText('john@example.com').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('invalidates the whole bookings domain after a status change, not two named keys', async () => {
+    // The bug this prevents: 'admin-bookings' and 'booking-stats' were
+    // invalidated by hand at six call sites, and the seventh — the note modal —
+    // forgot 'booking-stats', so the counters disagreed with the list until a
+    // reload.
+    const source = readFileSync('src/pages/admin/AdminBookings.jsx', 'utf8');
+    expect(source).not.toMatch(/queryKey:\s*\[\s*['"]admin-bookings/);
+    expect(source).toMatch(/queryKeys\.bookings\.all/);
+  });
+
+  it('rolls back the optimistic reschedule when the mutation fails, restoring the previous list', async () => {
+    // The bug this prevents: the optimistic update snapshots and restores
+    // whatever key it is given. Restoring a different key than the one that
+    // was snapshotted (or than the one useQuery reads) leaves the list stuck
+    // showing a move that never happened.
+    bookingsService.rescheduleBooking.mockRejectedValueOnce(new Error('network down'));
+
+    const user = userEvent.setup();
+    render(<AdminBookings />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('event-1')).toBeInTheDocument();
+    });
+
+    const originalStart = screen.getByTestId('event-1').getAttribute('data-start');
+
+    await user.click(screen.getByTestId('simulate-drop'));
+
+    const confirmButton = await screen.findByRole('button', { name: /reschedule/i });
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(bookingsService.rescheduleBooking).toHaveBeenCalledWith(
+        1,
+        { appointmentAt: '2026-03-01T09:00:00.000Z' }
+      );
+    });
+
+    // Once the rejected mutation's rollback runs, the cache must be back to
+    // the pre-optimistic value — not left on the optimistic guess, and not
+    // wiped by restoring the wrong key.
+    await waitFor(() => {
+      expect(screen.getByTestId('event-1')).toHaveAttribute('data-start', originalStart);
     });
   });
 });

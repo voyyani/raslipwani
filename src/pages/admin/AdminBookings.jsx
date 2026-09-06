@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { bookingQueries, setBookingStatus, rescheduleBooking } from '@/services/bookings';
+import { queryKeys } from '@/services/queryKeys';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -20,6 +21,10 @@ import useConfirm from '../../components/ui/useConfirm';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Icon from '../../components/Icon';
+
+// A stable empty array so `data = EMPTY_BOOKINGS` doesn't hand a fresh
+// reference to a dependent useMemo on every render before the query resolves.
+const EMPTY_BOOKINGS = [];
 
 /**
  * AdminBookings - Professional booking management with calendar views
@@ -51,82 +56,66 @@ const AdminBookings = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [expandedStats, setExpandedStats] = useState(false);
 
+  // The service's listBookings(filters) only understands `status` and
+  // `priority` — it queries the table those two ways and nothing else. The
+  // free-text search box and the (currently UI-less) date range have no
+  // server-side equivalent in the service layer, so they stay client-side
+  // filters applied to the fetched page below, rather than being silently
+  // dropped. This keeps the search box working; it trades a narrower SQL
+  // query for a wider one filtered in memory, which is the deliberate
+  // deviation from the migration brief's literal `bookingQueries.list(filters)`
+  // call — see the migration report for the full reasoning.
+  const bookingListFilters = { status: filters.status, priority: filters.priority };
+
   // Fetch bookings
-  const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ['admin-bookings', filters],
-    queryFn: async () => {
-      let query = supabase
-        .from('bookings')
-        .select('*')
-        .eq('is_archived', false)
-        .order('appointment_at', { ascending: true });
+  const { data: rawBookings = EMPTY_BOOKINGS, isLoading } = useQuery(
+    bookingQueries.list(bookingListFilters)
+  );
 
-      // Apply filters
-      if (filters.status !== 'all') {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.priority !== 'all') {
-        query = query.eq('priority', filters.priority);
-      }
-      if (filters.search) {
-        query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`);
-      }
-      if (filters.dateRange.start) {
-        query = query.gte('appointment_at', filters.dateRange.start);
-      }
-      if (filters.dateRange.end) {
-        query = query.lte('appointment_at', filters.dateRange.end);
-      }
+  const bookings = useMemo(() => {
+    let result = rawBookings;
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data || [];
+    if (filters.search) {
+      const term = filters.search.toLowerCase();
+      result = result.filter(booking =>
+        (booking.name || '').toLowerCase().includes(term) ||
+        (booking.email || '').toLowerCase().includes(term) ||
+        (booking.phone || '').toLowerCase().includes(term)
+      );
     }
-  });
-
-  // Fetch booking stats
-  const { data: stats } = useQuery({
-    queryKey: ['booking-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('status, priority')
-        .eq('is_archived', false);
-
-      if (error) throw error;
-
-      const statusCounts = {
-        total: data.length,
-        pending: data.filter(b => b.status === 'pending').length,
-        confirmed: data.filter(b => b.status === 'confirmed').length,
-        completed: data.filter(b => b.status === 'completed').length,
-        cancelled: data.filter(b => b.status === 'cancelled').length,
-        high_priority: data.filter(b => b.priority === 'high' || b.priority === 'urgent').length
-      };
-
-      return statusCounts;
+    if (filters.dateRange.start) {
+      result = result.filter(booking => booking.appointment_at >= filters.dateRange.start);
     }
-  });
+    if (filters.dateRange.end) {
+      result = result.filter(booking => booking.appointment_at <= filters.dateRange.end);
+    }
+
+    return result;
+  }, [rawBookings, filters.search, filters.dateRange.start, filters.dateRange.end]);
+
+  // Fetch booking stats. getBookingStats() returns { total, byStatus,
+  // byPriority } — a tally keyed by the exact status/priority value, not the
+  // { total, pending, confirmed, ... } shape this screen renders. Remapped
+  // here, once, so every tile below reads the same field names it always did.
+  const { data: rawStats } = useQuery(bookingQueries.stats());
+  const stats = rawStats && {
+    total: rawStats.total,
+    pending: rawStats.byStatus?.pending ?? 0,
+    confirmed: rawStats.byStatus?.confirmed ?? 0,
+    completed: rawStats.byStatus?.completed ?? 0,
+    cancelled: rawStats.byStatus?.cancelled ?? 0,
+    // The old tally counted 'high' and 'urgent' priority together.
+    high_priority: (rawStats.byPriority?.high ?? 0) + (rawStats.byPriority?.urgent ?? 0),
+  };
 
   // Status update mutation for swipe actions
   const statusMutation = useMutation({
-    mutationFn: async ({ id, status }) => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({ 
-          status, 
-          last_modified_at: new Date().toISOString() 
-        })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: ({ id, status }) => setBookingStatus(id, status),
     onSuccess: (_, { status }) => {
       toast.success(`Booking ${status}`);
-      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-      queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+      // One invalidation for the whole domain: list, stats and the pending
+      // badge in the layout all sit under this root.
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
     onError: () => toast.error('Failed to update booking')
   });
@@ -182,32 +171,24 @@ const AdminBookings = () => {
 
   // Reschedule booking mutation (for drag-and-drop)
   const rescheduleMutation = useMutation({
-    mutationFn: async ({ id, newDate }) => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .update({
-          appointment_at: newDate,
-          last_modified_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onMutate: async ({ id, newDate }) => {
+    mutationFn: ({ id, appointmentAt }) => rescheduleBooking(id, { appointmentAt }),
+    onMutate: async ({ id, appointmentAt }) => {
       // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: ['admin-bookings'] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.bookings.all });
 
-      // Snapshot previous value
-      const previousBookings = queryClient.getQueryData(['admin-bookings', filters]);
+      // Snapshot previous value. This must be the exact key useQuery reads
+      // above (bookingListFilters), and onError below must restore that same
+      // key — restoring a different key than was snapshotted silently loses
+      // the rollback and leaves the optimistic guess on screen.
+      const previousBookings = queryClient.getQueryData(
+        queryKeys.bookings.list(bookingListFilters)
+      );
 
       // Optimistically update
-      queryClient.setQueryData(['admin-bookings', filters], old =>
+      queryClient.setQueryData(queryKeys.bookings.list(bookingListFilters), old =>
         old.map(booking =>
           booking.id === id
-            ? { ...booking, appointment_at: newDate }
+            ? { ...booking, appointment_at: appointmentAt }
             : booking
         )
       );
@@ -216,13 +197,14 @@ const AdminBookings = () => {
     },
     onError: (err, variables, context) => {
       // Rollback on error
-      queryClient.setQueryData(['admin-bookings', filters], context.previousBookings);
+      queryClient.setQueryData(queryKeys.bookings.list(bookingListFilters), context.previousBookings);
       toast.error('Failed to reschedule booking');
     },
     onSuccess: () => {
       toast.success('Booking rescheduled successfully');
-      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-      queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     }
   });
 
@@ -291,7 +273,7 @@ const AdminBookings = () => {
     });
 
     if (ok) {
-      rescheduleMutation.mutate({ id: bookingId, newDate });
+      rescheduleMutation.mutate({ id: bookingId, appointmentAt: newDate });
     } else {
       info.revert();
     }
@@ -301,12 +283,10 @@ const AdminBookings = () => {
   const handleEventResize = (info) => {
     const bookingId = parseInt(info.event.id);
     const newDate = info.event.start.toISOString();
-    const newEndDate = info.event.end?.toISOString();
 
     rescheduleMutation.mutate({
       id: bookingId,
-      newDate: newDate,
-      newEndDate: newEndDate
+      appointmentAt: newDate
     });
   };
 
@@ -827,8 +807,7 @@ const AdminBookings = () => {
             setSelectedBooking(null);
           }}
           onUpdate={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-            queryClient.invalidateQueries({ queryKey: ['booking-stats'] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
           }}
         />
       )}
