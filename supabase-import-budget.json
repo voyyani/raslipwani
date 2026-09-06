@@ -1,4 +1,4 @@
 {
-  "max": 16,
+  "max": 14,
   "note": "Files under src/components and src/pages that import the Supabase client directly. Started at 22 on 2026-09-06 and has been ratcheted down as each surface migrates to src/services; currently 16. ROADMAP.md Block 3.1 drives this to 0, at which point scripts/supabase-import-ratchet.mjs is deleted and eslint.config.js enforces it as an error instead. This ceiling only falls."
 }

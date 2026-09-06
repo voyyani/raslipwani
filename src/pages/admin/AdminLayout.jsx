@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { bookingQueries } from '@/services/bookings';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from './AdminHeader';
 import AdminBottomNav from './AdminBottomNav';
@@ -37,19 +37,8 @@ const AdminLayout = ({ children }) => {
   
   // Fetch pending bookings count for badges
   const { data: pendingCount = 0 } = useQuery({
-    queryKey: ['pending-bookings-count'],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('bookings')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-        .eq('is_archived', false);
-      
-      if (error) throw error;
-      return count || 0;
-    },
+    ...bookingQueries.pendingCount(),
     refetchInterval: 60000, // Refetch every minute
-    staleTime: 30000
   });
 
   // Body scroll lock when sidebar is open on mobile

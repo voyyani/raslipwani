@@ -1,24 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
-import { logger } from '../../utils/logger';
+import { dashboardQueries } from '@/services/dashboard';
 import Icon from '../../components/Icon';
+
+// Module-level so the default doesn't create a new array/object identity
+// every render (see src/pages/Properties.jsx:14 for the same pattern). It
+// also covers the render that can land with isLoading false and data still
+// undefined (query resolves between renders) — the same shape the previous
+// useState(...) initializer defaulted to before any fetch completed.
+const EMPTY_BOOKINGS = [];
+const EMPTY_ACTIVITIES = [];
+const EMPTY_STATS = {
+  properties: { total: 0, featured: 0, pending: 0, sold: 0, available: 0 },
+  bookings: { total: 0, pending: 0 },
+  upcoming: EMPTY_BOOKINGS,
+  recentProperties: EMPTY_ACTIVITIES,
+  recentBookings: EMPTY_ACTIVITIES,
+};
+
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    totalProperties: 0,
-    featuredProperties: 0,
-    pendingProperties: 0,
-    soldProperties: 0,
-    totalBookings: 0,
-    newBookings: 0,
-    availableProperties: 0
-  });
-  
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeBookings, setActiveBookings] = useState([]);
+  const { data: stats = EMPTY_STATS, isLoading: loading } = useQuery(dashboardQueries.stats());
+
+  const activeBookings = stats.upcoming;
+
+  // Recent activity is a client-side merge of the two lists the service
+  // fetches, not a fetch of its own — recomputed only when the stats change.
+  const recentActivities = useMemo(() => {
+    // Format property activities
+    const formattedProperties = (stats.recentProperties ?? []).map(property => {
+      const isNew = new Date(property.created_at).getTime() === new Date(property.updated_at).getTime();
+
+      return {
+        id: `property-${property.id}`,
+        title: property.title,
+        action: isNew ? 'added' : 'updated',
+        timestamp: isNew ? property.created_at : property.updated_at,
+        icon: isNew ? <Icon name="plus-circle" className="text-success-content" /> : <Icon name="edit" className="text-brand" />,
+        type: 'property'
+      };
+    });
+
+    // Format booking activities
+    const formattedBookings = (stats.recentBookings ?? []).map(booking => {
+      let title = '';
+      let icon = <Icon name="calendar" className="text-purple-500" />;
+
+      if (booking.type === 'consultation') {
+        title = `Consultation: ${booking.service}`;
+      } else if (booking.type === 'viewing') {
+        title = `Viewing: ${booking.viewing_type}`;
+      } else if (booking.type === 'contact') {
+        title = `Contact: ${booking.name}`;
+        icon = <Icon name="envelope" className="text-orange-500" />;
+      } else {
+        title = `Booking: ${booking.name}`;
+      }
+
+      return {
+        id: `booking-${booking.id}`,
+        title,
+        action: 'received',
+        timestamp: booking.created_at,
+        icon,
+        type: 'booking'
+      };
+    });
+
+    // Combine and sort activities
+    return [...formattedProperties, ...formattedBookings]
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 8);
+  }, [stats]);
 
   // Format time difference for recent activities
   const timeAgo = (dateString) => {
@@ -40,125 +95,6 @@ const Dashboard = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
   
-  // Fetch dashboard stats and recent activities
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch property stats
-        const [
-          { count: total }, 
-          { count: featured }, 
-          { count: pending },
-          { count: sold },
-          { count: available },
-          { count: bookings },
-          { count: newBookings },
-          { data: upcomingBookings }
-        ] = await Promise.all([
-          supabase.from('properties').select('*', { count: 'exact' }),
-          supabase.from('properties').select('*', { count: 'exact' }).eq('featured', true),
-          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'pending'),
-          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'sold'),
-          supabase.from('properties').select('*', { count: 'exact' }).eq('status', 'available'),
-          supabase.from('bookings').select('*', { count: 'exact' }),
-          supabase.from('bookings')
-            .select('*', { count: 'exact' })
-            .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-          supabase
-            .from('bookings')
-            .select('id, name, appointment_at, service, viewing_type')
-            .gte('appointment_at', new Date().toISOString())
-            .order('appointment_at', { ascending: true })
-            .limit(4)
-        ]);
-        
-        setStats({
-          totalProperties: total || 0,
-          featuredProperties: featured || 0,
-          pendingProperties: pending || 0,
-          soldProperties: sold || 0,
-          availableProperties: available || 0,
-          totalBookings: bookings || 0,
-          newBookings: newBookings || 0
-        });
-        
-        setActiveBookings(upcomingBookings || []);
-
-        // Fetch recent activities from both properties and bookings
-        const [
-          { data: propertiesActivities },
-          { data: bookingsActivities }
-        ] = await Promise.all([
-          supabase
-            .from('properties')
-            .select('id, title, created_at, updated_at')
-            .order('created_at', { ascending: false })
-            .limit(5),
-          supabase
-            .from('bookings')
-            .select('id, name, service, viewing_type, type, created_at')
-            .order('created_at', { ascending: false })
-            .limit(5)
-        ]);
-        
-        // Format property activities
-        const formattedProperties = propertiesActivities?.map(property => {
-          const isNew = new Date(property.created_at).getTime() === new Date(property.updated_at).getTime();
-          
-          return {
-            id: `property-${property.id}`,
-            title: property.title,
-            action: isNew ? 'added' : 'updated',
-            timestamp: isNew ? property.created_at : property.updated_at,
-            icon: isNew ? <Icon name="plus-circle" className="text-success-content" /> : <Icon name="edit" className="text-brand" />,
-            type: 'property'
-          };
-        }) || [];
-        
-        // Format booking activities
-        const formattedBookings = bookingsActivities?.map(booking => {
-          let title = '';
-          let icon = <Icon name="calendar" className="text-purple-500" />;
-          
-          if (booking.type === 'consultation') {
-            title = `Consultation: ${booking.service}`;
-          } else if (booking.type === 'viewing') {
-            title = `Viewing: ${booking.viewing_type}`;
-          } else if (booking.type === 'contact') {
-            title = `Contact: ${booking.name}`;
-            icon = <Icon name="envelope" className="text-orange-500" />;
-          } else {
-            title = `Booking: ${booking.name}`;
-          }
-          
-          return {
-            id: `booking-${booking.id}`,
-            title,
-            action: 'received',
-            timestamp: booking.created_at,
-            icon,
-            type: 'booking'
-          };
-        }) || [];
-        
-        // Combine and sort activities
-        const allActivities = [...formattedProperties, ...formattedBookings]
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          .slice(0, 8);
-        
-        setRecentActivities(allActivities);
-      } catch (error) {
-        logger.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchDashboardData();
-  }, []);
-
   // Stats card component
   const StatCard = ({ title, value, icon, color, link }) => (
     <Link 
@@ -210,7 +146,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             <StatCard 
               title="Total Properties" 
-              value={stats.totalProperties} 
+              value={stats.properties.total}
               icon={<Icon name="building" />} 
               color="blue" 
               link="/admin/properties"
@@ -218,7 +154,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Available" 
-              value={stats.availableProperties} 
+              value={stats.properties.available}
               icon={<Icon name="home" />} 
               color="green" 
               link="/admin/properties?status=available"
@@ -226,7 +162,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Featured" 
-              value={stats.featuredProperties} 
+              value={stats.properties.featured}
               icon={<Icon name="star" />} 
               color="amber" 
               link="/admin/properties?filter=featured"
@@ -234,7 +170,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Pending Sale" 
-              value={stats.pendingProperties} 
+              value={stats.properties.pending}
               icon={<Icon name="dollar-sign" />} 
               color="yellow" 
               link="/admin/properties?status=pending"
@@ -242,7 +178,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Sold" 
-              value={stats.soldProperties} 
+              value={stats.properties.sold}
               icon={<Icon name="home" />} 
               color="green" 
               link="/admin/properties?status=sold"
@@ -250,7 +186,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="Total Bookings" 
-              value={stats.totalBookings} 
+              value={stats.bookings.total}
               icon={<Icon name="calendar" />} 
               color="purple" 
               link="/admin/bookings"
@@ -258,7 +194,7 @@ const Dashboard = () => {
             
             <StatCard 
               title="New Bookings" 
-              value={stats.newBookings} 
+              value={stats.bookings.pending} 
               icon={<Icon name="user-friends" />} 
               color="indigo" 
               link="/admin/bookings?filter=recent"
