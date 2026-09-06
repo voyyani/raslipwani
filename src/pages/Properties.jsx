@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiSearch, FiFilter, FiMapPin } from 'react-icons/fi';
-import { supabase } from '../../src/utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import PropertyModal from '../components/PropertyModal';
 
 const Properties = () => {
@@ -48,8 +48,12 @@ const Properties = () => {
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        setProperties(data);
-        setFilteredProperties(data);
+        // `data` is null on more than one PostgREST response, and every
+        // consumer below treats this as an array — the filter effect calls
+        // .filter on it and the JSON-LD block calls .slice, so a null here
+        // took the whole page down rather than rendering an empty list.
+        setProperties(data ?? []);
+        setFilteredProperties(data ?? []);
       } catch (err) {
         setError('Failed to load properties: ' + err.message);
       } finally {
@@ -130,7 +134,7 @@ const Properties = () => {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Property Listings",
-    "itemListElement": (filteredProperties || properties).slice(0, 20).map((p, idx) => ({
+    "itemListElement": (filteredProperties ?? properties ?? []).slice(0, 20).map((p, idx) => ({
       "@type": "ListItem",
       "position": idx + 1,
   "url": `https://raslipwani.co.ke/properties/${p.slug || p.id}`,
@@ -370,10 +374,12 @@ const Properties = () => {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-content">Filter Properties</h2>
                     <button 
+                      type="button"
                       onClick={() => setIsFilterOpen(false)}
+                      aria-label="Close filters"
                       className="lg:hidden text-content-subtle hover:text-content-muted"
                     >
-                      <FiX className="w-5 h-5" />
+                      <FiX className="w-5 h-5" aria-hidden="true" />
                     </button>
                   </div>
                   
@@ -501,10 +507,12 @@ const Properties = () => {
                         >
                           <span className="text-sm font-medium mr-2">{filter.label}</span>
                           <button 
+                            type="button"
                             onClick={() => removeFilter(filter.type)}
+                            aria-label={`Remove filter: ${filter.label}`}
                             className="text-primary/70 hover:text-primary transition-colors"
                           >
-                            <FiX size={16} />
+                            <FiX size={16} aria-hidden="true" />
                           </button>
                         </motion.div>
                       ))}
@@ -520,7 +528,7 @@ const Properties = () => {
                   >
                     <div className="flex items-center">
                       <div className="w-6 h-6 bg-danger-surface rounded-full flex items-center justify-center mr-3">
-                        <FiX className="text-danger-content" />
+                        <FiX className="text-danger-content" aria-hidden="true" />
                       </div>
                       {error}
                     </div>

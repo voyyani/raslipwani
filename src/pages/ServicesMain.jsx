@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import toast from 'react-hot-toast';
 
 import { notifyBookingReceived } from '../utils/bookingNotifications';

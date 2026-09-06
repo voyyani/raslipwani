@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { format } from 'date-fns';
 import {
   FaTimes,

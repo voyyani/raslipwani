@@ -45,11 +45,34 @@ export default defineConfig({
       // The jump is not new test-writing so much as the surface migrations
       // routing four large pages through primitives that already had suites.
       // This crosses the roadmap's 70% line target.
+      //
+      // Lowered once, deliberately, on 2026-09-06 — the only time this file has
+      // moved a floor down, and it needs its reasoning on the record.
+      //
+      // The axe suite (src/test/a11y) renders six full public pages plus the
+      // header and footer. Those pages had no suite of their own, so v8 never
+      // counted them; rendering them adds 476 statements to the denominator and
+      // executes a first render's worth of them. Measured both ways on the same
+      // tree:
+      //
+      //   without the axe suite   43 files   835 of 1205 statements   69.3%
+      //   with the axe suite      52 files  1013 of 1681 statements   60.3%
+      //
+      // 178 more statements are covered and nine more files are exercised. The
+      // percentage fell because the denominator grew faster than the numerator,
+      // which is what happens whenever testing reaches previously untested
+      // ground — a ratchet on a ratio punishes exactly that. Refusing to lower
+      // it here would have meant deleting the accessibility gate to protect a
+      // number, which is the tail wagging the dog.
+      //
+      // Set ~1 point under the new measurement (60.26 statements / 61.22 lines /
+      // 50.87 functions / 50.83 branches). The rule is unchanged from here on:
+      // this only goes up, and the next block to add tests raises it again.
       thresholds: {
-        lines: 69,
-        functions: 56,
-        branches: 59,
-        statements: 68
+        lines: 60,
+        functions: 49,
+        branches: 49,
+        statements: 59
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

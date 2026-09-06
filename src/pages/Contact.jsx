@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { useSettings } from '../hooks/useSettings';
 import { notifyBookingReceived } from '../utils/bookingNotifications';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTriangle, FaBuilding, FaCity, FaHome, FaMap } from 'react-icons/fa';

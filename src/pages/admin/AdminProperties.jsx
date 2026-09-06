@@ -4,7 +4,7 @@ import Modal from '../../components/ui/Modal';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
 import { motion, AnimatePresence } from 'framer-motion';

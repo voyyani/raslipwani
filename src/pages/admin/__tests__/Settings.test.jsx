@@ -3,7 +3,11 @@ import { render, screen, waitFor } from '../../../test/utils/renderWithProviders
 import userEvent from '@testing-library/user-event';
 import Settings from '../Settings';
 
-vi.mock('../../../utils/supabaseClient');
+// No local Supabase mock: src/test/setup.jsx already mocks this module with a
+// full client, realtime included. A bare `vi.mock(path)` here would automock
+// over it, replacing `channel()` with a stub that returns undefined — and
+// SettingsProvider subscribes to admin_settings on mount, so the page under
+// test would die before rendering a single tab.
 
 // Mock sub-components
 vi.mock('../settings/GeneralSettings', () => ({

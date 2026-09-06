@@ -8,7 +8,15 @@ import AdminLogin from '../AdminLogin';
 const mockSignIn = vi.fn();
 const mockAuth = { signIn: mockSignIn, user: null, isAdmin: false, loading: false };
 
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => mockAuth }));
+// `useAuth` is stubbed so this suite can drive sign-in results directly, but
+// the shared render helper wraps everything in the real AuthProvider — so the
+// mock has to keep exporting a provider, or the wrapper renders `undefined`.
+// A passthrough is the right stub here: the provider's own behaviour is not
+// what these tests are about, and the stubbed hook ignores it anyway.
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => mockAuth,
+  AuthProvider: ({ children }) => children
+}));
 
 beforeEach(() => {
   vi.clearAllMocks();

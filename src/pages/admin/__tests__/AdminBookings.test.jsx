@@ -2,11 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '../../../test/utils/renderWithProviders';
 import userEvent from '@testing-library/user-event';
 import AdminBookings from '../AdminBookings';
-import { supabase } from '../../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { exportToCSV } from '../../../utils/exportUtils';
 
 // Mock Supabase
-vi.mock('../../../utils/supabaseClient');
+// No local Supabase mock: src/test/setup.jsx already mocks this module with a
+// full client, realtime included, and the cases below override `supabase.from`
+// per test anyway. A bare `vi.mock(path)` here would automock over that and
+// take `channel()` with it, which SettingsProvider calls on mount.
 
 // Mock FullCalendar
 vi.mock('@fullcalendar/react', () => ({

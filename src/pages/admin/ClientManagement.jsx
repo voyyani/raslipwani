@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatClientsForExport } from '../../utils/exportUtils';
 import { formatDate } from '../../utils/dateUtils';

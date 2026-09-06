@@ -50,6 +50,22 @@ vi.mock('@/utils/supabaseClient', () => {
     supabase: {
       from: vi.fn(queryBuilder),
       rpc: vi.fn().mockResolvedValue({ data: false, error: null }),
+      // Realtime. SettingsContext subscribes to admin_settings on mount, so
+      // without these any test rendering a page inside SettingsProvider dies
+      // on `supabase.channel is not a function` before it asserts anything.
+      // The chain returns itself so `.on(...).subscribe()` resolves, and no
+      // event is ever delivered — subscriptions are set up under test, not
+      // exercised.
+      channel: vi.fn(() => {
+        const channel = {
+          on: vi.fn(() => channel),
+          subscribe: vi.fn(() => channel),
+          unsubscribe: vi.fn().mockResolvedValue('ok')
+        };
+        return channel;
+      }),
+      removeChannel: vi.fn().mockResolvedValue('ok'),
+      removeAllChannels: vi.fn().mockResolvedValue([]),
       auth: {
         getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
         signInWithPassword: vi.fn().mockResolvedValue({ data: { session: null, user: null }, error: null }),
@@ -77,3 +93,45 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn()
   }))
 });
+
+// jsdom implements no observer APIs, and framer-motion asks for
+// IntersectionObserver whenever a component animates into view — which, on
+// these pages, is most of them. Without it the component throws during render
+// and a test sees an empty tree rather than the interface it meant to assert
+// against. A stub that never fires is the right shape here: nothing scrolls
+// under test, so the observed elements are simply never in view.
+class MockIntersectionObserver {
+  constructor(callback, options = {}) {
+    this.callback = callback;
+    this.root = options.root ?? null;
+    this.rootMargin = options.rootMargin ?? '0px';
+    this.thresholds = [options.threshold ?? 0].flat();
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver
+});
+globalThis.IntersectionObserver = MockIntersectionObserver;
+
+// ResizeObserver goes the same way, for the same reason.
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: MockResizeObserver
+});
+globalThis.ResizeObserver = MockResizeObserver;

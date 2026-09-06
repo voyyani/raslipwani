@@ -58,6 +58,20 @@ jobs:
       - name: Label ratchet
         run: npm run label:ratchet
 
+      # The accessibility gate, named separately from the suite it runs inside.
+      # It is the same vitest run restricted to the axe files, so a red build
+      # here says "a visitor cannot use this" rather than "a test failed" — and
+      # ROADMAP.md can stop carrying "axe violations: not measured", which it
+      # did for four revisions while the block above it claimed a WCAG bar.
+      #
+      # Every public surface plus the header and footer, in both themes,
+      # against WCAG 2.1 A and AA. Contrast is excluded there because jsdom has
+      # no layout for axe to measure; it is asserted over the token pairs in
+      # src/design instead, which is the only place it can be decided now that
+      # every colour on these pages comes from a token.
+      - name: Accessibility (axe)
+        run: npm run test:a11y
+
       # `prebuild` runs the secret-shaped-env-name guard and asserts that
       # src/styles/tokens.css is still what src/design/tokens.js generates. A
       # build that paints from a stale stylesheet is worse than one that fails,

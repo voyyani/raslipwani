@@ -18,7 +18,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
-import { supabase } from './utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';

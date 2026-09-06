@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../../src/utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 
 import Icon from '../components/Icon';
 const PropertyDetail = () => {

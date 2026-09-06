@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { FaSave, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 

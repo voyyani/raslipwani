@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../src/utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import PropertyModal from '../components/PropertyModal';
 
 import Icon from '../components/Icon';

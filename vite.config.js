@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   plugins: [react()],
+  // The same alias vitest.config.js declares. It lived in only one of the two
+  // configs, so `@/utils/supabaseClient` resolved under test and not under
+  // build — which is why source files reached for relative paths instead, and
+  // why the global Supabase mock (keyed on the `@` specifier) silently missed
+  // every one of them. Both resolvers now agree.
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  },
   build: {
     // Enable code splitting for better caching and faster initial load
     rollupOptions: {

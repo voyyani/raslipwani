@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import { notifyBookingReceived } from '../../utils/bookingNotifications';
 
 import { logger } from '../../utils/logger';
