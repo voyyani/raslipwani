@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 import { supabase } from '@/utils/supabaseClient';
@@ -494,7 +493,7 @@ const ViewingExperience = () => {
                         onClick={() => removeFilter(filter.type)}
                         className="ml-0.5 text-primary/70 hover:text-primary"
                       >
-                        <FiX size={14} />
+                        <Icon name="times" size={14} />
                       </button>
                     </motion.div>
                   ))}

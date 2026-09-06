@@ -3,29 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/utils/supabaseClient';
 import { format } from 'date-fns';
-import {
-  FaTimes,
-  FaCheck,
-  FaBan,
-  FaClock,
-  FaTrash,
-  FaEdit,
-  FaPlus,
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaCalendar,
-  FaMapMarkerAlt,
-  FaExclamationTriangle,
-  FaChevronDown,
-  FaChevronLeft
-} from 'react-icons/fa';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import toast from 'react-hot-toast';
 
 import useConfirm from '../../components/ui/useConfirm';
 import usePrompt from '../../components/ui/usePrompt';
 import useDialog from '../../components/ui/useDialog';
+import Icon from '../../components/Icon';
 
 /**
  * BookingDetailModal - Comprehensive booking detail and management modal
@@ -278,7 +262,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 onClick={onClose}
                 className="md:hidden flex items-center gap-1 text-content-on-media/80 text-sm mb-2"
               >
-                <FaChevronLeft className="text-xs" />
+                <Icon name="chevron-left" size={12} />
                 Back
               </button>
               <h2 className="text-lg md:text-2xl font-bold mb-2">Booking Details</h2>
@@ -296,7 +280,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               onClick={onClose}
               className="hidden md:block text-content-on-media hover:text-content-on-media/90 transition p-2 flex-shrink-0"
             >
-              <FaTimes className="text-2xl" />
+              <Icon name="times" size={24} />
             </button>
           </div>
 
@@ -346,28 +330,28 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 <h3 className="text-lg font-semibold text-content mb-4">Customer Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface p-4 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FaUser className="text-content-subtle" />
+                    <Icon name="user" className="text-content-subtle" />
                     <div>
                       <div className="text-sm text-content-muted">Name</div>
                       <div className="font-medium text-content">{booking.name}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaEnvelope className="text-content-subtle" />
+                    <Icon name="envelope" className="text-content-subtle" />
                     <div>
                       <div className="text-sm text-content-muted">Email</div>
                       <div className="font-medium text-content">{booking.email}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaPhone className="text-content-subtle" />
+                    <Icon name="phone" className="text-content-subtle" />
                     <div>
                       <div className="text-sm text-content-muted">Phone</div>
                       <div className="font-medium text-content">{booking.phone}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaCalendar className="text-content-subtle" />
+                    <Icon name="calendar" className="text-content-subtle" />
                     <div>
                       <div className="text-sm text-content-muted">Appointment</div>
                       <div className="font-medium text-content">
@@ -417,7 +401,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                       onClick={() => setIsEditingStatus(true)}
                       className="text-brand hover:text-brand font-medium text-sm flex items-center gap-2"
                     >
-                      <FaEdit /> Change Status
+                      <Icon name="edit" /> Change Status
                     </button>
                   </div>
                 ) : (
@@ -509,7 +493,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
               {booking.status === 'cancelled' && booking.cancellation_reason && (
                 <div>
                   <h3 className="text-lg font-semibold text-content mb-4 flex items-center gap-2">
-                    <FaExclamationTriangle className="text-danger-content" />
+                    <Icon name="exclamation-triangle" className="text-danger-content" />
                     Cancellation Information
                   </h3>
                   <div className="bg-danger-surface border border-danger-border rounded-lg p-4">
@@ -538,7 +522,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                   disabled={addNoteMutation.isPending || !newNote.trim()}
                   className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
                 >
-                  <FaPlus /> Add Note
+                  <Icon name="plus" /> Add Note
                 </button>
               </div>
 
@@ -568,7 +552,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                           className="text-danger-content hover:opacity-80"
                           aria-label="Delete note"
                         >
-                          <FaTrash />
+                          <Icon name="trash" />
                         </button>
                       </div>
                       <p className="text-content-muted">{note.note_text}</p>
@@ -622,7 +606,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-brand text-content-on-brand rounded-xl font-medium active:bg-brand-hover transition disabled:opacity-50"
               >
-                <FaCheck /> Confirm Booking
+                <Icon name="check" /> Confirm Booking
               </button>
             )}
             {booking.status === 'confirmed' && (
@@ -631,7 +615,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-success-content text-content-on-brand rounded-xl font-medium active:bg-success-content transition disabled:opacity-50"
               >
-                <FaCheck /> Mark Completed
+                <Icon name="check" /> Mark Completed
               </button>
             )}
             {booking.status !== 'cancelled' && booking.status !== 'completed' && (
@@ -640,7 +624,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-surface-raised text-danger-content border border-danger-border rounded-xl font-medium active:bg-danger-surface transition disabled:opacity-50"
               >
-                <FaBan /> Cancel Booking
+                <Icon name="ban" /> Cancel Booking
               </button>
             )}
           </div>
@@ -653,7 +637,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
               >
-                <FaCheck /> Confirm Booking
+                <Icon name="check" /> Confirm Booking
               </button>
             )}
             {booking.status === 'confirmed' && (
@@ -662,7 +646,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 bg-success-content text-content-on-brand rounded-md hover:bg-success-content transition disabled:opacity-50"
               >
-                <FaCheck /> Mark Completed
+                <Icon name="check" /> Mark Completed
               </button>
             )}
             {booking.status !== 'cancelled' && booking.status !== 'completed' && (
@@ -671,7 +655,7 @@ const BookingDetailModal = ({ booking, onClose, onUpdate }) => {
                 disabled={updateStatusMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 bg-danger-content text-content-on-brand rounded-md hover:bg-danger-content transition disabled:opacity-50"
               >
-                <FaBan /> Cancel Booking
+                <Icon name="ban" /> Cancel Booking
               </button>
             )}
             <button

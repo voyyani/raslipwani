@@ -1,18 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { format, formatDistanceToNow, isPast, isToday, isTomorrow } from 'date-fns';
-import { 
-  FaPhone, 
-  FaEnvelope, 
-  FaCheck, 
-  FaTimes, 
-  FaClock,
-  FaExclamationTriangle,
-  FaCalendarCheck,
-  FaEye,
-  FaMapMarkerAlt
-} from 'react-icons/fa';
 import BookingStatusBadge from '../BookingStatusBadge';
+import Icon from '../Icon';
 
 /**
  * MobileBookingCard - Touch-optimized booking card with swipe gestures
@@ -105,7 +95,7 @@ const MobileBookingCard = ({
           onClick={() => handleAction(onConfirm)}
           className="flex flex-col items-center text-content-on-media"
         >
-          <FaCalendarCheck className="text-2xl mb-1" />
+          <Icon name="calendar-check" size={24} className="mb-1" />
           <span className="text-xs font-medium">Confirm</span>
         </button>
       </motion.div>
@@ -119,7 +109,7 @@ const MobileBookingCard = ({
           onClick={() => handleAction(onCancel)}
           className="flex flex-col items-center text-content-on-media"
         >
-          <FaTimes className="text-2xl mb-1" />
+          <Icon name="times" size={24} className="mb-1" />
           <span className="text-xs font-medium">Cancel</span>
         </button>
       </motion.div>
@@ -153,13 +143,13 @@ const MobileBookingCard = ({
                 <BookingStatusBadge status={booking.status} size="sm" />
                 {booking.priority === 'urgent' && (
                   <span className="flex items-center text-xs text-danger-content font-medium">
-                    <FaExclamationTriangle className="mr-1" />
+                    <Icon name="exclamation-triangle" className="mr-1" />
                     Urgent
                   </span>
                 )}
                 {booking.priority === 'high' && (
                   <span className="flex items-center text-xs text-warning-content font-medium">
-                    <FaExclamationTriangle className="mr-1" />
+                    <Icon name="exclamation-triangle" className="mr-1" />
                     High
                   </span>
                 )}
@@ -172,7 +162,7 @@ const MobileBookingCard = ({
               }}
               className="p-2 text-content-subtle hover:text-brand hover:bg-brand-subtle rounded-lg transition-colors"
             >
-              <FaEye className="text-lg" />
+              <Icon name="eye" size={18} />
             </button>
           </div>
 
@@ -183,14 +173,14 @@ const MobileBookingCard = ({
               isAppointmentTomorrow ? 'bg-warning-surface text-warning-content' :
               isPastAppointment ? 'bg-surface-sunken text-content-subtle' : 'bg-surface text-content-muted'}
           `}>
-            <FaClock className="text-sm flex-shrink-0" />
+            <Icon name="clock" size={14} className="flex-shrink-0" />
             <span className="text-sm font-medium">{getRelativeTime()}</span>
           </div>
 
           {/* Property/Service Info */}
           {booking.property_interest && (
             <div className="flex items-center gap-2 text-content-muted mb-3">
-              <FaMapMarkerAlt className="text-sm text-content-subtle" />
+              <Icon name="map-marker-alt" size={14} className="text-content-subtle" />
               <span className="text-sm truncate">{booking.property_interest}</span>
             </div>
           )}
@@ -207,7 +197,7 @@ const MobileBookingCard = ({
                 bg-success-surface text-success-content rounded-lg text-sm font-medium
                 active:bg-success-surface transition-colors"
             >
-              <FaPhone className="text-xs" />
+              <Icon name="phone" size={12} />
               Call
             </button>
             <button
@@ -220,7 +210,7 @@ const MobileBookingCard = ({
                 bg-brand-subtle text-brand rounded-lg text-sm font-medium
                 active:bg-brand-subtle transition-colors"
             >
-              <FaEnvelope className="text-xs" />
+              <Icon name="envelope" size={12} />
               Email
             </button>
           </div>

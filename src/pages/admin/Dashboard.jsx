@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/utils/supabaseClient';
-import { 
-  FaHome, 
-  FaStar, 
-  FaClock, 
-  FaPlusCircle, 
-  FaEdit, 
-  FaEnvelope,
-  FaCalendarAlt,
-  FaUserFriends,
-  FaDollarSign,
-  FaBuilding
-} from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import { logger } from '../../utils/logger';
+import Icon from '../../components/Icon';
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalProperties: 0,
@@ -123,7 +112,7 @@ const Dashboard = () => {
             title: property.title,
             action: isNew ? 'added' : 'updated',
             timestamp: isNew ? property.created_at : property.updated_at,
-            icon: isNew ? <FaPlusCircle className="text-success-content" /> : <FaEdit className="text-brand" />,
+            icon: isNew ? <Icon name="plus-circle" className="text-success-content" /> : <Icon name="edit" className="text-brand" />,
             type: 'property'
           };
         }) || [];
@@ -131,7 +120,7 @@ const Dashboard = () => {
         // Format booking activities
         const formattedBookings = bookingsActivities?.map(booking => {
           let title = '';
-          let icon = <FaCalendarAlt className="text-purple-500" />;
+          let icon = <Icon name="calendar" className="text-purple-500" />;
           
           if (booking.type === 'consultation') {
             title = `Consultation: ${booking.service}`;
@@ -139,7 +128,7 @@ const Dashboard = () => {
             title = `Viewing: ${booking.viewing_type}`;
           } else if (booking.type === 'contact') {
             title = `Contact: ${booking.name}`;
-            icon = <FaEnvelope className="text-orange-500" />;
+            icon = <Icon name="envelope" className="text-orange-500" />;
           } else {
             title = `Booking: ${booking.name}`;
           }
@@ -222,7 +211,7 @@ const Dashboard = () => {
             <StatCard 
               title="Total Properties" 
               value={stats.totalProperties} 
-              icon={<FaBuilding />} 
+              icon={<Icon name="building" />} 
               color="blue" 
               link="/admin/properties"
             />
@@ -230,7 +219,7 @@ const Dashboard = () => {
             <StatCard 
               title="Available" 
               value={stats.availableProperties} 
-              icon={<FaHome />} 
+              icon={<Icon name="home" />} 
               color="green" 
               link="/admin/properties?status=available"
             />
@@ -238,7 +227,7 @@ const Dashboard = () => {
             <StatCard 
               title="Featured" 
               value={stats.featuredProperties} 
-              icon={<FaStar />} 
+              icon={<Icon name="star" />} 
               color="amber" 
               link="/admin/properties?filter=featured"
             />
@@ -246,7 +235,7 @@ const Dashboard = () => {
             <StatCard 
               title="Pending Sale" 
               value={stats.pendingProperties} 
-              icon={<FaDollarSign />} 
+              icon={<Icon name="dollar-sign" />} 
               color="yellow" 
               link="/admin/properties?status=pending"
             />
@@ -254,7 +243,7 @@ const Dashboard = () => {
             <StatCard 
               title="Sold" 
               value={stats.soldProperties} 
-              icon={<FaHome />} 
+              icon={<Icon name="home" />} 
               color="green" 
               link="/admin/properties?status=sold"
             />
@@ -262,7 +251,7 @@ const Dashboard = () => {
             <StatCard 
               title="Total Bookings" 
               value={stats.totalBookings} 
-              icon={<FaCalendarAlt />} 
+              icon={<Icon name="calendar" />} 
               color="purple" 
               link="/admin/bookings"
             />
@@ -270,7 +259,7 @@ const Dashboard = () => {
             <StatCard 
               title="New Bookings" 
               value={stats.newBookings} 
-              icon={<FaUserFriends />} 
+              icon={<Icon name="user-friends" />} 
               color="indigo" 
               link="/admin/bookings?filter=recent"
             />
@@ -310,7 +299,7 @@ const Dashboard = () => {
                           <span className="text-brand ml-1">{activity.title}</span>
                         </p>
                         <p className="text-sm text-content-subtle flex items-center mt-1">
-                          <FaClock className="mr-1.5 text-content-subtle text-xs" />
+                          <Icon name="clock" size={12} className="mr-1.5 text-content-subtle" />
                           {timeAgo(activity.timestamp)}
                         </p>
                       </div>
@@ -341,14 +330,14 @@ const Dashboard = () => {
                       className="flex items-start border-b border-line pb-4 last:border-0 last:pb-0 group hover:bg-surface p-3 rounded-lg transition-colors"
                     >
                       <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                        <FaCalendarAlt className="text-purple-600" />
+                        <Icon name="calendar" className="text-purple-600" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-content">
                           {booking.name || 'Client'}
                         </p>
                         <p className="text-sm text-content-subtle mt-1 flex items-center">
-                          <FaClock className="mr-1.5 text-content-subtle text-xs" />
+                          <Icon name="clock" size={12} className="mr-1.5 text-content-subtle" />
                           {formatDate(booking.appointment_at)}
                         </p>
                         <p className="text-sm text-content-muted mt-2">

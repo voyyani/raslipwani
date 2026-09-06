@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabaseClient';
-import { FaSave, FaSpinner, FaCheckCircle, FaTimesCircle, FaCloudUploadAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../../hooks/useSettings';
 
 import { logger } from '../../../utils/logger';
+import Icon from '../../../components/Icon';
 /**
  * CloudinarySettings - Cloudinary configuration for image uploads
  * Works with flat table structure (single row with columns)
@@ -142,14 +142,14 @@ const CloudinarySettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
+    return <div className="flex justify-center py-8"><Icon name="spinner" size={30} className="animate-spin text-brand" /></div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div className="bg-brand-subtle border border-brand-subtle rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">
-          <FaCloudUploadAlt className="text-brand text-2xl mt-0.5" />
+          <Icon name="cloud-upload-alt" size={24} className="text-brand mt-0.5" />
           <div>
             <h4 className="font-medium text-brand-content mb-2">About Cloudinary</h4>
             <p className="text-sm text-brand-content">
@@ -228,7 +228,7 @@ const CloudinarySettings = () => {
           disabled={updateMutation.isPending}
           className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-media rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
-          {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
+          {updateMutation.isPending ? <Icon name="spinner" className="animate-spin" /> : <Icon name="save" />}
           Save Changes
         </button>
 
@@ -238,10 +238,10 @@ const CloudinarySettings = () => {
           disabled={testStatus === 'testing'}
           className="flex items-center gap-2 px-4 py-2 bg-success-content text-content-on-media rounded-md hover:bg-success-content transition disabled:opacity-50"
         >
-          {testStatus === 'testing' && <FaSpinner className="animate-spin" />}
-          {testStatus === 'success' && <FaCheckCircle />}
-          {testStatus === 'error' && <FaTimesCircle />}
-          {!testStatus && <FaCloudUploadAlt />}
+          {testStatus === 'testing' && <Icon name="spinner" className="animate-spin" />}
+          {testStatus === 'success' && <Icon name="check-circle" />}
+          {testStatus === 'error' && <Icon name="times-circle" />}
+          {!testStatus && <Icon name="cloud-upload-alt" />}
           {testStatus === 'testing' ? 'Testing...' : 'Test Upload'}
         </button>
       </div>

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/utils/supabaseClient';
 import { useSettings } from '../hooks/useSettings';
 import { notifyBookingReceived } from '../utils/bookingNotifications';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaExclamationTriangle, FaBuilding, FaCity, FaHome, FaMap } from 'react-icons/fa';
 
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -12,6 +11,7 @@ import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 
 import { logger } from '../utils/logger';
+import Icon from '../components/Icon';
 const Contact = () => {
   // Get settings
   const { phone, email, address, serviceLocations } = useSettings();
@@ -281,7 +281,7 @@ const Contact = () => {
                           : 'border-transparent text-content-subtle hover:text-content'
                       }`}
                     >
-                      <FaEnvelope className="mr-2" />
+                      <Icon name="envelope" className="mr-2" />
                       General Inquiry
                     </button>
                     <button
@@ -292,7 +292,7 @@ const Contact = () => {
                           : 'border-transparent text-content-subtle hover:text-content'
                       }`}
                     >
-                      <FaHome className="mr-2" />
+                      <Icon name="home" className="mr-2" />
                       Buying
                     </button>
                     <button
@@ -303,7 +303,7 @@ const Contact = () => {
                           : 'border-transparent text-content-subtle hover:text-content'
                       }`}
                     >
-                      <FaBuilding className="mr-2" />
+                      <Icon name="building" className="mr-2" />
                       Selling
                     </button>
                     <button
@@ -314,7 +314,7 @@ const Contact = () => {
                           : 'border-transparent text-content-subtle hover:text-content'
                       }`}
                     >
-                      <FaCity className="mr-2" />
+                      <Icon name="city" className="mr-2" />
                       Investment
                     </button>
                   </div>
@@ -342,7 +342,7 @@ const Contact = () => {
                         animate={{ opacity: 1, y: 0 }}
                       >
                         <div className="flex items-start">
-                          <FaCheck className="mt-1 mr-2 flex-shrink-0 text-success-content" />
+                          <Icon name="check" className="mt-1 mr-2 flex-shrink-0 text-success-content" />
                           <div>{success}</div>
                         </div>
                       </motion.div>
@@ -355,7 +355,7 @@ const Contact = () => {
                         animate={{ opacity: 1, y: 0 }}
                       >
                         <div className="flex items-start">
-                          <FaExclamationTriangle className="mt-1 mr-2 flex-shrink-0 text-danger-content" />
+                          <Icon name="exclamation-triangle" className="mt-1 mr-2 flex-shrink-0 text-danger-content" />
                           <div>{error}</div>
                         </div>
                       </motion.div>
@@ -502,7 +502,7 @@ const Contact = () => {
                         whileHover={{ x: 5 }}
                       >
                         <div className="bg-primary p-3 rounded-full text-content-on-brand mr-4 flex-shrink-0">
-                          <FaMap className="text-xl" />
+                          <Icon name="map" size={20} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-content mb-1">Nationwide Coverage</h3>
@@ -523,7 +523,7 @@ const Contact = () => {
                         whileHover={{ x: 5 }}
                       >
                         <div className="bg-primary p-3 rounded-full text-content-on-brand mr-4 flex-shrink-0">
-                          <FaMapMarkerAlt className="text-xl" />
+                          <Icon name="map-marker-alt" size={20} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-content mb-1">Head Office Location</h3>
@@ -539,7 +539,7 @@ const Contact = () => {
                         whileHover={{ x: 5 }}
                       >
                         <div className="bg-primary p-3 rounded-full text-content-on-brand mr-4 flex-shrink-0">
-                          <FaPhone className="text-xl" />
+                          <Icon name="phone" size={20} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-content mb-1">Phone Number</h3>
@@ -554,7 +554,7 @@ const Contact = () => {
                         whileHover={{ x: 5 }}
                       >
                         <div className="bg-primary p-3 rounded-full text-content-on-brand mr-4 flex-shrink-0">
-                          <FaEnvelope className="text-xl" />
+                          <Icon name="envelope" size={20} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-content mb-1">Email Address</h3>
@@ -569,7 +569,7 @@ const Contact = () => {
                         whileHover={{ x: 5 }}
                       >
                         <div className="bg-primary p-3 rounded-full text-content-on-brand mr-4 flex-shrink-0">
-                          <FaClock className="text-xl" />
+                          <Icon name="clock" size={20} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-content mb-1">Working Hours</h3>
@@ -592,7 +592,7 @@ const Contact = () => {
                         <div className="bg-surface-raised p-4 rounded-lg shadow-md">
                           <div className="aspect-w-16 aspect-h-9 bg-surface-sunken rounded-lg flex items-center justify-center">
                             <div className="text-center text-content-subtle">
-                              <FaMap className="text-4xl mx-auto mb-2 text-primary" />
+                              <Icon name="map" size={36} className="mx-auto mb-2 text-primary" />
                               <p className="text-sm">Interactive Kenya Map</p>
                               <p className="text-xs text-content-subtle">Showing our coverage areas nationwide</p>
                             </div>

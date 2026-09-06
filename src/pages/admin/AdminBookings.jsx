@@ -9,22 +9,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaCalendar,
-  FaList,
-  FaFilter,
-  FaPlus,
-  FaDownload,
-  FaSearch,
-  FaCalendarDay,
-  FaCalendarWeek,
-  FaTh,
-  FaPhone,
-  FaEnvelope,
-  FaTimes,
-  FaChevronDown,
-  FaChevronUp
-} from 'react-icons/fa';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import { statusClasses } from '../../design/status';
 import BookingDetailModal from './BookingDetailModal';
@@ -33,6 +17,7 @@ import { exportToCSV } from '../../utils/exportUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from '../../components/ui/useConfirm';
+import Icon from '../../components/Icon';
 
 /**
  * AdminBookings - Professional booking management with calendar views
@@ -411,7 +396,7 @@ const AdminBookings = () => {
                 </span>
               )}
             </div>
-            {expandedStats ? <FaChevronUp className="text-content-subtle" /> : <FaChevronDown className="text-content-subtle" />}
+            {expandedStats ? <Icon name="chevron-up" className="text-content-subtle" /> : <Icon name="chevron-down" className="text-content-subtle" />}
           </button>
           
           <AnimatePresence>
@@ -483,7 +468,7 @@ const AdminBookings = () => {
                 : 'text-content-muted'
             }`}
           >
-            <FaList className="text-sm" />
+            <Icon name="list" size={14} />
             List
           </button>
           <button
@@ -494,7 +479,7 @@ const AdminBookings = () => {
                 : 'text-content-muted'
             }`}
           >
-            <FaCalendar className="text-sm" />
+            <Icon name="calendar" size={14} />
             Calendar
           </button>
         </div>
@@ -504,7 +489,7 @@ const AdminBookings = () => {
       {isMobile && mobileView === 'list' && (
         <div className="flex gap-2 mb-4">
           <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle text-sm" />
+            <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle" />
             <input
               type="text"
               placeholder="Search bookings..."
@@ -521,7 +506,7 @@ const AdminBookings = () => {
                 : 'bg-surface-raised border-line text-content-muted'
             }`}
           >
-            <FaFilter />
+            <Icon name="filter" />
           </button>
         </div>
       )}
@@ -590,7 +575,7 @@ const AdminBookings = () => {
         <div className="space-y-4">
           {Object.keys(groupedBookings).length === 0 ? (
             <div className="text-center py-12 bg-surface-raised rounded-lg shadow">
-              <FaCalendar className="mx-auto text-4xl text-content-on-media/80 mb-3" />
+              <Icon name="calendar" size={36} className="mx-auto text-content-on-media/80 mb-3" />
               <p className="text-content-subtle">No bookings found</p>
             </div>
           ) : (
@@ -663,7 +648,7 @@ const AdminBookings = () => {
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
-              <FaCalendarDay />
+              <Icon name="calendar-day" />
               <span className="hidden xs:inline">Day</span>
             </button>
             <button
@@ -674,7 +659,7 @@ const AdminBookings = () => {
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
-              <FaCalendarWeek />
+              <Icon name="calendar-week" />
               <span className="hidden xs:inline">Week</span>
             </button>
             <button
@@ -685,7 +670,7 @@ const AdminBookings = () => {
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
-              <FaTh />
+              <Icon name="th" />
               <span className="hidden xs:inline">Month</span>
             </button>
             <button
@@ -696,7 +681,7 @@ const AdminBookings = () => {
                   : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
               }`}
             >
-              <FaList />
+              <Icon name="list" />
               <span className="hidden xs:inline">List</span>
             </button>
           </div>
@@ -707,14 +692,14 @@ const AdminBookings = () => {
               onClick={() => setShowFilters(!showFilters)}
               className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-surface-sunken text-content-muted rounded-md hover:bg-surface-sunken transition text-xs sm:text-base"
             >
-              <FaFilter />
+              <Icon name="filter" />
               <span className="hidden xs:inline">Filters</span>
             </button>
             <button
               onClick={handleExport}
               className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-success-content text-content-on-brand rounded-md hover:bg-success-content transition text-xs sm:text-base"
             >
-              <FaDownload />
+              <Icon name="download" />
               <span className="hidden xs:inline">Export</span>
             </button>
           </div>

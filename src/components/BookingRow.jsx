@@ -1,14 +1,7 @@
 import React from 'react';
 
 import { statusClasses, statusLabel } from '../design/status';
-import { 
-  FaCheck, 
-  FaTimes, 
-  FaEnvelope, 
-  FaEye,
-  FaArchive,
-  FaTrashRestore
-} from 'react-icons/fa';
+import Icon from './Icon';
 
 const BookingRow = ({
   booking,
@@ -56,7 +49,7 @@ const BookingRow = ({
               className="text-brand hover:text-brand-content transition-colors"
               title="View details"
             >
-              <FaEye className="w-5 h-5" />
+              <Icon name="eye" size={20} />
             </button>
             {booking.status !== 'confirmed' && (
               <button
@@ -64,7 +57,7 @@ const BookingRow = ({
                 className="text-success-content hover:text-success-content transition-colors"
                 title="Confirm appointment"
               >
-                <FaCheck className="w-5 h-5" />
+                <Icon name="check" size={20} />
               </button>
             )}
             {booking.status !== 'cancelled' && (
@@ -73,7 +66,7 @@ const BookingRow = ({
                 className="text-danger-content hover:text-danger-content transition-colors"
                 title="Cancel appointment"
               >
-                <FaTimes className="w-5 h-5" />
+                <Icon name="times" size={20} />
               </button>
             )}
             <a 
@@ -81,7 +74,7 @@ const BookingRow = ({
               className="text-purple-600 hover:text-purple-800 transition-colors"
               title="Send email"
             >
-              <FaEnvelope className="w-5 h-5" />
+              <Icon name="envelope" size={20} />
             </a>
             {viewFilter === 'active' ? (
               <button
@@ -89,7 +82,7 @@ const BookingRow = ({
                 className="text-content-muted hover:text-content transition-colors"
                 title="Archive appointment"
               >
-                <FaArchive className="w-5 h-5" />
+                <Icon name="archive" size={20} />
               </button>
             ) : (
               <button
@@ -97,7 +90,7 @@ const BookingRow = ({
                 className="text-brand hover:text-brand-content transition-colors"
                 title="Restore appointment"
               >
-                <FaTrashRestore className="w-5 h-5" />
+                <Icon name="trash-restore" size={20} />
               </button>
             )}
           </div>
@@ -149,7 +142,7 @@ const BookingRow = ({
                 className="text-success-content hover:text-success-content"
                 title="Confirm"
               >
-                <FaCheck />
+                <Icon name="check" />
               </button>
             )}
             {booking.status !== 'cancelled' && (
@@ -158,7 +151,7 @@ const BookingRow = ({
                 className="text-danger-content hover:text-danger-content"
                 title="Cancel"
               >
-                <FaTimes />
+                <Icon name="times" />
               </button>
             )}
             {viewFilter === 'active' ? (
@@ -167,7 +160,7 @@ const BookingRow = ({
                 className="text-content-muted hover:text-content"
                 title="Archive"
               >
-                <FaArchive />
+                <Icon name="archive" />
               </button>
             ) : (
               <button
@@ -175,7 +168,7 @@ const BookingRow = ({
                 className="text-brand hover:text-brand-content"
                 title="Restore"
               >
-                <FaTrashRestore />
+                <Icon name="trash-restore" />
               </button>
             )}
           </div>

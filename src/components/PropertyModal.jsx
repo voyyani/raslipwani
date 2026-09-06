@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiPhone, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 import toast from 'react-hot-toast';
 
 import { logger } from '../utils/logger';
 import useDialog from './ui/useDialog';
+import Icon from './Icon';
 
 /** The office number, in one place: it appeared as a literal in three. */
 const OFFICE_PHONE = '+254758066526';
@@ -392,7 +392,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                     >
-                      {isFullscreen ? <FiMinimize size={24} /> : <FiMaximize size={24} />}
+                      {isFullscreen ? <Icon name="compress" size={24} /> : <Icon name="expand" size={24} />}
                     </motion.button>
                     <motion.button
                       initial={{ opacity: 0 }}
@@ -404,7 +404,7 @@ const PropertyModal = ({ property, closeModal }) => {
                       } rounded-full p-2 shadow-lg transition-colors`}
                       aria-label={isFullscreen ? "Exit fullscreen" : "Close modal"}
                     >
-                      <FiX size={24} />
+                      <Icon name="times" size={24} />
                     </motion.button>
                   </div>
                 )}
@@ -505,7 +505,7 @@ const PropertyModal = ({ property, closeModal }) => {
               {showPhone ? (
                 <div className="bg-brand-subtle rounded-xl p-4 w-full flex flex-col items-center">
                   <div className="flex items-center mb-3">
-                    <FiPhone className="text-brand text-xl mr-2" />
+                    <Icon name="phone" size={20} className="text-brand mr-2" />
                     <h4 className="text-lg font-semibold">Contact Agent</h4>
                   </div>
                   <a 

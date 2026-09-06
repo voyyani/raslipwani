@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabaseClient';
-import { FaSave, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import Icon from '../../../components/Icon';
 
 /**
  * AdvancedSettings - Maintenance mode and advanced configuration
@@ -116,7 +116,7 @@ const AdvancedSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
+    return <div className="flex justify-center py-8"><Icon name="spinner" size={30} className="animate-spin text-brand" /></div>;
   }
 
   return (
@@ -127,7 +127,7 @@ const AdvancedSettings = () => {
         
         {formData.maintenanceEnabled && (
           <div className="bg-danger-surface border border-danger-border rounded-lg p-4 mb-4 flex items-start gap-3">
-            <FaExclamationTriangle className="text-danger-content mt-0.5" />
+            <Icon name="exclamation-triangle" className="text-danger-content mt-0.5" />
             <div>
               <p className="text-sm font-medium text-danger-content">Warning: Maintenance mode is active</p>
               <p className="text-xs text-danger-content mt-1">Your website is currently in maintenance mode. Visitors will see the maintenance message.</p>
@@ -240,7 +240,7 @@ const AdvancedSettings = () => {
           disabled={updateMutation.isPending}
           className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
-          {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
+          {updateMutation.isPending ? <Icon name="spinner" className="animate-spin" /> : <Icon name="save" />}
           Save Changes
         </button>
       </div>

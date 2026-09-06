@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaChevronRight, FaHome } from 'react-icons/fa';
+import Icon from '../../components/Icon';
 
 /**
  * AdminBreadcrumb - Auto-generated breadcrumb navigation
@@ -65,7 +65,7 @@ const AdminBreadcrumb = () => {
         {breadcrumbs.map((crumb, index) => (
           <li key={crumb.path} className="flex items-center">
             {index > 0 && (
-              <FaChevronRight className="w-3 h-3 mx-2 text-content-subtle" />
+              <Icon name="chevron-right" size={12} className="mx-2 text-content-subtle" />
             )}
             
             {crumb.isLast ? (
@@ -82,7 +82,7 @@ const AdminBreadcrumb = () => {
               >
                 {index === 0 ? (
                   <span className="flex items-center gap-1">
-                    <FaHome className="w-3.5 h-3.5" />
+                    <Icon name="home" className="w-3.5 h-3.5" />
                     <span>{crumb.label}</span>
                   </span>
                 ) : (
@@ -102,7 +102,7 @@ const AdminBreadcrumb = () => {
               to={breadcrumbs[breadcrumbs.length - 2].path}
               className="flex items-center text-brand hover:text-brand font-medium"
             >
-              <FaChevronRight className="w-3 h-3 mr-1 rotate-180" />
+              <Icon name="chevron-right" size={12} className="mr-1 rotate-180" />
               <span>Back</span>
             </Link>
             <span className="mx-2 text-content-subtle">|</span>

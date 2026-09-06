@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiSearch, FiFilter, FiMapPin } from 'react-icons/fi';
 import { supabase } from '@/utils/supabaseClient';
 import PropertyModal from '../components/PropertyModal';
+import Icon from '../components/Icon';
 
 const Properties = () => {
   const [properties, setProperties] = useState([]);
@@ -310,7 +310,7 @@ const Properties = () => {
               <div className="bg-surface-raised rounded-2xl shadow-2xl p-2 border border-line">
                 <div className="flex flex-col md:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <FiMapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-content-subtle text-lg" />
+                    <Icon name="map-marker-alt" size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-content-subtle" />
                     <input
                       type="text"
                       placeholder="Search by location, property type, or keyword..."
@@ -325,12 +325,12 @@ const Properties = () => {
                       onClick={() => setIsFilterOpen(!isFilterOpen)}
                       className="flex items-center gap-2 bg-surface-sunken hover:bg-surface-sunken text-content px-6 py-4 rounded-xl transition-colors font-medium"
                     >
-                      <FiFilter className="text-lg" />
+                      <Icon name="filter" size={18} />
                       <span className="hidden sm:inline">Filters</span>
                     </button>
                     
                     <button className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-content-on-brand px-8 py-4 rounded-xl transition-colors font-medium shadow-lg hover:shadow-xl">
-                      <FiSearch className="text-lg" />
+                      <Icon name="search" size={18} />
                       <span>Search</span>
                     </button>
                   </div>
@@ -379,7 +379,7 @@ const Properties = () => {
                       aria-label="Close filters"
                       className="lg:hidden text-content-subtle hover:text-content-muted"
                     >
-                      <FiX className="w-5 h-5" aria-hidden="true" />
+                      <Icon name="times" size={20} aria-hidden="true" />
                     </button>
                   </div>
                   
@@ -476,7 +476,7 @@ const Properties = () => {
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="lg:hidden flex items-center gap-2 bg-surface-raised border-2 border-line text-content px-4 py-2 rounded-xl hover:border-primary transition-colors"
                   >
-                    <FiFilter className="text-lg" />
+                    <Icon name="filter" size={18} />
                     <span>Filters</span>
                   </button>
                 </motion.div>
@@ -512,7 +512,7 @@ const Properties = () => {
                             aria-label={`Remove filter: ${filter.label}`}
                             className="text-primary/70 hover:text-primary transition-colors"
                           >
-                            <FiX size={16} aria-hidden="true" />
+                            <Icon name="times" size={16} aria-hidden="true" />
                           </button>
                         </motion.div>
                       ))}
@@ -528,7 +528,7 @@ const Properties = () => {
                   >
                     <div className="flex items-center">
                       <div className="w-6 h-6 bg-danger-surface rounded-full flex items-center justify-center mr-3">
-                        <FiX className="text-danger-content" aria-hidden="true" />
+                        <Icon name="times" className="text-danger-content" aria-hidden="true" />
                       </div>
                       {error}
                     </div>
@@ -549,7 +549,7 @@ const Properties = () => {
                       animate={{ opacity: 1 }}
                     >
                       <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <FiSearch className="text-3xl text-primary" />
+                        <Icon name="search" size={30} className="text-primary" />
                       </div>
                       <h3 className="text-2xl font-bold text-content mb-4">No properties match your criteria</h3>
                       <p className="text-content-muted mb-8 max-w-md mx-auto">
@@ -698,7 +698,7 @@ const PropertyCard = ({ property, index, openModal }) => {
         </div>
         
         <p className="text-content-muted mb-4 flex items-center text-sm">
-          <FiMapPin className="w-4 h-4 mr-2 text-primary flex-shrink-0" />
+          <Icon name="map-marker-alt" size={16} className="mr-2 text-primary flex-shrink-0" />
           <span className="line-clamp-1">{property.location}</span>
         </p>
         

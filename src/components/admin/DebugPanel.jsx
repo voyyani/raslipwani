@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaBug, FaTimes, FaTrash, FaDownload } from 'react-icons/fa';
+import Icon from '../Icon';
 
 /**
  * DebugPanel - On-screen console for mobile debugging
@@ -141,7 +141,7 @@ const DebugPanel = ({ hidden = true }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-20 right-4 z-[9999] bg-purple-600 text-content-on-media p-3 rounded-full shadow-lg"
       >
-        <FaBug className="text-lg" />
+        <Icon name="bug" size={18} />
         {logs.filter(l => l.type === 'error').length > 0 && (
           <span className="absolute -top-1 -right-1 bg-danger-content text-content-on-brand text-xs w-5 h-5 rounded-full flex items-center justify-center">
             {logs.filter(l => l.type === 'error').length}
@@ -161,20 +161,20 @@ const DebugPanel = ({ hidden = true }) => {
                 className="text-green-400 hover:text-green-300 p-1"
                 title="Download logs"
               >
-                <FaDownload className="text-sm" />
+                <Icon name="download" size={14} />
               </button>
               <button
                 onClick={() => { setLogs([]); localStorage.removeItem('debug_logs'); }}
                 className="text-content-subtle hover:text-content-on-media p-1"
                 title="Clear logs"
               >
-                <FaTrash className="text-sm" />
+                <Icon name="trash" size={14} />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-content-subtle hover:text-content-on-media p-1"
               >
-                <FaTimes />
+                <Icon name="times" />
               </button>
             </div>
           </div>

@@ -1,18 +1,10 @@
 import React from "react";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { 
-  FaClock, 
-  FaEnvelope,
-  FaEye,
-  FaChevronLeft,
-  FaChevronRight,
-  FaCheck,
-  FaTimes
-} from 'react-icons/fa';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
 import { logger } from '../utils/logger';
+import Icon from './Icon';
 const BookingCalendar = ({
   bookings,
   selectedDate,
@@ -122,7 +114,7 @@ const BookingCalendar = ({
               onClick={() => navigatePeriod(-1)}
               className="p-2 text-content-muted hover:text-content rounded-full hover:bg-surface-sunken"
             >
-              <FaChevronLeft />
+              <Icon name="chevron-left" />
             </button>
             
             <h2 className="text-xl font-semibold">
@@ -138,7 +130,7 @@ const BookingCalendar = ({
               onClick={() => navigatePeriod(1)}
               className="p-2 text-content-muted hover:text-content rounded-full hover:bg-surface-sunken"
             >
-              <FaChevronRight />
+              <Icon name="chevron-right" />
             </button>
           </div>
           
@@ -315,7 +307,7 @@ const BookingCalendar = ({
                 
                 <div className="mt-3">
                   <p className="text-sm text-content-muted flex items-center">
-                    <FaClock className="mr-2 text-content-subtle flex-shrink-0" />
+                    <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
                     <span>{formatDate(booking.appointment_at)}</span>
                   </p>
                 </div>
@@ -329,7 +321,7 @@ const BookingCalendar = ({
                         className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
                         title="Confirm appointment"
                       >
-                        <FaCheck className="mr-1" /> Confirm
+                        <Icon name="check" className="mr-1" /> Confirm
                       </button>
                     )}
                     {booking.status !== 'cancelled' && (
@@ -338,7 +330,7 @@ const BookingCalendar = ({
                         className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
                         title="Cancel appointment"
                       >
-                        <FaTimes className="mr-1" /> Cancel
+                        <Icon name="times" className="mr-1" /> Cancel
                       </button>
                     )}
                   </div>
@@ -348,13 +340,13 @@ const BookingCalendar = ({
                       onClick={() => openBookingModal(booking)}
                       className="text-brand hover:text-brand-content text-sm flex items-center"
                     >
-                      <FaEye className="mr-1" /> View Details
+                      <Icon name="eye" className="mr-1" /> View Details
                     </button>
                     <a 
                       href={`mailto:${booking.email}`}
                       className="text-purple-600 hover:text-purple-800 text-sm flex items-center"
                     >
-                      <FaEnvelope className="mr-1" /> Email
+                      <Icon name="envelope" className="mr-1" /> Email
                     </a>
                   </div>
                 </div>
@@ -393,7 +385,7 @@ const BookingCalendar = ({
                         
                         <div className="mt-3">
                           <p className="text-sm text-content-muted flex items-center">
-                            <FaClock className="mr-2 text-content-subtle flex-shrink-0" />
+                            <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
                             <span>{formatDate(booking.appointment_at)}</span>
                           </p>
                         </div>
@@ -407,7 +399,7 @@ const BookingCalendar = ({
                                 className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
                                 title="Confirm appointment"
                               >
-                                <FaCheck className="mr-1" /> Confirm
+                                <Icon name="check" className="mr-1" /> Confirm
                               </button>
                             )}
                             {booking.status !== 'cancelled' && (
@@ -416,7 +408,7 @@ const BookingCalendar = ({
                                 className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
                                 title="Cancel appointment"
                               >
-                                <FaTimes className="mr-1" /> Cancel
+                                <Icon name="times" className="mr-1" /> Cancel
                               </button>
                             )}
                           </div>
@@ -426,7 +418,7 @@ const BookingCalendar = ({
                               onClick={() => openBookingModal(booking)}
                               className="text-brand hover:text-brand-content text-sm flex items-center"
                             >
-                              <FaEye className="mr-1" /> Details
+                              <Icon name="eye" className="mr-1" /> Details
                             </button>
                           </div>
                         </div>
@@ -462,7 +454,7 @@ const BookingCalendar = ({
                 
                 <div className="mt-3">
                   <p className="text-sm text-content-muted flex items-center">
-                    <FaClock className="mr-2 text-content-subtle flex-shrink-0" />
+                    <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
                     <span>{formatDate(booking.appointment_at)}</span>
                   </p>
                 </div>
@@ -476,7 +468,7 @@ const BookingCalendar = ({
                         className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
                         title="Confirm appointment"
                       >
-                        <FaCheck className="mr-1" /> Confirm
+                        <Icon name="check" className="mr-1" /> Confirm
                       </button>
                     )}
                     {booking.status !== 'cancelled' && (
@@ -485,7 +477,7 @@ const BookingCalendar = ({
                         className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
                         title="Cancel appointment"
                       >
-                        <FaTimes className="mr-1" /> Cancel
+                        <Icon name="times" className="mr-1" /> Cancel
                       </button>
                     )}
                   </div>
@@ -495,7 +487,7 @@ const BookingCalendar = ({
                       onClick={() => openBookingModal(booking)}
                       className="text-brand hover:text-brand-content text-sm flex items-center"
                     >
-                      <FaEye className="mr-1" /> Details
+                      <Icon name="eye" className="mr-1" /> Details
                     </button>
                   </div>
                 </div>

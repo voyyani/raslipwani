@@ -1,15 +1,7 @@
 import React from 'react';
 
 import { statusClasses, statusLabel } from '../design/status';
-import { 
-  FaCheck, 
-  FaTimes, 
-  FaEnvelope, 
-  FaEye,
-  FaArchive,
-  FaTrashRestore,
-  FaClock
-} from 'react-icons/fa';
+import Icon from './Icon';
 
 // Helper function to group bookings by date
 const groupBookingsByDate = (bookings) => {
@@ -142,7 +134,7 @@ const BookingList = ({
                     <div className="mt-3 text-sm">
                       {booking.appointment_at ? (
                         <div className="flex items-center text-content-muted">
-                          <FaClock className="mr-2 text-content-subtle flex-shrink-0" />
+                          <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
                           {formatDate(booking.appointment_at)}
                         </div>
                       ) : null}
@@ -157,7 +149,7 @@ const BookingList = ({
                             className={`px-3 py-1 rounded-full text-xs flex items-center border ${statusClasses('confirmed')}`}
                             title="Confirm appointment"
                           >
-                            <FaCheck className="mr-1" /> Confirm
+                            <Icon name="check" className="mr-1" /> Confirm
                           </button>
                         )}
                         {booking.status !== 'cancelled' && (
@@ -166,7 +158,7 @@ const BookingList = ({
                             className={`px-3 py-1 rounded-full text-xs flex items-center border ${statusClasses('cancelled')}`}
                             title="Cancel appointment"
                           >
-                            <FaTimes className="mr-1" /> Cancel
+                            <Icon name="times" className="mr-1" /> Cancel
                           </button>
                         )}
                       </div>
@@ -176,27 +168,27 @@ const BookingList = ({
                           onClick={() => openBookingModal(booking)}
                           className="text-brand hover:text-brand-content text-sm flex items-center"
                         >
-                          <FaEye className="mr-1" /> Details
+                          <Icon name="eye" className="mr-1" /> Details
                         </button>
                         <a 
                           href={`mailto:${booking.email}`}
                           className="text-purple-600 hover:text-purple-800 text-sm flex items-center"
                         >
-                          <FaEnvelope className="mr-1" /> Email
+                          <Icon name="envelope" className="mr-1" /> Email
                         </a>
                         {viewFilter === 'active' ? (
                           <button
                             onClick={() => toggleArchive(booking.id, true)}
                             className="text-content-muted hover:text-content text-sm flex items-center"
                           >
-                            <FaArchive className="mr-1" /> Archive
+                            <Icon name="archive" className="mr-1" /> Archive
                           </button>
                         ) : (
                           <button
                             onClick={() => toggleArchive(booking.id, false)}
                             className="text-brand hover:text-brand-content text-sm flex items-center"
                           >
-                            <FaTrashRestore className="mr-1" /> Restore
+                            <Icon name="trash-restore" className="mr-1" /> Restore
                           </button>
                         )}
                       </div>
@@ -256,7 +248,7 @@ const BookingList = ({
                         className="text-brand hover:text-brand-content transition-colors"
                         title="View details"
                       >
-                        <FaEye className="w-5 h-5" />
+                        <Icon name="eye" size={20} />
                       </button>
                       {booking.status !== 'confirmed' && (
                         <button
@@ -264,7 +256,7 @@ const BookingList = ({
                           className="text-success-content hover:text-success-content transition-colors"
                           title="Confirm appointment"
                         >
-                          <FaCheck className="w-5 h-5" />
+                          <Icon name="check" size={20} />
                         </button>
                       )}
                       {booking.status !== 'cancelled' && (
@@ -273,7 +265,7 @@ const BookingList = ({
                           className="text-danger-content hover:text-danger-content transition-colors"
                           title="Cancel appointment"
                         >
-                          <FaTimes className="w-5 h-5" />
+                          <Icon name="times" size={20} />
                         </button>
                       )}
                       <a 
@@ -281,7 +273,7 @@ const BookingList = ({
                         className="text-purple-600 hover:text-purple-800 transition-colors"
                         title="Send email"
                       >
-                        <FaEnvelope className="w-5 h-5" />
+                        <Icon name="envelope" size={20} />
                       </a>
                       {viewFilter === 'active' ? (
                         <button
@@ -289,7 +281,7 @@ const BookingList = ({
                           className="text-content-muted hover:text-content transition-colors"
                           title="Archive appointment"
                         >
-                          <FaArchive className="w-5 h-5" />
+                          <Icon name="archive" size={20} />
                         </button>
                       ) : (
                         <button
@@ -297,7 +289,7 @@ const BookingList = ({
                           className="text-brand hover:text-brand-content transition-colors"
                           title="Restore appointment"
                         >
-                          <FaTrashRestore className="w-5 h-5" />
+                          <Icon name="trash-restore" size={20} />
                         </button>
                       )}
                     </div>
@@ -354,7 +346,7 @@ const BookingList = ({
                         className="text-success-content hover:text-success-content"
                         title="Confirm"
                       >
-                        <FaCheck />
+                        <Icon name="check" />
                       </button>
                     )}
                     {booking.status !== 'cancelled' && (
@@ -363,7 +355,7 @@ const BookingList = ({
                         className="text-danger-content hover:text-danger-content"
                         title="Cancel"
                       >
-                        <FaTimes />
+                        <Icon name="times" />
                       </button>
                     )}
                     {viewFilter === 'active' ? (
@@ -372,7 +364,7 @@ const BookingList = ({
                         className="text-content-muted hover:text-content"
                         title="Archive"
                       >
-                        <FaArchive />
+                        <Icon name="archive" />
                       </button>
                     ) : (
                       <button
@@ -380,7 +372,7 @@ const BookingList = ({
                         className="text-brand hover:text-brand-content"
                         title="Restore"
                       >
-                        <FaTrashRestore />
+                        <Icon name="trash-restore" />
                       </button>
                     )}
                   </div>

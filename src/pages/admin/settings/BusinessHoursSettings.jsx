@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabaseClient';
-import { FaSave, FaSpinner } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import Icon from '../../../components/Icon';
 
 /**
  * BusinessHoursSettings - Business hours configuration
@@ -90,7 +90,7 @@ const BusinessHoursSettings = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-8"><FaSpinner className="animate-spin text-3xl text-brand" /></div>;
+    return <div className="flex justify-center py-8"><Icon name="spinner" size={30} className="animate-spin text-brand" /></div>;
   }
 
   return (
@@ -162,7 +162,7 @@ const BusinessHoursSettings = () => {
           disabled={updateMutation.isPending}
           className="flex items-center gap-2 px-6 py-2 bg-brand text-content-on-brand rounded-md hover:bg-brand-hover transition disabled:opacity-50"
         >
-          {updateMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaSave />}
+          {updateMutation.isPending ? <Icon name="spinner" className="animate-spin" /> : <Icon name="save" />}
           Save Changes
         </button>
       </div>

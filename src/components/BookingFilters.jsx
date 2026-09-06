@@ -1,5 +1,5 @@
-import { FaCalendarCheck, FaList, FaCalendarDay, FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
 
+import Icon from './Icon';
 const BookingFilters = ({
   searchTerm,
   setSearchTerm,
@@ -34,7 +34,7 @@ const BookingFilters = ({
               className="w-full border border-line-strong rounded-lg px-4 py-2 pl-10 focus:ring-2 focus:ring-focus-ring focus:outline-none"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-subtle">
-              <FaCalendarCheck />
+              <Icon name="calendar-check" />
             </div>
           </div>
           
@@ -74,7 +74,7 @@ const BookingFilters = ({
                 : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
             }`}
           >
-            <FaList className="mr-2" /> List View
+            <Icon name="list" className="mr-2" /> List View
           </button>
           <button
             onClick={() => setViewType('calendar')}
@@ -84,7 +84,7 @@ const BookingFilters = ({
                 : 'bg-surface-sunken text-content-muted hover:bg-surface-sunken'
             }`}
           >
-            <FaCalendarDay className="mr-2" /> Calendar View
+            <Icon name="calendar-day" className="mr-2" /> Calendar View
           </button>
         </div>
         
@@ -136,7 +136,7 @@ const BookingFilters = ({
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >
-                <FaCalendarAlt className="mr-2" /> Day
+                <Icon name="calendar" className="mr-2" /> Day
               </button>
               <button
                 onClick={() => setCalendarViewMode('week')}
@@ -146,7 +146,7 @@ const BookingFilters = ({
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 } border-l border-r border-line-strong`}
               >
-                <FaCalendarWeek className="mr-2" /> Week
+                <Icon name="calendar-week" className="mr-2" /> Week
               </button>
               <button
                 onClick={() => setCalendarViewMode('month')}
@@ -156,7 +156,7 @@ const BookingFilters = ({
                     : 'bg-surface-raised text-content-muted hover:bg-surface'
                 }`}
               >
-                <FaCalendarAlt className="mr-2" /> Month
+                <Icon name="calendar" className="mr-2" /> Month
               </button>
             </div>
           )}

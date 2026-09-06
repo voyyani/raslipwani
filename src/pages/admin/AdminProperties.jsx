@@ -10,31 +10,10 @@ import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils'
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
 import MobilePropertyCard from '../../components/admin/MobilePropertyCard';
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaPlus, 
-  FaTimes, 
-  FaUpload, 
-  FaSearch,
-  FaCheck,
-  FaDollarSign,
-  FaHome,
-  FaBuilding,
-  FaLandmark,
-  FaDownload,
-  FaChevronLeft,
-  FaChevronRight,
-  FaTh,
-  FaList,
-  FaFilter,
-  FaChevronDown,
-  FaChevronUp,
-  FaStar
-} from 'react-icons/fa';
 
 import { logger } from '../../utils/logger';
 import useConfirm from '../../components/ui/useConfirm';
+import Icon from '../../components/Icon';
 
 const AdminProperties = () => {
   const [confirm, confirmDialog] = useConfirm();
@@ -562,7 +541,7 @@ const AdminProperties = () => {
               className="w-full border border-line-strong rounded-lg px-3 sm:px-4 py-2 pl-9 sm:pl-10 text-sm sm:text-base focus:ring-2 focus:ring-focus-ring focus:outline-none"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-subtle">
-              <FaSearch className="text-sm" />
+              <Icon name="search" size={14} />
             </div>
           </div>
           
@@ -571,7 +550,7 @@ const AdminProperties = () => {
             className="bg-success-content hover:bg-success-content text-content-on-brand px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center shadow-md text-sm sm:text-base"
             title="Export to CSV"
           >
-            <FaDownload className="mr-2" /> <span className="hidden sm:inline">Export</span><span className="sm:hidden">CSV</span>
+            <Icon name="download" className="mr-2" /> <span className="hidden sm:inline">Export</span><span className="sm:hidden">CSV</span>
           </button>
           
           <button
@@ -582,7 +561,7 @@ const AdminProperties = () => {
             }}
             className="bg-brand hover:bg-brand-hover text-content-on-brand px-4 py-2 rounded-lg flex items-center shadow-md"
           >
-            <FaPlus className="mr-2" /> Add Property
+            <Icon name="plus" className="mr-2" /> Add Property
           </button>
         </div>
       </div>
@@ -649,7 +628,7 @@ const AdminProperties = () => {
                           />
                         ) : (
                           <div className="bg-surface-sunken border-2 border-dashed rounded-md w-16 h-16 mr-4 flex items-center justify-center text-content-subtle">
-                            <FaTimes />
+                            <Icon name="times" />
                           </div>
                         )}
                         <div>
@@ -689,14 +668,14 @@ const AdminProperties = () => {
                           className="text-brand hover:text-brand-content transition-colors"
                           title="Edit property"
                         >
-                          <FaEdit className="w-5 h-5" />
+                          <Icon name="edit" size={20} />
                         </button>
                         <button
                           onClick={() => handleDelete(property.id)}
                           className="text-danger-content hover:text-danger-content transition-colors"
                           title="Delete property"
                         >
-                          <FaTrash className="w-5 h-5" />
+                          <Icon name="trash" size={20} />
                         </button>
                       </div>
                     </td>
@@ -718,7 +697,7 @@ const AdminProperties = () => {
                     mobileViewMode === 'grid' ? 'bg-surface-raised text-brand shadow-sm' : 'text-content-muted'
                   }`}
                 >
-                  <FaTh />
+                  <Icon name="th" />
                 </button>
                 <button
                   onClick={() => setMobileViewMode('list')}
@@ -726,7 +705,7 @@ const AdminProperties = () => {
                     mobileViewMode === 'list' ? 'bg-surface-raised text-brand shadow-sm' : 'text-content-muted'
                   }`}
                 >
-                  <FaList />
+                  <Icon name="list" />
                 </button>
               </div>
               
@@ -739,7 +718,7 @@ const AdminProperties = () => {
                     : 'bg-surface-raised border-line text-content-muted'
                 }`}
               >
-                <FaFilter className="text-sm" />
+                <Icon name="filter" size={14} />
                 <span className="text-sm">Filter</span>
               </button>
             </div>
@@ -836,7 +815,7 @@ const AdminProperties = () => {
                       />
                     ) : (
                       <div className="w-16 h-16 bg-surface-sunken rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FaHome className="text-content-subtle text-xl" />
+                        <Icon name="home" size={20} className="text-content-subtle" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -856,7 +835,7 @@ const AdminProperties = () => {
                         </span>
                       </div>
                     </div>
-                    <FaChevronRight className="text-content-on-media/80" />
+                    <Icon name="chevron-right" className="text-content-on-media/80" />
                   </div>
                 ))}
               </div>
@@ -882,7 +861,7 @@ const AdminProperties = () => {
                   : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
               }`}
             >
-              <FaChevronLeft className="mr-0 sm:mr-1" /> <span className="hidden xs:inline">Prev</span>
+              <Icon name="chevron-left" className="mr-0 sm:mr-1" /> <span className="hidden xs:inline">Prev</span>
             </button>
             
             <div className="flex items-center gap-1">
@@ -920,7 +899,7 @@ const AdminProperties = () => {
                   : 'bg-surface-raised border border-line-strong text-content-muted hover:bg-surface'
               }`}
             >
-              <span className="hidden xs:inline">Next</span> <FaChevronRight className="ml-0 sm:ml-1" />
+              <span className="hidden xs:inline">Next</span> <Icon name="chevron-right" className="ml-0 sm:ml-1" />
             </button>
           </div>
         </div>
@@ -1171,7 +1150,7 @@ const AdminProperties = () => {
                             onClick={() => handleRemoveAmenity(index)}
                             className="ml-1 text-brand hover:text-brand-content"
                           >
-                            <FaTimes size={14} />
+                            <Icon name="times" size={14} />
                           </button>
                         </div>
                       ))}
@@ -1217,7 +1196,7 @@ const AdminProperties = () => {
                     <label className="block text-sm font-medium text-content-muted mb-2">Property Images</label>
                     <div className="flex items-center justify-center w-full border-2 border-dashed border-line-strong rounded-lg p-8 text-center bg-surface">
                       <div>
-                        <FaUpload className="mx-auto text-content-subtle text-2xl mb-2" />
+                        <Icon name="upload" size={24} className="mx-auto text-content-subtle mb-2" />
                         <p className="text-sm text-content-muted">
                           Drag & drop images here or
                           <label htmlFor="property-images" className="text-brand cursor-pointer ml-1 font-medium">
@@ -1251,7 +1230,7 @@ const AdminProperties = () => {
                             onClick={() => handleDeleteImage(index, 'existing')}
                             className="absolute top-1 right-1 bg-danger-content text-content-on-brand rounded-full w-6 h-6 flex items-center justify-center"
                           >
-                            <FaTimes className="w-3 h-3" />
+                            <Icon name="times" size={12} />
                           </button>
                         </div>
                       ))}
@@ -1269,7 +1248,7 @@ const AdminProperties = () => {
                             onClick={() => handleDeleteImage(index, 'preview')}
                             className="absolute top-1 right-1 bg-danger-content text-content-on-brand rounded-full w-6 h-6 flex items-center justify-center"
                           >
-                            <FaTimes className="w-3 h-3" />
+                            <Icon name="times" size={12} />
                           </button>
                         </div>
                       ))}
