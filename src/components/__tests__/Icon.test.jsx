@@ -53,6 +53,25 @@ describe('Icon registry', () => {
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
+
+  it('covers the vocabulary the admin console uses', () => {
+    // Named explicitly rather than counted: a count passes if someone adds
+    // thirty-seven of the wrong names. These are the 37 entries the react-icons
+    // call sites in src/pages/admin and src/components need, in the FontAwesome
+    // vocabulary the registry keys already use.
+    const ADMIN_VOCABULARY = [
+      'ban', 'bars', 'bug', 'building', 'calendar', 'calendar-day', 'calendar-week',
+      'check', 'chevron-left', 'chevron-right', 'cloud', 'cloud-upload-alt', 'cog',
+      'compress', 'dollar-sign', 'download', 'edit', 'ellipsis-v',
+      'exclamation-triangle', 'expand', 'external-link-alt', 'filter', 'globe',
+      'info-circle', 'landmark', 'list', 'plus', 'plus-circle', 'question-circle',
+      'sign-out-alt', 'tachometer-alt', 'th', 'times-circle', 'tools', 'trash',
+      'upload', 'user-friends',
+    ];
+
+    const missing = ADMIN_VOCABULARY.filter((name) => !ICON_NAMES.includes(name));
+    expect(missing).toEqual([]);
+  });
 });
 
 describe('FontAwesome stays gone', () => {
