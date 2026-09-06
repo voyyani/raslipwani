@@ -25,7 +25,6 @@
     "@fullcalendar/list": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
-    "@headlessui/react": "^2.2.4",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.50.0",
     "@tanstack/react-query": "^5.90.19",

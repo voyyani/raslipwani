@@ -39,11 +39,17 @@ export default defineConfig({
       // 63.26 lines / 62.38 statements / 49.45 functions / 49.47 branches.
       // Each floor sits ~1 point under its measurement: enough headroom that
       // ordinary work does not trip CI, tight enough that deleting a suite does.
+      //
+      // Ratcheted again after the 4C surface passes, which measured
+      // 70.61 lines / 69.78 statements / 57.45 functions / 60.09 branches.
+      // The jump is not new test-writing so much as the surface migrations
+      // routing four large pages through primitives that already had suites.
+      // This crosses the roadmap's 70% line target.
       thresholds: {
-        lines: 62,
-        functions: 48,
-        branches: 48,
-        statements: 61
+        lines: 69,
+        functions: 56,
+        branches: 59,
+        statements: 68
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

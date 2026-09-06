@@ -15,9 +15,7 @@ const CloudinarySettings = () => {
   const { refreshSettings } = useSettings();
   const [formData, setFormData] = useState({
     cloud_name: 'dzqdxosk2',
-    upload_preset: 'raslipwani_unsigned',
-    cloudinary_api_key: '',
-    cloudinary_api_secret: ''
+    upload_preset: 'raslipwani_unsigned'
   });
   const [testStatus, setTestStatus] = useState(null);
 
@@ -30,7 +28,7 @@ const CloudinarySettings = () => {
       logger.debug('[CloudinarySettings] Fetching settings...');
       const { data, error } = await supabase
         .from('admin_settings')
-        .select('cloud_name, upload_preset, cloudinary_api_key, cloudinary_api_secret')
+        .select('cloud_name, upload_preset')
         .limit(1)
         .single();
 
@@ -41,9 +39,7 @@ const CloudinarySettings = () => {
       if (data) {
         setFormData({
           cloud_name: data.cloud_name || 'dzqdxosk2',
-          upload_preset: data.upload_preset || 'raslipwani_unsigned',
-          cloudinary_api_key: data.cloudinary_api_key || '',
-          cloudinary_api_secret: data.cloudinary_api_secret || ''
+          upload_preset: data.upload_preset || 'raslipwani_unsigned'
         });
       }
       return data;
@@ -58,8 +54,6 @@ const CloudinarySettings = () => {
       const updateData = {
         cloud_name: settings.cloud_name,
         upload_preset: settings.upload_preset,
-        cloudinary_api_key: settings.cloudinary_api_key,
-        cloudinary_api_secret: settings.cloudinary_api_secret,
         updated_at: new Date().toISOString()
       };
 
@@ -217,38 +211,15 @@ const CloudinarySettings = () => {
       </div>
 
       <div className="border-t pt-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Optional: API Credentials (for advanced features)</h4>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              API Key
-            </label>
-            <input
-              type="text"
-              value={formData.cloudinary_api_key}
-              onChange={(e) => setFormData({ ...formData, cloudinary_api_key: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="123456789012345"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              API Secret
-            </label>
-            <input
-              type="password"
-              value={formData.cloudinary_api_secret}
-              onChange={(e) => setFormData({ ...formData, cloudinary_api_secret: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••••••••••••••"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Only needed for signed uploads and admin API features
-            </p>
-          </div>
-        </div>
+        <h4 className="text-sm font-medium text-gray-700 mb-1">API credentials</h4>
+        <p className="text-xs text-gray-500">
+          The Cloudinary API key and secret are <strong>not</strong> configured here. They are
+          server-side credentials, and <code>admin_settings</code> is readable with the public
+          anon key &mdash; storing them in it would publish them to every visitor. Set
+          <code> CLOUDINARY_API_KEY</code> and <code>CLOUDINARY_API_SECRET</code> in the hosting
+          environment instead. Unsigned uploads, which is all this site performs, need only the
+          cloud name and upload preset above.
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-3 pt-4 border-t">
@@ -281,7 +252,6 @@ const CloudinarySettings = () => {
         <div className="text-xs text-gray-600 space-y-1 font-mono">
           <p><span className="text-gray-500">Upload URL:</span> https://api.cloudinary.com/v1_1/<span className="text-blue-600">{formData.cloud_name || '[cloud_name]'}</span>/image/upload</p>
           <p><span className="text-gray-500">Preset:</span> <span className="text-blue-600">{formData.upload_preset || '[not set]'}</span></p>
-          <p><span className="text-gray-500">API Key:</span> {formData.cloudinary_api_key ? '••••' + formData.cloudinary_api_key.slice(-4) : <span className="text-gray-400">[not set]</span>}</p>
         </div>
       </div>
     </form>

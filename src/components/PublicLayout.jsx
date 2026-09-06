@@ -52,8 +52,26 @@ const PublicLayout = () => {
       <Helmet>
         <link rel="canonical" href={`${SITE_ORIGIN}${path}`} />
       </Helmet>
+      {/*
+        * First thing in the tab order, visible only once focused. Without it a
+        * keyboard or screen-reader visitor walks the entire header — logo, six
+        * nav items, two dropdowns and the auth buttons — before reaching the
+        * page, on every navigation.
+        *
+        * The target takes `tabIndex={-1}` so moving focus to it actually works:
+        * a fragment link only moves the browser's focus if the target is
+        * focusable, and otherwise scrolls while leaving focus behind in the nav.
+        */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-primary focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        Skip to main content
+      </a>
       <Header />
-      <Outlet />
+      <div id="main-content" tabIndex={-1} className="flex flex-col flex-grow outline-none">
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );

@@ -168,3 +168,32 @@ describe('the chrome lives in the layout route, not in pages', () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe('skip to main content', () => {
+  // Without this link a keyboard or screen-reader visitor tabs through the
+  // logo, six nav items, two dropdowns and the auth buttons before reaching
+  // the page — on every navigation.
+  it('is the first focusable thing on the page', () => {
+    renderAt('/');
+
+    const link = screen.getByRole('link', { name: /skip to main content/i });
+    expect(link).toBeInTheDocument();
+
+    // Not merely present — present *first*. A skip link placed after the nav
+    // it skips is decoration.
+    const focusable = document.querySelectorAll('a[href], button, [tabindex]');
+    expect(focusable[0]).toBe(link);
+  });
+
+  it('points at a target that can actually take focus', () => {
+    renderAt('/');
+
+    const link = screen.getByRole('link', { name: /skip to main content/i });
+    const target = document.querySelector(link.getAttribute('href'));
+
+    expect(target).not.toBeNull();
+    // A fragment link only moves focus if its target is focusable; without
+    // this the page scrolls and focus stays behind in the navigation.
+    expect(target.getAttribute('tabindex')).toBe('-1');
+  });
+});

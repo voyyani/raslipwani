@@ -191,6 +191,7 @@ const Header = () => {
               whileTap={{ scale: 0.95 }}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
+              aria-controls="admin-mobile-nav"
             >
               <div className="relative w-6 h-6">
                 <motion.span
@@ -266,7 +267,7 @@ const Header = () => {
               </div>
               
               {/* Navigation */}
-              <nav className="flex flex-col py-2">
+              <nav id="admin-mobile-nav" className="flex flex-col py-2">
                 {navItems.map((item) => {
                   const IconComponent = item.icon;
                   const isActive = location.pathname === item.path;

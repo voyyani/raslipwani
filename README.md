@@ -3,8 +3,8 @@
 ![Raslipwani Properties Banner](https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![React Version](https://img.shields.io/badge/React-18.2.0-61dafb)](https://reactjs.org/)
-[![Vite Build](https://img.shields.io/badge/Vite-4.4.5-646cff)](https://vitejs.dev/)
+[![React Version](https://img.shields.io/badge/React-18.3.1-61dafb)](https://reactjs.org/)
+[![Vite Build](https://img.shields.io/badge/Vite-6.3.5-646cff)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.0.0-3ecf8e)](https://supabase.io/)
 
 Raslipwani Properties is a comprehensive real estate management platform designed to streamline property listings, client bookings, and business operations. Built with modern technologies, this platform offers a seamless experience for both property managers and clients.
@@ -57,8 +57,8 @@ graph TD
 
 | Technology   | Purpose              | Version |
 | ------------ | -------------------- | ------- |
-| React        | UI Component Library | 18.2.0  |
-| Vite         | Frontend Tooling     | 4.4.5   |
+| React        | UI Component Library | 18.3.1  |
+| Vite         | Frontend Tooling     | 6.3.5   |
 | Tailwind CSS | Styling Framework    | 3.3.3   |
 | React Router | Navigation           | 6.15.0  |
 | React Icons  | Icon Library         | 4.10.1  |
