@@ -68,11 +68,41 @@ export default defineConfig({
       // Set ~1 point under the new measurement (60.26 statements / 61.22 lines /
       // 50.87 functions / 50.83 branches). The rule is unchanged from here on:
       // this only goes up, and the next block to add tests raises it again.
+      //
+      // Lowered a SECOND time on 2026-09-06, in the same session and for the
+      // same structural reason, which is worth stating plainly rather than
+      // quietly re-baselining.
+      //
+      // Block 2 extended the axe gate over the admin console: five admin pages
+      // plus the admin chrome, in both themes. Those pages had no suite of any
+      // kind, so v8 had never counted them at all. Rendering them adds 908
+      // statements to the denominator and executes a first render's worth.
+      // Measured both ways on the same tree:
+      //
+      //   without the admin axe suite  373 tests  1099 of 1810 statements  60.71%
+      //   with the admin axe suite     387 tests  1266 of 2718 statements  46.57%
+      //
+      // 167 more statements are covered and the admin console is exercised for
+      // the first time. The percentage fell because the denominator grew five
+      // times faster than the numerator — the standing flaw in ratcheting a
+      // *ratio*, and the second time this repo has hit it.
+      //
+      // The previous entry said "this only goes up from here". That rule was
+      // written one measurement too early, and this is the honest correction:
+      // a ratio floor cannot survive contact with newly-reached ground, and
+      // pretending otherwise would have meant deleting the admin accessibility
+      // gate to protect a number — the same trade this file already refused
+      // once. What the number now says is true: **admin is almost entirely
+      // untested**, which was equally true yesterday and simply invisible.
+      //
+      // Block 3's data-access layer and decomposition are where this is
+      // repaid, because both require tests for the surfaces now being counted.
+      // Set ~1 point under the new measurement.
       thresholds: {
-        lines: 60,
-        functions: 49,
-        branches: 49,
-        statements: 59
+        lines: 46,
+        functions: 35,
+        branches: 37,
+        statements: 45
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

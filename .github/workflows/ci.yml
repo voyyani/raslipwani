@@ -64,11 +64,23 @@ jobs:
       # ROADMAP.md can stop carrying "axe violations: not measured", which it
       # did for four revisions while the block above it claimed a WCAG bar.
       #
-      # Every public surface plus the header and footer, in both themes,
-      # against WCAG 2.1 A and AA. Contrast is excluded there because jsdom has
-      # no layout for axe to measure; it is asserted over the token pairs in
-      # src/design instead, which is the only place it can be decided now that
-      # every colour on these pages comes from a token.
+      # Every public surface plus the header and footer, and — since Block 2 —
+      # the five admin surfaces and the admin chrome, in both themes, against
+      # WCAG 2.1 A and AA.
+      #
+      # Admin arrived later on purpose. It held all 65 of the codebase's
+      # unlabelled form controls, and a gate that lands with 65 known
+      # violations gets switched off within a day. The labels reached 0 first;
+      # this covers what was then clean. That sequencing was vindicated when
+      # the gate immediately found four <select> elements with no accessible
+      # name that the label ratchet had scored as clean — "satisfies
+      # jsx-a11y/label-has-associated-control" is not the same claim as "has an
+      # accessible name", and only one of them is WCAG.
+      #
+      # Contrast is excluded because jsdom has no layout for axe to measure; it
+      # is asserted over the token pairs in src/design instead, which is the
+      # only place it can be decided now that every colour on these pages comes
+      # from a token.
       - name: Accessibility (axe)
         run: npm run test:a11y
 

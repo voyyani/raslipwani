@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { render } from '../utils/renderWithProviders';
+import { render, waitFor } from '../utils/renderWithProviders';
 import { expectNoAxeViolations } from '../utils/axe';
 import { signInAsAdmin } from '../utils/authenticatedAdmin';
 
@@ -61,12 +61,21 @@ describe('admin surfaces have no WCAG A/AA violations', () => {
         const { container } = render(<Surface />, { route });
 
         // A gate that inspects an empty container passes and asserts nothing.
-        // Admin pages behind a loading state render almost nothing, so this is
-        // the assertion that makes the rest of the test mean something.
-        expect(
-          container.textContent.trim().length,
-          `${name} rendered almost nothing — axe would pass by inspecting an empty page`
-        ).toBeGreaterThan(50);
+        // Several of these pages gate their whole render on a query's
+        // isLoading and paint only a spinner until it settles, so axe run on
+        // the first paint would report zero violations on a blank page. Wait
+        // for real content, then assert there is some — the wait is what makes
+        // the test correct, and the assertion is what stops it silently
+        // degrading if a page later starts rendering nothing at all.
+        await waitFor(
+          () => {
+            expect(
+              container.textContent.trim().length,
+              `${name} rendered almost nothing — axe would pass by inspecting an empty page`
+            ).toBeGreaterThan(50);
+          },
+          { timeout: 10000 }
+        );
 
         await expectNoAxeViolations(container);
       }, 30000);

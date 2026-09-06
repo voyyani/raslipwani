@@ -574,6 +574,7 @@ const AdminProperties = () => {
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
         <div className="flex gap-2 flex-1 sm:flex-initial">
           <select
+            aria-label="Sort properties by"
             value={sortField}
             onChange={(e) => setSortField(e.target.value)}
             className="flex-1 sm:flex-initial border border-line-strong rounded-lg px-2 sm:px-4 py-2 text-sm sm:text-base focus:ring-2 focus:ring-focus-ring focus:outline-none"

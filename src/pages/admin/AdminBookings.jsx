@@ -629,6 +629,18 @@ const AdminBookings = () => {
       {isMobile && mobileView === 'calendar' && (
         <div className="bg-surface-raised rounded-lg shadow-md p-2 overflow-hidden">
           <FullCalendar
+            /*
+              FullCalendar draws its prev/next arrows as
+              <span class="fc-icon fc-icon-chevron-left" role="img"> with no
+              accessible name, inside a button that already has one. axe
+              reports that span as a nameless image (role-img-alt, serious),
+              and it is right: role="img" is a promise of alternative text.
+              Turning the icons off replaces the span with the button's text,
+              which is both accessible and unambiguous in an admin toolbar.
+              This is the first of the third-party chrome ROADMAP.md flags as
+              never having been audited.
+            */
+            buttonIcons={false}
             plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
             initialView="listWeek"
             headerToolbar={{
@@ -767,6 +779,7 @@ const AdminBookings = () => {
       {!isMobile && (
       <div className="bg-surface-raised rounded-lg shadow-md p-3 sm:p-4 lg:p-6 overflow-hidden">
         <FullCalendar
+          buttonIcons={false}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
           initialView={viewType}
           headerToolbar={{

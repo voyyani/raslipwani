@@ -56,24 +56,24 @@ revisions of this document. Everything an agent can do is preparation for it.**
 |---|---|
 | Identity | One stack. Clerk removed from code and `package.json`; Supabase Auth, `admin_users`, `is_admin()` |
 | Privileged keys in bundle | Zero JWT-shaped strings in `dist/`, enforced at build time |
-| Tests | **341 passing / 32 files** (0 at baseline) |
-| Lint errors | 0 (baseline 77). **375 warnings**, every one counted and budgeted |
+| Tests | **387 passing / 36 files** (0 at baseline) |
+| Lint errors | 0 (baseline 77). **168 warnings** (was 375), every one counted and budgeted |
 | CI | lint · test · coverage floor · **axe** · palette ratchet · label ratchet · token freshness · build · bundle budget · no-console-in-dist · gitleaks |
-| **axe violations** | **0**, across 6 public surfaces + header + footer × 2 themes, enforced in CI |
+| **axe violations** | **0**, across 6 public + 5 admin surfaces + all chrome × 2 themes, enforced in CI |
 | Routing | 0 unreachable pages, guarded by a test; 0 broken nav links; one `PublicLayout`, header mounts once |
 | Design tokens | 32 role tokens + 5 fixed tokens, both themes, one source, 129 contrast assertions at AA |
 | **Themes** | **Two, shipped.** Light / dark / system, persisted, applied before first paint |
 | Primitives | `Button`, `Field`, `Input`/`Textarea`/`Select`, `Card`, `Badge`, `Modal`, `Toast`, `ConfirmDialog`, `ThemeToggle` |
 | Native dialogs | 0 `alert()`/`confirm()`/`prompt()`; 0 hand-rolled overlays. Both held by tests |
 | Literal palette classes | **94**, from 3,005. Ceiling live and blocking in CI |
-| Unlabelled controls | **65**, from 96 — and **0 on every public, visitor-facing form** |
+| Unlabelled controls | **0**, from 96. Held by a ratchet that is now a floor, not a ceiling |
 | Public surfaces on tokens | Home, Properties, PropertyDetail, About, Contact, International, UNHousing |
 | Contact form | Behind `Input`/`Select`/`Textarea`/`Button`; errors announced, not just visible |
 | Nav disclosures | Dropdown operable by keyboard (it was not — the trigger had no `onClick` at all), `aria-expanded`/`aria-controls` on all five disclosures |
 | Skip link | First in the tab order, target focusable, asserted by test |
 | Module resolution | `@` alias in **both** vite and vitest configs; Supabase imported by one specifier everywhere |
-| Bundle | 215.3 kB gzip first load (from 275 kB), budget 219 kB |
-| Icon fonts | 0 bytes (FontAwesome's 999 kB removed); CSS 146 kB → 76.3 kB raw |
+| Bundle | 215.9 kB gzip first load (from 275 kB), budget 219 kB |
+| Icon libraries | **One** — `lucide-react`. FontAwesome (999 kB of fonts) and `react-icons` both gone |
 | Canonicals | Route-aware. Every page previously declared the homepage as its canonical |
 | Cloudinary secret | Form can no longer write it to an anon-readable column; guarded by test |
 | JSON-LD geo | Corrected from Nairobi to Kikambala (~500 km); guarded by test |
@@ -295,7 +295,27 @@ What is left is the genuine remainder: the parts a table could not decide.
       67 known violations gets switched off within a day. But those violations are in
       **admin**, and the gate that matters covers the **public** surfaces — which were
       already at zero. Scoping the gate to what is clean, rather than delaying it until
-      everything is, turned it on two blocks early. Extend it to admin as the labels land.
+      everything is, turned it on two blocks early.
+
+      **Extended over the admin console on 2026-09-06** — five admin surfaces plus the
+      admin chrome, both themes, 30 assertions in CI. It found three things the label
+      work had not:
+
+      - **Four `<select>` elements with no accessible name** (`select-name`, critical) in
+        `AdminProperties` and `ClientManagement`. The label ratchet scored these as clean
+        because there was no `<label>` element for it to inspect at all — the filters use
+        their first option as a pseudo-label. **Passing `jsx-a11y/label-has-associated-control`
+        is not the same claim as having an accessible name, and only one of them is WCAG.**
+      - **A nameless `role="img"`** (`role-img-alt`, serious) inside FullCalendar's
+        prev/next buttons — the first of the third-party chrome this block flags as never
+        audited. Fixed with `buttonIcons={false}`.
+      - **`AdminBookings` rendering an empty page under test**, caught by a `textContent`
+        assertion written before the gate was switched on. axe reports zero violations on
+        a blank page, so a gate without that assertion would have passed while inspecting
+        nothing.
+
+      The gate was verified to still fail by planting a nameless icon-only button and
+      watching `button-name` catch it on both themes.
 - [ ] **Live regions for async status and toasts.** The skip link is done.
 - [ ] Bring the CSS bundle under 50 kB raw (**76.3 kB** today, from 146 kB). Two theories
       about where the excess lives have now been retired by measurement. It was not the
@@ -313,9 +333,21 @@ What is left is the genuine remainder: the parts a table could not decide.
       fixed nothing; turning it off last removed 39 that had become genuinely redundant.
       Total warnings: **375 → 168**.
 
-**Exit:** raw-palette ratchet at **0** or a documented exemption for developer chrome ·
-label ratchet at **0** · axe extended over the admin console, still at zero · every
-public flow completable by keyboard in both themes · one icon library · CSS under 50 kB.
+**Exit criteria, as at 2026-09-06:**
+
+| | |
+|---|---|
+| label ratchet at **0** | ✅ from 96 at the start of Release 4 |
+| axe extended over the admin console, still at zero | ✅ 30 assertions in CI |
+| one icon library | ✅ `react-icons` removed |
+| `jsx-a11y/label-has-for` retired | ✅ warnings 375 → 168 |
+| raw-palette ratchet at **0** or a documented exemption | ⬜ **94** — untouched by this block |
+| every public flow completable by keyboard in both themes | ⬜ not yet verified by hand |
+| CSS under 50 kB | ⬜ **76.3 kB** — the icon theory is now retired, see above |
+
+Four of seven. The three that remain were not attempted here and are deliberately left
+unticked: ticking them would make this document less accurate, which is the one thing rule
+3 forbids.
 
 ---
 
@@ -518,10 +550,10 @@ ledger at the top.
 | Lighthouse Performance (mobile) | not measured | **not measured** | ≥ 90 | 3 |
 | Property pages in the sitemap | 0 | **0** | all | 5 |
 | `.ts`/`.tsx` files | 0 | **0** | incremental adoption | 6 |
-| axe violations (public + chrome) | not measured | **0** ✅ enforced in CI | 0 | ✅ 2 |
+| axe violations (public + admin + chrome) | not measured | **0** ✅ enforced in CI, 30 assertions | 0 | ✅ 2 |
 | Themes shipped | 2 | **2** ✅ | 2, both AA | ✅ |
 | JSON-LD geo error | ~500 km | **corrected** ✅ | correct | ✅ 5 |
-| Test coverage | 70.3% statements | **60.3% statements** — see below | ≥ 70% | ongoing |
+| Test coverage | 70.3% statements | **46.6% statements** — floor lowered a second time, see below | ≥ 70% | ongoing |
 | Overall audit score | ~6.5 / 10 | **~7 / 10** | **9 / 10** | — |
 
 **Two numbers went the wrong way, and both are left visible rather than re-baselined.**
@@ -539,12 +571,33 @@ own, so v8 had never counted them. Measured both ways on the same tree:
 because the denominator grew faster than the numerator — which is what happens whenever
 testing reaches previously untested ground, and is the standing flaw in ratcheting a
 *ratio*. Holding the old floor would have meant deleting the accessibility gate to protect
-a number. The reasoning is recorded in `vitest.config.js` beside the thresholds, and the
-rule is unchanged from here: it only goes up from 60.
+a number. The reasoning is recorded in `vitest.config.js` beside the thresholds.
+
+**It then happened again, harder, in Block 2 — and "it only goes up from 60" was written
+one measurement too early.** Extending the axe gate over the admin console renders five
+admin pages that had no suite of any kind, so v8 had never counted them either:
+
+| | tests | covered statements | % |
+|---|---:|---:|---:|
+| without the admin axe suite | 373 | 1,099 of 1,810 | 60.71% |
+| with the admin axe suite | 387 | **1,266** of 2,718 | **46.57%** |
+
+**167 more statements are covered and the admin console is exercised for the first time**,
+while 908 statements joined the denominator. The floor came down a second time, to 45.
+
+Two give-backs from the same cause is no longer an exception, it is the metric behaving as
+designed: **a ratio floor cannot survive contact with newly-reached ground.** The choice
+each time was between lowering the number and deleting the gate that revealed it, and
+deleting a WCAG gate to protect a coverage percentage is the tail wagging the dog. What
+46.57% now says is true — **admin is almost entirely untested** — and that was equally true
+yesterday, merely invisible. Block 3 is where it is repaid, because a data-access layer and
+decomposition both require tests for exactly these surfaces.
 
 **The CSS bundle rose 75.6 → 76.3 kB** despite the migration finishing, which retires the
-theory that the excess was two vocabularies coexisting. It is the token layer's own
-breadth. Chase it with the icon consolidation, not with more migration.
+theory that the excess was two vocabularies coexisting. Block 2 then retired the second
+theory too: the icon consolidation landed and **the stylesheet did not move by one byte**,
+because icons are JavaScript. Two wrong predictions in a row on this line; the remaining
+lead is unused-utility pruning, and it should be measured before it is scheduled.
 
 **The score is capped at roughly 7 until Block 1 is executed, and no amount of further
 coding lifts it.**
