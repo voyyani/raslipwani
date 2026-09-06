@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
+import Textarea from '../../components/ui/Textarea';
+import Checkbox from '../../components/ui/Checkbox';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -734,8 +738,16 @@ const AdminProperties = () => {
                 >
                   <div className="bg-surface-raised rounded-lg shadow p-3 space-y-3">
                     <div>
-                      <label className="block text-xs font-medium text-content-muted mb-1">Status</label>
-                      <div className="flex flex-wrap gap-2">
+                      {/*
+                        A group, not a label. These are toggle buttons, and a
+                        <button> is not a labellable control — the <label> that
+                        used to sit here named nothing at all. aria-labelledby
+                        keeps the visible text and gives the group a real name.
+                      */}
+                      <span id="status-filter-label" className="block text-xs font-medium text-content-muted mb-1">
+                        Status
+                      </span>
+                      <div role="group" aria-labelledby="status-filter-label" className="flex flex-wrap gap-2">
                         {['all', 'available', 'pending', 'sold', 'rented'].map(status => (
                           <button
                             key={status}
@@ -752,8 +764,16 @@ const AdminProperties = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-content-muted mb-1">Purpose</label>
-                      <div className="flex flex-wrap gap-2">
+                      {/*
+                        A group, not a label. These are toggle buttons, and a
+                        <button> is not a labellable control — the <label> that
+                        used to sit here named nothing at all. aria-labelledby
+                        keeps the visible text and gives the group a real name.
+                      */}
+                      <span id="purpose-filter-label" className="block text-xs font-medium text-content-muted mb-1">
+                        Purpose
+                      </span>
+                      <div role="group" aria-labelledby="purpose-filter-label" className="flex flex-wrap gap-2">
                         {['all', 'sale', 'rent'].map(purpose => (
                           <button
                             key={purpose}
@@ -947,182 +967,147 @@ const AdminProperties = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Left Column */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Title*</label>
-                    <input
+                    <Input
+                      label="Title"
+                      required
+                      error={errors.title}
                       type="text"
                       name="title"
                       value={formData.title}
                       onChange={handleInputChange}
-                      className={`w-full border ${errors.title ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                      required
                     />
-                    {errors.title && <p className="text-danger-content text-sm mt-1">{errors.title}</p>}
-                  </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Description*</label>
-                    <textarea
+                    <Textarea
+                      label="Description"
+                      required
+                      error={errors.description}
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      className={`w-full border ${errors.description ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 h-32 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                      required
-                    ></textarea>
-                    {errors.description && <p className="text-danger-content text-sm mt-1">{errors.description}</p>}
-                  </div>
+                    />
                   
-                  <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Price (KES)*</label>
-                    <input
+                    <Input
+                      label="Price (KES)"
+                      required
+                      error={errors.price}
                       type="number"
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
-                      className={`w-full border ${errors.price ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                      required
                     />
-                    {errors.price && <p className="text-danger-content text-sm mt-1">{errors.price}</p>}
-                  </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Purpose*</label>
-                      <select
+                      <Select
+                        label="Purpose"
+                        required
                         name="purpose"
                         value={formData.purpose}
                         onChange={handleInputChange}
-                        className="w-full border border-line-strong rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none"
-                        required
                       >
                         <option value="sale">For Sale</option>
                         <option value="rent">For Rent</option>
-                      </select>
-                    </div>
+                      </Select>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Property Type*</label>
-                      <select
+                      <Select
+                        label="Property Type"
+                        required
+                        error={errors.property_type}
                         name="property_type"
                         value={formData.property_type}
                         onChange={handleInputChange}
-                        className={`w-full border ${errors.property_type ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                        required
                       >
                         <option value="">Select Type</option>
                         {propertyTypes[formData.purpose]?.map(type => (
-                          <option key={type} value={type}>
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                          </option>
+                        <option key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </option>
                         ))}
-                      </select>
-                      {errors.property_type && <p className="text-danger-content text-sm mt-1">{errors.property_type}</p>}
-                    </div>
+                      </Select>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Location*</label>
-                    <input
+                    <Input
+                      label="Location"
+                      required
+                      error={errors.location}
                       type="text"
                       name="location"
                       value={formData.location}
                       onChange={handleInputChange}
-                      className={`w-full border ${errors.location ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                      required
                     />
-                    {errors.location && <p className="text-danger-content text-sm mt-1">{errors.location}</p>}
-                  </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Address*</label>
-                    <input
+                    <Input
+                      label="Address"
+                      required
+                      error={errors.address}
                       type="text"
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      className={`w-full border ${errors.address ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                      required
                     />
-                    {errors.address && <p className="text-danger-content text-sm mt-1">{errors.address}</p>}
-                  </div>
                   
                   <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Bedrooms*</label>
-                      <input
+                      <Input
+                        label="Bedrooms"
+                        required
+                        error={errors.bedrooms}
                         type="number"
                         name="bedrooms"
                         value={formData.bedrooms}
                         onChange={handleInputChange}
-                        className={`w-full border ${errors.bedrooms ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                        required
                       />
-                      {errors.bedrooms && <p className="text-danger-content text-sm mt-1">{errors.bedrooms}</p>}
-                    </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Bathrooms*</label>
-                      <input
+                      <Input
+                        label="Bathrooms"
+                        required
+                        error={errors.bathrooms}
                         type="number"
                         name="bathrooms"
                         value={formData.bathrooms}
                         onChange={handleInputChange}
-                        className={`w-full border ${errors.bathrooms ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                        required
                       />
-                      {errors.bathrooms && <p className="text-danger-content text-sm mt-1">{errors.bathrooms}</p>}
-                    </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Area (sqft)*</label>
-                      <input
+                      <Input
+                        label="Area (sqft)"
+                        required
+                        error={errors.area_sqft}
                         type="number"
                         name="area_sqft"
                         value={formData.area_sqft}
                         onChange={handleInputChange}
-                        className={`w-full border ${errors.area_sqft ? 'border-danger-border' : 'border-line-strong'} rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none`}
-                        required
                       />
-                      {errors.area_sqft && <p className="text-danger-content text-sm mt-1">{errors.area_sqft}</p>}
-                    </div>
                   </div>
                 </div>
                 
                 {/* Right Column */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Lot Size (sqft)</label>
-                      <input
+                      <Input
+                        label="Lot Size (sqft)"
                         type="number"
                         name="lot_size_sqft"
                         value={formData.lot_size_sqft}
                         onChange={handleInputChange}
-                        className="w-full border border-line-strong rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none"
                       />
-                    </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-content-muted mb-2">Status*</label>
-                      <select
+                      <Select
+                        label="Status"
+                        required
                         name="status"
                         value={formData.status}
                         onChange={handleInputChange}
-                        className="w-full border border-line-strong rounded-lg p-3 focus:ring-2 focus:ring-focus-ring focus:outline-none"
-                        required
                       >
                         <option value="available">Available</option>
                         <option value="pending">Pending</option>
                         <option value="sold">Sold</option>
                         <option value="off-market">Off Market</option>
-                      </select>
-                    </div>
+                      </Select>
                   </div>
                   
                   <div className="bg-surface p-4 rounded-lg">
-                    <label className="block text-sm font-medium text-content-muted mb-2">Amenities</label>
+                    <label htmlFor="new-amenity" className="block text-sm font-medium text-content-muted mb-2">Amenities</label>
                     <div className="flex mb-3">
                       <input
+                        id="new-amenity"
                         type="text"
                         value={newAmenity}
                         onChange={(e) => setNewAmenity(e.target.value)}
@@ -1159,41 +1144,35 @@ const AdminProperties = () => {
                   
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        label="Has Pool"
                         name="has_pool"
                         checked={formData.has_pool}
                         onChange={handleInputChange}
-                        className="mr-2 h-4 w-4 text-brand rounded focus:ring-focus-ring"
                       />
-                      <label className="text-sm font-medium text-content-muted">Has Pool</label>
                     </div>
                     
                     <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        label="Has Garden"
                         name="has_garden"
                         checked={formData.has_garden}
                         onChange={handleInputChange}
-                        className="mr-2 h-4 w-4 text-brand rounded focus:ring-focus-ring"
                       />
-                      <label className="text-sm font-medium text-content-muted">Has Garden</label>
                     </div>
                     
                     <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        label="Featured Property"
                         name="featured"
                         checked={formData.featured}
                         onChange={handleInputChange}
-                        className="mr-2 h-4 w-4 text-brand rounded focus:ring-focus-ring"
                       />
-                      <label className="text-sm font-medium text-content-muted">Featured Property</label>
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-content-muted mb-2">Property Images</label>
+                    <span className="block text-sm font-medium text-content-muted mb-2">Property Images</span>
                     <div className="flex items-center justify-center w-full border-2 border-dashed border-line-strong rounded-lg p-8 text-center bg-surface">
                       <div>
                         <Icon name="upload" size={24} className="mx-auto text-content-subtle mb-2" />
