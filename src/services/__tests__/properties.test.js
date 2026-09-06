@@ -1,0 +1,114 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { supabase } from '@/utils/supabaseClient';
+import { mockFrom } from '@/test/utils/supabaseQueryMock';
+import {
+  listFeatured, listAll, listPage, getById, updateProperty, setFeatured, propertyQueries,
+} from '../properties';
+import { ServiceError } from '../unwrap';
+import { queryKeys } from '../queryKeys';
+import { STALE_TIME } from '../cachePolicy';
+
+const row = { id: 7, title: 'Gigiri Apartment', featured: true };
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe('listFeatured', () => {
+  it('asks for featured rows, newest first, three of them', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], error: null } });
+
+    await expect(listFeatured()).resolves.toEqual([row]);
+
+    expect(supabase.from).toHaveBeenCalledWith('properties');
+    expect(builders.properties.eq).toHaveBeenCalledWith('featured', true);
+    expect(builders.properties.order).toHaveBeenCalledWith('created_at', { ascending: false });
+    expect(builders.properties.limit).toHaveBeenCalledWith(3);
+  });
+
+  it('honours an explicit limit', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [], error: null } });
+    await listFeatured({ limit: 6 });
+    expect(builders.properties.limit).toHaveBeenCalledWith(6);
+  });
+
+  it('returns [] rather than null when there are no featured properties', async () => {
+    mockFrom(supabase, { properties: { data: null, error: null } });
+    await expect(listFeatured()).resolves.toEqual([]);
+  });
+
+  it('throws a ServiceError when the query fails', async () => {
+    mockFrom(supabase, { properties: { data: null, error: { message: 'denied' } } });
+    await expect(listFeatured()).rejects.toBeInstanceOf(ServiceError);
+  });
+});
+
+describe('listAll', () => {
+  it('defaults to newest first and accepts an ascending sort', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], error: null } });
+
+    await listAll();
+    expect(builders.properties.order).toHaveBeenCalledWith('created_at', { ascending: false });
+
+    await listAll({ sortField: 'price', sortDirection: 'asc' });
+    expect(builders.properties.order).toHaveBeenCalledWith('price', { ascending: true });
+  });
+});
+
+describe('listPage', () => {
+  it('translates a 1-based page into a Supabase range and returns the total', async () => {
+    const builders = mockFrom(supabase, {
+      properties: { data: [row], count: 47, error: null },
+    });
+
+    await expect(listPage({ page: 3, pageSize: 10 })).resolves.toEqual({ rows: [row], count: 47 });
+
+    // Page 3 of 10 is rows 20..29 — the off-by-one that made the admin table
+    // skip a property between every page before this function existed.
+    expect(builders.properties.range).toHaveBeenCalledWith(20, 29);
+    expect(builders.properties.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  });
+
+  it('starts page 1 at row 0', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [], count: 0, error: null } });
+    await listPage({ page: 1, pageSize: 12 });
+    expect(builders.properties.range).toHaveBeenCalledWith(0, 11);
+  });
+});
+
+describe('getById', () => {
+  it('fetches one row by id', async () => {
+    const builders = mockFrom(supabase, { properties: { data: row, error: null } });
+    await expect(getById(7)).resolves.toEqual(row);
+    expect(builders.properties.eq).toHaveBeenCalledWith('id', 7);
+    expect(builders.properties.single).toHaveBeenCalled();
+  });
+});
+
+describe('writes', () => {
+  it('updates by id and returns the updated row', async () => {
+    const builders = mockFrom(supabase, { properties: { data: { ...row, price: 10 }, error: null } });
+    await expect(updateProperty(7, { price: 10 })).resolves.toEqual({ ...row, price: 10 });
+    expect(builders.properties.update).toHaveBeenCalledWith({ price: 10 });
+    expect(builders.properties.eq).toHaveBeenCalledWith('id', 7);
+  });
+
+  it('toggles featured and returns the updated row', async () => {
+    const builders = mockFrom(supabase, { properties: { data: { ...row, featured: false }, error: null } });
+    await setFeatured(7, false);
+    expect(builders.properties.update).toHaveBeenCalledWith({ featured: false });
+  });
+});
+
+describe('propertyQueries', () => {
+  it('builds featured options from the registry and the standard lifetime', () => {
+    const options = propertyQueries.featured();
+    expect(options.queryKey).toEqual(queryKeys.properties.featured());
+    expect(options.staleTime).toBe(STALE_TIME.standard);
+    expect(typeof options.queryFn).toBe('function');
+  });
+
+  it('builds detail options keyed by the id', () => {
+    expect(propertyQueries.detail(7).queryKey).toEqual(queryKeys.properties.detail(7));
+  });
+});
