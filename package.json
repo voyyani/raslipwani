@@ -19,7 +19,8 @@
     "tokens": "node scripts/generate-tokens.mjs",
     "tokens:check": "node scripts/generate-tokens.mjs --check",
     "palette:ratchet": "node scripts/palette-ratchet.mjs",
-    "label:ratchet": "node scripts/label-ratchet.mjs"
+    "label:ratchet": "node scripts/label-ratchet.mjs",
+    "supabase:ratchet": "node scripts/supabase-import-ratchet.mjs"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.20",
