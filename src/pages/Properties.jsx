@@ -379,8 +379,8 @@ const Properties = () => {
                   
                   {/* Purpose Filter (Rent/Sale) */}
                   <div className="mb-6">
-                    <label className="block text-content mb-3 font-medium">Purpose</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <span id="purpose-filter-label" className="block text-content mb-3 font-medium">Purpose</span>
+                    <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="purpose-filter-label">
                       {[
                         { value: 'all', label: 'All', icon: '🏠' },
                         { value: 'sale', label: 'For Sale', icon: '💰' },
@@ -389,6 +389,7 @@ const Properties = () => {
                         <button
                           key={option.value}
                           onClick={() => setPurposeFilter(option.value)}
+                          aria-pressed={purposeFilter === option.value}
                           className={`p-3 rounded-xl border-2 transition-all duration-300 text-center ${
                             purposeFilter === option.value
                               ? 'border-primary bg-primary/10 text-primary font-medium'
@@ -404,8 +405,9 @@ const Properties = () => {
                   
                   {/* Property Type */}
                   <div className="mb-6">
-                    <label className="block text-content mb-3 font-medium">Property Type</label>
+                    <label htmlFor="property-type-filter" className="block text-content mb-3 font-medium">Property Type</label>
                     <select
+                      id="property-type-filter"
                       className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
                       value={filterOption}
                       onChange={(e) => setFilterOption(e.target.value)}
@@ -421,8 +423,9 @@ const Properties = () => {
                   
                   {/* Sort By */}
                   <div className="mb-6">
-                    <label className="block text-content mb-3 font-medium">Sort By</label>
+                    <label htmlFor="sort-by-filter" className="block text-content mb-3 font-medium">Sort By</label>
                     <select
+                      id="sort-by-filter"
                       className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
                       value={sortOption}
                       onChange={(e) => setSortOption(e.target.value)}
