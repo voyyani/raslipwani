@@ -12,6 +12,7 @@ import { formatDate } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from './ui/useConfirm';
+import Input from './ui/Input';
 import Select from './ui/Select';
 import Textarea from './ui/Textarea';
 import { Home, Plus, X, Save, Trash2, MapPin, DollarSign, Bed, Bath } from 'lucide-react';
@@ -37,15 +38,14 @@ const PropertyInterests = ({ clientId }) => {
     interestQueries.forClient(clientId)
   );
 
-  // Search properties. There is no dedicated "typeahead" endpoint in
-  // src/services/properties.js, so this reuses propertyQueries.page, the
-  // closest existing function — see the migration report for the resulting
-  // semantic differences (default ordering added, `*` selected instead of a
-  // narrow column list, and no explicit row limit beyond pageSize).
-  const { data: { rows: searchResults } = { rows: EMPTY_SEARCH_RESULTS }, isLoading: searchLoading } = useQuery({
-    ...propertyQueries.page({ page: 1, pageSize: 10, search: searchTerm }),
-    enabled: searchTerm.length >= 2,
-  });
+  // Search properties. propertyQueries.search reproduces the original inline
+  // query exactly (seven columns, no ordering, no count) rather than reusing
+  // the paginated admin-table query, which would add an ORDER BY and a COUNT
+  // to a control that fires on every keystroke. The two-character gate lives
+  // in the query options themselves.
+  const { data: searchResults = EMPTY_SEARCH_RESULTS, isLoading: searchLoading } = useQuery(
+    propertyQueries.search(searchTerm)
+  );
 
   // Add interest mutation
   const addInterestMutation = useMutation({

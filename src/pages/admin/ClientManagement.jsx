@@ -16,6 +16,15 @@ import { useNavigate } from 'react-router-dom';
 // array identity each time (src/pages/Properties.jsx:14).
 const EMPTY_CLIENTS = [];
 
+// The Budget filter's labels are UI vocabulary — clientQueries.page takes
+// the resolved numeric bounds, not the bucket name.
+const BUDGET_RANGES = {
+  '0-500k': { min: 0, max: 500000 },
+  '500k-1m': { min: 500000, max: 1000000 },
+  '1m-5m': { min: 1000000, max: 5000000 },
+  '5m+': { min: 5000000, max: 999999999 },
+};
+
 const ClientManagement = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -33,15 +42,11 @@ const ClientManagement = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const itemsPerPage = 20;
 
-  // Fetch clients with filters.
-  //
-  // NOTE (Task 15 migration): clientQueries.page (src/services/clients.js)
-  // supports status, clientType and search, but has no budget-range
-  // parameter — the budgetFilter select below no longer narrows the query.
-  // Reproducing it would mean widening the committed Task 6 service
-  // interface, which is out of this task's file list, so this is flagged in
-  // the migration report instead of silently worked around. See TRAP 4 in
-  // the task brief.
+  // Fetch clients with filters. The budget bucket is resolved to numeric
+  // bounds here and threaded through clientQueries.page so they land in the
+  // query key too — otherwise the cache would serve one budget's results
+  // for another.
+  const budgetRange = BUDGET_RANGES[budgetFilter];
   const { data: { rows: clients, count: totalCount } = { rows: EMPTY_CLIENTS, count: 0 }, isLoading, error } = useQuery(
     clientQueries.page({
       page,
@@ -49,6 +54,8 @@ const ClientManagement = () => {
       status: statusFilter,
       clientType: typeFilter,
       search: debouncedSearch,
+      budgetMin: budgetRange?.min,
+      budgetMax: budgetRange?.max,
     })
   );
 

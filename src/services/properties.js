@@ -91,6 +91,27 @@ export async function listPage({
   return unwrapCount(await query.range(from, to), { table: TABLE, operation: 'listPage' });
 }
 
+/**
+ * The narrow typeahead behind PropertyInterests.jsx's "Add Interest" search
+ * box. Deliberately not `listPage`: this fires on every keystroke, so it
+ * asks for the seven columns the card needs, no ordering, no count — the
+ * same shape the inline query had before the client surfaces moved onto the
+ * service layer.
+ */
+export async function searchProperties({ term, limit = 10 } = {}) {
+  const cleaned = term ? sanitiseSearch(term) : '';
+  if (!cleaned) return [];
+
+  return unwrapList(
+    await supabase
+      .from(TABLE)
+      .select('id, title, location, price, bedrooms, bathrooms, images')
+      .or(`title.ilike.%${cleaned}%,location.ilike.%${cleaned}%`)
+      .limit(limit),
+    { table: TABLE, operation: 'searchProperties' }
+  );
+}
+
 export async function getById(propertyId) {
   return unwrap(await supabase.from(TABLE).select('*').eq('id', propertyId).single(), {
     table: TABLE,
@@ -167,5 +188,12 @@ export const propertyQueries = {
     queryFn: () => getById(propertyId),
     staleTime: STALE_TIME.standard,
     enabled: Boolean(propertyId),
+  }),
+  /** The two-character gate lives here, with the query it gates. */
+  search: (term) => ({
+    queryKey: queryKeys.properties.search(term),
+    queryFn: () => searchProperties({ term }),
+    staleTime: STALE_TIME.live,
+    enabled: Boolean(term) && term.length >= 2,
   }),
 };

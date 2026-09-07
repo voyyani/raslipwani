@@ -14,6 +14,8 @@ export async function listClientsPage({
   status,
   clientType,
   search,
+  budgetMin,
+  budgetMax,
 } = {}) {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -36,6 +38,13 @@ export async function listClientsPage({
       );
     }
   }
+
+  // An overlap test, not a containment test: a client whose own budget_max
+  // reaches at least budgetMin, and whose budget_min stays at or below
+  // budgetMax, has a range that overlaps the filter's — the two ranges need
+  // not be nested inside one another.
+  if (isSet(budgetMin)) query = query.gte('budget_max', budgetMin);
+  if (isSet(budgetMax)) query = query.lte('budget_min', budgetMax);
 
   return unwrapCount(await query, { table: TABLE, operation: 'listClientsPage' });
 }

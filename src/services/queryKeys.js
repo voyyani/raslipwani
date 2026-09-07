@@ -24,6 +24,7 @@ export const queryKeys = {
     page: (params = {}) => ['properties', 'page', params],
     detail: (propertyId) => ['properties', 'detail', id(propertyId)],
     segment: (segment) => ['properties', 'segment', segment],
+    search: (term) => ['properties', 'search', term],
   },
   bookings: {
     all: ['bookings'],

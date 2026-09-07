@@ -39,6 +39,30 @@ describe('listClientsPage', () => {
     const [filter] = builders.clients.or.mock.calls[0];
     expect(filter).not.toContain('a,b');
   });
+
+  it('filters by budget as an overlap, not a containment, test', async () => {
+    // A client whose budget_max reaches at least budgetMin, and whose
+    // budget_min stays at or below budgetMax, overlaps the filter's range —
+    // the crossover (gte on budget_max, lte on budget_min) is deliberate.
+    const builders = mockFrom(supabase, { clients: { data: [], count: 0, error: null } });
+    await listClientsPage({ budgetMin: 500000, budgetMax: 1000000 });
+    expect(builders.clients.gte).toHaveBeenCalledWith('budget_max', 500000);
+    expect(builders.clients.lte).toHaveBeenCalledWith('budget_min', 1000000);
+  });
+
+  it('applies only the budget bound that is given', async () => {
+    const builders = mockFrom(supabase, { clients: { data: [], count: 0, error: null } });
+    await listClientsPage({ budgetMin: 5000000 });
+    expect(builders.clients.gte).toHaveBeenCalledWith('budget_max', 5000000);
+    expect(builders.clients.lte).not.toHaveBeenCalled();
+  });
+
+  it('does not filter by budget when neither bound is given', async () => {
+    const builders = mockFrom(supabase, { clients: { data: [], count: 0, error: null } });
+    await listClientsPage({});
+    expect(builders.clients.gte).not.toHaveBeenCalled();
+    expect(builders.clients.lte).not.toHaveBeenCalled();
+  });
 });
 
 describe('getClientStats', () => {

@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/utils/supabaseClient';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
-  listFeatured, listAll, listRecentProperties, listPage, getById, updateProperty, setFeatured, propertyQueries,
+  listFeatured, listAll, listRecentProperties, listPage, getById, updateProperty, setFeatured,
+  searchProperties, propertyQueries,
 } from '../properties';
 import { ServiceError } from '../unwrap';
 import { queryKeys } from '../queryKeys';
@@ -113,6 +114,42 @@ describe('listPage', () => {
     await listPage({ page: 1, pageSize: 10, search: 'a,b' });
     const [filter] = builders.properties.or.mock.calls[0];
     expect(filter).not.toContain('a,b');
+  });
+});
+
+describe('searchProperties', () => {
+  it('asks for seven columns, no ordering, no count, capped at the limit', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], error: null } });
+
+    await expect(searchProperties({ term: 'Gigiri' })).resolves.toEqual([row]);
+
+    expect(builders.properties.select).toHaveBeenCalledWith(
+      'id, title, location, price, bedrooms, bathrooms, images'
+    );
+    expect(builders.properties.or).toHaveBeenCalledWith(
+      'title.ilike.%Gigiri%,location.ilike.%Gigiri%'
+    );
+    expect(builders.properties.limit).toHaveBeenCalledWith(10);
+    expect(builders.properties.order).not.toHaveBeenCalled();
+  });
+
+  it('honours an explicit limit', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [], error: null } });
+    await searchProperties({ term: 'Gigiri', limit: 5 });
+    expect(builders.properties.limit).toHaveBeenCalledWith(5);
+  });
+
+  it('escapes a comma in the search term so it cannot inject a second filter', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [], error: null } });
+    await searchProperties({ term: 'a,b' });
+    const [filter] = builders.properties.or.mock.calls[0];
+    expect(filter).not.toContain('a,b');
+  });
+
+  it('returns [] without querying for an empty or whitespace-only term', async () => {
+    await expect(searchProperties({ term: '' })).resolves.toEqual([]);
+    await expect(searchProperties({ term: '   ' })).resolves.toEqual([]);
+    expect(supabase.from).not.toHaveBeenCalled();
   });
 });
 
