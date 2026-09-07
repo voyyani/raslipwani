@@ -47,6 +47,16 @@ vi.mock('@/services/settings', () => ({
 
 describe('AdminProperties data access', () => {
   const source = () => readFileSync('src/pages/admin/AdminProperties.jsx', 'utf8');
+  // Task 22 split the screen into src/pages/admin/properties/*; the
+  // Cloudinary read now lives in PropertyFormModal, which owns the create/
+  // edit mutation and the upload it feeds. The invariant this file checks —
+  // no direct admin_settings read, one settings-service call — still has to
+  // hold, just possibly in a different module of the same feature.
+  const featureSource = () =>
+    [
+      source(),
+      readFileSync('src/pages/admin/properties/PropertyFormModal.jsx', 'utf8'),
+    ].join('\n');
 
   it('does not import the Supabase client', () => {
     expect(source()).not.toMatch(/supabaseClient/);
@@ -56,8 +66,8 @@ describe('AdminProperties data access', () => {
     // This screen used to select from admin_settings itself, which is how a
     // second copy of the "which columns are safe to read" decision came to
     // exist. There is one now, in settings.js, and it names two columns.
-    expect(source()).toMatch(/settingsQueries\.cloudinary/);
-    expect(source()).not.toMatch(/from\('admin_settings'\)/);
+    expect(featureSource()).toMatch(/settingsQueries\.cloudinary/);
+    expect(featureSource()).not.toMatch(/from\('admin_settings'\)/);
   });
 
   it('invalidates the properties domain after a write', () => {

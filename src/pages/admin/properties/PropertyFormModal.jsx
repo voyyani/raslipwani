@@ -1,0 +1,428 @@
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import toast from 'react-hot-toast';
+import { useQuery } from '@tanstack/react-query';
+import Button from '../../../components/ui/Button';
+import Modal from '../../../components/ui/Modal';
+import Input from '../../../components/ui/Input';
+import Select from '../../../components/ui/Select';
+import Textarea from '../../../components/ui/Textarea';
+import Checkbox from '../../../components/ui/Checkbox';
+import Icon from '../../../components/Icon';
+import { createProperty, updateProperty } from '@/services/properties';
+import { settingsQueries } from '@/services/settings';
+import { logger } from '../../../utils/logger';
+import { usePropertyForm } from './usePropertyForm';
+import PropertyImageUploader from './PropertyImageUploader';
+
+// Property types based on purpose
+const propertyTypes = {
+  sale: ['land', 'residential', 'commercial'],
+  rent: ['apartment', 'villa', 'office']
+};
+
+/**
+ * The create/edit property modal, moved out of `AdminProperties.jsx`
+ * (Task 22). Owns the image-file selection, the Cloudinary upload and the
+ * create/update mutation; the form fields and their validation live in
+ * `usePropertyForm`.
+ *
+ * The dialog fields are still hand-written and still carry unassociated
+ * labels where `Input`/`Select`/`Checkbox` aren't already used — that was
+ * true before this extraction too, and moves verbatim rather than being
+ * fixed here.
+ */
+const PropertyFormModal = ({ isOpen, property, onClose, onSaved }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [newAmenity, setNewAmenity] = useState('');
+
+  const {
+    formData,
+    errors,
+    handleInputChange,
+    addAmenity,
+    removeAmenity,
+    validateForm,
+    resetForm,
+    toSubmitData,
+  } = usePropertyForm(property);
+
+  // Cloudinary settings. `admin_settings` is the single source of truth since
+  // 010; the legacy `settings` table it replaced also held the Cloudinary
+  // api_secret in a browser-readable row, so this reads only the two columns
+  // the service names rather than the whole row.
+  const { data: cloudinaryConfig } = useQuery(settingsQueries.cloudinary());
+  const cloudinarySettings = {
+    cloudName: cloudinaryConfig?.cloud_name || '',
+    uploadPreset: cloudinaryConfig?.upload_preset || '',
+  };
+
+  const loading = isSubmitting;
+
+  const handleAddAmenity = () => {
+    const trimmed = newAmenity.trim();
+    if (trimmed && !formData.amenities.includes(trimmed)) {
+      addAmenity(trimmed);
+      setNewAmenity('');
+    }
+  };
+
+  const handleImageAdd = (files) => {
+    setImageFiles(files);
+  };
+
+  const handleDeleteImage = (index, type) => {
+    if (type === 'existing') {
+      // Delete from Cloudinary URLs. Routed back through handleInputChange
+      // rather than a new hook method, so usePropertyForm's public surface
+      // stays exactly what the Task 22 brief specifies.
+      const newImages = [...formData.images];
+      newImages.splice(index, 1);
+      handleInputChange({ target: { name: 'images', value: newImages, type: 'text' } });
+    } else {
+      // Delete from new selections
+      setImageFiles(prev => {
+        const newFiles = [...prev];
+        newFiles.splice(index, 1);
+        return newFiles;
+      });
+    }
+  };
+
+  const handleModalClose = () => {
+    resetForm();
+    setImageFiles([]);
+    setNewAmenity('');
+    onClose();
+  };
+
+  // Upload multiple images to Cloudinary
+  const uploadImages = async () => {
+    if (!imageFiles.length || !cloudinarySettings.cloudName || !cloudinarySettings.uploadPreset) {
+      return [];
+    }
+
+    try {
+      setIsSubmitting(true);
+      const uploadPromises = imageFiles.map(file => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', cloudinarySettings.uploadPreset);
+
+        return fetch(
+          `https://api.cloudinary.com/v1_1/${cloudinarySettings.cloudName}/image/upload`,
+          { method: 'POST', body: fd }
+        ).then(res => res.json());
+      });
+
+      const results = await Promise.all(uploadPromises);
+      return results.map(result => result.secure_url);
+    } catch (err) {
+      logger.error('Image upload error:', err);
+      toast.error('Failed to upload images. Please check Cloudinary settings.');
+      return [];
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm(imageFiles.length)) return;
+
+    try {
+      setIsSubmitting(true);
+
+      // Upload new images if selected
+      let cloudinaryUrls = [...formData.images];
+
+      if (imageFiles.length) {
+        const uploadedUrls = await uploadImages();
+        cloudinaryUrls = [...cloudinaryUrls, ...uploadedUrls];
+      }
+
+      const submitData = toSubmitData(cloudinaryUrls);
+
+      if (property) {
+        // Update
+        await updateProperty(property.id, submitData);
+        toast.success('Property updated successfully!');
+      } else {
+        // Create
+        await createProperty(submitData);
+        toast.success('Property added successfully!');
+      }
+
+      onSaved();
+      handleModalClose();
+    } catch (error) {
+      toast.error('Error saving property: ' + error.message);
+      toast.error('Failed to save property');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    /*
+      The property form. It was a hand-rolled overlay with a sticky header:
+      focus never entered it, Tab left the form for the table behind, and
+      Escape did nothing. `Modal` supplies all three. The fields inside are
+      still hand-written and still carry unassociated labels — they move to
+      `Input`/`Select` with this surface's own migration, which is a larger
+      change than putting the dialog in the right shell.
+    */
+    <Modal
+      isOpen={isOpen}
+      onClose={handleModalClose}
+      title={property ? 'Edit Property' : 'Add New Property'}
+      size="xl"
+      footer={
+        <>
+          <Button
+            variant="secondary"
+            onClick={handleModalClose}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} loading={loading} disabled={loading}>
+            {loading
+              ? property
+                ? 'Updating...'
+                : 'Adding...'
+              : property
+                ? 'Update Property'
+                : 'Add Property'}
+          </Button>
+        </>
+      }
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Left Column */}
+        <div className="space-y-4">
+          <Input
+            label="Title"
+            required
+            error={errors.title}
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+          />
+
+          <Textarea
+            label="Description"
+            required
+            error={errors.description}
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+          />
+
+          <Input
+            label="Price (KES)"
+            required
+            error={errors.price}
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Purpose"
+              required
+              name="purpose"
+              value={formData.purpose}
+              onChange={handleInputChange}
+            >
+              <option value="sale">For Sale</option>
+              <option value="rent">For Rent</option>
+            </Select>
+
+            <Select
+              label="Property Type"
+              required
+              error={errors.property_type}
+              name="property_type"
+              value={formData.property_type}
+              onChange={handleInputChange}
+            >
+              <option value="">Select Type</option>
+              {propertyTypes[formData.purpose]?.map(type => (
+                <option key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <Input
+            label="Location"
+            required
+            error={errors.location}
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleInputChange}
+          />
+
+          <Input
+            label="Address"
+            required
+            error={errors.address}
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+          />
+
+          <div className="grid grid-cols-3 gap-4">
+            <Input
+              label="Bedrooms"
+              required
+              error={errors.bedrooms}
+              type="number"
+              name="bedrooms"
+              value={formData.bedrooms}
+              onChange={handleInputChange}
+            />
+
+            <Input
+              label="Bathrooms"
+              required
+              error={errors.bathrooms}
+              type="number"
+              name="bathrooms"
+              value={formData.bathrooms}
+              onChange={handleInputChange}
+            />
+
+            <Input
+              label="Area (sqft)"
+              required
+              error={errors.area_sqft}
+              type="number"
+              name="area_sqft"
+              value={formData.area_sqft}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Lot Size (sqft)"
+              type="number"
+              name="lot_size_sqft"
+              value={formData.lot_size_sqft}
+              onChange={handleInputChange}
+            />
+
+            <Select
+              label="Status"
+              required
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+            >
+              <option value="available">Available</option>
+              <option value="pending">Pending</option>
+              <option value="sold">Sold</option>
+              <option value="off-market">Off Market</option>
+            </Select>
+          </div>
+
+          <div className="bg-surface p-4 rounded-lg">
+            <label htmlFor="new-amenity" className="block text-sm font-medium text-content-muted mb-2">Amenities</label>
+            <div className="flex mb-3">
+              <input
+                id="new-amenity"
+                type="text"
+                value={newAmenity}
+                onChange={(e) => setNewAmenity(e.target.value)}
+                placeholder="Add amenity (e.g. Swimming Pool)"
+                className="flex-grow border border-line-strong rounded-lg p-2 focus:ring-2 focus:ring-focus-ring focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleAddAmenity}
+                className="ml-2 bg-brand text-content-on-brand px-4 py-2 rounded-lg hover:bg-brand-hover transition-colors"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {formData.amenities.map((amenity, index) => (
+                <div
+                  key={index}
+                  className="bg-brand-subtle text-brand-content rounded-full pl-3 pr-2 py-1.5 flex items-center"
+                >
+                  <span className="text-sm">{amenity}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAmenity(index)}
+                    className="ml-1 text-brand hover:text-brand-content"
+                  >
+                    <Icon name="times" size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center">
+              <Checkbox
+                label="Has Pool"
+                name="has_pool"
+                checked={formData.has_pool}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="flex items-center">
+              <Checkbox
+                label="Has Garden"
+                name="has_garden"
+                checked={formData.has_garden}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="flex items-center">
+              <Checkbox
+                label="Featured Property"
+                name="featured"
+                checked={formData.featured}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          <PropertyImageUploader
+            images={formData.images}
+            files={imageFiles}
+            onAdd={handleImageAdd}
+            onRemove={handleDeleteImage}
+            error={errors.images}
+            uploading={loading}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+PropertyFormModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  property: PropTypes.object,
+  onClose: PropTypes.func.isRequired,
+  onSaved: PropTypes.func.isRequired,
+};
+
+export default PropertyFormModal;
