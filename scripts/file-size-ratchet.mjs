@@ -29,6 +29,17 @@ export function largestFiles(files) {
     .sort((a, b) => b.lines - a.lines);
 }
 
+/**
+ * The ratchet's decision, isolated from I/O so it can be tested directly:
+ * lowering and holding are both allowed, raising is refused. Returns the new
+ * ceiling, or `null` as the refusal sentinel when `currentMax` exceeds
+ * `budgetMax`.
+ * @param {number} currentMax @param {number} budgetMax @returns {number|null}
+ */
+export function nextCeiling(currentMax, budgetMax) {
+  return currentMax > budgetMax ? null : currentMax;
+}
+
 function readTree(dir, acc = {}) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
@@ -51,15 +62,16 @@ if (process.argv[1]?.endsWith('file-size-ratchet.mjs')) {
   }
 
   if (process.argv.includes('--update')) {
-    if (largest > budget.max) {
+    const updated = nextCeiling(largest, budget.max);
+    if (updated === null) {
       console.error(
         `\nRefusing to raise the ceiling from ${budget.max} to ${largest}. ` +
           'This budget only falls — that is what makes it a ratchet.'
       );
       process.exit(1);
     }
-    writeFileSync(BUDGET_FILE, `${JSON.stringify({ ...budget, max: largest }, null, 2)}\n`);
-    console.log(`\nCeiling lowered ${budget.max} -> ${largest}.`);
+    writeFileSync(BUDGET_FILE, `${JSON.stringify({ ...budget, max: updated }, null, 2)}\n`);
+    console.log(`\nCeiling lowered ${budget.max} -> ${updated}.`);
     process.exit(0);
   }
 
@@ -68,5 +80,12 @@ if (process.argv[1]?.endsWith('file-size-ratchet.mjs')) {
     for (const { path, lines } of over) console.error(`  ${lines}  ${path}`);
     console.error('\nSplit by responsibility, not by line count. See ROADMAP.md Block 3.2.\n');
     process.exit(1);
+  }
+
+  if (largest < budget.max) {
+    console.log(
+      `\n${budget.max - largest} under the ceiling. Run \`npm run size:ratchet -- --update\` ` +
+        'to bank the gain so it cannot be given back.'
+    );
   }
 }
