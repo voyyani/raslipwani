@@ -39,6 +39,11 @@ const AdminProperties = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProperty, setCurrentProperty] = useState(null);
+  // Gates the table/grid/pagination while a mutation is in flight — restored
+  // from the pre-Task-22 `loading = isPageLoading || isSubmitting`. Losing
+  // this let a second click hit the same (or another) row's Delete button
+  // while the first delete was still running.
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { filters, setFilter, activeCount } = useFilters(INITIAL_FILTERS);
   const debouncedSearchTerm = useDebounce(filters.search, 500);
@@ -61,7 +66,7 @@ const AdminProperties = () => {
       search: debouncedSearchTerm || undefined,
     })
   );
-  const loading = isPageLoading;
+  const loading = isPageLoading || isSubmitting;
 
   useEffect(() => {
     setTotalCount(fetchedCount);
@@ -108,12 +113,15 @@ const AdminProperties = () => {
     if (!ok) return;
 
     try {
+      setIsSubmitting(true);
       await deleteProperty(id);
       invalidateProperties();
       toast.success('Property deleted successfully!');
     } catch (error) {
       toast.error('Error deleting property: ' + error.message);
       toast.error('Failed to delete property');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -290,6 +298,7 @@ const AdminProperties = () => {
           setCurrentProperty(null);
         }}
         onSaved={invalidateProperties}
+        onSubmittingChange={setIsSubmitting}
       />
       {confirmDialog}
     </>

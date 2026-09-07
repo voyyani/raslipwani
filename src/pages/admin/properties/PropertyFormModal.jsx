@@ -32,10 +32,20 @@ const propertyTypes = {
  * true before this extraction too, and moves verbatim rather than being
  * fixed here.
  */
-const PropertyFormModal = ({ isOpen, property, onClose, onSaved }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const PropertyFormModal = ({ isOpen, property, onClose, onSaved, onSubmittingChange }) => {
+  const [isSubmitting, setIsSubmittingState] = useState(false);
   const [imageFiles, setImageFiles] = useState([]);
   const [newAmenity, setNewAmenity] = useState('');
+
+  // AdminProperties gates the table/pagination on a page-level "is anything
+  // mutating" flag (the pre-Task-22 `loading = isPageLoading ||
+  // isSubmitting`). This modal owns the create/update submit, so it reports
+  // its own submitting state up rather than the page inventing a second,
+  // disagreeing one.
+  const setIsSubmitting = (value) => {
+    setIsSubmittingState(value);
+    onSubmittingChange?.(value);
+  };
 
   const {
     formData,
@@ -423,6 +433,7 @@ PropertyFormModal.propTypes = {
   property: PropTypes.object,
   onClose: PropTypes.func.isRequired,
   onSaved: PropTypes.func.isRequired,
+  onSubmittingChange: PropTypes.func,
 };
 
 export default PropertyFormModal;

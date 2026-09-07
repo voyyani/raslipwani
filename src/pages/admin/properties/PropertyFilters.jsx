@@ -52,7 +52,7 @@ const PropertyFilters = ({ filters, onFilterChange, onReset, activeCount, showMo
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <div className="hidden sm:flex gap-2">
+        <div className="hidden lg:flex gap-2">
           <select
             aria-label="Status"
             value={status}

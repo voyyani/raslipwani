@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '../../../test/utils/renderWithProviders';
+import { render, screen, waitFor, within } from '../../../test/utils/renderWithProviders';
+import userEvent from '@testing-library/user-event';
 import AdminProperties from '../AdminProperties';
 import { queryKeys } from '@/services/queryKeys';
+import { deleteProperty } from '@/services/properties';
 
 const row = {
   id: 7,
@@ -89,5 +91,45 @@ describe('AdminProperties rendering', () => {
 
   it('uses the properties root key so a save invalidates the whole domain', () => {
     expect(queryKeys.properties.all).toEqual(['properties']);
+  });
+
+  it('gates the table while a delete is in flight, so a second click cannot hit it', async () => {
+    // Regression pin: Task 22's first pass dropped the pre-existing
+    // `loading = isPageLoading || isSubmitting` gate, leaving the table (and
+    // every row's Delete button) mounted and clickable for the duration of a
+    // delete. A slow or double click could then fire the mutation twice.
+    let resolveDelete;
+    deleteProperty.mockImplementation(
+      () => new Promise((resolve) => { resolveDelete = resolve; })
+    );
+
+    const user = userEvent.setup();
+    render(<AdminProperties />);
+
+    await screen.findAllByText('Gigiri Apartment');
+
+    const deleteButton = screen.getByTitle('Delete property');
+    await user.click(deleteButton);
+
+    const dialog = await screen.findByRole('dialog');
+    const confirmButton = within(dialog).getByRole('button', { name: 'Delete property' });
+    await user.click(confirmButton);
+
+    // The delete is now in flight (deleteProperty's promise hasn't resolved).
+    // The gated loading state replaces the table with a skeleton, so the row
+    // — and its Delete button — is gone from the document, not merely
+    // disabled: a second click has nothing to land on.
+    await waitFor(() => {
+      expect(screen.queryByTitle('Delete property')).not.toBeInTheDocument();
+    });
+
+    resolveDelete();
+
+    // Once the delete settles, the gate lifts and the row (now removed from
+    // the mocked data by the surrounding describe's fixture) or an empty
+    // state returns — either way the page is no longer stuck loading.
+    await waitFor(() => {
+      expect(screen.queryByText(/^Showing \d/)).toBeInTheDocument();
+    });
   });
 });
