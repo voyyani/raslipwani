@@ -13,17 +13,6 @@ export async function getSettingsByCategory(category) {
   );
 }
 
-export async function getGeneralSettings() {
-  return unwrap(
-    await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('setting_category', 'general')
-      .maybeSingle(),
-    { table: TABLE, operation: 'getGeneralSettings' }
-  );
-}
-
 /**
  * Exactly two fields, named explicitly.
  *
@@ -47,35 +36,6 @@ export async function getCloudinaryConfig() {
 }
 
 /**
- * Insert or update, decided once.
- *
- * Six settings screens each wrote their own version of this. Two of them
- * treated "no row yet" as an error and showed a red toast on a first save that
- * had in fact succeeded; one wrote without the category and produced a second
- * uncategorised row that the next read never saw.
- */
-export async function saveSettings(values, { category }) {
-  const existing = unwrap(
-    await supabase.from(TABLE).select('id').eq('setting_category', category).maybeSingle(),
-    { table: TABLE, operation: 'saveSettings.lookup' }
-  );
-
-  const payload = { ...values, setting_category: category, updated_at: new Date().toISOString() };
-
-  if (existing?.id) {
-    return unwrap(
-      await supabase.from(TABLE).update(payload).eq('id', existing.id).select().single(),
-      { table: TABLE, operation: 'saveSettings.update' }
-    );
-  }
-
-  return unwrap(await supabase.from(TABLE).insert(payload).select().single(), {
-    table: TABLE,
-    operation: 'saveSettings.insert',
-  });
-}
-
-/**
  * The uncategorised read.
  *
  * `SettingsContext.jsx`, `GeneralSettings.jsx` and `CloudinarySettings.jsx`
@@ -95,12 +55,16 @@ export async function getSettingsRow() {
 /**
  * Insert or update the single uncategorised row, decided once.
  *
- * `saveSettings` above is unsafe for `GeneralSettings.jsx` and
- * `CloudinarySettings.jsx`: it looks the existing row up by
- * `setting_category`, and the row those two screens read and write carries
- * no category. That lookup would miss, take the insert branch, and leave a
- * second row in the table that the next uncategorised read may or may not
- * see. This mirrors what those two screens' hand-rolled save code actually
+ * There is deliberately no categorised sibling of this function (no
+ * `saveSettings(values, { category })`) in this file any more. One existed
+ * briefly during the migration and was deleted: its existing-row lookup
+ * filtered by `setting_category`, which — against `GeneralSettings.jsx`'s
+ * and `CloudinarySettings.jsx`'s row, which carries no category — would miss
+ * every time, take the insert branch, and leave a second row in the table
+ * that the next uncategorised read may or may not see. Nothing in production
+ * ever called it safely, and a function that corrupts data the moment
+ * someone reaches for its obvious name is worse than no function at all.
+ * This one mirrors what those two screens' hand-rolled save code actually
  * does — look up the row with no category filter, update it if found,
  * insert it otherwise — and stamps no `setting_category` onto the payload.
  */
@@ -190,34 +154,54 @@ export function subscribeToSettings(onChange) {
 }
 
 export const settingsQueries = {
+  /**
+   * No `staleTime` here, deliberately. `EmailSettings.jsx`, `AdvancedSettings.jsx`
+   * and `LocalizationSettings.jsx` — the only callers — never set one before
+   * this migration either, so this falls through to the app's global default
+   * (`staleTime: 5 * 60 * 1000` in App.jsx) rather than `STALE_TIME.static`
+   * (30 minutes). A settings screen's whole job is showing current
+   * configuration; a change made by another admin, or in another browser
+   * tab, should not take up to half an hour to appear.
+   */
   category: (category) => ({
     queryKey: queryKeys.settings.category(category),
     queryFn: () => getSettingsByCategory(category),
-    staleTime: STALE_TIME.static,
   }),
-  general: () => ({
-    queryKey: queryKeys.settings.general(),
-    queryFn: () => getGeneralSettings(),
-    staleTime: STALE_TIME.static,
-  }),
+  /**
+   * Matches `GeneralSettings.jsx`'s original `staleTime: 0, refetchOnMount:
+   * 'always'` — its only caller — rather than `STALE_TIME.static`: this
+   * screen always considered its row stale, so a save is visible the moment
+   * the tab is reopened rather than after a 30-minute cache window.
+   */
   row: () => ({
     queryKey: queryKeys.settings.row(),
     queryFn: () => getSettingsRow(),
-    staleTime: STALE_TIME.static,
+    staleTime: 0,
+    refetchOnMount: 'always',
   }),
+  /** No `staleTime` override — see the comment on `category` above.
+   * `BusinessHoursSettings.jsx`, the only caller, never set one either. */
   keys: (keys) => ({
     queryKey: queryKeys.settings.keys(keys),
     queryFn: () => getSettingsByKeys(keys),
-    staleTime: STALE_TIME.static,
   }),
+  /**
+   * `STALE_TIME.static` here is deliberate and must stay: `AdminProperties.jsx`
+   * also reads through this query option, and its 30-minute cache is
+   * established, reviewed behaviour outside this file's scope.
+   * `CloudinarySettings.jsx` needs different freshness (its row can change
+   * from this same screen in another tab) and overrides `staleTime` and
+   * `refetchOnMount` at its own call site rather than here.
+   */
   cloudinary: () => ({
     queryKey: queryKeys.settings.cloudinary(),
     queryFn: () => getCloudinaryConfig(),
     staleTime: STALE_TIME.static,
   }),
+  /** No `staleTime` override — `EmailSettings.jsx`'s original template list
+   * query never set one either; inherits the 5-minute global default. */
   emailTemplates: () => ({
     queryKey: queryKeys.settings.emailTemplates(),
     queryFn: () => listEmailTemplates(),
-    staleTime: STALE_TIME.static,
   }),
 };

@@ -44,7 +44,6 @@ export const queryKeys = {
   settings: {
     all: ['settings'],
     category: (category) => ['settings', 'category', category],
-    general: () => ['settings', 'category', 'general'],
     row: () => ['settings', 'row'],
     keys: (keys) => ['settings', 'keys', keys],
     cloudinary: () => ['settings', 'cloudinary'],

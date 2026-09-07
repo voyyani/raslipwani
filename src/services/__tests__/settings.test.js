@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from '@/utils/supabaseClient';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
-  getSettingsByCategory, getCloudinaryConfig, saveSettings,
+  getSettingsByCategory, getCloudinaryConfig,
   listEmailTemplates, subscribeToSettings, settingsQueries, getSettingsRow,
   saveSettingsRow, getSettingsByKeys, upsertSettingRows,
 } from '../settings';
@@ -48,31 +48,6 @@ describe('getCloudinaryConfig', () => {
   });
 });
 
-describe('saveSettings', () => {
-  it('updates the existing row when one exists', async () => {
-    const builders = mockFrom(supabase, { admin_settings: { data: { id: 3 }, error: null } });
-    await saveSettings({ site_name: 'Raslipwani' }, { category: 'general' });
-    expect(builders.admin_settings.update).toHaveBeenCalled();
-    expect(builders.admin_settings.eq).toHaveBeenCalledWith('id', 3);
-    expect(builders.admin_settings.insert).not.toHaveBeenCalled();
-  });
-
-  it('inserts when the category has no row yet', async () => {
-    // `maybeSingle` resolving to null data is "no row", not an error — which is
-    // the case two of the six settings screens got wrong, each in its own way.
-    const builders = mockFrom(supabase, { admin_settings: { data: null, error: null } });
-    await saveSettings({ site_name: 'Raslipwani' }, { category: 'general' });
-    expect(builders.admin_settings.insert).toHaveBeenCalled();
-  });
-
-  it('stamps the category on the written row', async () => {
-    const builders = mockFrom(supabase, { admin_settings: { data: null, error: null } });
-    await saveSettings({ site_name: 'R' }, { category: 'general' });
-    const [payload] = builders.admin_settings.insert.mock.calls[0];
-    expect(payload.setting_category).toBe('general');
-  });
-});
-
 describe('listEmailTemplates', () => {
   it('returns only active templates', async () => {
     const builders = mockFrom(supabase, { email_templates: { data: [], error: null } });
@@ -91,9 +66,33 @@ describe('subscribeToSettings', () => {
   });
 });
 
-describe('settingsQueries', () => {
-  it('caches settings with the static lifetime', () => {
-    expect(settingsQueries.general().staleTime).toBe(STALE_TIME.static);
+describe('settingsQueries freshness', () => {
+  // Fix round 1: these pin each query option's staleTime/refetchOnMount so
+  // they cannot silently drift back onto STALE_TIME.static (30 minutes) —
+  // right for a query with one reviewed 30-minute-cache consumer
+  // (`cloudinary`, shared with AdminProperties.jsx), wrong for a settings
+  // screen whose job is showing what another admin just changed.
+
+  it('category(): no staleTime override — inherits the 5-minute global default, matching the original', () => {
+    expect(settingsQueries.category('email').staleTime).toBeUndefined();
+  });
+
+  it('row(): staleTime 0 and refetchOnMount "always", matching GeneralSettings.jsx\'s original', () => {
+    const options = settingsQueries.row();
+    expect(options.staleTime).toBe(0);
+    expect(options.refetchOnMount).toBe('always');
+  });
+
+  it('keys(): no staleTime override — inherits the 5-minute global default, matching BusinessHoursSettings.jsx\'s original', () => {
+    expect(settingsQueries.keys(['business_hours', 'timezone']).staleTime).toBeUndefined();
+  });
+
+  it('cloudinary(): keeps STALE_TIME.static — AdminProperties.jsx also reads through this option', () => {
+    expect(settingsQueries.cloudinary().staleTime).toBe(STALE_TIME.static);
+  });
+
+  it('emailTemplates(): no staleTime override — inherits the 5-minute global default, matching EmailSettings.jsx\'s original', () => {
+    expect(settingsQueries.emailTemplates().staleTime).toBeUndefined();
   });
 });
 
@@ -133,11 +132,12 @@ describe('saveSettingsRow', () => {
   });
 
   it('applies no category filter to the lookup — this would fail if one were applied', async () => {
-    // saveSettings (the categorised sibling) filters its lookup by
-    // setting_category. General and Cloudinary rows carry no category, so
-    // that filter would miss and take the insert branch, producing a second
-    // row on every save. This test pins the opposite: no category filter at
-    // all on the lookup.
+    // A categorised lookup (filtering by setting_category) would miss
+    // against General and Cloudinary rows, which carry no category, and take
+    // the insert branch — producing a second row on every save. That
+    // function existed briefly during the migration and was deleted for
+    // exactly this landmine. This test pins the opposite: no category
+    // filter at all on the lookup.
     const builders = mockFrom(supabase, { admin_settings: { data: { id: 5 }, error: null } });
     await saveSettingsRow({ business_name: 'Raslipwani' });
     expect(builders.admin_settings.eq).not.toHaveBeenCalledWith('setting_category', expect.anything());

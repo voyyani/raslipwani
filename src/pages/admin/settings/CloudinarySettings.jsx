@@ -22,8 +22,20 @@ const CloudinarySettings = () => {
   const [testStatus, setTestStatus] = useState(null);
 
   // Fetch settings — exactly the two Cloudinary columns, no category (see
-  // getCloudinaryConfig's doc comment in src/services/settings.js)
-  const { data, isLoading } = useQuery(settingsQueries.cloudinary());
+  // getCloudinaryConfig's doc comment in src/services/settings.js).
+  //
+  // Overrides staleTime/refetchOnMount here rather than in
+  // settingsQueries.cloudinary() itself: that option is shared with
+  // AdminProperties.jsx, which has its own established 30-minute cache
+  // (STALE_TIME.static). This screen's original inline query used
+  // `staleTime: 0, refetchOnMount: 'always'` instead — it IS the settings
+  // editor, so a save from another tab must show up the moment this one is
+  // reopened, not up to 30 minutes later.
+  const { data, isLoading } = useQuery({
+    ...settingsQueries.cloudinary(),
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
 
   useEffect(() => {
     if (!data) return;
