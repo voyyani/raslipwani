@@ -28,6 +28,19 @@ describe('getCloudinaryConfig', () => {
     expect(builders.admin_settings.select).toHaveBeenCalledWith('cloud_name, upload_preset');
   });
 
+  it('applies no category filter, matching the screens it replaced', async () => {
+    // AdminProperties.jsx and CloudinarySettings.jsx both read this row with
+    // no setting_category filter. A guessed 'general' filter here silently
+    // returns no row — and no Cloudinary config — if the live row's category
+    // is anything else, which is exactly the bug this test pins against.
+    const builders = mockFrom(supabase, {
+      admin_settings: { data: { cloud_name: 'x', upload_preset: 'y' }, error: null },
+    });
+    await getCloudinaryConfig();
+    expect(builders.admin_settings.eq).not.toHaveBeenCalled();
+    expect(builders.admin_settings.limit).toHaveBeenCalledWith(1);
+  });
+
   it('returns null rather than throwing when no row exists yet', async () => {
     mockFrom(supabase, { admin_settings: { data: null, error: null } });
     await expect(getCloudinaryConfig()).resolves.toBeNull();

@@ -31,14 +31,17 @@ export async function getGeneralSettings() {
  * API secret readable by `anon`; migration 010 moved the secrets out, and this
  * selection is the second lock — a `select('*')` here would put whatever lands
  * in that table next back onto the wire.
+ *
+ * No category filter, deliberately: the two screens this replaced
+ * (AdminProperties.jsx and CloudinarySettings.jsx) both read the row with no
+ * `setting_category` filter at all, and nothing in the repo establishes which
+ * category the live Cloudinary row actually carries. Guessing 'general' here
+ * silently returns no row and disables image uploads if the guess is wrong —
+ * exactly what happened the first time this function carried that filter.
  */
 export async function getCloudinaryConfig() {
   return unwrap(
-    await supabase
-      .from(TABLE)
-      .select('cloud_name, upload_preset')
-      .eq('setting_category', 'general')
-      .maybeSingle(),
+    await supabase.from(TABLE).select('cloud_name, upload_preset').limit(1).maybeSingle(),
     { table: TABLE, operation: 'getCloudinaryConfig' }
   );
 }
