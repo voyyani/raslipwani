@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { settingsQueries, upsertSettingRows } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import toast from 'react-hot-toast';
 import Icon from '../../../components/Icon';
 import Input from '../../../components/ui/Input';
@@ -22,91 +23,78 @@ const AdvancedSettings = () => {
   });
 
   // Fetch settings
-  const { isLoading } = useQuery({
-    queryKey: ['settings', 'advanced'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .eq('setting_category', 'advanced');
+  const { data: rows, isLoading } = useQuery(settingsQueries.category('advanced'));
 
-      if (error) throw error;
-
-      data.forEach(setting => {
-        if (setting.setting_key === 'maintenance_mode') {
-          setFormData(prev => ({
-            ...prev,
-            maintenanceEnabled: setting.setting_value.enabled || false,
-            maintenanceMessage: setting.setting_value.message || ''
-          }));
-        } else if (setting.setting_key === 'google_analytics') {
-          setFormData(prev => ({
-            ...prev,
-            googleAnalytics: setting.setting_value.tracking_id || ''
-          }));
-        } else if (setting.setting_key === 'facebook_pixel') {
-          setFormData(prev => ({
-            ...prev,
-            facebookPixel: setting.setting_value.pixel_id || ''
-          }));
-        } else if (setting.setting_key === 'terms_url') {
-          setFormData(prev => ({
-            ...prev,
-            termsUrl: setting.setting_value.value || '/terms'
-          }));
-        } else if (setting.setting_key === 'privacy_url') {
-          setFormData(prev => ({
-            ...prev,
-            privacyUrl: setting.setting_value.value || '/privacy'
-          }));
-        }
-      });
-
-      return data;
-    }
-  });
+  useEffect(() => {
+    if (!rows) return;
+    rows.forEach(setting => {
+      if (setting.setting_key === 'maintenance_mode') {
+        setFormData(prev => ({
+          ...prev,
+          maintenanceEnabled: setting.setting_value.enabled || false,
+          maintenanceMessage: setting.setting_value.message || ''
+        }));
+      } else if (setting.setting_key === 'google_analytics') {
+        setFormData(prev => ({
+          ...prev,
+          googleAnalytics: setting.setting_value.tracking_id || ''
+        }));
+      } else if (setting.setting_key === 'facebook_pixel') {
+        setFormData(prev => ({
+          ...prev,
+          facebookPixel: setting.setting_value.pixel_id || ''
+        }));
+      } else if (setting.setting_key === 'terms_url') {
+        setFormData(prev => ({
+          ...prev,
+          termsUrl: setting.setting_value.value || '/terms'
+        }));
+      } else if (setting.setting_key === 'privacy_url') {
+        setFormData(prev => ({
+          ...prev,
+          privacyUrl: setting.setting_value.value || '/privacy'
+        }));
+      }
+    });
+  }, [rows]);
 
   // Update settings
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      const { error } = await supabase
-        .from('admin_settings')
-        .upsert([
-          {
-            setting_key: 'maintenance_mode',
-            setting_value: {
-              enabled: settings.maintenanceEnabled,
-              message: settings.maintenanceMessage
-            },
-            setting_category: 'advanced'
+      await upsertSettingRows([
+        {
+          setting_key: 'maintenance_mode',
+          setting_value: {
+            enabled: settings.maintenanceEnabled,
+            message: settings.maintenanceMessage
           },
-          {
-            setting_key: 'google_analytics',
-            setting_value: { tracking_id: settings.googleAnalytics },
-            setting_category: 'advanced'
-          },
-          {
-            setting_key: 'facebook_pixel',
-            setting_value: { pixel_id: settings.facebookPixel },
-            setting_category: 'advanced'
-          },
-          {
-            setting_key: 'terms_url',
-            setting_value: { value: settings.termsUrl },
-            setting_category: 'advanced'
-          },
-          {
-            setting_key: 'privacy_url',
-            setting_value: { value: settings.privacyUrl },
-            setting_category: 'advanced'
-          }
-        ], { onConflict: 'setting_key' });
-
-      if (error) throw error;
+          setting_category: 'advanced'
+        },
+        {
+          setting_key: 'google_analytics',
+          setting_value: { tracking_id: settings.googleAnalytics },
+          setting_category: 'advanced'
+        },
+        {
+          setting_key: 'facebook_pixel',
+          setting_value: { pixel_id: settings.facebookPixel },
+          setting_category: 'advanced'
+        },
+        {
+          setting_key: 'terms_url',
+          setting_value: { value: settings.termsUrl },
+          setting_category: 'advanced'
+        },
+        {
+          setting_key: 'privacy_url',
+          setting_value: { value: settings.privacyUrl },
+          setting_category: 'advanced'
+        }
+      ]);
     },
     onSuccess: () => {
       toast.success('Advanced settings saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'advanced'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
     },
     onError: () => {
       toast.error('Failed to save settings');

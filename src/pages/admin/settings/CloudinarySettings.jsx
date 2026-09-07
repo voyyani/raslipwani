@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { settingsQueries, saveSettingsRow } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../../hooks/useSettings';
 
@@ -20,32 +21,17 @@ const CloudinarySettings = () => {
   });
   const [testStatus, setTestStatus] = useState(null);
 
-  // Fetch settings (single row with all columns)
-  const { isLoading } = useQuery({
-    queryKey: ['settings', 'cloudinary'],
-    staleTime: 0,
-    refetchOnMount: 'always',
-    queryFn: async () => {
-      logger.debug('[CloudinarySettings] Fetching settings...');
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('cloud_name, upload_preset')
-        .limit(1)
-        .single();
+  // Fetch settings — exactly the two Cloudinary columns, no category (see
+  // getCloudinaryConfig's doc comment in src/services/settings.js)
+  const { data, isLoading } = useQuery(settingsQueries.cloudinary());
 
-      logger.debug('[CloudinarySettings] Fetch result:', { data, error });
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        setFormData({
-          cloud_name: data.cloud_name || 'dzqdxosk2',
-          upload_preset: data.upload_preset || 'raslipwani_unsigned'
-        });
-      }
-      return data;
-    }
-  });
+  useEffect(() => {
+    if (!data) return;
+    setFormData({
+      cloud_name: data.cloud_name || 'dzqdxosk2',
+      upload_preset: data.upload_preset || 'raslipwani_unsigned'
+    });
+  }, [data]);
 
   // Update settings mutation
   const updateMutation = useMutation({
@@ -54,38 +40,14 @@ const CloudinarySettings = () => {
 
       const updateData = {
         cloud_name: settings.cloud_name,
-        upload_preset: settings.upload_preset,
-        updated_at: new Date().toISOString()
+        upload_preset: settings.upload_preset
       };
 
-      const { data: existing, error: selectError } = await supabase
-        .from('admin_settings')
-        .select('id')
-        .limit(1)
-        .single();
-
-      logger.debug('[CloudinarySettings] Existing row:', { existing, selectError });
-
-      if (existing) {
-        const { data, error } = await supabase
-          .from('admin_settings')
-          .update(updateData)
-          .eq('id', existing.id)
-          .select();
-        logger.debug('[CloudinarySettings] Update result:', { data, error });
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from('admin_settings')
-          .insert(updateData)
-          .select();
-        logger.debug('[CloudinarySettings] Insert result:', { data, error });
-        if (error) throw error;
-      }
+      await saveSettingsRow(updateData);
     },
     onSuccess: () => {
       toast.success('Cloudinary settings saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'cloudinary'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
       refreshSettings();
     },
     onError: (error) => {

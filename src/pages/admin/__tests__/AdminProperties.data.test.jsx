@@ -37,6 +37,12 @@ vi.mock('@/services/settings', () => ({
       queryFn: () => Promise.resolve({ cloud_name: 'demo', upload_preset: 'preset' }),
     })),
   },
+  // renderWithProviders wraps every page in SettingsProvider, which now reads
+  // through this same module — not because this test cares about it, but
+  // because a module-level vi.mock replaces the whole module for every
+  // component rendered in this file.
+  getSettingsRow: vi.fn().mockResolvedValue(null),
+  subscribeToSettings: vi.fn(() => () => {}),
 }));
 
 describe('AdminProperties data access', () => {

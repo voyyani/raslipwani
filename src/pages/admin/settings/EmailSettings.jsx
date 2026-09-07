@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/Icon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Modal from '../../../components/ui/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { settingsQueries, upsertSettingRows, updateEmailTemplate } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import toast from 'react-hot-toast';
@@ -27,71 +28,47 @@ const EmailSettings = () => {
   });
 
   // Fetch settings
-  const { isLoading } = useQuery({
-    queryKey: ['settings', 'email'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .eq('setting_category', 'email');
+  const { data: rows, isLoading } = useQuery(settingsQueries.category('email'));
 
-      if (error) throw error;
-
-      data.forEach(setting => {
-        if (setting.setting_key === 'email_notifications') {
-          setFormData(prev => ({ ...prev, ...setting.setting_value }));
-        } else if (setting.setting_key === 'email_recipients') {
-          setFormData(prev => ({ ...prev, recipients: setting.setting_value.value || '' }));
-        }
-      });
-
-      return data;
-    }
-  });
+  useEffect(() => {
+    if (!rows) return;
+    rows.forEach(setting => {
+      if (setting.setting_key === 'email_notifications') {
+        setFormData(prev => ({ ...prev, ...setting.setting_value }));
+      } else if (setting.setting_key === 'email_recipients') {
+        setFormData(prev => ({ ...prev, recipients: setting.setting_value.value || '' }));
+      }
+    });
+  }, [rows]);
 
   // Fetch email templates
-  const { data: templates = [] } = useQuery({
-    queryKey: ['email-templates'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('email_templates')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) throw error;
-      return data;
-    }
-  });
+  const { data: templates = [] } = useQuery(settingsQueries.emailTemplates());
 
   // Update settings
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      const { error } = await supabase
-        .from('admin_settings')
-        .upsert([
-          {
-            setting_key: 'email_notifications',
-            setting_value: {
-              new_booking: settings.new_booking,
-              status_change: settings.status_change,
-              new_client: settings.new_client,
-              property_inquiry: settings.property_inquiry,
-              system_alerts: settings.system_alerts
-            },
-            setting_category: 'email'
+      await upsertSettingRows([
+        {
+          setting_key: 'email_notifications',
+          setting_value: {
+            new_booking: settings.new_booking,
+            status_change: settings.status_change,
+            new_client: settings.new_client,
+            property_inquiry: settings.property_inquiry,
+            system_alerts: settings.system_alerts
           },
-          {
-            setting_key: 'email_recipients',
-            setting_value: { value: settings.recipients },
-            setting_category: 'email'
-          }
-        ], { onConflict: 'setting_key' });
-
-      if (error) throw error;
+          setting_category: 'email'
+        },
+        {
+          setting_key: 'email_recipients',
+          setting_value: { value: settings.recipients },
+          setting_category: 'email'
+        }
+      ]);
     },
     onSuccess: () => {
       toast.success('Email settings saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'email'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
     },
     onError: () => {
       toast.error('Failed to save settings');
@@ -101,16 +78,11 @@ const EmailSettings = () => {
   // Update template
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, subject, body }) => {
-      const { error } = await supabase
-        .from('email_templates')
-        .update({ subject, body })
-        .eq('id', id);
-
-      if (error) throw error;
+      await updateEmailTemplate(id, { subject, body });
     },
     onSuccess: () => {
       toast.success('Template updated successfully');
-      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
       setShowTemplateEditor(false);
       setSelectedTemplate(null);
     },

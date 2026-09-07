@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { settingsQueries, saveSettingsRow } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import toast from 'react-hot-toast';
 import { useSettings } from '../../../hooks/useSettings';
 
@@ -31,59 +32,45 @@ const GeneralSettings = () => {
     social_tiktok: ''
   });
 
-  // Fetch settings (single row with all columns)
-  const { isLoading } = useQuery({
-    queryKey: ['settings', 'general'],
-    staleTime: 0, // Always consider data stale
-    refetchOnMount: 'always', // Always refetch when component mounts
-    queryFn: async () => {
-      logger.debug('[GeneralSettings] Fetching settings from database...');
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .limit(1)
-        .single();
+  // Fetch settings (single row with all columns, no category — see
+  // saveSettingsRow's doc comment in src/services/settings.js)
+  const { data, isLoading } = useQuery(settingsQueries.row());
 
-      logger.debug('[GeneralSettings] Fetch result:', { data, error });
-      
-      if (error && error.code !== 'PGRST116') throw error;
+  useEffect(() => {
+    if (!data) return;
 
-      if (data) {
-        // Parse service_locations if it's an array
-        let locationsStr = 'Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi, Watamu, Lamu';
-        if (Array.isArray(data.service_locations) && data.service_locations.length > 0) {
-          locationsStr = data.service_locations.join(', ');
-        } else if (typeof data.service_locations === 'string' && data.service_locations) {
-          locationsStr = data.service_locations;
-        }
-
-        const newFormData = {
-          business_name: data.business_name || 'Raslipwani Properties',
-          company_logo: data.company_logo || '',
-          company_tagline: data.company_tagline || 'Your Premier Real Estate Partner Across Kenya',
-          business_email: data.business_email || 'info@raslipwani.com',
-          business_phone: data.business_phone || '+254712345678',
-          business_address: data.business_address || 'Kilifi, Kenya',
-          whatsapp_number: data.whatsapp_number || '+254712345678',
-          service_locations: locationsStr,
-          social_facebook: data.social_facebook || 'https://facebook.com/raslipwani',
-          social_twitter: data.social_twitter || 'https://twitter.com/raslipwani',
-          social_instagram: data.social_instagram || 'https://instagram.com/raslipwani',
-          social_linkedin: data.social_linkedin || 'https://linkedin.com/company/raslipwani',
-          social_tiktok: data.social_tiktok || ''
-        };
-        logger.debug('[GeneralSettings] Setting form data:', newFormData);
-        setFormData(newFormData);
-      }
-      return data;
+    // Parse service_locations if it's an array
+    let locationsStr = 'Nairobi, Mombasa, Kilifi, Diani, Naivasha, Malindi, Watamu, Lamu';
+    if (Array.isArray(data.service_locations) && data.service_locations.length > 0) {
+      locationsStr = data.service_locations.join(', ');
+    } else if (typeof data.service_locations === 'string' && data.service_locations) {
+      locationsStr = data.service_locations;
     }
-  });
 
-  // Update settings mutation (updates the single row)
+    const newFormData = {
+      business_name: data.business_name || 'Raslipwani Properties',
+      company_logo: data.company_logo || '',
+      company_tagline: data.company_tagline || 'Your Premier Real Estate Partner Across Kenya',
+      business_email: data.business_email || 'info@raslipwani.com',
+      business_phone: data.business_phone || '+254712345678',
+      business_address: data.business_address || 'Kilifi, Kenya',
+      whatsapp_number: data.whatsapp_number || '+254712345678',
+      service_locations: locationsStr,
+      social_facebook: data.social_facebook || 'https://facebook.com/raslipwani',
+      social_twitter: data.social_twitter || 'https://twitter.com/raslipwani',
+      social_instagram: data.social_instagram || 'https://instagram.com/raslipwani',
+      social_linkedin: data.social_linkedin || 'https://linkedin.com/company/raslipwani',
+      social_tiktok: data.social_tiktok || ''
+    };
+    logger.debug('[GeneralSettings] Setting form data:', newFormData);
+    setFormData(newFormData);
+  }, [data]);
+
+  // Update settings mutation (updates the single uncategorised row)
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
       logger.debug('[GeneralSettings] Saving settings:', settings);
-      
+
       // Parse service locations from comma-separated string to array
       const locationsArray = settings.service_locations
         ? settings.service_locations.split(',').map(l => l.trim()).filter(Boolean)
@@ -102,41 +89,15 @@ const GeneralSettings = () => {
         social_twitter: settings.social_twitter,
         social_instagram: settings.social_instagram,
         social_linkedin: settings.social_linkedin,
-        social_tiktok: settings.social_tiktok,
-        updated_at: new Date().toISOString()
+        social_tiktok: settings.social_tiktok
       };
 
       logger.debug('[GeneralSettings] Update payload:', updateData);
-
-      // Try to update existing row, or insert if none exists
-      const { data: existing, error: selectError } = await supabase
-        .from('admin_settings')
-        .select('id')
-        .limit(1)
-        .single();
-
-      logger.debug('[GeneralSettings] Existing row:', { existing, selectError });
-
-      if (existing) {
-        const { data, error } = await supabase
-          .from('admin_settings')
-          .update(updateData)
-          .eq('id', existing.id)
-          .select();
-        logger.debug('[GeneralSettings] Update result:', { data, error });
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from('admin_settings')
-          .insert(updateData)
-          .select();
-        logger.debug('[GeneralSettings] Insert result:', { data, error });
-        if (error) throw error;
-      }
+      await saveSettingsRow(updateData);
     },
     onSuccess: () => {
       toast.success('General settings saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'general'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
       // Refresh global SettingsContext so all components get updated
       refreshSettings();
     },

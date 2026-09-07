@@ -4,6 +4,7 @@ import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
   getSettingsByCategory, getCloudinaryConfig, saveSettings,
   listEmailTemplates, subscribeToSettings, settingsQueries, getSettingsRow,
+  saveSettingsRow, getSettingsByKeys, upsertSettingRows,
 } from '../settings';
 import { STALE_TIME } from '../cachePolicy';
 
@@ -113,5 +114,57 @@ describe('getSettingsRow', () => {
   it('returns null rather than throwing when no row exists', async () => {
     mockFrom(supabase, { admin_settings: { data: null, error: null } });
     await expect(getSettingsRow()).resolves.toBeNull();
+  });
+});
+
+describe('saveSettingsRow', () => {
+  it('updates the existing uncategorised row when one exists', async () => {
+    const builders = mockFrom(supabase, { admin_settings: { data: { id: 5 }, error: null } });
+    await saveSettingsRow({ business_name: 'Raslipwani' });
+    expect(builders.admin_settings.update).toHaveBeenCalled();
+    expect(builders.admin_settings.eq).toHaveBeenCalledWith('id', 5);
+    expect(builders.admin_settings.insert).not.toHaveBeenCalled();
+  });
+
+  it('inserts when no row exists yet', async () => {
+    const builders = mockFrom(supabase, { admin_settings: { data: null, error: null } });
+    await saveSettingsRow({ business_name: 'Raslipwani' });
+    expect(builders.admin_settings.insert).toHaveBeenCalled();
+  });
+
+  it('applies no category filter to the lookup — this would fail if one were applied', async () => {
+    // saveSettings (the categorised sibling) filters its lookup by
+    // setting_category. General and Cloudinary rows carry no category, so
+    // that filter would miss and take the insert branch, producing a second
+    // row on every save. This test pins the opposite: no category filter at
+    // all on the lookup.
+    const builders = mockFrom(supabase, { admin_settings: { data: { id: 5 }, error: null } });
+    await saveSettingsRow({ business_name: 'Raslipwani' });
+    expect(builders.admin_settings.eq).not.toHaveBeenCalledWith('setting_category', expect.anything());
+    expect(builders.admin_settings.limit).toHaveBeenCalledWith(1);
+  });
+
+  it('does not stamp a setting_category onto the written row', async () => {
+    const builders = mockFrom(supabase, { admin_settings: { data: null, error: null } });
+    await saveSettingsRow({ business_name: 'Raslipwani' });
+    const [payload] = builders.admin_settings.insert.mock.calls[0];
+    expect(payload.setting_category).toBeUndefined();
+  });
+});
+
+describe('getSettingsByKeys', () => {
+  it('filters on setting_key with `in`', async () => {
+    const builders = mockFrom(supabase, { admin_settings: { data: [], error: null } });
+    await getSettingsByKeys(['business_hours', 'timezone']);
+    expect(builders.admin_settings.in).toHaveBeenCalledWith('setting_key', ['business_hours', 'timezone']);
+  });
+});
+
+describe('upsertSettingRows', () => {
+  it('upserts the given rows keyed by setting_key', async () => {
+    const rows = [{ setting_key: 'currency', setting_value: { code: 'KES' }, setting_category: 'localization' }];
+    const builders = mockFrom(supabase, { admin_settings: { data: null, error: null } });
+    await upsertSettingRows(rows);
+    expect(builders.admin_settings.upsert).toHaveBeenCalledWith(rows, { onConflict: 'setting_key' });
   });
 });

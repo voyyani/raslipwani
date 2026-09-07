@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { getSettingsByKeys, upsertSettingRows } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
+import { STALE_TIME } from '@/services/cachePolicy';
 import toast from 'react-hot-toast';
 import Icon from '../../../components/Icon';
+
+// Module-level constant: the `useQuery`'s queryFn reads exactly these two
+// keys. A literal array inline would be a fresh identity every render, which
+// would defeat query-key memoisation if this were ever spread into a key.
+const BUSINESS_HOURS_KEYS = ['business_hours', 'timezone'];
 
 /**
  * BusinessHoursSettings - Business hours configuration
@@ -22,16 +29,23 @@ const BusinessHoursSettings = () => {
 
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-  // Fetch settings
+  /**
+   * Fetch settings — by `setting_key`, with NO category filter. This is a
+   * known asymmetry, not a fix-in-passing candidate: the write below stamps
+   * `setting_category: 'business'` on both rows, but this read never filters
+   * on category at all. That looks like a bug, and it may be one, but this is
+   * a mechanical migration and the live `admin_settings` table cannot be
+   * inspected from here — silently adding a category filter to "fix" it would
+   * risk repointing an admin's saved business hours to a different row if the
+   * live rows' actual category ever disagrees with 'business'. Reproduced
+   * exactly as the original code read it. Flagged for a human with access to
+   * the live table.
+   */
   const { isLoading } = useQuery({
-    queryKey: ['settings', 'business'],
+    queryKey: queryKeys.settings.keys(BUSINESS_HOURS_KEYS),
+    staleTime: STALE_TIME.static,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .in('setting_key', ['business_hours', 'timezone']);
-
-      if (error) throw error;
+      const data = await getSettingsByKeys(BUSINESS_HOURS_KEYS);
 
       data.forEach(setting => {
         if (setting.setting_key === 'business_hours') {
@@ -45,29 +59,26 @@ const BusinessHoursSettings = () => {
     }
   });
 
-  // Update settings
+  // Update settings — writes `setting_category: 'business'`, asymmetric with
+  // the uncategorised read above. See the comment on the read.
   const updateMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('admin_settings')
-        .upsert([
-          {
-            setting_key: 'business_hours',
-            setting_value: businessHours,
-            setting_category: 'business'
-          },
-          {
-            setting_key: 'timezone',
-            setting_value: { value: timezone },
-            setting_category: 'business'
-          }
-        ], { onConflict: 'setting_key' });
-
-      if (error) throw error;
+      await upsertSettingRows([
+        {
+          setting_key: 'business_hours',
+          setting_value: businessHours,
+          setting_category: 'business'
+        },
+        {
+          setting_key: 'timezone',
+          setting_value: { value: timezone },
+          setting_category: 'business'
+        }
+      ]);
     },
     onSuccess: () => {
       toast.success('Business hours saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'business'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
     },
     onError: () => {
       toast.error('Failed to save settings');

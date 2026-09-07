@@ -1,28 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/utils/supabaseClient';
+import {
+  getSession,
+  signIn as signInService,
+  signOut as signOutService,
+  requestPasswordReset,
+  onAuthStateChange,
+  checkAdminUser,
+} from '@/services/auth';
 
-import { logger } from '../utils/logger';
 const AuthContext = createContext(null);
-
-/**
- * Reads the caller's own admin_users row. RLS restricts this to `id = auth.uid()`,
- * so a non-admin simply gets no row back rather than an error.
- */
-async function fetchIsAdmin(userId) {
-  if (!userId) return false;
-  const { data, error } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (error) {
-    // Fail closed. A lookup failure must never be read as "is an admin".
-    logger.error('[AuthContext] admin lookup failed:', error.message);
-    return false;
-  }
-  return Boolean(data);
-}
 
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
@@ -57,7 +43,7 @@ export const AuthProvider = ({ children }) => {
       if (fromAuthEvent) sawAuthEventRef.current = true;
 
       const ticket = ++latestRef.current;
-      const nextIsAdmin = await fetchIsAdmin(nextSession?.user?.id);
+      const nextIsAdmin = await checkAdminUser(nextSession?.user?.id);
 
       // Commit session and isAdmin together. Setting session before the await
       // would let a stale call publish a session that disagrees with the
@@ -68,29 +54,41 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
 
-    supabase.auth.getSession()
-      .then(({ data }) => applySession(data?.session ?? null, { fromAuthEvent: false }))
+    getSession()
+      .then((nextSession) => applySession(nextSession, { fromAuthEvent: false }))
       // Without this, a rejected getSession leaves loading=true forever and
       // ProtectedRoute spins with no way out. Fail closed: treat it as no session.
       .catch(() => applySession(null, { fromAuthEvent: false }));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const unsubscribe = onAuthStateChange(
       (_event, nextSession) => { applySession(nextSession ?? null, { fromAuthEvent: true }); }
     );
 
     return () => {
       activeRef.current = false;
-      subscription?.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
   const signIn = useCallback(async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ?? null };
+    try {
+      await signInService({ email, password });
+      return { error: null };
+    } catch (err) {
+      // Unwrap the service's ServiceError back to the original Supabase
+      // error, so callers (AdminLogin.jsx renders `error.message`) see the
+      // same text as before the service layer wrapped it.
+      return { error: err.cause ?? err };
+    }
   }, []);
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
+    let error = null;
+    try {
+      await signOutService();
+    } catch (err) {
+      error = err.cause ?? err;
+    }
 
     // Claim a fresh ticket so any admin lookup still in flight — e.g. from a
     // TOKEN_REFRESHED event that fired just before this click — loses its race
@@ -100,14 +98,16 @@ export const AuthProvider = ({ children }) => {
 
     setSession(null);
     setIsAdmin(false);
-    return { error: error ?? null };
+    return { error };
   }, []);
 
   const resetPassword = useCallback(async (email) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/admin/login`
-    });
-    return { error: error ?? null };
+    try {
+      await requestPasswordReset(email, { redirectTo: `${window.location.origin}/admin/login` });
+      return { error: null };
+    } catch (err) {
+      return { error: err.cause ?? err };
+    }
   }, []);
 
   const value = {

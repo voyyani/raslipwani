@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/utils/supabaseClient';
+import { getSettingsRow, subscribeToSettings } from '@/services/settings';
 
 import { logger } from '../utils/logger';
 // Default fallback values for settings (used while loading or on error)
@@ -73,23 +73,7 @@ export const SettingsProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .limit(1)
-        .single();
-
-      if (fetchError) {
-        // If no rows exist, that's okay - use defaults
-        if (fetchError.code === 'PGRST116') {
-          logger.warn('[SettingsContext] No settings row found, using defaults');
-          setLoading(false);
-          return;
-        }
-        logger.error('[SettingsContext] Fetch error:', fetchError);
-        setError(fetchError.message);
-        return;
-      }
+      const data = await getSettingsRow();
 
       if (!data) {
         logger.warn('[SettingsContext] No settings found, using defaults');
@@ -205,21 +189,10 @@ export const SettingsProvider = ({ children }) => {
 
   // Subscribe to realtime updates (optional - for admin panel live sync)
   useEffect(() => {
-    const channel = supabase
-      .channel('admin_settings_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'admin_settings' },
-        (payload) => {
-          logger.debug('[SettingsContext] Realtime update detected:', payload);
-          refreshSettings();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return subscribeToSettings((payload) => {
+      logger.debug('[SettingsContext] Realtime update detected:', payload);
+      refreshSettings();
+    });
   }, [refreshSettings]);
 
   const contextValue = {

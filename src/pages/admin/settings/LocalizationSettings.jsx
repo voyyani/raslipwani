@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { settingsQueries, upsertSettingRows } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import toast from 'react-hot-toast';
 import Icon from '../../../components/Icon';
 import Input from '../../../components/ui/Input';
@@ -22,71 +23,58 @@ const LocalizationSettings = () => {
   });
 
   // Fetch settings
-  const { isLoading } = useQuery({
-    queryKey: ['settings', 'localization'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('admin_settings')
-        .select('*')
-        .eq('setting_category', 'localization');
+  const { data: rows, isLoading } = useQuery(settingsQueries.category('localization'));
 
-      if (error) throw error;
-
-      data.forEach(setting => {
-        if (setting.setting_key === 'currency') {
-          setFormData(prev => ({
-            ...prev,
-            currencyCode: setting.setting_value.code || 'KES',
-            currencySymbol: setting.setting_value.symbol || 'KSh',
-            currencyPosition: setting.setting_value.position || 'before',
-            decimals: setting.setting_value.decimals || 2
-          }));
-        } else if (setting.setting_key === 'locale') {
-          setFormData(prev => ({
-            ...prev,
-            localeCode: setting.setting_value.code || 'en-KE',
-            dateFormat: setting.setting_value.dateFormat || 'DD/MM/YYYY',
-            timeFormat: setting.setting_value.timeFormat || '24h'
-          }));
-        }
-      });
-
-      return data;
-    }
-  });
+  useEffect(() => {
+    if (!rows) return;
+    rows.forEach(setting => {
+      if (setting.setting_key === 'currency') {
+        setFormData(prev => ({
+          ...prev,
+          currencyCode: setting.setting_value.code || 'KES',
+          currencySymbol: setting.setting_value.symbol || 'KSh',
+          currencyPosition: setting.setting_value.position || 'before',
+          decimals: setting.setting_value.decimals || 2
+        }));
+      } else if (setting.setting_key === 'locale') {
+        setFormData(prev => ({
+          ...prev,
+          localeCode: setting.setting_value.code || 'en-KE',
+          dateFormat: setting.setting_value.dateFormat || 'DD/MM/YYYY',
+          timeFormat: setting.setting_value.timeFormat || '24h'
+        }));
+      }
+    });
+  }, [rows]);
 
   // Update settings
   const updateMutation = useMutation({
     mutationFn: async (settings) => {
-      const { error } = await supabase
-        .from('admin_settings')
-        .upsert([
-          {
-            setting_key: 'currency',
-            setting_value: {
-              code: settings.currencyCode,
-              symbol: settings.currencySymbol,
-              position: settings.currencyPosition,
-              decimals: parseInt(settings.decimals)
-            },
-            setting_category: 'localization'
+      await upsertSettingRows([
+        {
+          setting_key: 'currency',
+          setting_value: {
+            code: settings.currencyCode,
+            symbol: settings.currencySymbol,
+            position: settings.currencyPosition,
+            decimals: parseInt(settings.decimals)
           },
-          {
-            setting_key: 'locale',
-            setting_value: {
-              code: settings.localeCode,
-              dateFormat: settings.dateFormat,
-              timeFormat: settings.timeFormat
-            },
-            setting_category: 'localization'
-          }
-        ], { onConflict: 'setting_key' });
-
-      if (error) throw error;
+          setting_category: 'localization'
+        },
+        {
+          setting_key: 'locale',
+          setting_value: {
+            code: settings.localeCode,
+            dateFormat: settings.dateFormat,
+            timeFormat: settings.timeFormat
+          },
+          setting_category: 'localization'
+        }
+      ]);
     },
     onSuccess: () => {
       toast.success('Localization settings saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['settings', 'localization'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all });
     },
     onError: () => {
       toast.error('Failed to save settings');
