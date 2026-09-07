@@ -356,17 +356,20 @@ unticked: ticking them would make this document less accurate, which is the one 
 Invisible to users, and the thing that makes Block 4 a design exercise rather than a
 rewrite.
 
-### 3.1 — Data-access layer
+### 3.1 — Data-access layer ✅ *(done)*
 
 **24 files under `src/components` and `src/pages` import the Supabase client directly.**
 
-- [ ] `src/services/` — one module per domain: `properties`, `bookings`, `clients`,
+- [x] `src/services/` — one module per domain: `properties`, `bookings`, `clients`,
       `settings`, `auth`. Every query behind a named, testable function.
-- [ ] Standardise on TanStack Query; remove raw `useEffect` + `supabase` fetching. Two
+- [x] Standardise on TanStack Query; remove raw `useEffect` + `supabase` fetching. Two
       paradigms coexist today.
-- [ ] Centralise query keys. `Home.jsx` sets a local `staleTime` that silently disagrees
+- [x] Centralise query keys. `Home.jsx` sets a local `staleTime` that silently disagrees
       with the global default in `App.jsx`.
-- [ ] **Exit:** `grep -rl supabaseClient src/components src/pages` returns nothing.
+- [x] **Exit:** `grep -rl supabaseClient src/components src/pages` returns nothing but
+      the two test files that configure the mock. Enforced going forward by a
+      `no-restricted-imports` ESLint error (see `eslint.config.js`), which replaced the
+      ratchet that held the line while the migration was in flight.
 
 ### 3.2 — Decompose the largest components *(after 3.1 — they shrink on their own)*
 
@@ -544,7 +547,7 @@ ledger at the top.
 | CSS bundle (raw) | 75.6 kB | **76.3 kB** — unmoved by the icon work, as it should have been | < 50 kB | 2 |
 | `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **rule removed** ✅ | rule removed after pairing | ✅ 2 |
 | `jsx-a11y/control-has-associated-label` | 87 | **45** — halved as a side effect, not targeted | 0 | 2 |
-| Files importing Supabase directly | 24 | **24** | 0 | 3 |
+| Files importing Supabase directly | 24 | **0** ✅ | 0 | ✅ 3 |
 | Files over 700 lines | 8 | **7** (largest 1,294) | 0 over 300 | 3 |
 | First-load JS (gzip) | 215 kB | **215.3 kB** | < 100 kB | 3 |
 | Lighthouse Performance (mobile) | not measured | **not measured** | ≥ 90 | 3 |

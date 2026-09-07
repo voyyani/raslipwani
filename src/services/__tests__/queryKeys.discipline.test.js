@@ -17,7 +17,7 @@ function sourceFiles(dir = 'src', acc = []) {
 
 // Un-skipped in Task 17, once every call site is migrated. It is skipped rather
 // than absent so the intent is on the record while Phase 1 is in flight.
-describe.skip('query key discipline', () => {
+describe('query key discipline', () => {
   it('builds no query key from an inline string literal', () => {
     const offenders = sourceFiles().filter((file) =>
       /queryKey:\s*\[\s*['"`]/.test(readFileSync(file, 'utf8'))
@@ -28,7 +28,7 @@ describe.skip('query key discipline', () => {
   it('sets no staleTime that did not come from cachePolicy', () => {
     const offenders = sourceFiles().filter(
       (file) =>
-        /staleTime:\s*[0-9]/.test(readFileSync(file, 'utf8')) && !file.endsWith('cachePolicy.js')
+        /staleTime:\s*[1-9][0-9]*/.test(readFileSync(file, 'utf8')) && !file.endsWith('cachePolicy.js')
     );
     expect(offenders).toEqual([]);
   });

@@ -158,7 +158,7 @@ export const settingsQueries = {
    * No `staleTime` here, deliberately. `EmailSettings.jsx`, `AdvancedSettings.jsx`
    * and `LocalizationSettings.jsx` — the only callers — never set one before
    * this migration either, so this falls through to the app's global default
-   * (`staleTime: 5 * 60 * 1000` in App.jsx) rather than `STALE_TIME.static`
+   * (`STALE_TIME.standard`, 5 minutes, in App.jsx) rather than `STALE_TIME.static`
    * (30 minutes). A settings screen's whole job is showing current
    * configuration; a change made by another admin, or in another browser
    * tab, should not take up to half an hour to appear.

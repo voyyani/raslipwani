@@ -58,15 +58,6 @@ jobs:
       - name: Label ratchet
         run: npm run label:ratchet
 
-      # The same instrument again, pointed at Block 3's defect: twenty-two
-      # components and pages that build Supabase queries inline, so nothing
-      # about the app's data access is nameable, testable, or lazily loadable.
-      # A rule that failed the build on arrival with twenty-two violations
-      # would be switched off within a day; this ceiling only falls, and it is
-      # deleted in favour of a hard ESLint error once it reaches 0.
-      - name: Supabase import ratchet
-        run: npm run supabase:ratchet
-
       # The accessibility gate, named separately from the suite it runs inside.
       # It is the same vitest run restricted to the axe files, so a red build
       # here says "a visitor cannot use this" rather than "a test failed" — and

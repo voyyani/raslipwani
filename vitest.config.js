@@ -98,11 +98,23 @@ export default defineConfig({
       // Block 3's data-access layer and decomposition are where this is
       // repaid, because both require tests for the surfaces now being counted.
       // Set ~1 point under the new measurement.
+      //
+      // Raised at the end of Block 3 Phase 1. The data layer added roughly 110
+      // pure unit tests over src/services — no jsdom rendering, no new
+      // component or page under test. Unlike the two give-backs above, this
+      // moves the numerator without touching the denominator: it does not
+      // reach previously-uncounted ground the way the axe suites did, it tests
+      // ground that already existed and was already counted as uncovered.
+      // That is exactly the shape of test-writing a ratio floor rewards rather
+      // than punishes.
+      //
+      // Measured on 2026-09-07: 52.73% lines / 51.66% statements / 41.48%
+      // functions / 43.86% branches. Each floor sits ~1 point under.
       thresholds: {
-        lines: 46,
-        functions: 35,
-        branches: 37,
-        statements: 45
+        lines: 51,
+        functions: 40,
+        branches: 42,
+        statements: 50
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

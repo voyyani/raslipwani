@@ -125,4 +125,34 @@ export default [
       globals: { ...globals.browser, ...globals.node, ...globals.vitest },
     },
   },
+
+  // The data layer's boundary, as an error rather than a ratchet.
+  //
+  // Block 3.1 moved twenty-two components and pages off the client and behind
+  // src/services/. A ratchet held the line while that was in flight (see the
+  // deleted scripts/supabase-import-ratchet.mjs); at zero it is worth less than
+  // a rule, because a ratchet is also satisfied by deleting a file.
+  //
+  // src/services, src/contexts and src/utils are exempt: services are the
+  // boundary itself, and the two contexts consume services rather than the
+  // client. Test files are exempt because configuring the mock is what they are
+  // for.
+  {
+    files: ['src/components/**/*.{js,jsx}', 'src/pages/**/*.{js,jsx}'],
+    ignores: ['**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/utils/supabaseClient', '@/utils/supabaseClient', '@supabase/supabase-js'],
+              message:
+                'Query through a module in src/services/ instead. See ROADMAP.md Block 3.1.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]

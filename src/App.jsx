@@ -19,6 +19,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
 import { propertyQueries } from '@/services/properties';
+import { STALE_TIME } from '@/services/cachePolicy';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';
@@ -28,7 +29,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: STALE_TIME.standard,
     },
   },
 });
