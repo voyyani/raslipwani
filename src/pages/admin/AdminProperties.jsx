@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
@@ -7,8 +7,16 @@ import Textarea from '../../components/ui/Textarea';
 import Checkbox from '../../components/ui/Checkbox';
 import { Helmet } from 'react-helmet-async';
 import toast from 'react-hot-toast';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  propertyQueries,
+  createProperty,
+  updateProperty,
+  deleteProperty,
+  setFeatured,
+} from '@/services/properties';
+import { settingsQueries } from '@/services/settings';
+import { queryKeys } from '@/services/queryKeys';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatPropertiesForExport } from '../../utils/exportUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,17 +27,17 @@ import { logger } from '../../utils/logger';
 import useConfirm from '../../components/ui/useConfirm';
 import Icon from '../../components/Icon';
 
+// A stable reference: `properties` defaults to this when the page query has
+// no data yet, so components reading it don't see a fresh `[]` identity every
+// render (see src/pages/Properties.jsx for the effect this avoids elsewhere).
+const EMPTY_PROPERTIES = [];
+
 const AdminProperties = () => {
   const [confirm, confirmDialog] = useConfirm();
   const queryClient = useQueryClient();
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProperty, setCurrentProperty] = useState(null);
-  const [cloudinarySettings, setCloudinarySettings] = useState({
-    cloudName: '',
-    uploadPreset: ''
-  });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [newAmenity, setNewAmenity] = useState('');
@@ -63,7 +71,6 @@ const AdminProperties = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
-  const [totalCount, setTotalCount] = useState(0);
 
   // Mobile state
   const [mobileViewMode, setMobileViewMode] = useState('grid'); // 'grid' or 'list'
@@ -77,58 +84,34 @@ const AdminProperties = () => {
     rent: ['apartment', 'villa', 'office']
   };
 
-  // Fetch Cloudinary settings and properties with pagination
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch Cloudinary settings. `admin_settings` is the single source
-        // of truth since 010; the legacy `settings` table it replaced also
-        // held the Cloudinary api_secret in a browser-readable row.
-        const { data: settings } = await supabase
-          .from('admin_settings')
-          .select('cloud_name, upload_preset')
-          .single();
-        
-        if (settings) {
-          setCloudinarySettings({
-            cloudName: settings.cloud_name,
-            uploadPreset: settings.upload_preset
-          });
-        }
+  // Cloudinary settings. `admin_settings` is the single source of truth since
+  // 010; the legacy `settings` table it replaced also held the Cloudinary
+  // api_secret in a browser-readable row, so this reads only the two columns
+  // the service names rather than the whole row.
+  const { data: cloudinaryConfig } = useQuery(settingsQueries.cloudinary());
+  const cloudinarySettings = {
+    cloudName: cloudinaryConfig?.cloud_name || '',
+    uploadPreset: cloudinaryConfig?.upload_preset || '',
+  };
 
-        // Fetch properties with pagination
-        setLoading(true);
-        
-        // Calculate pagination
-        const from = (currentPage - 1) * itemsPerPage;
-        const to = from + itemsPerPage - 1;
-        
-        let query = supabase
-          .from('properties')
-          .select('*', { count: 'exact' })
-          .order(sortField, { ascending: sortDirection === 'asc' });
-        
-        // Apply search filter
-        if (debouncedSearchTerm) {
-          query = query.or(`title.ilike.%${debouncedSearchTerm}%,location.ilike.%${debouncedSearchTerm}%`);
-        }
-        
-        query = query.range(from, to);
-        
-        const { data, error, count } = await query;
-        
-        if (error) throw error;
-        setProperties(data || []);
-        setTotalCount(count || 0);
-      } catch (error) {
-        toast.error('Error fetching properties: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [sortField, sortDirection, currentPage, debouncedSearchTerm, itemsPerPage]);
+  // Properties, one page at a time. `listPage` owns the 1-based-page to
+  // 0-based-inclusive-range arithmetic and the search filter both.
+  const {
+    data: { rows: properties = EMPTY_PROPERTIES, count: totalCount = 0 } = {},
+    isLoading: isPageLoading,
+  } = useQuery(
+    propertyQueries.page({
+      page: currentPage,
+      pageSize: itemsPerPage,
+      sortField,
+      sortDirection,
+      search: debouncedSearchTerm || undefined,
+    })
+  );
+  const loading = isPageLoading || isSubmitting;
+
+  const invalidateProperties = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
 
   // Export properties to CSV
   const handleExport = () => {
@@ -291,7 +274,7 @@ const AdminProperties = () => {
     }
 
     try {
-      setLoading(true);
+      setIsSubmitting(true);
       const uploadPromises = imageFiles.map(file => {
         const formData = new FormData();
         formData.append('file', file);
@@ -310,16 +293,16 @@ const AdminProperties = () => {
       toast.error('Failed to upload images. Please check Cloudinary settings.');
       return [];
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     try {
-      setLoading(true);
-      
+      setIsSubmitting(true);
+
       // Upload new images if selected
       let cloudinaryUrls = [...formData.images];
       
@@ -341,24 +324,15 @@ const AdminProperties = () => {
 
       if (currentProperty) {
         // Update
-        const { error } = await supabase
-          .from('properties')
-          .update(submitData)
-          .eq('id', currentProperty.id);
-        
-        if (error) throw error;
+        await updateProperty(currentProperty.id, submitData);
         toast.success('Property updated successfully!');
       } else {
         // Create
-        const { error } = await supabase
-          .from('properties')
-          .insert([submitData]);
-        
-        if (error) throw error;
+        await createProperty(submitData);
         toast.success('Property added successfully!');
       }
-      
-      fetchProperties();
+
+      invalidateProperties();
       setIsModalOpen(false);
       setCurrentProperty(null);
       resetForm();
@@ -366,24 +340,7 @@ const AdminProperties = () => {
       toast.error('Error saving property: ' + error.message);
       toast.error('Failed to save property');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order(sortField, { ascending: sortDirection === 'asc' });
-      
-      if (error) throw error;
-      setProperties(data);
-    } catch (error) {
-      toast.error('Error fetching properties: ' + error.message);
-    } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -402,20 +359,15 @@ const AdminProperties = () => {
     if (!ok) return;
     
     try {
-      setLoading(true);
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      setProperties(properties.filter(p => p.id !== id));
+      setIsSubmitting(true);
+      await deleteProperty(id);
+      invalidateProperties();
       toast.success('Property deleted successfully!');
     } catch (error) {
       toast.error('Error deleting property: ' + error.message);
       toast.error('Failed to delete property');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -423,36 +375,17 @@ const AdminProperties = () => {
   const handleToggleFeatured = async (property) => {
     try {
       const newFeaturedValue = !property.featured;
-      
+
       logger.debug('Toggling featured for property:', property.id, 'to:', newFeaturedValue);
-      
+
       // Plain client: the Supabase Auth session carries admin identity, and the
       // "admins manage properties" policy in 009 authorises this write.
-      const { data, error } = await supabase
-        .from('properties')
-        .update({ featured: newFeaturedValue })
-        .eq('id', property.id)
-        .select();
-      
-      if (error) {
-        logger.error('Supabase error:', error);
-        throw error;
-      }
-      
-      logger.debug('Update result:', data);
-      
-      // Check if update actually happened
-      if (!data || data.length === 0) {
-        throw new Error('No rows updated - property may not exist');
-      }
-      
-      setProperties(prev => prev.map(p => 
-        p.id === property.id ? { ...p, featured: newFeaturedValue } : p
-      ));
-      
-      // Invalidate homepage featured properties cache
-      queryClient.invalidateQueries({ queryKey: ['featured-properties'] });
-      
+      await setFeatured(property.id, newFeaturedValue);
+
+      // Invalidate the whole properties domain: the admin table, the featured
+      // strip and every open detail all read from one root key.
+      queryClient.invalidateQueries({ queryKey: queryKeys.properties.all });
+
       toast.success(newFeaturedValue ? 'Added to featured' : 'Removed from featured');
     } catch (error) {
       logger.error('Toggle featured error:', error);

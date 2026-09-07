@@ -60,24 +60,31 @@ export async function listAll({ sortField = 'created_at', sortDirection = 'desc'
  * `range` is 0-based and inclusive at both ends. Converting in one place is the
  * point — the previous inline version was written twice and disagreed with
  * itself by one row.
+ *
+ * `search`, when given, matches the admin table's search box: an `ilike` on
+ * title or location, applied before the range so pagination counts the
+ * filtered set rather than the whole table.
  */
 export async function listPage({
   page = 1,
   pageSize = 10,
   sortField = 'created_at',
   sortDirection = 'desc',
+  search,
 } = {}) {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  return unwrapCount(
-    await supabase
-      .from(TABLE)
-      .select('*', { count: 'exact' })
-      .order(sortField, { ascending: sortDirection === 'asc' })
-      .range(from, to),
-    { table: TABLE, operation: 'listPage' }
-  );
+  let query = supabase
+    .from(TABLE)
+    .select('*', { count: 'exact' })
+    .order(sortField, { ascending: sortDirection === 'asc' });
+
+  if (search) {
+    query = query.or(`title.ilike.%${search}%,location.ilike.%${search}%`);
+  }
+
+  return unwrapCount(await query.range(from, to), { table: TABLE, operation: 'listPage' });
 }
 
 export async function getById(propertyId) {

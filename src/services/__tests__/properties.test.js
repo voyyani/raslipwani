@@ -92,6 +92,18 @@ describe('listPage', () => {
     await listPage({ page: 1, pageSize: 12 });
     expect(builders.properties.range).toHaveBeenCalledWith(0, 11);
   });
+
+  it('filters by title or location when a search term is given', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], count: 1, error: null } });
+    await listPage({ page: 1, pageSize: 10, search: 'Gigiri' });
+    expect(builders.properties.or).toHaveBeenCalledWith('title.ilike.%Gigiri%,location.ilike.%Gigiri%');
+  });
+
+  it('does not filter when no search term is given', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], count: 1, error: null } });
+    await listPage({ page: 1, pageSize: 10 });
+    expect(builders.properties.or).not.toHaveBeenCalled();
+  });
 });
 
 describe('getById', () => {
