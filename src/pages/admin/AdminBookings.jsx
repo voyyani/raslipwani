@@ -1,25 +1,23 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bookingQueries, setBookingStatus, rescheduleBooking } from '@/services/bookings';
+import { bookingQueries, rescheduleBooking } from '@/services/bookings';
 import { queryKeys } from '@/services/queryKeys';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
-import { format, isToday, isTomorrow, isPast } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
-import BookingStatusBadge from '../../components/BookingStatusBadge';
-import { statusClasses } from '../../design/status';
+import { format } from 'date-fns';
 import BookingDetailModal from './BookingDetailModal';
-import MobileBookingCard from '../../components/admin/MobileBookingCard';
+import BookingStatsCards from './bookings/BookingStatsCards';
+import BookingFiltersPanel from './bookings/BookingFiltersPanel';
+import BookingTable from './bookings/BookingTable';
+import { useBookingMutations } from './bookings/useBookingMutations';
 import { exportToCSV } from '../../utils/exportUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from '../../components/ui/useConfirm';
-import Input from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
 import Icon from '../../components/Icon';
 
 // A stable empty array so `data = EMPTY_BOOKINGS` doesn't hand a fresh
@@ -362,82 +360,12 @@ const AdminBookings = () => {
         <p className="text-sm text-content-muted hidden sm:block">Manage appointments with calendar</p>
       </div>
 
-      {/* Mobile Stats - Collapsible */}
-      {stats && isMobile && (
-        <div className="mb-4">
-          <button 
-            onClick={() => setExpandedStats(!expandedStats)}
-            className="w-full flex items-center justify-between bg-surface-raised rounded-lg shadow p-3"
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-lg font-bold text-content">{stats.total}</span>
-              <span className="text-sm text-content-muted">Total Bookings</span>
-              {stats.pending > 0 && (
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusClasses('pending')}`}>
-                  {stats.pending} pending
-                </span>
-              )}
-            </div>
-            {expandedStats ? <Icon name="chevron-up" className="text-content-subtle" /> : <Icon name="chevron-down" className="text-content-subtle" />}
-          </button>
-          
-          <AnimatePresence>
-            {expandedStats && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="bg-warning-surface rounded-lg p-2 text-center border border-warning-border">
-                    <div className="text-lg font-bold text-warning-content">{stats.pending}</div>
-                    <div className="text-xs text-warning-content">Pending</div>
-                  </div>
-                  <div className="bg-brand-subtle rounded-lg p-2 text-center border border-brand-subtle">
-                    <div className="text-lg font-bold text-brand-content">{stats.confirmed}</div>
-                    <div className="text-xs text-brand">Confirmed</div>
-                  </div>
-                  <div className="bg-success-surface rounded-lg p-2 text-center border border-success-border">
-                    <div className="text-lg font-bold text-success-content">{stats.completed}</div>
-                    <div className="text-xs text-success-content">Completed</div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
-      {/* Desktop Stats Dashboard */}
-      {stats && !isMobile && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
-          <div className="bg-surface-raised rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xl sm:text-2xl font-bold text-content">{stats.total}</div>
-            <div className="text-xs sm:text-sm text-content-muted">Total</div>
-          </div>
-          <div className="bg-warning-surface rounded-lg shadow p-3 sm:p-4 border border-warning-border">
-            <div className="text-xl sm:text-2xl font-bold text-warning-content">{stats.pending}</div>
-            <div className="text-xs sm:text-sm text-warning-content">Pending</div>
-          </div>
-          <div className="bg-brand-subtle rounded-lg shadow p-3 sm:p-4 border border-brand-subtle">
-            <div className="text-xl sm:text-2xl font-bold text-brand-content">{stats.confirmed}</div>
-            <div className="text-xs sm:text-sm text-brand">Confirmed</div>
-          </div>
-          <div className="bg-success-surface rounded-lg shadow p-3 sm:p-4 border border-success-border">
-            <div className="text-xl sm:text-2xl font-bold text-success-content">{stats.completed}</div>
-            <div className="text-xs sm:text-sm text-success-content">Completed</div>
-          </div>
-          <div className="bg-danger-surface rounded-lg shadow p-3 sm:p-4 border border-danger-border">
-            <div className="text-xl sm:text-2xl font-bold text-danger-content">{stats.cancelled}</div>
-            <div className="text-xs sm:text-sm text-danger-content">Cancelled</div>
-          </div>
-          <div className="bg-warning-surface rounded-lg shadow p-3 sm:p-4 border border-warning-border">
-            <div className="text-xl sm:text-2xl font-bold text-warning-content">{stats.high_priority}</div>
-            <div className="text-xs sm:text-sm text-warning-content">High Priority</div>
-          </div>
-        </div>
-      )}
+      <BookingStatsCards
+        stats={stats}
+        isMobile={isMobile}
+        expandedStats={expandedStats}
+        onToggleExpand={() => setExpandedStats(!expandedStats)}
+      />
 
       {/* Mobile View Toggle */}
       {isMobile && (
@@ -467,100 +395,15 @@ const AdminBookings = () => {
         </div>
       )}
 
-      {/* Mobile Search & Filter Bar */}
-      {isMobile && mobileView === 'list' && (
-        <div className="flex gap-2 mb-4">
-          <div className="flex-1 relative">
-            <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle" />
-            <input
-              type="text"
-              placeholder="Search bookings..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="w-full pl-9 pr-3 py-2.5 text-sm border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-transparent"
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-2.5 rounded-lg border transition-all ${
-              showFilters || filters.status !== 'all' || filters.priority !== 'all'
-                ? 'bg-brand-subtle border-brand-subtle text-brand'
-                : 'bg-surface-raised border-line text-content-muted'
-            }`}
-          >
-            <Icon name="filter" />
-          </button>
-        </div>
-      )}
-
-      {/* Mobile Filters Dropdown */}
-      <AnimatePresence>
-        {isMobile && showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden mb-4"
-          >
-            <div className="bg-surface-raised rounded-lg shadow p-3 space-y-3">
-              <div>
-                {/* A named group, not a label: these are toggle buttons, and a
-                    <button> cannot be labelled. See AdminProperties for the
-                    same fix. */}
-                <span id="booking-status-filter" className="block text-xs font-medium text-content-muted mb-1">
-                  Status
-                </span>
-                <div role="group" aria-labelledby="booking-status-filter" className="flex flex-wrap gap-2">
-                  {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(status => (
-                    <button
-                      key={status}
-                      onClick={() => setFilters({ ...filters, status })}
-                      className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
-                        filters.status === status
-                          ? 'bg-brand text-content-on-brand'
-                          : 'bg-surface-sunken text-content-muted'
-                      }`}
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                {/* A named group, not a label: these are toggle buttons, and a
-                    <button> cannot be labelled. See AdminProperties for the
-                    same fix. */}
-                <span id="booking-priority-filter" className="block text-xs font-medium text-content-muted mb-1">
-                  Priority
-                </span>
-                <div role="group" aria-labelledby="booking-priority-filter" className="flex flex-wrap gap-2">
-                  {['all', 'low', 'normal', 'high', 'urgent'].map(priority => (
-                    <button
-                      key={priority}
-                      onClick={() => setFilters({ ...filters, priority })}
-                      className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all ${
-                        filters.priority === priority
-                          ? 'bg-brand text-content-on-brand'
-                          : 'bg-surface-sunken text-content-muted'
-                      }`}
-                    >
-                      {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {(filters.status !== 'all' || filters.priority !== 'all') && (
-                <button
-                  onClick={() => setFilters({ ...filters, status: 'all', priority: 'all' })}
-                  className="w-full py-2 text-sm text-danger-content font-medium"
-                >
-                  Clear Filters
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <BookingFiltersPanel
+        filters={filters}
+        isMobile={isMobile}
+        mobileView={mobileView}
+        showFilters={showFilters}
+        onFilterChange={(name, value) => setFilters({ ...filters, [name]: value })}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        onReset={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
+      />
 
       {/* Mobile List View */}
       {isMobile && mobileView === 'list' && (
@@ -709,49 +552,15 @@ const AdminBookings = () => {
           </div>
         </div>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <div className="mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Input
-              label="Search"
-              type="text"
-              placeholder="Name, email, phone..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-            <Select
-              label="Status"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </Select>
-              <Select
-                label="Priority"
-                value={filters.priority}
-                onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              >
-                <option value="all">All Priorities</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </Select>
-            <div>
-              <span className="block text-sm font-medium text-content-muted mb-1">Actions</span>
-              <button
-                onClick={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
-                className="w-full px-3 py-2 bg-gray-600 text-content-on-media rounded-md hover:bg-gray-700 transition"
-              >
-                Clear Filters
-              </button>
-            </div>
-          </div>
-        )}
+        <BookingFiltersPanel
+          filters={filters}
+          isMobile={isMobile}
+          mobileView={mobileView}
+          showFilters={showFilters}
+          onFilterChange={(name, value) => setFilters({ ...filters, [name]: value })}
+          onToggleFilters={() => setShowFilters(!showFilters)}
+          onReset={() => setFilters({ search: '', status: 'all', priority: 'all', dateRange: { start: null, end: null } })}
+        />
       </div>
       )}
 
