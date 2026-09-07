@@ -58,6 +58,13 @@ jobs:
       - name: Label ratchet
         run: npm run label:ratchet
 
+      # A 1,187-line component cannot be reviewed, cannot be tested at its
+      # seams, and cannot be code-split. ROADMAP.md Block 3.2 wants nothing over
+      # 300 lines; a hard rule would fail twenty-four times on arrival, so this
+      # ceiling only falls. See file-size-budget.json.
+      - name: File size ratchet
+        run: npm run size:ratchet
+
       # The accessibility gate, named separately from the suite it runs inside.
       # It is the same vitest run restricted to the axe files, so a red build
       # here says "a visitor cannot use this" rather than "a test failed" — and
