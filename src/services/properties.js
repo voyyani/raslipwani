@@ -2,6 +2,7 @@ import { supabase } from '@/utils/supabaseClient';
 import { unwrap, unwrapList, unwrapCount } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
+import { sanitiseSearch } from './sanitiseSearch';
 
 const TABLE = 'properties';
 
@@ -81,7 +82,10 @@ export async function listPage({
     .order(sortField, { ascending: sortDirection === 'asc' });
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,location.ilike.%${search}%`);
+    const term = sanitiseSearch(search);
+    if (term) {
+      query = query.or(`title.ilike.%${term}%,location.ilike.%${term}%`);
+    }
   }
 
   return unwrapCount(await query.range(from, to), { table: TABLE, operation: 'listPage' });

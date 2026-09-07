@@ -2,17 +2,11 @@ import { supabase } from '@/utils/supabaseClient';
 import { unwrap, unwrapCount } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
+import { sanitiseSearch } from './sanitiseSearch';
 
 const TABLE = 'clients';
 
 const isSet = (value) => value !== undefined && value !== null && value !== '' && value !== 'all';
-
-/**
- * PostgREST parses `or=(a.ilike.%x%,b.ilike.%x%)` by splitting on commas, so a
- * comma typed into the search box would add a condition of the searcher's
- * choosing. Parentheses terminate a filter for the same reason.
- */
-const sanitiseSearch = (term) => term.replace(/[,()]/g, ' ').trim();
 
 export async function listClientsPage({
   page = 1,

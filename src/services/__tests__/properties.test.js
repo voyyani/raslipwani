@@ -104,6 +104,16 @@ describe('listPage', () => {
     await listPage({ page: 1, pageSize: 10 });
     expect(builders.properties.or).not.toHaveBeenCalled();
   });
+
+  it('escapes a comma in the search term so it cannot inject a second filter', async () => {
+    // PostgREST's `or` is comma-separated; an unescaped comma in user input
+    // becomes another condition. This is the one place user text reaches a
+    // filter grammar.
+    const builders = mockFrom(supabase, { properties: { data: [row], count: 1, error: null } });
+    await listPage({ page: 1, pageSize: 10, search: 'a,b' });
+    const [filter] = builders.properties.or.mock.calls[0];
+    expect(filter).not.toContain('a,b');
+  });
 });
 
 describe('getById', () => {
