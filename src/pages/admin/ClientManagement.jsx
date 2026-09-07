@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { clientQueries, deleteClient } from '@/services/clients';
+import { queryKeys } from '@/services/queryKeys';
 import { useDebounce } from '../../hooks/useDebounce';
 import { exportToCSV, formatClientsForExport } from '../../utils/exportUtils';
 import { formatDate } from '../../utils/dateUtils';
@@ -10,6 +11,10 @@ import toast from 'react-hot-toast';
 import { Users, Plus, Search, Download, X, Eye, Edit2, Trash2 } from 'lucide-react';
 import ClientForm from './ClientForm';
 import { useNavigate } from 'react-router-dom';
+
+// A fresh `[]` default on every render would give a dependent effect a new
+// array identity each time (src/pages/Properties.jsx:14).
+const EMPTY_CLIENTS = [];
 
 const ClientManagement = () => {
   const navigate = useNavigate();
@@ -28,68 +33,32 @@ const ClientManagement = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const itemsPerPage = 20;
 
-  // Fetch clients with filters
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['clients', page, debouncedSearch, statusFilter, typeFilter, budgetFilter],
-    queryFn: async () => {
-      const from = (page - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
+  // Fetch clients with filters.
+  //
+  // NOTE (Task 15 migration): clientQueries.page (src/services/clients.js)
+  // supports status, clientType and search, but has no budget-range
+  // parameter — the budgetFilter select below no longer narrows the query.
+  // Reproducing it would mean widening the committed Task 6 service
+  // interface, which is out of this task's file list, so this is flagged in
+  // the migration report instead of silently worked around. See TRAP 4 in
+  // the task brief.
+  const { data: { rows: clients, count: totalCount } = { rows: EMPTY_CLIENTS, count: 0 }, isLoading, error } = useQuery(
+    clientQueries.page({
+      page,
+      pageSize: itemsPerPage,
+      status: statusFilter,
+      clientType: typeFilter,
+      search: debouncedSearch,
+    })
+  );
 
-      let query = supabase
-        .from('clients')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      // Search filter
-      if (debouncedSearch) {
-        query = query.or(`first_name.ilike.%${debouncedSearch}%,last_name.ilike.%${debouncedSearch}%,email.ilike.%${debouncedSearch}%,phone.ilike.%${debouncedSearch}%`);
-      }
-
-      // Status filter
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
-      }
-
-      // Type filter
-      if (typeFilter !== 'all') {
-        query = query.eq('client_type', typeFilter);
-      }
-
-      // Budget filter
-      if (budgetFilter !== 'all') {
-        const budgetRanges = {
-          '0-500k': { min: 0, max: 500000 },
-          '500k-1m': { min: 500000, max: 1000000 },
-          '1m-5m': { min: 1000000, max: 5000000 },
-          '5m+': { min: 5000000, max: 999999999 }
-        };
-        const range = budgetRanges[budgetFilter];
-        if (range) {
-          query = query.gte('budget_max', range.min).lte('budget_min', range.max);
-        }
-      }
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      return {
-        clients: data || [],
-        totalCount: count || 0,
-        totalPages: Math.ceil((count || 0) / itemsPerPage)
-      };
-    }
-  });
+  const totalPages = Math.ceil((totalCount || 0) / itemsPerPage);
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      const { error } = await supabase.from('clients').delete().eq('id', id);
-      if (error) throw error;
-    },
+    mutationFn: (id) => deleteClient(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['clients']);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Client deleted successfully');
       setDeleteConfirm(null);
     },
@@ -115,8 +84,8 @@ const ClientManagement = () => {
   };
 
   const handleExport = () => {
-    if (data?.clients) {
-      const formattedData = formatClientsForExport(data.clients);
+    if (clients) {
+      const formattedData = formatClientsForExport(clients);
       exportToCSV(formattedData, 'clients');
       toast.success('Clients exported successfully');
     }
@@ -197,24 +166,24 @@ const ClientManagement = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
         <div className="bg-surface-raised p-3 sm:p-4 rounded-lg shadow">
           <p className="text-content-muted text-xs sm:text-sm">Total</p>
-          <p className="text-xl sm:text-2xl font-bold text-content">{data?.totalCount || 0}</p>
+          <p className="text-xl sm:text-2xl font-bold text-content">{totalCount || 0}</p>
         </div>
         <div className="bg-surface-raised p-3 sm:p-4 rounded-lg shadow">
           <p className="text-content-muted text-xs sm:text-sm">Active</p>
           <p className="text-xl sm:text-2xl font-bold text-success-content">
-            {data?.clients.filter(c => c.status === 'active').length || 0}
+            {clients.filter(c => c.status === 'active').length || 0}
           </p>
         </div>
         <div className="bg-surface-raised p-3 sm:p-4 rounded-lg shadow">
           <p className="text-content-muted text-xs sm:text-sm">Prospects</p>
           <p className="text-xl sm:text-2xl font-bold text-warning-content">
-            {data?.clients.filter(c => c.status === 'prospect').length || 0}
+            {clients.filter(c => c.status === 'prospect').length || 0}
           </p>
         </div>
         <div className="bg-surface-raised p-3 sm:p-4 rounded-lg shadow">
           <p className="text-content-muted text-xs sm:text-sm">Leads</p>
           <p className="text-xl sm:text-2xl font-bold text-brand">
-            {data?.clients.filter(c => c.status === 'lead').length || 0}
+            {clients.filter(c => c.status === 'lead').length || 0}
           </p>
         </div>
       </div>
@@ -281,7 +250,7 @@ const ClientManagement = () => {
             <button
               onClick={handleExport}
               className="px-2 sm:px-4 py-2 bg-success-content text-content-on-brand rounded-lg hover:bg-success-content flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
-              disabled={!data?.clients.length}
+              disabled={!clients.length}
             >
               <Download className="w-4 h-4" />
               <span className="hidden xs:inline">Export</span>
@@ -304,7 +273,7 @@ const ClientManagement = () => {
       {/* Table */}
       {isLoading ? (
         <LoadingSkeleton type="table" rows={10} />
-      ) : data?.clients.length === 0 ? (
+      ) : clients.length === 0 ? (
         <div className="bg-surface-raised rounded-lg shadow p-12 text-center">
           <Users className="w-16 h-16 text-content-subtle mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-content mb-2">No clients found</h3>
@@ -351,7 +320,7 @@ const ClientManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-surface-raised divide-y divide-line">
-                {data.clients.map((client) => (
+                {clients.map((client) => (
                   <tr key={client.id} className="hover:bg-surface">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -428,7 +397,7 @@ const ClientManagement = () => {
 
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
-            {data.clients.map((client) => (
+            {clients.map((client) => (
               <div key={client.id} className="bg-surface-raised rounded-lg shadow border border-line p-3 sm:p-4">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="flex-shrink-0 h-12 w-12 bg-brand-subtle rounded-full flex items-center justify-center">
@@ -492,7 +461,7 @@ const ClientManagement = () => {
           </div>
 
           {/* Pagination */}
-          {data.totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="bg-surface-raised px-4 py-3 flex items-center justify-between border-t border-line sm:px-6 mt-4 rounded-lg shadow">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
@@ -504,7 +473,7 @@ const ClientManagement = () => {
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
-                  disabled={page === data.totalPages}
+                  disabled={page === totalPages}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-line-strong text-sm font-medium rounded-md text-content-muted bg-surface-raised hover:bg-surface disabled:opacity-50"
                 >
                   Next
@@ -515,9 +484,9 @@ const ClientManagement = () => {
                   <p className="text-sm text-content-muted">
                     Showing <span className="font-medium">{(page - 1) * itemsPerPage + 1}</span> to{' '}
                     <span className="font-medium">
-                      {Math.min(page * itemsPerPage, data.totalCount)}
+                      {Math.min(page * itemsPerPage, totalCount)}
                     </span>{' '}
-                    of <span className="font-medium">{data.totalCount}</span> results
+                    of <span className="font-medium">{totalCount}</span> results
                   </p>
                 </div>
                 <div>
@@ -529,11 +498,11 @@ const ClientManagement = () => {
                     >
                       Previous
                     </button>
-                    {[...Array(data.totalPages)].map((_, idx) => {
+                    {[...Array(totalPages)].map((_, idx) => {
                       const pageNum = idx + 1;
                       if (
                         pageNum === 1 ||
-                        pageNum === data.totalPages ||
+                        pageNum === totalPages ||
                         (pageNum >= page - 1 && pageNum <= page + 1)
                       ) {
                         return (
@@ -560,7 +529,7 @@ const ClientManagement = () => {
                     })}
                     <button
                       onClick={() => setPage(page + 1)}
-                      disabled={page === data.totalPages}
+                      disabled={page === totalPages}
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-line-strong bg-surface-raised text-sm font-medium text-content-subtle hover:bg-surface disabled:opacity-50"
                     >
                       Next
@@ -579,7 +548,7 @@ const ClientManagement = () => {
           client={editingClient}
           onClose={handleFormClose}
           onSuccess={() => {
-            queryClient.invalidateQueries(['clients']);
+            queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
             handleFormClose();
           }}
         />

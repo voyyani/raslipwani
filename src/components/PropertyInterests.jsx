@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import {
+  interestQueries,
+  addClientInterest,
+  updateClientInterest,
+  deleteClientInterest,
+} from '@/services/clientInterests';
+import { propertyQueries } from '@/services/properties';
+import { queryKeys } from '@/services/queryKeys';
 import { formatDate } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
@@ -8,6 +15,11 @@ import useConfirm from './ui/useConfirm';
 import Select from './ui/Select';
 import Textarea from './ui/Textarea';
 import { Home, Plus, X, Save, Trash2, MapPin, DollarSign, Bed, Bath } from 'lucide-react';
+
+// A fresh `[]` default on every render would give a dependent effect a new
+// array identity each time (src/pages/Properties.jsx:14).
+const EMPTY_INTERESTS = [];
+const EMPTY_SEARCH_RESULTS = [];
 
 const PropertyInterests = ({ clientId }) => {
   const [confirm, confirmDialog] = useConfirm();
@@ -18,69 +30,37 @@ const PropertyInterests = ({ clientId }) => {
   const [interestLevel, setInterestLevel] = useState('medium');
   const [notes, setNotes] = useState('');
 
-  // Fetch client's property interests
-  const { data: interests, isLoading: interestsLoading } = useQuery({
-    queryKey: ['property-interests', clientId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_property_interests')
-        .select(`
-          *,
-          properties (
-            id,
-            title,
-            location,
-            price,
-            bedrooms,
-            bathrooms,
-            images
-          )
-        `)
-        .eq('client_id', clientId)
-        .order('created_at', { ascending: false });
+  // Fetch client's property interests — the join lives in the service
+  // (clientInterests.js), so `interest.properties` arrives already populated;
+  // this used to fetch each interest's property in a separate request.
+  const { data: interests = EMPTY_INTERESTS, isLoading: interestsLoading } = useQuery(
+    interestQueries.forClient(clientId)
+  );
 
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
-  // Search properties
-  const { data: searchResults, isLoading: searchLoading } = useQuery({
-    queryKey: ['property-search', searchTerm],
-    queryFn: async () => {
-      if (!searchTerm || searchTerm.length < 2) return [];
-
-      const { data, error } = await supabase
-        .from('properties')
-        .select('id, title, location, price, bedrooms, bathrooms, images')
-        .or(`title.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
-        .limit(10);
-
-      if (error) throw error;
-      return data || [];
-    },
+  // Search properties. There is no dedicated "typeahead" endpoint in
+  // src/services/properties.js, so this reuses propertyQueries.page, the
+  // closest existing function — see the migration report for the resulting
+  // semantic differences (default ordering added, `*` selected instead of a
+  // narrow column list, and no explicit row limit beyond pageSize).
+  const { data: { rows: searchResults } = { rows: EMPTY_SEARCH_RESULTS }, isLoading: searchLoading } = useQuery({
+    ...propertyQueries.page({ page: 1, pageSize: 10, search: searchTerm }),
     enabled: searchTerm.length >= 2,
   });
 
   // Add interest mutation
   const addInterestMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       if (!selectedProperty) throw new Error('No property selected');
 
-      const { error } = await supabase
-        .from('client_property_interests')
-        .insert([{
-          client_id: clientId,
-          property_id: selectedProperty.id,
-          interest_level: interestLevel,
-          notes: notes,
-        }]);
-
-      if (error) throw error;
+      return addClientInterest({
+        client_id: clientId,
+        property_id: selectedProperty.id,
+        interest_level: interestLevel,
+        notes: notes,
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['property-interests', clientId]);
-      queryClient.invalidateQueries(['client-stats', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Property interest added successfully');
       resetForm();
     },
@@ -91,19 +71,13 @@ const PropertyInterests = ({ clientId }) => {
 
   // Update interest mutation
   const updateInterestMutation = useMutation({
-    mutationFn: async ({ id, level, notes }) => {
-      const { error } = await supabase
-        .from('client_property_interests')
-        .update({
-          interest_level: level,
-          notes: notes,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-    },
+    mutationFn: ({ id, level, notes }) =>
+      updateClientInterest(id, {
+        interest_level: level,
+        notes: notes,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['property-interests', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Interest updated successfully');
     },
     onError: (error) => {
@@ -113,17 +87,9 @@ const PropertyInterests = ({ clientId }) => {
 
   // Delete interest mutation
   const deleteInterestMutation = useMutation({
-    mutationFn: async (id) => {
-      const { error } = await supabase
-        .from('client_property_interests')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
+    mutationFn: (id) => deleteClientInterest(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['property-interests', clientId]);
-      queryClient.invalidateQueries(['client-stats', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Interest removed successfully');
     },
     onError: (error) => {

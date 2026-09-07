@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { createClient, updateClient } from '@/services/clients';
 import toast from 'react-hot-toast';
 
 import Icon from '../../components/Icon';
@@ -74,7 +74,7 @@ const ClientForm = ({ client, onClose, onSuccess }) => {
 
   // Create/Update mutation
   const saveMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: (data) => {
       // Transform data
       const transformedData = {
         ...data,
@@ -83,18 +83,9 @@ const ClientForm = ({ client, onClose, onSuccess }) => {
         tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       };
 
-      if (isEditing) {
-        const { error } = await supabase
-          .from('clients')
-          .update(transformedData)
-          .eq('id', client.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('clients')
-          .insert([transformedData]);
-        if (error) throw error;
-      }
+      return isEditing
+        ? updateClient(client.id, transformedData)
+        : createClient(transformedData);
     },
     onSuccess: () => {
       toast.success(isEditing ? 'Client updated successfully' : 'Client created successfully');

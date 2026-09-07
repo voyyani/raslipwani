@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import { clientQueries } from '@/services/clients';
+import { queryKeys } from '@/services/queryKeys';
 import { formatDate } from '../../utils/dateUtils';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
 import { 
@@ -22,46 +23,10 @@ const ClientDetail = () => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 
   // Fetch client data
-  const { data: client, isLoading, error } = useQuery({
-    queryKey: ['client', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: client, isLoading, error } = useQuery(clientQueries.detail(id));
 
   // Fetch client stats
-  const { data: stats } = useQuery({
-    queryKey: ['client-stats', id],
-    queryFn: async () => {
-      const [interests, communications, bookings] = await Promise.all([
-        supabase
-          .from('client_property_interests')
-          .select('id', { count: 'exact' })
-          .eq('client_id', id),
-        supabase
-          .from('client_communications')
-          .select('id', { count: 'exact' })
-          .eq('client_id', id),
-        supabase
-          .from('bookings')
-          .select('id', { count: 'exact' })
-          .eq('client_id', id),
-      ]);
-
-      return {
-        interests: interests.count || 0,
-        communications: communications.count || 0,
-        bookings: bookings.count || 0,
-      };
-    },
-  });
+  const { data: stats } = useQuery(clientQueries.stats(id));
 
   if (error) {
     return (
@@ -368,8 +333,7 @@ const ClientDetail = () => {
           client={client}
           onClose={() => setIsEditFormOpen(false)}
           onSuccess={() => {
-            queryClient.invalidateQueries(['client', id]);
-            queryClient.invalidateQueries(['clients']);
+            queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
             setIsEditFormOpen(false);
           }}
         />

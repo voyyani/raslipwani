@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/utils/supabaseClient';
+import {
+  communicationQueries,
+  addClientCommunication,
+  updateClientCommunication,
+  deleteClientCommunication,
+} from '@/services/clientCommunications';
+import { queryKeys } from '@/services/queryKeys';
 import { formatDateTime } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
@@ -12,6 +18,11 @@ import {
   Phone, Mail, Video, MessageSquare, Calendar, 
   Plus, Edit2, Trash2, Eye, X, Save 
 } from 'lucide-react';
+
+// A fresh `[]` default on every render would give a dependent effect a new
+// array identity each time. There is no such effect here today, but this is
+// the pattern used across the migrated surfaces (src/pages/Properties.jsx:14).
+const EMPTY_COMMUNICATIONS = [];
 
 const CommunicationTimeline = ({ clientId }) => {
   const [confirm, confirmDialog] = useConfirm();
@@ -27,38 +38,23 @@ const CommunicationTimeline = ({ clientId }) => {
   });
 
   // Fetch communications
-  const { data: communications, isLoading } = useQuery({
-    queryKey: ['communications', clientId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_communications')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('communication_date', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const { data: communications = EMPTY_COMMUNICATIONS, isLoading } = useQuery(
+    communicationQueries.forClient(clientId)
+  );
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: async (data) => {
-      const { error } = await supabase
-        .from('client_communications')
-        .insert([{
-          client_id: clientId,
-          type: data.type,
-          subject: data.subject,
-          notes: data.notes,
-          communication_date: data.date,
-          duration_minutes: data.duration_minutes ? parseInt(data.duration_minutes) : null,
-        }]);
-      if (error) throw error;
-    },
+    mutationFn: (data) =>
+      addClientCommunication({
+        client_id: clientId,
+        type: data.type,
+        subject: data.subject,
+        notes: data.notes,
+        communication_date: data.date,
+        duration_minutes: data.duration_minutes ? parseInt(data.duration_minutes) : null,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['communications', clientId]);
-      queryClient.invalidateQueries(['client-stats', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Communication added successfully');
       resetForm();
     },
@@ -69,21 +65,16 @@ const CommunicationTimeline = ({ clientId }) => {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
-      const { error } = await supabase
-        .from('client_communications')
-        .update({
-          type: data.type,
-          subject: data.subject,
-          notes: data.notes,
-          communication_date: data.date,
-          duration_minutes: data.duration_minutes ? parseInt(data.duration_minutes) : null,
-        })
-        .eq('id', id);
-      if (error) throw error;
-    },
+    mutationFn: ({ id, data }) =>
+      updateClientCommunication(id, {
+        type: data.type,
+        subject: data.subject,
+        notes: data.notes,
+        communication_date: data.date,
+        duration_minutes: data.duration_minutes ? parseInt(data.duration_minutes) : null,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['communications', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Communication updated successfully');
       setEditingComm(null);
       resetForm();
@@ -95,16 +86,9 @@ const CommunicationTimeline = ({ clientId }) => {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      const { error } = await supabase
-        .from('client_communications')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-    },
+    mutationFn: (id) => deleteClientCommunication(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['communications', clientId]);
-      queryClient.invalidateQueries(['client-stats', clientId]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.clients.all });
       toast.success('Communication deleted successfully');
     },
     onError: (error) => {
