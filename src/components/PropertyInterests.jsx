@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import PropertyInterestForm from './interests/PropertyInterestForm';
+import PropertyInterestList from './interests/PropertyInterestList';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   interestQueries,
@@ -8,7 +10,6 @@ import {
 } from '@/services/clientInterests';
 import { propertyQueries } from '@/services/properties';
 import { queryKeys } from '@/services/queryKeys';
-import { formatDate } from '../utils/dateUtils';
 import toast from 'react-hot-toast';
 
 import useConfirm from './ui/useConfirm';
@@ -163,206 +164,33 @@ const PropertyInterests = ({ clientId }) => {
         </button>
       </div>
 
-      {/* Add Form */}
       {isAddingNew && (
-        <form onSubmit={handleSubmit} className="bg-surface rounded-lg p-4 mb-6">
-          <div className="space-y-4">
-            {/* Property Search */}
-            <Input
-              label="Search Property"
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by title or location..."
-              />
-              {/* Search Results */}
-              {searchLoading && searchTerm.length >= 2 && (
-              <div className="mt-2 text-sm text-content-subtle">Searching...</div>
-              )}
-              {searchResults && searchResults.length > 0 && !selectedProperty && (
-              <div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg">
-              {searchResults.map((property) => (
-              <button
-              key={property.id}
-              type="button"
-              onClick={() => {
-              setSelectedProperty(property);
-              setSearchTerm('');
-              }}
-              className="w-full text-left p-3 hover:bg-surface-sunken border-b last:border-b-0"
-              >
-              <div className="font-medium text-content">{property.title}</div>
-              <div className="text-sm text-content-muted">{property.location}</div>
-              <div className="text-sm text-brand">{formatCurrency(property.price)}</div>
-              </button>
-              ))}
-              </div>
-              )}
-              </div>
-              {/* Selected Property */}
-              {selectedProperty && (
-              <div className="bg-surface-raised border border-brand-subtle rounded-lg p-3">
-              <div className="flex justify-between items-start">
-              <div>
-              <h4 className="font-medium text-content">{selectedProperty.title}</h4>
-              <p className="text-sm text-content-muted">{selectedProperty.location}</p>
-              <p className="text-sm text-brand">{formatCurrency(selectedProperty.price)}</p>
-              </div>
-              <button
-              type="button"
-              onClick={() => setSelectedProperty(null)}
-              className="text-content-subtle hover:text-content-muted"
-              >
-              <X className="w-5 h-5" />
-              </button>
-              </div>
-              </div>
-              )}
-              {/* Interest Level */}
-              <Select
-                label="Interest Level"
-                required
-                value={interestLevel}
-                onChange={(e) => setInterestLevel(e.target.value)}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </Select>
-              {/* Notes */}
-              <Textarea
-                label="Notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                placeholder="Any specific requirements or notes..."
-              />
-
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-4 py-2 border border-line-strong rounded-lg text-content-muted hover:bg-surface"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!selectedProperty || addInterestMutation.isPending}
-              className="px-4 py-2 bg-brand text-content-on-brand rounded-lg hover:bg-brand-hover disabled:opacity-50 flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              Add Interest
-            </button>
-          </div>
-        </form>
+        <PropertyInterestForm
+          searchTerm={searchTerm}
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+          selectedProperty={selectedProperty}
+          interestLevel={interestLevel}
+          notes={notes}
+          isSubmitting={addInterestMutation.isPending}
+          formatCurrency={formatCurrency}
+          onSearchTermChange={setSearchTerm}
+          onSelectProperty={setSelectedProperty}
+          onInterestLevelChange={setInterestLevel}
+          onNotesChange={setNotes}
+          onSubmit={handleSubmit}
+          onCancel={resetForm}
+        />
       )}
 
-      {/* Interests List */}
-      {interests.length === 0 ? (
-        <div className="text-center py-12 bg-surface rounded-lg">
-          <Home className="w-12 h-12 text-content-subtle mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-content mb-2">No property interests yet</h3>
-          <p className="text-content-muted">Track which properties this client is interested in</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {interests.map((interest) => (
-            <div key={interest.id} className="bg-surface-raised border border-line rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              {/* Property Image */}
-              {interest.properties?.images?.[0] && (
-                <div className="h-48 bg-surface-sunken">
-                  <img
-                    src={interest.properties.images[0]}
-                    alt={interest.properties.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-content">{interest.properties?.title}</h4>
-                  {getInterestBadge(interest.interest_level)}
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-content-muted">
-                    <MapPin className="w-4 h-4" />
-                    {interest.properties?.location}
-                  </div>
-
-                  <div className="flex items-center gap-2 text-brand font-semibold">
-                    <DollarSign className="w-4 h-4" />
-                    {formatCurrency(interest.properties?.price)}
-                  </div>
-
-                  {(interest.properties?.bedrooms || interest.properties?.bathrooms) && (
-                    <div className="flex items-center gap-4 text-content-muted">
-                      {interest.properties.bedrooms && (
-                        <div className="flex items-center gap-1">
-                          <Bed className="w-4 h-4" />
-                          {interest.properties.bedrooms} beds
-                        </div>
-                      )}
-                      {interest.properties.bathrooms && (
-                        <div className="flex items-center gap-1">
-                          <Bath className="w-4 h-4" />
-                          {interest.properties.bathrooms} baths
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {interest.notes && (
-                    <p className="text-content-muted mt-2">{interest.notes}</p>
-                  )}
-
-                  <p className="text-xs text-content-subtle mt-2">
-                    Added {formatDate(interest.created_at)}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 mt-4 pt-4 border-t">
-                  <select
-                    value={interest.interest_level}
-                    onChange={(e) => {
-                      updateInterestMutation.mutate({
-                        id: interest.id,
-                        level: e.target.value,
-                        notes: interest.notes,
-                      });
-                    }}
-                    className="flex-1 px-3 py-1 text-sm border border-line-strong rounded focus:ring-2 focus:ring-focus-ring"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-
-                  <button
-                    onClick={async () => {
-                      const ok = await confirm({
-                        title: 'Remove property interest',
-                        message: `${
-                          interest.properties?.title || 'This property'
-                        } will be removed from this client's interests.`,
-                        confirmLabel: 'Remove interest',
-                      });
-                      if (ok) deleteInterestMutation.mutate(interest.id);
-                    }}
-                    className="px-3 py-1 text-danger-content hover:bg-danger-surface rounded"
-                    aria-label="Remove property interest"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <PropertyInterestList
+        interests={interests}
+        formatCurrency={formatCurrency}
+        getInterestBadge={getInterestBadge}
+        confirm={confirm}
+        onUpdateInterest={updateInterestMutation.mutate}
+        onDeleteInterest={deleteInterestMutation.mutate}
+      />
 
       {confirmDialog}
     </div>

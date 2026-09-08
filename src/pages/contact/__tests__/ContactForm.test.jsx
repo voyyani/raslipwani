@@ -11,7 +11,7 @@ beforeEach(() => vi.clearAllMocks());
 describe('ContactForm', () => {
   it('submits the enquiry and tells its parent', async () => {
     const onSubmitted = vi.fn();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<ContactForm inquiryType="general" onSubmitted={onSubmitted} />);
 
     await user.type(screen.getByLabelText(/full name/i), 'Ada');
@@ -31,7 +31,7 @@ describe('ContactForm', () => {
   });
 
   it('does not submit an enquiry with no email', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<ContactForm inquiryType="general" onSubmitted={vi.fn()} />);
     await user.type(screen.getByLabelText(/full name/i), 'Ada');
     await user.click(screen.getByRole('button', { name: /send message/i }));

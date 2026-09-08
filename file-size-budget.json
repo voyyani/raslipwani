@@ -1,4 +1,4 @@
 {
-  "max": 482,
-  "note": "Lines in the longest non-test file under src/. ROADMAP.md Block 3.2 drives this to 300. Measured directly with `node scripts/file-size-ratchet.mjs --update` at Block 3 Task 21 (src/pages/admin/AdminProperties.jsx). This ceiling only falls; lower it with `npm run size:ratchet -- --update` at the end of every decomposition task."
+  "max": 295,
+  "note": "Lines in the longest non-test file under src/. ROADMAP.md Block 3.2 asked for 300; Block 3 Task 27 finished the sweep and the measured longest file is now 295, so the ceiling sits there rather than at the round number. This ceiling only falls; lower it with `npm run size:ratchet -- --update` at the end of every decomposition task."
 }

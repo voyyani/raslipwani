@@ -7,6 +7,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    // 5s is not enough for this suite. The slowest tests drive real forms
+    // through userEvent — a booking wizard, two enquiry forms — and each
+    // keystroke re-renders a controlled component under jsdom. They pass
+    // comfortably alone and time out only when the whole suite is competing
+    // for cores, which is exactly the shape of a CI runner. Raised rather than
+    // sprinkled per-test, so a genuinely hung test still fails rather than
+    // hanging the run.
+    testTimeout: 15000,
     setupFiles: './src/test/setup.jsx',
     // supabaseClient.js throws at import time when these are absent. The global
     // mock only intercepts the `@/utils/supabaseClient` specifier, so any file

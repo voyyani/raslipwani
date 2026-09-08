@@ -22,9 +22,9 @@ const repoRoot = path.resolve(__dirname, '../../../..');
 const FILES = [
   'src/pages/admin/AdminLayout.jsx',
   'src/pages/admin/AdminBottomNav.jsx',
-  'src/pages/admin/AdminHeader.jsx',
+  'src/pages/admin/header/adminNavItems.js',
   'src/pages/admin/Settings.jsx',
-  'src/components/Header.jsx',
+  'src/components/header/navItems.js',
   'src/components/BookingStatusBadge.jsx',
   'src/components/admin/MobilePropertyCard.jsx',
 ];

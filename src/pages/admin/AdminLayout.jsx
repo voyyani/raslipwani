@@ -17,6 +17,7 @@ import ThemeToggle from '../../components/ui/ThemeToggle';
 // and body, and Tailwind's preflight already sets `box-sizing: border-box`.
 import '../../styles/admin-mobile.css';
 import Icon from '../../components/Icon';
+import AdminSidebar from './layout/AdminSidebar';
 
 /**
  * AdminLayout - World-class admin layout with mobile-first navigation
@@ -121,47 +122,6 @@ const AdminLayout = ({ children }) => {
   ];
 
   // Sidebar link component
-  const SidebarLink = ({ item }) => {
-    const active = isActive(item.path);
-    
-    return (
-      <Link
-        to={`/admin${item.path}`}
-        onClick={closeSidebar}
-        className={`flex items-center p-3 rounded-lg transition-all duration-200 group relative ${
-          active
-            ? 'bg-brand text-content-on-brand shadow-lg'
-            : 'text-content-on-media/80 hover:bg-surface-chrome-raised/50 hover:text-content-on-media'
-        }`}
-        title={isSidebarCollapsed ? item.label : undefined}
-      >
-        <div className="relative flex-shrink-0">
-          <Icon name={item.icon} size={20} className={active ? 'text-content-on-media' : 'text-content-on-media/70'} />
-          {/* Badge */}
-          {item.badge && (
-            <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center bg-danger-content text-content-on-brand text-[10px] font-bold rounded-full px-1">
-              {item.badge > 99 ? '99+' : item.badge}
-            </span>
-          )}
-        </div>
-        
-        {!isSidebarCollapsed && (
-          <span className="ml-3 font-medium whitespace-nowrap">{item.label}</span>
-        )}
-        
-        {/* Active indicator */}
-        {active && (
-          <motion.div
-            layoutId="sidebarActiveIndicator"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-surface-raised rounded-r-full"
-            initial={false}
-            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-          />
-        )}
-      </Link>
-    );
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-surface overflow-x-hidden">
       {/* Top Header */}
@@ -183,109 +143,17 @@ const AdminLayout = ({ children }) => {
           )}
         </AnimatePresence>
 
-        {/* Sidebar - Hidden on mobile unless open */}
-        <aside 
-          className={`
-            bg-gradient-to-b from-surface-chrome via-surface-chrome to-surface-chrome-raised 
-            text-content-on-media flex flex-col shrink-0
-            fixed top-0 left-0 h-full z-40
-            transition-transform duration-300 ease-in-out
-            w-[280px] max-w-[85vw]
-            lg:relative lg:translate-x-0
-            ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          `}
-        >
-          {/* Sidebar Header */}
-          <div className={`p-4 border-b border-line-media/20 shrink-0 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
-            <div className="flex items-center justify-between gap-2">
-              {!isSidebarCollapsed && (
-                <div>
-                  <h2 className="text-lg font-bold text-content-on-media">Admin Panel</h2>
-                  <p className="text-xs text-content-on-media/70 mt-0.5">Raslipwani Properties</p>
-                </div>
-              )}
-              
-              {/* Close button for mobile */}
-              <button
-                onClick={closeSidebar}
-                className="lg:hidden p-2 rounded-lg hover:bg-surface-chrome-raised transition-colors"
-                aria-label="Close sidebar"
-              >
-                <Icon name="times" size={20} className="text-content-subtle" />
-              </button>
-              
-              {/* Collapse button for desktop */}
-              <button
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="hidden lg:flex p-2 rounded-lg hover:bg-surface-chrome-raised transition-colors"
-                aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                title={isSidebarCollapsed ? "Expand (Ctrl+[)" : "Collapse (Ctrl+[)"}
-              >
-                {isSidebarCollapsed ? (
-                  <Icon name="chevron-right" size={16} className="text-content-subtle" />
-                ) : (
-                  <Icon name="chevron-left" size={16} className="text-content-subtle" />
-                )}
-              </button>
-            </div>
-          </div>
-          
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin scrollbar-thumb-surface-chrome-raised scrollbar-track-transparent">
-            {navSections.map((section) => (
-              <div key={section.title}>
-                {/* Section header */}
-                {!isSidebarCollapsed && (
-                  <h3 className="text-xs font-semibold text-content-subtle uppercase tracking-wider mb-2 px-3">
-                    {section.title}
-                  </h3>
-                )}
-                
-                {/* Section items */}
-                <div className="space-y-1">
-                  {section.items.map((item) => (
-                    <SidebarLink key={item.path} item={item} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
-          
-          {/* User section */}
-          <div className={`mt-auto p-4 border-t border-line-media/20 ${isSidebarCollapsed ? 'lg:px-2' : ''}`}>
-            <div className={`flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'gap-3'} mb-3`}>
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-brand bg-primary text-sm font-bold uppercase text-content-on-brand"
-                aria-hidden="true"
-              >
-                {(user?.email?.[0] ?? '?')}
-              </div>
-              
-              {!isSidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-content-on-media text-sm truncate">
-                    {user?.email?.split('@')[0] ?? 'Admin'}
-                  </p>
-                  <p className="text-xs text-content-on-media/70 truncate">
-                    {user?.email ?? ''}
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className={`flex items-center w-full p-3 text-content-on-media/80 hover:bg-surface-chrome-raised/50 hover:text-content-on-media rounded-lg transition-colors ${
-                isSidebarCollapsed ? 'lg:justify-center' : ''
-              }`}
-              title={isSidebarCollapsed ? "Sign Out" : undefined}
-            >
-              <Icon name="sign-out-alt" size={20} className="flex-shrink-0" />
-              {!isSidebarCollapsed && <span className="ml-3">Sign Out</span>}
-            </button>
-          </div>
-        </aside>
+        <AdminSidebar
+          navSections={navSections}
+          isOpen={isSidebarOpen}
+          isCollapsed={isSidebarCollapsed}
+          isActive={isActive}
+          user={user}
+          onClose={closeSidebar}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onLogout={handleLogout}
+        />
+
         
         {/* Main content area */}
         <main className="flex-1 min-h-screen bg-surface w-full overflow-x-hidden pb-20 lg:pb-0">

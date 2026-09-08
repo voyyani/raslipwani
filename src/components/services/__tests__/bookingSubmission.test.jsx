@@ -26,7 +26,7 @@ beforeEach(() => vi.clearAllMocks());
 
 describe('Contact', () => {
   it('submits an enquiry through createBooking with every required field', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<Contact />);
 
     await user.type(screen.getByLabelText(/full name/i), 'Ada Lovelace');
@@ -56,7 +56,7 @@ describe('Contact', () => {
 
 describe('ServicesMain', () => {
   it('does not fetch properties on mount, only once the viewing booking modal opens', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<ServicesMain />);
 
     // Regression pin: an earlier version of this migration dropped the
@@ -72,7 +72,7 @@ describe('ServicesMain', () => {
     // The wizard was split into a hook and five components (Task 24); this
     // pins the whole path a visitor actually takes, end to end, through the
     // step machinery and into the write.
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<ServicesMain />);
 
     await user.click(screen.getAllByRole('button', { name: /get consultation/i })[0]);
@@ -106,7 +106,7 @@ describe('ServicesMain', () => {
   });
 
   it('goes back to an earlier step without losing what was typed', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<ServicesMain />);
 
     await user.click(screen.getAllByRole('button', { name: /get consultation/i })[0]);

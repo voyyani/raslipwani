@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AuthButtons from './AuthButtons';
 import { useSettings } from '../hooks/useSettings';
+import DesktopNav from './header/DesktopNav';
+import MobileMenu from './header/MobileMenu';
 
 import Icon from './Icon';
-/**
- * A stable DOM id from a nav label, so `aria-controls` on the trigger and the
- * `id` on the menu it opens are derived from one source and cannot drift.
- */
-const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+/**
+ * The site header: the brand, the desktop navigation, the auth buttons and the
+ * mobile menu. The two navigations and the nav data are their own modules
+ * (Task 27); what stays here is the shell and the four pieces of state the
+ * halves share.
+ */
 const Header = () => {
   const { logo, siteName, tagline } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,46 +36,6 @@ const Header = () => {
     setOpenDropdown(null);
     setOpenMobileDropdown(null);
   }, [location]);
-
-  const navItems = [
-    { 
-      path: '/', 
-      label: 'Home', 
-      icon: 'home' 
-    },
-    { 
-      path: '/properties', 
-      label: 'Listings', 
-      icon: 'th' 
-    },
-    { 
-      path: '/services', 
-      label: 'Services', 
-      icon: 'tools' 
-    },
-    {
-      path: '/international',
-      label: 'International',
-      icon: 'globe',
-      dropdown: [
-        { path: '/international', label: 'Overview' },
-        { path: '/international/un-housing', label: 'UN & Diplomatic Housing' },
-      ],
-    },
-    {
-      path: '/about',
-      label: 'About',
-      icon: 'info-circle'
-    },
-    {
-      // Construction support was shelved here and shipped as its own brand.
-      // The route never existed, so this link 404'd on every page.
-      path: 'https://nairobuild.co.ke',
-      label: 'Construction',
-      icon: 'question-circle',
-      external: true,
-    },
-  ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => {
@@ -114,118 +77,13 @@ const Header = () => {
             </div>
           </Link>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {navItems.map((item) => {
-              
-              // Handle dropdown menus
-              if (item.dropdown) {
-                const isOpen = openDropdown === item.label;
-                const menuId = `nav-dropdown-${slug(item.label)}`;
 
-                return (
-                  <div 
-                    key={item.label} 
-                    className="relative"
-                    onMouseEnter={() => setOpenDropdown(item.label)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                    onKeyDown={(e) => {
-                      // Escape closes the menu and puts focus back on the
-                      // control that opened it, rather than stranding it on a
-                      // link that has just been unmounted.
-                      if (e.key === 'Escape' && isOpen) {
-                        setOpenDropdown(null);
-                        e.currentTarget.querySelector('button')?.focus();
-                      }
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setOpenDropdown(isOpen ? null : item.label)}
-                      aria-expanded={isOpen}
-                      aria-controls={menuId}
-                      aria-haspopup="true"
-                      className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
-                    >
-                      <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
-                        isScrolled ? 'scale-90' : 'scale-100'
-                      }`} />
-                      <span className="relative">{item.label}</span>
-                      <Icon name="chevron-down" size={16} className={`transition-transform duration-300 ${
-                        isOpen ? 'rotate-180' : ''
-                      }`} />
-                    </button>
-                    
-                    {/* Dropdown Menu */}
-                    {isOpen && (
-                      <div id={menuId} className="absolute top-full left-0 mt-2 w-56 bg-surface-raised rounded-xl shadow-xl border border-line py-2 z-50">
-                        {item.dropdown.map((subItem) => (
-                          <Link
-                            key={subItem.path}
-                            to={subItem.path}
-                            className="block px-4 py-3 text-content-muted hover:text-primary hover:bg-surface transition-colors"
-                            onClick={() => setOpenDropdown(null)}
-                          >
-                            {subItem.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-              
-              // Links that leave the site render as plain anchors — NavLink would
-              // treat the URL as an in-app route and never navigate.
-              if (item.external) {
-                return (
-                  <div key={item.label} className="relative">
-                    <a
-                      href={item.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group text-content-muted hover:text-primary hover:bg-surface/80"
-                    >
-                      <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
-                        isScrolled ? 'scale-90' : 'scale-100'
-                      }`} />
-                      <span className="relative">
-                        {item.label}
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                      </span>
-                      <Icon name="external-link-alt" className="w-3.5 h-3.5 text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
-                    </a>
-                  </div>
-                );
-              }
+          <DesktopNav
+            openDropdown={openDropdown}
+            isScrolled={isScrolled}
+            onDropdownChange={setOpenDropdown}
+          />
 
-              // Regular menu items
-              return (
-                <div key={item.label} className="relative">
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) => 
-                      `relative font-semibold transition-all duration-300 px-4 py-3 rounded-xl flex items-center gap-2 group
-                       ${isActive 
-                          ? 'text-primary bg-primary/10 shadow-sm' 
-                          : 'text-content-muted hover:text-primary hover:bg-surface/80'}`
-                    }
-                  >
-                    <Icon name={item.icon} size={16} className={`transition-transform duration-300 ${
-                      isScrolled ? 'scale-90' : 'scale-100'
-                    }`} />
-                    <span className="relative">
-                      {item.label}
-                      <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 ${
-                        location.pathname === item.path ? 'w-full' : 'group-hover:w-full'
-                      }`}></span>
-                    </span>
-                  </NavLink>
-                </div>
-              );
-            })}
-          </nav>
-          
           {/* Right Section - Auth & Mobile Menu */}
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
@@ -264,206 +122,12 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Enhanced Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-scrim/60 backdrop-blur-sm z-40 lg:hidden"
-              onClick={closeMenu}
-            />
-            
-            {/* Menu Panel */}
-            <motion.div
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-surface-raised shadow-2xl z-50 lg:hidden overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="p-6 border-b border-line bg-gradient-to-r from-primary to-brand text-content-on-media">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src="https://res.cloudinary.com/dzqdxosk2/image/upload/v1751885050/Raslipwani_Logo_qgwaen.jpg"
-                      alt="Raslipwani Properties"
-                      className="w-12 h-12 rounded-xl object-cover border-2 border-line-media"
-                    />
-                    <div>
-                      <h2 className="text-lg font-bold">Raslipwani</h2>
-                      <p className="text-content-on-media/80 text-xs">Properties</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={closeMenu}
-                    className="p-2 rounded-lg bg-surface-raised/20 hover:bg-surface-raised/30 transition-colors"
-                    aria-label="Close menu"
-                  >
-                    <Icon name="times" size={20} />
-                  </button>
-                </div>
-                
-                {/* Quick Contact */}
-                <div className="text-xs space-y-1">
-                  <p>📞 +254 758 066 526</p>
-                  <p>📧 info@raslipwani.co.ke</p>
-                </div>
-              </div>
-              
-              {/* Navigation */}
-              <nav id="mobile-nav" className="flex flex-col py-2">
-                {navItems.map((item) => {
-                  const isActive = location.pathname === item.path;
-                  
-                  // Handle dropdown menus
-                  if (item.dropdown) {
-                    const isDropdownOpen = openMobileDropdown === item.label;
-                    return (
-                      <div key={item.label} className="border-b border-line last:border-b-0">
-                        <button
-                          type="button"
-                          onClick={() => setOpenMobileDropdown(isDropdownOpen ? null : item.label)}
-                          aria-expanded={isDropdownOpen}
-                          aria-controls={`mobile-nav-dropdown-${slug(item.label)}`}
-                          className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-content-muted hover:text-primary hover:bg-surface w-full"
-                        >
-                          <div className="p-2 rounded-lg transition-colors bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary">
-                            <Icon name={item.icon} size={20} />
-                          </div>
-                          <span className="flex-1 text-left">{item.label}</span>
-                          {isDropdownOpen ? (
-                            <Icon name="chevron-up" size={20} />
-                          ) : (
-                            <Icon name="chevron-down" size={20} />
-                          )}
-                        </button>
-                        
-                        {/* Dropdown items */}
-                        {isDropdownOpen && (
-                          <div id={`mobile-nav-dropdown-${slug(item.label)}`} className="bg-surface py-2">
-                            {item.dropdown.map((subItem) => (
-                              <Link
-                                key={subItem.path}
-                                to={subItem.path}
-                                onClick={closeMenu}
-                                className="flex items-center gap-4 px-6 py-3 pl-16 text-content-muted hover:text-primary hover:bg-surface-raised transition-colors"
-                              >
-                                <span>{subItem.label}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                  
-                  if (item.external) {
-                    return (
-                      <div key={item.label} className="border-b border-line last:border-b-0">
-                        <a
-                          href={item.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={closeMenu}
-                          className="flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group text-content-muted hover:text-primary hover:bg-surface"
-                        >
-                          <div className="p-2 rounded-lg transition-colors bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary">
-                            <Icon name={item.icon} size={20} />
-                          </div>
-                          <span className="flex-1">{item.label}</span>
-                          <Icon name="external-link-alt" size={16} className="text-content-subtle group-hover:text-primary transition-colors" aria-hidden="true" />
-                        </a>
-                      </div>
-                    );
-                  }
-
-                  // Regular menu items
-                  return (
-                    <div key={item.label} className="border-b border-line last:border-b-0">
-                      <NavLink
-                        to={item.path}
-                        onClick={closeMenu}
-                        className={`flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group
-                         ${isActive 
-                            ? 'text-primary bg-primary/5 border-r-4 border-primary' 
-                            : 'text-content-muted hover:text-primary hover:bg-surface'}`}
-                      >
-                        <div className={`p-2 rounded-lg transition-colors ${
-                          isActive ? 'bg-primary/10 text-primary' : 'bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary'
-                        }`}>
-                          <Icon name={item.icon} size={20} />
-                        </div>
-                        <span className="flex-1">{item.label}</span>
-                        <div className={`w-2 h-2 rounded-full transition-colors ${
-                          isActive ? 'bg-primary' : 'bg-transparent group-hover:bg-primary/30'
-                        }`}></div>
-                      </NavLink>
-                    </div>
-                  );
-                })}
-              </nav>
-              
-              {/* Auth Section for Mobile */}
-              <div className="px-6 py-4 border-t border-line bg-primary/5">
-                <div className="flex items-center justify-center">
-                  <AuthButtons />
-                </div>
-              </div>
-              
-              {/* CTA Section */}
-              <div className="p-6 border-t border-line bg-surface">
-                <div className="space-y-3">
-                  <p className="text-sm text-content-muted text-center mb-4">
-                    Ready to find your dream property?
-                  </p>
-                  
-                  <Link
-                    to="/properties"
-                    onClick={closeMenu}
-                    className="block w-full bg-primary hover:bg-primary-dark text-content-on-brand text-center font-semibold py-3 px-4 rounded-xl transition-colors shadow-lg hover:shadow-xl"
-                  >
-                    Browse Listings
-                  </Link>
-                  
-                  <Link
-                    to="/contact"
-                    onClick={closeMenu}
-                    className="block w-full border-2 border-primary text-primary hover:bg-primary hover:text-content-on-brand text-center font-semibold py-3 px-4 rounded-xl transition-all duration-300"
-                  >
-                    Contact Us
-                  </Link>
-                </div>
-                
-                {/* Social Links */}
-                <div className="flex justify-center space-x-4 mt-6 pt-6 border-t border-line">
-                  {[
-                    { icon: 'whatsapp', href: 'https://wa.me/254758066526', color: 'hover:text-success-content' },
-                    { icon: 'instagram', href: 'https://www.instagram.com/raslipwani/', color: 'hover:text-pink-500' },
-                    { icon: 'facebook', href: 'https://www.facebook.com/raslipwani/', color: 'hover:text-brand' },
-                    { icon: 'tiktok', href: 'https://www.tiktok.com/@raslipwani0', color: 'hover:text-content' }
-                  ].map((social, index) => (
-                    <a
-                      key={index}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`text-content-subtle ${social.color} transition-colors duration-300 text-xl`}
-                      aria-label={social.icon.split('-')[1]}
-                    >
-                      <Icon name={social.icon} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <MobileMenu
+        isOpen={isMenuOpen}
+        openMobileDropdown={openMobileDropdown}
+        onDropdownChange={setOpenMobileDropdown}
+        onClose={closeMenu}
+      />
 
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
