@@ -119,6 +119,38 @@ jobs:
           path: dist
           retention-days: 7
 
+  lighthouse:
+    name: Lighthouse (mobile)
+    runs-on: ubuntu-latest
+    needs: verify
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Three runs per URL and the median, because one run on a shared runner is
+      # noisy enough to fail a gate on a good commit. The bundle budget catches
+      # weight; this catches everything weight does not — render-blocking
+      # requests, layout shift, and an image nobody sized.
+      #
+      # This job is the FIRST place these scores have ever been measured: the
+      # development sandbox has no Chrome (no libatk, and no way to install it),
+      # so lighthouserc.json's performance assertion is `warn` until a real
+      # number exists. Read the first run's output and promote it to `error`.
+      - name: Lighthouse
+        run: npm run lighthouse
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

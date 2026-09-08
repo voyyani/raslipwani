@@ -571,7 +571,7 @@ ledger at the top.
 | Files importing Supabase directly | 24 | **0** ✅ | 0 | ✅ 3 |
 | Files over 700 lines | 8 | **0** ✅ — longest source file is 295 (Block 3 Tasks 22–27) | 0 over 300 | ✅ 3 |
 | First-load JS (gzip) | 215 kB | **112.4 kB** (Block 3 Tasks 28–31) | < 100 kB | 3 |
-| Lighthouse Performance (mobile) | not measured | **not measured** | ≥ 90 | 3 |
+| Lighthouse Performance (mobile) | not measured | **still not measured** — gated in CI as of Block 3 Task 32; the dev sandbox has no Chrome | ≥ 90 | 3 |
 | Property pages in the sitemap | 0 | **0** | all | 5 |
 | `.ts`/`.tsx` files | 0 | **0** | incremental adoption | 6 |
 | axe violations (public + admin + chrome) | not measured | **0** ✅ enforced in CI, 30 assertions | 0 | ✅ 2 |

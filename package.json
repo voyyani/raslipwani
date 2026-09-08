@@ -20,7 +20,8 @@
     "tokens:check": "node scripts/generate-tokens.mjs --check",
     "palette:ratchet": "node scripts/palette-ratchet.mjs",
     "label:ratchet": "node scripts/label-ratchet.mjs",
-    "size:ratchet": "node scripts/file-size-ratchet.mjs"
+    "size:ratchet": "node scripts/file-size-ratchet.mjs",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.20",
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@lhci/cli": "^0.15.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
