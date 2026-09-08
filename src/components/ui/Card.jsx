@@ -13,12 +13,21 @@ import PropTypes from 'prop-types';
  */
 const Card = ({ as, onClick, children, padded = true, className = '', ...rest }) => {
   const classes = [
-    'bg-surface-raised border border-line rounded-xl shadow-sm',
+    'bg-surface-raised border border-line rounded-lg shadow-raised',
     padded ? 'p-6' : '',
+    // The lift is reserved for the clickable branch on purpose. A card that
+    // rises under the cursor and then does nothing when clicked is a promise
+    // the interface does not keep — and on a listings grid, where most cards
+    // are links and a few are not, that promise is being read constantly.
     onClick
-      ? 'text-left w-full transition-shadow hover:shadow-md focus:outline-none ' +
+      ? 'text-left w-full ' +
+        'transition-[transform,box-shadow] duration-base ease-spring ' +
+        'hover:-translate-y-1 hover:shadow-glass active:translate-y-0 active:scale-[0.99] ' +
+        'focus:outline-none ' +
         'focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 ' +
-        'focus-visible:ring-offset-surface'
+        'focus-visible:ring-offset-surface ' +
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0 ' +
+        'motion-reduce:active:scale-100'
       : '',
     className,
   ]

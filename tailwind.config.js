@@ -161,6 +161,9 @@ export default {
           // Over photography. Not interchangeable with the others — see
           // DESIGN.md, "Why glass-bg-media exists".
           media: 'var(--glass-bg-media)',
+          // The media ground with the alpha removed, for the panels that cannot
+          // composite: no backdrop-filter, or reduced transparency requested.
+          'media-solid': 'var(--glass-media-solid)',
         },
       },
 

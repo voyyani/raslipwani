@@ -37,6 +37,15 @@ export const MATERIAL_TOKENS = {
     // lights. See the dark theme's copy of this value and glassContrast.test.js.
     'glass-bg-media': 'rgb(10 46 70 / 0.78)',
 
+
+    // The same ground with the alpha taken out, for the two cases where the
+    // browser will not composite: no `backdrop-filter` support, and a visitor
+    // who has asked the OS to reduce transparency. Translucency without blur is
+    // washed-out text, and `content-on-media` is white in both themes — so the
+    // fallback has to stay dark in both themes too, which no `surface-*` token
+    // does. Identical in light and dark for the same reason `glass-bg-media` is.
+    'glass-media-solid': 'rgb(10 46 70)',
+
     'glass-border': 'rgb(255 255 255 / 0.60)',
     'glass-highlight': 'rgb(255 255 255 / 0.90)',
 
@@ -72,6 +81,15 @@ export const MATERIAL_TOKENS = {
     // could never have caught it, because it compares two opaque tokens against
     // a colour the browser stops painting the moment a panel goes translucent.
     'glass-bg-media': 'rgb(10 46 70 / 0.78)',
+
+
+    // The same ground with the alpha taken out, for the two cases where the
+    // browser will not composite: no `backdrop-filter` support, and a visitor
+    // who has asked the OS to reduce transparency. Translucency without blur is
+    // washed-out text, and `content-on-media` is white in both themes — so the
+    // fallback has to stay dark in both themes too, which no `surface-*` token
+    // does. Identical in light and dark for the same reason `glass-bg-media` is.
+    'glass-media-solid': 'rgb(10 46 70)',
 
     'glass-border': 'rgb(255 255 255 / 0.14)',
     'glass-highlight': 'rgb(255 255 255 / 0.22)',
