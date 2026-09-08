@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, NavLink } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon';
 import AuthButtons from '../AuthButtons';
 import { navItems } from './navItems';
@@ -11,28 +10,34 @@ const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 /**
  * The mobile menu: the backdrop, the sliding panel, the same navigation as the
  * desktop bar with its dropdowns expanded in place, and the contact and social
- * blocks at the foot of it. Moved out of `Header.jsx` (Task 27) unchanged.
+ * blocks at the foot of it. Moved out of `Header.jsx` (Task 27).
+ *
+ * The slide-in was framer-motion and is now a CSS transform transition
+ * (Task 30). The header is in every first load, so an animation library here
+ * cost every visitor ~50 kB for one panel. The panel stays mounted and is
+ * hidden with `hidden`, which keeps it out of the accessibility tree and out
+ * of the tab order while closed — `AnimatePresence` unmounted it instead, and
+ * `aria-controls` pointed at nothing for as long as the menu was shut.
  */
 const MobileMenu = ({ isOpen, openMobileDropdown, onDropdownChange, onClose }) => (
-<AnimatePresence>
-  {isOpen && (
-    <>
-      {/* Backdrop */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-scrim/60 backdrop-blur-sm z-40 lg:hidden"
+<>
+      {/* Backdrop. `aria-hidden` and not focusable: the panel's own controls
+          are the way out, and the click target is a convenience. */}
+      <div
+        aria-hidden="true"
+        hidden={!isOpen}
+        className={`fixed inset-0 bg-scrim/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
-      
+
       {/* Menu Panel */}
-      <motion.div
-        initial={{ x: '100%', opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: '100%', opacity: 0 }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-surface-raised shadow-2xl z-50 lg:hidden overflow-y-auto"
+      <div
+        hidden={!isOpen}
+        className={`fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-surface-raised shadow-2xl z-50 lg:hidden overflow-y-auto transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
         {/* Header */}
         <div className="p-6 border-b border-line bg-gradient-to-r from-primary to-brand text-content-on-media">
@@ -209,10 +214,8 @@ const MobileMenu = ({ isOpen, openMobileDropdown, onDropdownChange, onClose }) =
             ))}
           </div>
         </div>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
+      </div>
+</>
 
 );
 

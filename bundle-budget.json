@@ -1,4 +1,4 @@
 {
-  "firstLoadGzipKb": 156.0,
-  "note": "Measured 2026-09-08 after Block 3 Task 29 made the Supabase client a dynamic, memoised import: 210.4 kB -> 156.0 kB gzip. (Task 28, deleting the manualChunks grouping, took 220.7 -> 210.4 before it.) ROADMAP Block 3.3 drives this under 100 kB; Tasks 30-31 take framer-motion out of the eager chrome and trim the entry. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
+  "firstLoadGzipKb": 114.6,
+  "note": "Measured 2026-09-08 through Block 3 Phase 3: 220.7 kB -> 210.4 (Task 28, deleting the manualChunks grouping) -> 156.0 (Task 29, the Supabase client made a dynamic import) -> 114.6 (Task 30, framer-motion out of the header). ROADMAP Block 3.3 targets under 100 kB; Task 31 trims what is left of the entry. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
 }

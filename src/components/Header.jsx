@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import AuthButtons from './AuthButtons';
 import { useSettings } from '../hooks/useSettings';
 import DesktopNav from './header/DesktopNav';
@@ -91,33 +90,36 @@ const Header = () => {
             </div>
             
             {/* Mobile Menu Button */}
-            <motion.button 
+            {/* The three bars fold into a cross on open. This was framer-motion
+                and is now a transform transition: the header is in every first
+                load, so an animation library here costs every visitor ~50 kB
+                for four moving elements. */}
+            <button
+              type="button"
               onClick={toggleMenu}
-              className="lg:hidden relative p-3 rounded-xl border-2 border-primary bg-surface-raised hover:bg-surface transition-all duration-300 group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="lg:hidden relative p-3 rounded-xl border-2 border-primary bg-surface-raised hover:bg-surface transition-all duration-300 hover:scale-105 active:scale-95 group"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-nav"
             >
               <div className="relative w-6 h-6">
-                <motion.span
-                  className="absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"
-                  animate={isMenuOpen ? { rotate: 45, y: 0 } : { rotate: 0, y: -6 }}
-                  transition={{ duration: 0.3 }}
+                <span
+                  className={`absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 ${
+                    isMenuOpen ? 'rotate-45' : '-translate-y-[calc(50%+6px)]'
+                  }`}
                 />
-                <motion.span
-                  className="absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"
-                  animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                  transition={{ duration: 0.3 }}
+                <span
+                  className={`absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 ${
+                    isMenuOpen ? 'opacity-0' : 'opacity-100'
+                  }`}
                 />
-                <motion.span
-                  className="absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"
-                  animate={isMenuOpen ? { rotate: -45, y: 0 } : { rotate: 0, y: 6 }}
-                  transition={{ duration: 0.3 }}
+                <span
+                  className={`absolute top-1/2 left-1/2 w-4 h-0.5 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 ${
+                    isMenuOpen ? '-rotate-45' : 'translate-y-[calc(6px-50%)]'
+                  }`}
                 />
               </div>
-            </motion.button>
+            </button>
           </div>
         </div>
       </header>
@@ -131,12 +133,10 @@ const Header = () => {
 
       {/* Scroll Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-primary/20 z-50">
-        <motion.div
-          className="h-full bg-gradient-to-r from-primary to-brand"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: isScrolled ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ transformOrigin: 'left' }}
+        <div
+          className={`h-full origin-left bg-gradient-to-r from-primary to-brand transition-transform duration-300 ${
+            isScrolled ? 'scale-x-100' : 'scale-x-0'
+          }`}
         />
       </div>
     </>

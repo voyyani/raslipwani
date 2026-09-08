@@ -1,4 +1,5 @@
 import React from 'react';
+import { readFileSync, readdirSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -134,5 +135,25 @@ describe('the mobile menu toggle', () => {
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(document.getElementById('mobile-nav')).not.toBeNull();
+  });
+
+  it('imports no animation library, because it is in every first load', () => {
+    // Header is rendered by PublicLayout, which App.jsx imports statically. Any
+    // library it touches is downloaded before the first paint on every route,
+    // including the ones that never animate anything. The header's own parts
+    // count too: they are static imports of the same eager module.
+    const sources = [
+      'src/components/Header.jsx',
+      ...readdirSync('src/components/header')
+        .filter((f) => f.endsWith('.jsx'))
+        .map((f) => `src/components/header/${f}`),
+    ];
+
+    // Imports, not prose: these files explain in comments why they no longer
+    // reach for one.
+    const offenders = sources.filter((f) =>
+      /^\s*import\b[^\n]*['"]framer-motion['"]/m.test(readFileSync(f, 'utf8'))
+    );
+    expect(offenders).toEqual([]);
   });
 });
