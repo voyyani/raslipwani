@@ -13,10 +13,10 @@ import Icon from '../../../components/Icon';
  *
  * The three regions sit at different points in the page, not next to each
  * other, so this component is mounted twice — once where the mobile bar and
- * sheet used to live, once inside the desktop toolbar where the filter grid
- * used to live. Each mount renders only the region `isMobile` says applies;
- * the other mount naturally renders nothing, exactly as the original's
- * `isMobile`/`!isMobile` guards did.
+ * sheet used to live (the page renders that mount only when `isMobile`), once
+ * inside `BookingToolbar`, which is itself desktop-only, where the filter grid
+ * used to live. Each mount therefore renders exactly one region, as the
+ * original's `isMobile`/`!isMobile` guards did.
  *
  * Two different "clear" behaviours are also unchanged: the mobile sheet's
  * button only clears status/priority (via `onFilterChange`), while
