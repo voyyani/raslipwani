@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapList } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -24,8 +24,9 @@ const SELECTION = `
 `;
 
 export async function listClientInterests(clientId) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select(SELECTION)
       .eq('client_id', clientId)
@@ -35,21 +36,24 @@ export async function listClientInterests(clientId) {
 }
 
 export async function addClientInterest(values) {
-  return unwrap(await supabase.from(TABLE).insert([values]).select().single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).insert([values]).select().single(), {
     table: TABLE,
     operation: 'addClientInterest',
   });
 }
 
 export async function updateClientInterest(interestId, values) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).update(values).eq('id', interestId).select().single(),
+    await db.from(TABLE).update(values).eq('id', interestId).select().single(),
     { table: TABLE, operation: 'updateClientInterest' }
   );
 }
 
 export async function deleteClientInterest(interestId) {
-  unwrap(await supabase.from(TABLE).delete().eq('id', interestId), {
+  const db = await getSupabase();
+  unwrap(await db.from(TABLE).delete().eq('id', interestId), {
     table: TABLE,
     operation: 'deleteClientInterest',
   });

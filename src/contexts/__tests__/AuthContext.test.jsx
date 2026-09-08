@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import { supabase } from '@/utils/supabaseClient';
+import { __client as supabase } from '@/services/client';
 import { AuthProvider, useAuth } from '../AuthContext';
 
 function Probe() {
@@ -149,6 +149,10 @@ describe('AuthContext', () => {
     });
 
     renderProbe();
+    // The provider subscribes only once the Supabase client has been fetched
+    // (Task 29 made that dynamic), so wait for the callback to be registered
+    // before emitting through it.
+    await waitFor(() => expect(emitAuthChange).toBeTypeOf('function'));
 
     // A sign-out arrives and settles while the first lookup is still in flight.
     await act(async () => { emitAuthChange('SIGNED_OUT', null); });
@@ -220,9 +224,10 @@ describe('AuthContext', () => {
 
     const { unmount } = renderProbe();
     await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('false'));
+    await waitFor(() => expect(supabase.auth.onAuthStateChange).toHaveBeenCalled());
     unmount();
 
-    expect(unsubscribe).toHaveBeenCalled();
+    await waitFor(() => expect(unsubscribe).toHaveBeenCalled());
   });
 
   it('throws a helpful error when useAuth is used outside AuthProvider', () => {

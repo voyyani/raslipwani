@@ -16,11 +16,12 @@ export default defineConfig({
     // hanging the run.
     testTimeout: 15000,
     setupFiles: './src/test/setup.jsx',
-    // supabaseClient.js throws at import time when these are absent. The global
-    // mock only intercepts the `@/utils/supabaseClient` specifier, so any file
-    // importing it by relative path loads the real module and takes its whole
-    // suite down. These are inert placeholders — no test reaches the network —
-    // and they let the suite run on a clean checkout or in CI, where no .env exists.
+    // `src/services/client.js` reads these when it constructs the client, and
+    // `client.test.js` exercises the real module. These are inert placeholders —
+    // no test reaches the network — and they let the suite run on a clean
+    // checkout or in CI, where no .env exists. (The client no longer throws at
+    // import time, only at first use, so a missing variable would fail one
+    // query rather than a whole suite; the placeholders keep even that quiet.)
     env: {
       VITE_SUPABASE_URL: 'http://localhost:54321',
       VITE_SUPABASE_KEY: 'test-anon-key'

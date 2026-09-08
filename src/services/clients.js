@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapCount } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -17,10 +17,11 @@ export async function listClientsPage({
   budgetMin,
   budgetMax,
 } = {}) {
+  const db = await getSupabase();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabase
+  let query = db
     .from(TABLE)
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -50,7 +51,8 @@ export async function listClientsPage({
 }
 
 export async function getClientById(clientId) {
-  return unwrap(await supabase.from(TABLE).select('*').eq('id', clientId).single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).select('*').eq('id', clientId).single(), {
     table: TABLE,
     operation: 'getClientById',
   });
@@ -58,9 +60,10 @@ export async function getClientById(clientId) {
 
 /** The three counters on the client detail header. */
 export async function getClientStats(clientId) {
+  const db = await getSupabase();
   const countFor = async (table, column, operation) =>
     unwrapCount(
-      await supabase.from(table).select('id', { count: 'exact', head: true }).eq(column, clientId),
+      await db.from(table).select('id', { count: 'exact', head: true }).eq(column, clientId),
       { table, operation }
     ).count;
 
@@ -74,21 +77,24 @@ export async function getClientStats(clientId) {
 }
 
 export async function createClient(values) {
-  return unwrap(await supabase.from(TABLE).insert([values]).select().single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).insert([values]).select().single(), {
     table: TABLE,
     operation: 'createClient',
   });
 }
 
 export async function updateClient(clientId, values) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).update(values).eq('id', clientId).select().single(),
+    await db.from(TABLE).update(values).eq('id', clientId).select().single(),
     { table: TABLE, operation: 'updateClient' }
   );
 }
 
 export async function deleteClient(clientId) {
-  unwrap(await supabase.from(TABLE).delete().eq('id', clientId), {
+  const db = await getSupabase();
+  unwrap(await db.from(TABLE).delete().eq('id', clientId), {
     table: TABLE,
     operation: 'deleteClient',
   });

@@ -60,13 +60,23 @@ export const AuthProvider = ({ children }) => {
       // ProtectedRoute spins with no way out. Fail closed: treat it as no session.
       .catch(() => applySession(null, { fromAuthEvent: false }));
 
-    const unsubscribe = onAuthStateChange(
+    // The client is fetched on demand, so the subscription arrives
+    // asynchronously: a fast unmount can resolve after this cleanup has run,
+    // which would leave the auth listener attached to a dead provider.
+    let unsubscribe;
+    let cancelled = false;
+
+    onAuthStateChange(
       (_event, nextSession) => { applySession(nextSession ?? null, { fromAuthEvent: true }); }
-    );
+    ).then((stop) => {
+      if (cancelled) stop();
+      else unsubscribe = stop;
+    });
 
     return () => {
       activeRef.current = false;
-      unsubscribe();
+      cancelled = true;
+      unsubscribe?.();
     };
   }, []);
 

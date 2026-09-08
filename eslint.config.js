@@ -146,9 +146,9 @@ export default [
         {
           patterns: [
             {
-              group: ['**/utils/supabaseClient', '@/utils/supabaseClient', '@supabase/supabase-js'],
+              group: ['@supabase/supabase-js', '**/services/client', '@/services/client'],
               message:
-                'Query through a module in src/services/ instead. See ROADMAP.md Block 3.1.',
+                'Query through a module in src/services/ instead — and do not construct a client either. See ROADMAP.md Block 3.1.',
             },
           ],
         },

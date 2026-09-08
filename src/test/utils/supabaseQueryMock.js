@@ -9,7 +9,7 @@ import { vi } from 'vitest';
  * resolves — which is fine for "did this component subscribe" and useless for
  * "what does this service return". Service tests use this instead.
  *
- *   import { supabase } from '@/utils/supabaseClient';
+ *   import { __client as supabase } from '@/services/client';
  *   const builders = mockFrom(supabase, { properties: { data: [{ id: 1 }], error: null } });
  *   await expect(listFeatured()).resolves.toEqual([{ id: 1 }]);
  *   expect(builders.properties.eq).toHaveBeenCalledWith('featured', true);

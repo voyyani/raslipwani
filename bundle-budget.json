@@ -1,4 +1,4 @@
 {
-  "firstLoadGzipKb": 210.4,
-  "note": "Measured 2026-09-08 after Block 3 Task 28 deleted the manualChunks grouping: 220.7 kB -> 210.4 kB gzip. The grouping put react-calendar (one admin component) in the same eager chunk as framer-motion, so every first-time visitor downloaded it. Rollup's default splitting follows the real import graph instead. ROADMAP Block 3.3 drives this to under 100 kB; Tasks 29-31 take out Supabase, framer-motion and the entry's analytics. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
+  "firstLoadGzipKb": 156.0,
+  "note": "Measured 2026-09-08 after Block 3 Task 29 made the Supabase client a dynamic, memoised import: 210.4 kB -> 156.0 kB gzip. (Task 28, deleting the manualChunks grouping, took 220.7 -> 210.4 before it.) ROADMAP Block 3.3 drives this under 100 kB; Tasks 30-31 take framer-motion out of the eager chrome and trim the entry. Lower it when a phase wins space back; raise it only in a commit that explains the trade."
 }

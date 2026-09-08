@@ -44,7 +44,8 @@ vi.mock('@/services/settings', () => ({
   // because a module-level vi.mock replaces the whole module for every
   // component rendered in this file.
   getSettingsRow: vi.fn().mockResolvedValue(null),
-  subscribeToSettings: vi.fn(() => () => {}),
+  // Resolves with the unsubscribe: the client is fetched on demand (Task 29).
+  subscribeToSettings: vi.fn(async () => () => {}),
 }));
 
 describe('AdminProperties data access', () => {

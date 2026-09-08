@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapList, unwrapCount } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -8,8 +8,9 @@ const TABLE = 'properties';
 
 /** The three featured cards on the home page. */
 export async function listFeatured({ limit = 3 } = {}) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('*')
       .eq('featured', true)
@@ -21,8 +22,9 @@ export async function listFeatured({ limit = 3 } = {}) {
 
 /** The five most recently touched rows for the admin dashboard's activity feed. */
 export async function listRecentProperties({ limit = 5 } = {}) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('id, title, created_at, updated_at')
       .order('created_at', { ascending: false })
@@ -33,8 +35,9 @@ export async function listRecentProperties({ limit = 5 } = {}) {
 
 /** Everything a visitor may book a viewing on. */
 export async function listAvailable() {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('*')
       .eq('status', 'available')
@@ -45,8 +48,9 @@ export async function listAvailable() {
 
 /** The public /properties grid, which filters client-side after one fetch. */
 export async function listAll({ sortField = 'created_at', sortDirection = 'desc' } = {}) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('*')
       .order(sortField, { ascending: sortDirection === 'asc' }),
@@ -73,10 +77,11 @@ export async function listPage({
   sortDirection = 'desc',
   search,
 } = {}) {
+  const db = await getSupabase();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabase
+  let query = db
     .from(TABLE)
     .select('*', { count: 'exact' })
     .order(sortField, { ascending: sortDirection === 'asc' });
@@ -99,11 +104,12 @@ export async function listPage({
  * service layer.
  */
 export async function searchProperties({ term, limit = 10 } = {}) {
+  const db = await getSupabase();
   const cleaned = term ? sanitiseSearch(term) : '';
   if (!cleaned) return [];
 
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('id, title, location, price, bedrooms, bathrooms, images')
       .or(`title.ilike.%${cleaned}%,location.ilike.%${cleaned}%`)
@@ -113,7 +119,8 @@ export async function searchProperties({ term, limit = 10 } = {}) {
 }
 
 export async function getById(propertyId) {
-  return unwrap(await supabase.from(TABLE).select('*').eq('id', propertyId).single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).select('*').eq('id', propertyId).single(), {
     table: TABLE,
     operation: 'getById',
   });
@@ -121,36 +128,41 @@ export async function getById(propertyId) {
 
 /** Counts for the dashboard tiles. `head: true` fetches no rows. */
 export async function countProperties({ featured, status } = {}) {
-  let query = supabase.from(TABLE).select('*', { count: 'exact', head: true });
+  const db = await getSupabase();
+  let query = db.from(TABLE).select('*', { count: 'exact', head: true });
   if (featured !== undefined) query = query.eq('featured', featured);
   if (status !== undefined) query = query.eq('status', status);
   return unwrapCount(await query, { table: TABLE, operation: 'countProperties' }).count;
 }
 
 export async function createProperty(values) {
-  return unwrap(await supabase.from(TABLE).insert([values]).select().single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).insert([values]).select().single(), {
     table: TABLE,
     operation: 'createProperty',
   });
 }
 
 export async function updateProperty(propertyId, values) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).update(values).eq('id', propertyId).select().single(),
+    await db.from(TABLE).update(values).eq('id', propertyId).select().single(),
     { table: TABLE, operation: 'updateProperty' }
   );
 }
 
 export async function deleteProperty(propertyId) {
-  unwrap(await supabase.from(TABLE).delete().eq('id', propertyId), {
+  const db = await getSupabase();
+  unwrap(await db.from(TABLE).delete().eq('id', propertyId), {
     table: TABLE,
     operation: 'deleteProperty',
   });
 }
 
 export async function setFeatured(propertyId, featured) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).update({ featured }).eq('id', propertyId).select().single(),
+    await db.from(TABLE).update({ featured }).eq('id', propertyId).select().single(),
     { table: TABLE, operation: 'setFeatured' }
   );
 }

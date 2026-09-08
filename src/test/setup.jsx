@@ -31,9 +31,14 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock Supabase — auth methods are configurable per test via
-//   import { supabase } from '@/utils/supabaseClient';
+//   import { __client as supabase } from '@/services/client';
 //   supabase.auth.signInWithPassword.mockResolvedValue({ data: {}, error: null });
-vi.mock('@/utils/supabaseClient', () => {
+//
+// The client is constructed behind `getSupabase()` now (it is fetched
+// dynamically, to keep 55 kB of it out of the first load), so the mock hands
+// back the same double every service awaits. `__client` is exported so a test
+// can still reach that double directly, exactly as it used to reach `supabase`.
+vi.mock('@/services/client', () => {
   const queryBuilder = () => ({
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
@@ -46,8 +51,7 @@ vi.mock('@/utils/supabaseClient', () => {
     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
   });
 
-  return {
-    supabase: {
+  const client = {
       from: vi.fn(queryBuilder),
       rpc: vi.fn().mockResolvedValue({ data: false, error: null }),
       // Realtime. SettingsContext subscribes to admin_settings on mount, so
@@ -75,7 +79,12 @@ vi.mock('@/utils/supabaseClient', () => {
           data: { subscription: { unsubscribe: vi.fn() } }
         }))
       }
-    }
+    };
+
+  return {
+    getSupabase: vi.fn(async () => client),
+    resetSupabaseClient: vi.fn(),
+    __client: client,
   };
 });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { supabase } from '@/utils/supabaseClient';
+import { __client as supabase } from '@/services/client';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
   getSettingsByCategory, getCloudinaryConfig,
@@ -57,9 +57,11 @@ describe('listEmailTemplates', () => {
 });
 
 describe('subscribeToSettings', () => {
-  it('opens a channel and hands back a working unsubscribe', () => {
+  // Async since the client is fetched on demand (Task 29): the subscription
+  // resolves with the unsubscribe rather than returning it.
+  it('opens a channel and hands back a working unsubscribe', async () => {
     const onChange = vi.fn();
-    const unsubscribe = subscribeToSettings(onChange);
+    const unsubscribe = await subscribeToSettings(onChange);
     expect(supabase.channel).toHaveBeenCalled();
     unsubscribe();
     expect(supabase.removeChannel).toHaveBeenCalled();

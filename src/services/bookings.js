@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapList, unwrapCount } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -11,12 +11,18 @@ const isSet = (value) => value !== undefined && value !== null && value !== '' &
 
 const now = () => new Date().toISOString();
 
-export async function listBookings({ status, priority } = {}) {
-  let query = supabase
+/**
+ * `archived` and `ascending` exist for the viewings screen, which is the one
+ * caller that reads the archive and wants newest first. Both keep the defaults
+ * the admin bookings table has always used, so its behaviour is unchanged.
+ */
+export async function listBookings({ status, priority, archived = false, ascending = true } = {}) {
+  const db = await getSupabase();
+  let query = db
     .from(TABLE)
     .select('*')
-    .eq('is_archived', false)
-    .order('appointment_at', { ascending: true });
+    .eq('is_archived', archived)
+    .order('appointment_at', { ascending });
 
   if (isSet(status)) query = query.eq('status', status);
   if (isSet(priority)) query = query.eq('priority', priority);
@@ -33,8 +39,9 @@ export async function listBookings({ status, priority } = {}) {
  * invalidation.
  */
 export async function getBookingStats() {
+  const db = await getSupabase();
   const rows = unwrapList(
-    await supabase.from(TABLE).select('status, priority').eq('is_archived', false),
+    await db.from(TABLE).select('status, priority').eq('is_archived', false),
     { table: TABLE, operation: 'getBookingStats' }
   );
 
@@ -53,8 +60,9 @@ export async function getBookingStats() {
 }
 
 export async function countPendingBookings() {
+  const db = await getSupabase();
   return unwrapCount(
-    await supabase
+    await db
       .from(TABLE)
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pending')
@@ -64,15 +72,17 @@ export async function countPendingBookings() {
 }
 
 export async function countBookings({ status, createdAfter } = {}) {
-  let query = supabase.from(TABLE).select('*', { count: 'exact', head: true });
+  const db = await getSupabase();
+  let query = db.from(TABLE).select('*', { count: 'exact', head: true });
   if (isSet(status)) query = query.eq('status', status);
   if (isSet(createdAfter)) query = query.gt('created_at', createdAfter);
   return unwrapCount(await query, { table: TABLE, operation: 'countBookings' }).count;
 }
 
 export async function listUpcomingBookings({ limit = 5 } = {}) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('id, name, appointment_at, service, viewing_type')
       .gte('appointment_at', now())
@@ -83,8 +93,9 @@ export async function listUpcomingBookings({ limit = 5 } = {}) {
 }
 
 export async function listRecentBookings({ limit = 5 } = {}) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('id, name, service, viewing_type, type, created_at')
       .order('created_at', { ascending: false })
@@ -101,15 +112,17 @@ export async function listRecentBookings({ limit = 5 } = {}) {
  * not theirs to read back.
  */
 export async function createBooking(record) {
-  unwrap(await supabase.from(TABLE).insert([record]), {
+  const db = await getSupabase();
+  unwrap(await db.from(TABLE).insert([record]), {
     table: TABLE,
     operation: 'createBooking',
   });
 }
 
 export async function updateBooking(bookingId, updates) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase
+    await db
       .from(TABLE)
       .update({ ...updates, last_modified_at: now() })
       .eq('id', bookingId)
@@ -127,8 +140,9 @@ export const rescheduleBooking = (bookingId, { appointmentAt }) =>
   updateBooking(bookingId, { appointment_at: appointmentAt });
 
 export async function listBookingNotes(bookingId) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(NOTES_TABLE)
       .select('*')
       .eq('booking_id', bookingId)
@@ -149,8 +163,9 @@ export async function listBookingNotes(bookingId) {
  * actually been applied.
  */
 export async function addBookingNote({ bookingId, note, author }) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase
+    await db
       .from(NOTES_TABLE)
       // `is_internal` is left unset so the column default (TRUE) applies.
       .insert({ booking_id: bookingId, note_text: note, created_by: author })
@@ -161,7 +176,8 @@ export async function addBookingNote({ bookingId, note, author }) {
 }
 
 export async function deleteBookingNote(noteId) {
-  unwrap(await supabase.from(NOTES_TABLE).delete().eq('id', noteId), {
+  const db = await getSupabase();
+  unwrap(await db.from(NOTES_TABLE).delete().eq('id', noteId), {
     table: NOTES_TABLE,
     operation: 'deleteBookingNote',
   });

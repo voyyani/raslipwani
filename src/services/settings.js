@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapList } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -7,8 +7,9 @@ const TABLE = 'admin_settings';
 const TEMPLATES_TABLE = 'email_templates';
 
 export async function getSettingsByCategory(category) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase.from(TABLE).select('*').eq('setting_category', category),
+    await db.from(TABLE).select('*').eq('setting_category', category),
     { table: TABLE, operation: 'getSettingsByCategory' }
   );
 }
@@ -29,8 +30,9 @@ export async function getSettingsByCategory(category) {
  * exactly what happened the first time this function carried that filter.
  */
 export async function getCloudinaryConfig() {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).select('cloud_name, upload_preset').limit(1).maybeSingle(),
+    await db.from(TABLE).select('cloud_name, upload_preset').limit(1).maybeSingle(),
     { table: TABLE, operation: 'getCloudinaryConfig' }
   );
 }
@@ -46,7 +48,8 @@ export async function getCloudinaryConfig() {
  * real category.
  */
 export async function getSettingsRow() {
-  return unwrap(await supabase.from(TABLE).select('*').maybeSingle(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).select('*').maybeSingle(), {
     table: TABLE,
     operation: 'getSettingsRow',
   });
@@ -69,8 +72,9 @@ export async function getSettingsRow() {
  * insert it otherwise — and stamps no `setting_category` onto the payload.
  */
 export async function saveSettingsRow(values) {
+  const db = await getSupabase();
   const existing = unwrap(
-    await supabase.from(TABLE).select('id').limit(1).maybeSingle(),
+    await db.from(TABLE).select('id').limit(1).maybeSingle(),
     { table: TABLE, operation: 'saveSettingsRow.lookup' }
   );
 
@@ -78,12 +82,12 @@ export async function saveSettingsRow(values) {
 
   if (existing?.id) {
     return unwrap(
-      await supabase.from(TABLE).update(payload).eq('id', existing.id).select().single(),
+      await db.from(TABLE).update(payload).eq('id', existing.id).select().single(),
       { table: TABLE, operation: 'saveSettingsRow.update' }
     );
   }
 
-  return unwrap(await supabase.from(TABLE).insert(payload).select().single(), {
+  return unwrap(await db.from(TABLE).insert(payload).select().single(), {
     table: TABLE,
     operation: 'saveSettingsRow.insert',
   });
@@ -96,8 +100,9 @@ export async function saveSettingsRow(values) {
  * flat row of columns.
  */
 export async function getSettingsByKeys(keys) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase.from(TABLE).select('*').in('setting_key', keys),
+    await db.from(TABLE).select('*').in('setting_key', keys),
     { table: TABLE, operation: 'getSettingsByKeys' }
   );
 }
@@ -112,22 +117,25 @@ export async function getSettingsByKeys(keys) {
  * decided by the caller, not by this function.
  */
 export async function upsertSettingRows(rows) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).upsert(rows, { onConflict: 'setting_key' }),
+    await db.from(TABLE).upsert(rows, { onConflict: 'setting_key' }),
     { table: TABLE, operation: 'upsertSettingRows' }
   );
 }
 
 export async function listEmailTemplates() {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase.from(TEMPLATES_TABLE).select('*').eq('is_active', true),
+    await db.from(TEMPLATES_TABLE).select('*').eq('is_active', true),
     { table: TEMPLATES_TABLE, operation: 'listEmailTemplates' }
   );
 }
 
 export async function updateEmailTemplate(templateId, { subject, body }) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase
+    await db
       .from(TEMPLATES_TABLE)
       .update({ subject, body })
       .eq('id', templateId)
@@ -142,14 +150,15 @@ export async function updateEmailTemplate(templateId, { subject, body }) {
  * the channel's shape, so the context does not import the client to build one.
  * Returns an unsubscribe suitable for a useEffect cleanup.
  */
-export function subscribeToSettings(onChange) {
-  const channel = supabase
+export async function subscribeToSettings(onChange) {
+  const db = await getSupabase();
+  const channel = db
     .channel('admin_settings_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, onChange)
     .subscribe();
 
   return () => {
-    supabase.removeChannel(channel);
+    db.removeChannel(channel);
   };
 }
 

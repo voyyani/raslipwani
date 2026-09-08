@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { ServiceError } from './unwrap';
 import { logger } from '@/utils/logger';
 
@@ -15,30 +15,35 @@ function assertOk(error, operation) {
 }
 
 export async function getSession() {
-  const { data, error } = await supabase.auth.getSession();
+  const db = await getSupabase();
+  const { data, error } = await db.auth.getSession();
   assertOk(error, 'getSession');
   return data?.session ?? null;
 }
 
 export async function signIn({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const db = await getSupabase();
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
   assertOk(error, 'signIn');
   return data?.session ?? null;
 }
 
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const db = await getSupabase();
+  const { error } = await db.auth.signOut();
   assertOk(error, 'signOut');
 }
 
 export async function requestPasswordReset(email, { redirectTo } = {}) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  const db = await getSupabase();
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
   assertOk(error, 'requestPasswordReset');
 }
 
 /** Returns an unsubscribe, so no caller has to know the shape Supabase returns. */
-export function onAuthStateChange(callback) {
-  const { data } = supabase.auth.onAuthStateChange((event, session) => callback(event, session));
+export async function onAuthStateChange(callback) {
+  const db = await getSupabase();
+  const { data } = db.auth.onAuthStateChange((event, session) => callback(event, session));
   return () => data?.subscription?.unsubscribe?.();
 }
 
@@ -53,8 +58,9 @@ export function onAuthStateChange(callback) {
  * trip, and must fail closed the same way.
  */
 export async function checkAdminUser(userId) {
+  const db = await getSupabase();
   if (!userId) return false;
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('admin_users')
     .select('id')
     .eq('id', userId)
@@ -76,7 +82,8 @@ export async function checkAdminUser(userId) {
  * an admin".
  */
 export async function isAdmin() {
-  const { data, error } = await supabase.rpc('is_admin');
+  const db = await getSupabase();
+  const { data, error } = await db.rpc('is_admin');
   if (error) {
     logger.error('[auth.isAdmin]', error);
     return false;

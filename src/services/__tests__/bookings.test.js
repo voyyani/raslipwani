@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { supabase } from '@/utils/supabaseClient';
+import { __client as supabase } from '@/services/client';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
   listBookings, getBookingStats, countPendingBookings, countBookings, createBooking,

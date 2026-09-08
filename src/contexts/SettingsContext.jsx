@@ -187,12 +187,28 @@ export const SettingsProvider = ({ children }) => {
     fetchSettings();
   }, [fetchSettings]);
 
-  // Subscribe to realtime updates (optional - for admin panel live sync)
+  // Subscribe to realtime updates (optional - for admin panel live sync).
+  //
+  // The Supabase client is fetched on demand now, so the subscription arrives
+  // asynchronously and a fast unmount can resolve *after* this effect's cleanup
+  // has already run. Without the `cancelled` flag that leaves a live channel
+  // behind with nothing to close it.
   useEffect(() => {
-    return subscribeToSettings((payload) => {
+    let stop;
+    let cancelled = false;
+
+    subscribeToSettings((payload) => {
       logger.debug('[SettingsContext] Realtime update detected:', payload);
       refreshSettings();
+    }).then((unsubscribe) => {
+      if (cancelled) unsubscribe();
+      else stop = unsubscribe;
     });
+
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
   }, [refreshSettings]);
 
   const contextValue = {

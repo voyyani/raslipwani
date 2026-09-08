@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { getSupabase } from './client';
 import { unwrap, unwrapList } from './unwrap';
 import { queryKeys } from './queryKeys';
 import { STALE_TIME } from './cachePolicy';
@@ -6,8 +6,9 @@ import { STALE_TIME } from './cachePolicy';
 const TABLE = 'client_communications';
 
 export async function listClientCommunications(clientId) {
+  const db = await getSupabase();
   return unwrapList(
-    await supabase
+    await db
       .from(TABLE)
       .select('*')
       .eq('client_id', clientId)
@@ -17,21 +18,24 @@ export async function listClientCommunications(clientId) {
 }
 
 export async function addClientCommunication(values) {
-  return unwrap(await supabase.from(TABLE).insert([values]).select().single(), {
+  const db = await getSupabase();
+  return unwrap(await db.from(TABLE).insert([values]).select().single(), {
     table: TABLE,
     operation: 'addClientCommunication',
   });
 }
 
 export async function updateClientCommunication(communicationId, values) {
+  const db = await getSupabase();
   return unwrap(
-    await supabase.from(TABLE).update(values).eq('id', communicationId).select().single(),
+    await db.from(TABLE).update(values).eq('id', communicationId).select().single(),
     { table: TABLE, operation: 'updateClientCommunication' }
   );
 }
 
 export async function deleteClientCommunication(communicationId) {
-  unwrap(await supabase.from(TABLE).delete().eq('id', communicationId), {
+  const db = await getSupabase();
+  unwrap(await db.from(TABLE).delete().eq('id', communicationId), {
     table: TABLE,
     operation: 'deleteClientCommunication',
   });

@@ -1,4 +1,4 @@
-import { supabase } from '@/utils/supabaseClient';
+import { __client as supabase } from '@/services/client';
 
 const ADMIN_USER = {
   id: '00000000-0000-4000-8000-000000000001',

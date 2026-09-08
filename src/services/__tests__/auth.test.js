@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { supabase } from '@/utils/supabaseClient';
+import { __client as supabase } from '@/services/client';
 import { getSession, signIn, signOut, onAuthStateChange, isAdmin } from '../auth';
 import { ServiceError } from '../unwrap';
 
@@ -41,10 +41,11 @@ describe('signOut', () => {
 });
 
 describe('onAuthStateChange', () => {
-  it('hands back an unsubscribe that actually unsubscribes', () => {
+  it('hands back an unsubscribe that actually unsubscribes', async () => {
     const unsubscribe = vi.fn();
     supabase.auth.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe } } });
-    const stop = onAuthStateChange(vi.fn());
+    // Async since the client is fetched on demand (Task 29).
+    const stop = await onAuthStateChange(vi.fn());
     stop();
     expect(unsubscribe).toHaveBeenCalled();
   });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { supabase } from '@/utils/supabaseClient';
+import { listBookings, setBookingStatus, updateBooking } from '@/services/bookings';
 import BookingFilters from '../../components/BookingFilters';
 import BookingList from '../../components/BookingList';
 import BookingCalendar from '../../components/BookingCalendar';
@@ -29,20 +29,11 @@ const Bookings = () => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        let query = supabase
-          .from('bookings')
-          .select('*')
-          .order('appointment_at', { ascending: false });
+        const data = await listBookings({
+          archived: viewFilter !== 'active',
+          ascending: false,
+        });
 
-        if (viewFilter === 'active') {
-          query = query.eq('is_archived', false);
-        } else {
-          query = query.eq('is_archived', true);
-        }
-
-        const { data, error } = await query;
-        
-        if (error) throw error;
         setBookings(data || []);
       } catch (error) {
         logger.error('Error fetching bookings:', error);
@@ -121,13 +112,8 @@ const Bookings = () => {
   // Update booking status
   const updateStatus = async (id, status) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
+      await setBookingStatus(id, status);
+
       setBookings(prev => prev.map(b => 
         b.id === id ? { ...b, status } : b
       ));
@@ -146,16 +132,11 @@ const Bookings = () => {
   // Archive/restore booking
   const toggleArchive = async (id, archive) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          is_archived: archive,
-          archived_at: archive ? new Date().toISOString() : null 
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
+      await updateBooking(id, {
+        is_archived: archive,
+        archived_at: archive ? new Date().toISOString() : null,
+      });
+
       setBookings(prev => prev.filter(b => b.id !== id));
       
       if (selectedBooking && selectedBooking.id === id) {
