@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Clock3, ShieldCheck, Sparkles, Wrench } from 'lucide-react';
 
+// This page's styling, loaded with the page rather than with the site.
+import './MaintenancePage.css';
+
 const formatTimeUnit = (value) => String(value).padStart(2, '0');
 
 const getTimeLeft = (targetDate) => {
