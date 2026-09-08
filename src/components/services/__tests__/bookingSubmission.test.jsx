@@ -68,4 +68,55 @@ describe('ServicesMain', () => {
 
     await waitFor(() => expect(availableQueryFn).toHaveBeenCalled());
   });
+  it('walks the three-step consultation wizard and submits one booking', async () => {
+    // The wizard was split into a hook and five components (Task 24); this
+    // pins the whole path a visitor actually takes, end to end, through the
+    // step machinery and into the write.
+    const user = userEvent.setup();
+    render(<ServicesMain />);
+
+    await user.click(screen.getAllByRole('button', { name: /get consultation/i })[0]);
+
+    // Step one: the service is preselected by the button that opened the
+    // wizard, so Continue moves straight on. A consultation has no property
+    // step, so step two is the options summary.
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+    expect(screen.getByRole('heading', { name: /service details/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+
+    await user.type(screen.getByLabelText(/full name/i), 'Grace Hopper');
+    await user.type(screen.getByLabelText(/email/i), 'grace@example.com');
+    await user.type(screen.getByLabelText(/phone/i), '+254711111111');
+    await user.type(screen.getByLabelText(/preferred date/i), '2030-01-15');
+    await user.type(screen.getByLabelText(/preferred time/i), '10:30');
+    await user.click(screen.getByRole('button', { name: /confirm booking/i }));
+
+    await waitFor(() => expect(createBooking).toHaveBeenCalledTimes(1));
+    const [record] = createBooking.mock.calls[0];
+    expect(record).toMatchObject({
+      type: 'consultation',
+      service: 'consultation',
+      name: 'Grace Hopper',
+      email: 'grace@example.com',
+      phone: '+254711111111',
+      status: 'pending',
+      property_id: null,
+    });
+    expect(record.appointment_at).toContain('2030-01-15');
+  });
+
+  it('goes back to an earlier step without losing what was typed', async () => {
+    const user = userEvent.setup();
+    render(<ServicesMain />);
+
+    await user.click(screen.getAllByRole('button', { name: /get consultation/i })[0]);
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+
+    await user.type(screen.getByLabelText(/full name/i), 'Ada Lovelace');
+    await user.click(screen.getByRole('button', { name: /back/i }));
+    await user.click(screen.getByRole('button', { name: /continue/i }));
+
+    expect(screen.getByLabelText(/full name/i)).toHaveValue('Ada Lovelace');
+  });
 });
