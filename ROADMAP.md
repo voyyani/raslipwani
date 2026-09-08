@@ -400,6 +400,27 @@ temporary defect, not a finished state.
 first-load JS **under 100 kB gzip** · Lighthouse Performance ≥ 90 mobile · UN inventory
 served from the database.
 
+**Measured 2026-09-08, Block 3 Tasks 22–31.** Three of the five have landed: the Supabase
+boundary is an ESLint error and the client is a dynamic import; the longest source file is
+295 lines, down from 1,294; first load is **112.4 kB gzip**, down from 220.7.
+
+The bundle target is **not met, and the last 12.4 kB is not more of the same work.** The
+plan's arithmetic assumed the entry chunk would shrink to ~30 kB and the icon registry to
+~3 kB once the vendor groups were gone; neither was ever going to, and the measurement says
+so. What is actually left:
+
+| Remaining | Gzip | Notes |
+|---|---:|---|
+| Stylesheet | 13.2 kB | 78.4 kB raw. Unused-utility pruning is **Block 2's open lead**, not Block 3's |
+| React + React-DOM + router | ~53 kB | The floor. Removable only by changing routing |
+| Icon registry (85 lucide icons) | ~8.6 kB | Synchronous by contract — call sites store icon *names*, not components |
+| App code, helmet, react-query | ~37 kB | The application itself |
+
+The stylesheet is the only line with real slack in it, and it belongs to Block 2. This is
+recorded rather than closed: `scripts/__tests__/firstLoadComposition.test.js` holds the
+under-100 assertion as an `it.fails`, so it flips red — and the marker comes off — the day
+the number is actually met.
+
 ---
 
 ## Block 4 — Phase 9 · The client-side UI revamp *(≈3 weeks)*
@@ -548,8 +569,8 @@ ledger at the top.
 | `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **rule removed** ✅ | rule removed after pairing | ✅ 2 |
 | `jsx-a11y/control-has-associated-label` | 87 | **45** — halved as a side effect, not targeted | 0 | 2 |
 | Files importing Supabase directly | 24 | **0** ✅ | 0 | ✅ 3 |
-| Files over 700 lines | 8 | **7** (largest 1,294) | 0 over 300 | 3 |
-| First-load JS (gzip) | 215 kB | **215.3 kB** | < 100 kB | 3 |
+| Files over 700 lines | 8 | **0** ✅ — longest source file is 295 (Block 3 Tasks 22–27) | 0 over 300 | ✅ 3 |
+| First-load JS (gzip) | 215 kB | **112.4 kB** (Block 3 Tasks 28–31) | < 100 kB | 3 |
 | Lighthouse Performance (mobile) | not measured | **not measured** | ≥ 90 | 3 |
 | Property pages in the sitemap | 0 | **0** | all | 5 |
 | `.ts`/`.tsx` files | 0 | **0** | incremental adoption | 6 |

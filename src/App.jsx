@@ -14,8 +14,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import PublicLayout from './components/PublicLayout';
 import ToastProvider from './components/Toast';
 import { propertyQueries } from '@/services/properties';
@@ -23,7 +21,6 @@ import { STALE_TIME } from '@/services/cachePolicy';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DynamicSEO from './components/DynamicSEO';
-import MaintenancePage from './pages/MaintenancePage';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -63,6 +60,17 @@ const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminProperties = lazy(() => import('./pages/admin/AdminProperties'));
+// Analytics that delays the first paint is measuring a page it made slower.
+const Analytics = lazy(() =>
+  import('@vercel/analytics/react').then((module) => ({ default: module.Analytics }))
+);
+const SpeedInsights = lazy(() =>
+  import('@vercel/speed-insights/react').then((module) => ({ default: module.SpeedInsights }))
+);
+
+// Statically imported for a branch that is false on every normal load.
+const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
+
 const Bookings = lazy(() => import('./features/bookings/Bookings'));
 const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
 const ClientManagement = lazy(() => import('./pages/admin/ClientManagement'));
@@ -97,13 +105,15 @@ function App() {
 
   if (maintenanceConfig.enabled) {
     return (
-      <MaintenancePage
-        durationDays={maintenanceConfig.durationDays}
-        message={maintenanceConfig.message}
-        brandName={maintenanceConfig.brandName}
-        brandLogo={maintenanceConfig.brandLogo}
-        tagline={maintenanceConfig.tagline}
-      />
+      <Suspense fallback={null}>
+        <MaintenancePage
+          durationDays={maintenanceConfig.durationDays}
+          message={maintenanceConfig.message}
+          brandName={maintenanceConfig.brandName}
+          brandLogo={maintenanceConfig.brandLogo}
+          tagline={maintenanceConfig.tagline}
+        />
+      </Suspense>
     );
   }
 
@@ -114,8 +124,12 @@ function App() {
       <AuthProvider>
         <SettingsProvider>
         <ToastProvider />
-        <Analytics />
-        <SpeedInsights />
+        {/* Below the router's Suspense would be tidier, but these two mount
+            once for the whole app and must not remount per route. */}
+        <Suspense fallback={null}>
+          <Analytics />
+          <SpeedInsights />
+        </Suspense>
       {/* Dynamic SEO using settings */}
       <DynamicSEO />
       
