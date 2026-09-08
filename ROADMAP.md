@@ -1,32 +1,34 @@
 # Raslipwani Properties — Remaining Work to World-Class
 
-> **Version 11 — reconciled 2026-09-06.** This document contains **only what is still
-> outstanding**. Work that is verifiably finished is compressed into the ledger below and
-> then never mentioned again. Supersedes Versions 1–10.
+> **Version 12 — re-measured 2026-09-08, after Block 3.** This document contains **only
+> what is still outstanding**. Work that is verifiably finished is compressed into the
+> ledger below and then never mentioned again. Supersedes Versions 1–11.
 >
-> **Why "reconciled":** two sessions worked from `18e82a9` in parallel and each wrote its
-> own Version 10. One migrated the public surfaces by hand through the primitives and
-> fixed the nav, the JSON-LD geo error and the Cloudinary secret; the other wrote the
-> palette codemod, the theme-invariant roles and the theme provider. Both were real, both
-> were unmerged, and their two roadmaps disagreed about what was done. They are merged at
-> `28f57ca`, the conflicts resolved in favour of the hand-migrated structure with the
-> codemod re-run over it, and **every number below re-measured against the merged tree**.
+> **What changed since Version 11:** Block 3 landed in 13 commits, `e5eccc5` last. The
+> data-access layer is closed and enforced by ESLint, the eight files over 700 lines are
+> gone, and first load fell **215.9 → 112.3 kB gzip**. Two of Block 3's five exit criteria
+> did **not** clear and are recorded as open rather than quietly re-baselined: the bundle
+> is 12.3 kB over target, and Lighthouse has still never produced a score. Version 11's
+> reconciliation of the two parallel Version 10s stands; nothing below re-litigates it.
 >
 > **Score:** audited **3.8/10** (2026-09-01) → **~7/10** today → target **9/10**.
-> The score does not move past 7 by writing code. See **Block 1**, which remains the only
+> The score does not move past 7 by writing code, and Block 3 is the proof: a block this
+> large landed and the number did not move. See **Block 1**, which remains the only
 > outstanding work with a live consequence and the only work an agent cannot do for you.
 >
 > **Sources:** [`docs/audit/2026-09-01-codebase-audit.md`](docs/audit/2026-09-01-codebase-audit.md);
 > live introspection of project `gihgdouvltxlpynpuyde` (`rasilpwani`, eu-north-1) on
-> 2026-09-01 and 2026-09-02. **Every count below was re-measured on 2026-09-06**, except
-> the database facts in Block 1, which are carried forward from 2026-09-02 and are marked
-> where they need re-confirming.
+> 2026-09-01 and 2026-09-02. **Every count below was re-measured on 2026-09-08** by
+> running the ratchets, ESLint and a production build, except the database facts in Block
+> 1, which are carried forward from 2026-09-02 and are marked where they need
+> re-confirming.
 
 ---
 
 ## Where this actually stands
 
-Version 10 said three things were true at once. Two of them have changed.
+Version 11 said three things were true at once. One of them has changed, and a fourth has
+been added by Block 3.
 
 1. **The design system is spent, not just built.** Version 9 described a proven token
    layer painting one theme with 2,772 literal colour classes standing between it and a
@@ -40,25 +42,36 @@ Version 10 said three things were true at once. Two of them have changed.
    in both themes, on every run, as its own CI step. **Zero violations.** The gate found
    three real defects on its first run — including a page that crashed outright on a null
    Supabase response — which is the argument for gates over intentions in one line.
-3. **The database is still open.** `007` and `008` are applied. `009`–`012` are written,
+3. **The database is still open.** `007` and `008` are applied. `009`–`013` are written,
    dry-run inside a rolled-back transaction, and **not applied**. Until they are, anyone
    holding the public anon key can still read customer PII and write through an
-   unauthenticated RPC.
+   unauthenticated RPC. `013_property_segments.sql` joined this queue in Block 3, and it
+   is the one migration here with a *visible* consequence: until it and its seed run, the
+   UN housing page renders an empty state.
+4. **The architecture is no longer the constraint; the stylesheet and the database are.**
+   Block 3 removed the two structural excuses — 24 files reaching past the service layer
+   into Supabase, and eight files over 700 lines. What is left on the performance line is
+   78.5 kB of raw CSS (Block 2's open lead) and the React/router floor, neither of which
+   is decomposition work. **Block 4 is now genuinely a design exercise, which was the
+   whole point of Block 3.**
 
-**Block 1 is still the only work with a live consequence, and it has not moved in four
-revisions of this document. Everything an agent can do is preparation for it.**
+**Block 1 is still the only work with a live consequence, and it has not moved in five
+revisions of this document. Everything an agent can do is preparation for it — and after
+Block 3, nearly all of that preparation is now done.**
 
 ### Already true — do not re-do, do not re-litigate
 
 <sub>Kept deliberately short. A roadmap with no record of finished work invites redoing it.</sub>
 
-| | Verified 2026-09-06 |
+| | Verified 2026-09-08 |
 |---|---|
 | Identity | One stack. Clerk removed from code and `package.json`; Supabase Auth, `admin_users`, `is_admin()` |
 | Privileged keys in bundle | Zero JWT-shaped strings in `dist/`, enforced at build time |
-| Tests | **387 passing / 36 files** (0 at baseline) |
-| Lint errors | 0 (baseline 77). **168 warnings** (was 375), every one counted and budgeted |
-| CI | lint · test · coverage floor · **axe** · palette ratchet · label ratchet · token freshness · build · bundle budget · no-console-in-dist · gitleaks |
+| Tests | **70 files** (36 at Version 11, 0 at baseline); 580 passing at the last full run |
+| Lint errors | 0 (baseline 77). **157 warnings** (was 168, baseline 375), every one counted and budgeted |
+| CI | lint · test · coverage floor · **axe** · palette ratchet · label ratchet · **file-size ratchet** · token freshness · build · bundle budget · **Lighthouse (mobile)** · no-console-in-dist · gitleaks |
+| **Data-access layer** | **Closed.** One module per domain in `src/services/`, centralised query keys, TanStack Query throughout. Zero direct Supabase imports in components and pages, held by a `no-restricted-imports` **error** |
+| **Longest source file** | **295 lines**, from 1,294. Ceiling live and blocking in CI |
 | **axe violations** | **0**, across 6 public + 5 admin surfaces + all chrome × 2 themes, enforced in CI |
 | Routing | 0 unreachable pages, guarded by a test; 0 broken nav links; one `PublicLayout`, header mounts once |
 | Design tokens | 32 role tokens + 5 fixed tokens, both themes, one source, 129 contrast assertions at AA |
@@ -72,7 +85,8 @@ revisions of this document. Everything an agent can do is preparation for it.**
 | Nav disclosures | Dropdown operable by keyboard (it was not — the trigger had no `onClick` at all), `aria-expanded`/`aria-controls` on all five disclosures |
 | Skip link | First in the tab order, target focusable, asserted by test |
 | Module resolution | `@` alias in **both** vite and vitest configs; Supabase imported by one specifier everywhere |
-| Bundle | 215.9 kB gzip first load (from 275 kB), budget 219 kB |
+| Bundle | **112.3 kB gzip first load** (from 275 kB), budget 112.4 kB. Still 12.3 kB over the < 100 kB target — see Block 3.3 |
+| Public route splitting | Every route lazy; Supabase, framer-motion, analytics and the maintenance page all out of the entry chunk |
 | Icon libraries | **One** — `lucide-react`. FontAwesome (999 kB of fonts) and `react-icons` both gone |
 | Canonicals | Route-aware. Every page previously declared the homepage as its canonical |
 | Cloudinary secret | Form can no longer write it to an anon-readable column; guarded by test |
@@ -93,13 +107,17 @@ revisions of this document. Everything an agent can do is preparation for it.**
 |---|---|---|---|---|
 | **1** | Close the database | 🔑 **you** | ~1 day | *everything downstream in production* |
 | **2** | Finish 4C/4D — the long tail of the migration | agent | ~2 days | Block 5 |
-| **3** | Release 5 — data layer, decomposition, the rest of the budget | agent | ~7 days | Block 4 (partly) |
+| ~~**3**~~ | ~~Release 5 — data layer, decomposition, the rest of the budget~~ | agent | ✅ **delivered 2026-09-08** | — |
 | **4** | Phase 9 — the UI revamp | agent | ~3 weeks | — |
 | **5** | Phase 8 — SEO and discovery | agent | ~1 week + one investigation | — |
 | **6** | Phase 10 — platform maturity | ongoing | — | — |
 
-Block 1 blocks production, not the agents. Block 2 → 4 are sequential. 3 and 5 parallelise
-with 2. **Version 9's Block 2 ("land what already exists") is deleted — it is done.**
+Block 1 blocks production, not the agents. Block 2 → 4 are sequential. 5 parallelises with
+2. **Version 9's Block 2 ("land what already exists") is deleted — it is done.**
+
+**Block 3 is delivered** and kept below only for its two open lines: the bundle target it
+missed and the Lighthouse score it has never produced. Both are now owned by other blocks
+or by CI, and neither should stop Block 4 starting. **Block 4 is the next agent work.**
 
 ---
 
@@ -317,7 +335,7 @@ What is left is the genuine remainder: the parts a table could not decide.
       The gate was verified to still fail by planting a nameless icon-only button and
       watching `button-name` catch it on both themes.
 - [ ] **Live regions for async status and toasts.** The skip link is done.
-- [ ] Bring the CSS bundle under 50 kB raw (**76.3 kB** today, from 146 kB). Two theories
+- [ ] Bring the CSS bundle under 50 kB raw (**78.5 kB** today, from 146 kB). Two theories
       about where the excess lives have now been retired by measurement. It was not the
       two colour vocabularies coexisting — the bundle *rose* when the admin migration
       landed. And it was not the icons: the consolidation is done and the stylesheet did
@@ -325,6 +343,14 @@ What is left is the genuine remainder: the parts a table could not decide.
       should have been expected, since icons are JavaScript and never touched the CSS.
       **The only remaining lead is unused-utility pruning, and it should be measured
       before it is scheduled** — that is two wrong predictions in a row on this line.
+
+      **This line has now been promoted, and it is no longer only Block 2's problem.**
+      Block 3 spent its entire performance budget and stopped 12.3 kB short of the
+      under-100 kB target; the stylesheet is **13.2 kB of that first load and the only
+      line in it with real slack.** It also rose again through Block 3 — 76.3 → 78.5 kB
+      raw — while every JavaScript number fell by half. **Pruning this is now the single
+      highest-leverage performance task in the document**, and it is the one thing that
+      can still clear Block 3.3's exit criterion.
 - [x] Retire `jsx-a11y/label-has-for` in `eslint.config.js`. ✅ Done on 2026-09-06, and
       listing it last was right for a reason worth keeping. It was costed at **100 of
       375** warnings. By the time the labels landed it was **39 of 207**, because
@@ -333,28 +359,31 @@ What is left is the genuine remainder: the parts a table could not decide.
       fixed nothing; turning it off last removed 39 that had become genuinely redundant.
       Total warnings: **375 → 168**.
 
-**Exit criteria, as at 2026-09-06:**
+**Exit criteria, re-measured 2026-09-08:**
 
 | | |
 |---|---|
 | label ratchet at **0** | ✅ from 96 at the start of Release 4 |
 | axe extended over the admin console, still at zero | ✅ 30 assertions in CI |
 | one icon library | ✅ `react-icons` removed |
-| `jsx-a11y/label-has-for` retired | ✅ warnings 375 → 168 |
-| raw-palette ratchet at **0** or a documented exemption | ⬜ **94** — untouched by this block |
+| `jsx-a11y/label-has-for` retired | ✅ warnings 375 → **157** |
+| raw-palette ratchet at **0** or a documented exemption | ⬜ **94** — untouched by Block 3 either |
 | every public flow completable by keyboard in both themes | ⬜ not yet verified by hand |
-| CSS under 50 kB | ⬜ **76.3 kB** — the icon theory is now retired, see above |
+| CSS under 50 kB | ⬜ **78.5 kB** — rose again through Block 3; now the top performance lead |
 
-Four of seven. The three that remain were not attempted here and are deliberately left
-unticked: ticking them would make this document less accurate, which is the one thing rule
-3 forbids.
+Four of seven, unchanged by Block 3 — which touched none of these deliberately. The three
+that remain are still unticked: ticking them would make this document less accurate, which
+is the one thing rule 3 forbids.
 
 ---
 
-## Block 3 — Release 5 · Data layer, decomposition, and the rest of the budget *(≈7 days)*
+## Block 3 — Release 5 · Data layer, decomposition, and the rest of the budget ✅ *(delivered)*
 
 Invisible to users, and the thing that makes Block 4 a design exercise rather than a
-rewrite.
+rewrite. **Delivered 2026-09-08 in 13 commits, `e5eccc5` last.** Three of five exit
+criteria met, one missed by 12.3 kB and reclassified, one still unmeasurable in this
+sandbox. Kept in the document for those last two and for the owner step in 3.4; everything
+else here is history and should not be re-done.
 
 ### 3.1 — Data-access layer ✅ *(done)*
 
@@ -371,22 +400,36 @@ rewrite.
       `no-restricted-imports` ESLint error (see `eslint.config.js`), which replaced the
       ratchet that held the line while the migration was in flight.
 
-### 3.2 — Decompose the largest components *(after 3.1 — they shrink on their own)*
+### 3.2 — Decompose the largest components ✅ *(done)*
 
-**8 files still exceed 700 lines**; `AdminProperties.jsx` is 1,294.
+**8 files exceeded 700 lines**; `AdminProperties.jsx` was 1,294.
 
-- [ ] Split `AdminProperties.jsx`, `AdminBookings.jsx`, `ServicesMain.jsx`. Target: none
-      over 300 lines.
-- [ ] Extract `usePagination`, `useFilters`, `useCsvExport`.
+- [x] Split `AdminProperties.jsx`, `AdminBookings.jsx`, `ServicesMain.jsx`. Target: none
+      over 300 lines. **Met — the longest source file is now 295 lines**, and the biggest
+      individual falls were `International` 762 → 100, `PropertyDetail` 734 → 170,
+      `Properties` 743 → 261, `BookingDetailModal` 633 → 278, `AdminBookings` 630 → 248.
+- [x] Extract `usePagination`, `useFilters`, `useCsvExport`. All three live in
+      `src/hooks/`.
+- [x] **Held going forward** by `file-size-budget.json` at **295** and a CI ratchet that
+      only falls — so the next 1,294-line file fails the build rather than accumulating.
 
-### 3.3 — Finish the performance budget
+### 3.3 — Finish the performance budget ⚠️ *(two of three done; the target itself missed)*
 
-First load is **215 kB gzip** against a **< 100 kB** target.
+First load was **215 kB gzip** against a **< 100 kB** target. It is now **112.3 kB**.
 
-- [ ] **Split the Supabase client.** `vendor-supabase` is 55 kB gzip — the single largest
-      item in first load, and the dominant one now that the fonts are gone.
-- [ ] Route-level code splitting on the public side (admin is already lazy).
-- [ ] Lighthouse in CI as a gate, mobile profile.
+- [x] **Split the Supabase client.** Done — it is a dynamic import, and deleting the
+      `manualChunks` grouping that was forcing it eager was worth more than the split
+      itself (210.4 → 156.0 kB).
+- [x] Route-level code splitting on the public side (admin was already lazy). 24 lazy
+      routes; framer-motion, analytics and the maintenance page also left the entry.
+- [x] Lighthouse in CI as a gate, mobile profile. Wired in `ci.yml` against
+      `lighthouserc.json`, `formFactor: mobile`, 3 runs over `/`, `/properties`,
+      `/contact`. **The performance assertion is `warn`, not `error`** — it cannot be
+      promoted until CI produces a first real score, because this sandbox has no Chrome.
+      **Promoting it is the one piece of Block 3 still waiting on something.**
+- [ ] **The target itself: under 100 kB gzip. Missed at 112.3 kB** — see the measurement
+      below, which reclassifies the remainder rather than scheduling more of the same
+      work.
 
 ### 3.4 — Move `UNHousing.jsx`'s hardcoded inventory into the database ✅ *(code done; one owner step)*
 
@@ -407,13 +450,21 @@ columns for one page.
 that runs the page renders its empty state — which is honest, where the placeholder array
 was not.
 
-**Exit:** zero direct Supabase imports in components and pages · no file over 300 lines ·
-first-load JS **under 100 kB gzip** · Lighthouse Performance ≥ 90 mobile · UN inventory
-served from the database.
+**Exit, scored 2026-09-08:**
 
-**Measured 2026-09-08, Block 3 Tasks 22–31.** Three of the five have landed: the Supabase
-boundary is an ESLint error and the client is a dynamic import; the longest source file is
-295 lines, down from 1,294; first load is **112.4 kB gzip**, down from 220.7.
+| Criterion | Result |
+|---|---|
+| Zero direct Supabase imports in components and pages | ✅ only the two test files that configure the mock; held by an ESLint **error** |
+| No file over 300 lines | ✅ longest is **295**; held by a CI ratchet |
+| First-load JS under 100 kB gzip | ❌ **112.3 kB** — missed by 12.3 kB, reclassified below |
+| Lighthouse Performance ≥ 90 mobile | ⬜ **still never measured** — gate is wired, assertion is `warn`, sandbox has no Chrome |
+| UN inventory served from the database | ✅ in code · 🔑 **awaiting the owner step below** |
+
+**Three of five clean, one missed, one unmeasurable here.**
+
+**Measured 2026-09-08, Block 3 Tasks 22–31.** The Supabase boundary is an ESLint error and
+the client is a dynamic import; the longest source file is 295 lines, down from 1,294;
+first load is **112.3 kB gzip**, down from 220.7.
 
 The bundle target is **not met, and the last 12.4 kB is not more of the same work.** The
 plan's arithmetic assumed the entry chunk would shrink to ~30 kB and the icon registry to
@@ -422,7 +473,7 @@ so. What is actually left:
 
 | Remaining | Gzip | Notes |
 |---|---:|---|
-| Stylesheet | 13.2 kB | 78.4 kB raw. Unused-utility pruning is **Block 2's open lead**, not Block 3's |
+| Stylesheet | 13.2 kB | **78.5 kB raw.** Unused-utility pruning is **Block 2's open lead**, not Block 3's — and it is the only line here that can still clear the target |
 | React + React-DOM + router | ~53 kB | The floor. Removable only by changing routing |
 | Icon registry (85 lucide icons) | ~8.6 kB | Synchronous by contract — call sites store icon *names*, not components |
 | App code, helmet, react-query | ~37 kB | The application itself |
@@ -567,31 +618,47 @@ instantly.
 Only metrics with distance left to travel appear here. Anything at target moved to the
 ledger at the top.
 
-| Metric | 2026-09-03 | **Today (2026-09-06)** | Target | Block |
+| Metric | 2026-09-06 | **Today (2026-09-08)** | Target | Block |
 |---|---|---|---|---|
 | `SECURITY DEFINER` RPCs granted to `anon` | 2 | **2** | 0 | 1 |
 | Policies that are `USING (true)` | 19 | **19** → 1 after `009` | 1 | 1 |
 | Published secrets not yet rotated | 3 | **3** | 0 | 1 |
 | Booking notification delivery | 0% | **0%** — 8 enquiries stranded | 100% | 1 |
-| Raw palette classes in `src/` | 95 | **94** | 0 or a documented exemption | 2 |
-| Unlabelled form controls | 67 | **0** ✅ | 0 | ✅ 2 |
-| Icon libraries | 2 | **1** ✅ `lucide-react` only | 1 | ✅ 2 |
-| CSS bundle (raw) | 75.6 kB | **76.3 kB** — unmoved by the icon work, as it should have been | < 50 kB | 2 |
-| `jsx-a11y/label-has-for` (deprecated, double-counts) | 109 | **rule removed** ✅ | rule removed after pairing | ✅ 2 |
-| `jsx-a11y/control-has-associated-label` | 87 | **45** — halved as a side effect, not targeted | 0 | 2 |
-| Files importing Supabase directly | 24 | **0** ✅ | 0 | ✅ 3 |
-| Files over 700 lines | 8 | **0** ✅ — longest source file is 295 (Block 3 Tasks 22–27) | 0 over 300 | ✅ 3 |
-| First-load JS (gzip) | 215 kB | **112.4 kB** (Block 3 Tasks 28–31) | < 100 kB | 3 |
-| Lighthouse Performance (mobile) | not measured | **still not measured** — gated in CI as of Block 3 Task 32; the dev sandbox has no Chrome | ≥ 90 | 3 |
+| Migrations written but not applied | 4 (`009`–`012`) | **5** (`009`–`013`) — `013` now also gates the UN page | 0 | 1 |
+| Raw palette classes in `src/` | 94 | **94** — untouched by Block 3 | 0 or a documented exemption | 2 |
+| Unlabelled form controls | 0 | **0** ✅ | 0 | ✅ 2 |
+| Icon libraries | 1 | **1** ✅ `lucide-react` only | 1 | ✅ 2 |
+| CSS bundle (raw) | 76.3 kB | **78.5 kB** — rose again; now the top performance lead | < 50 kB | 2 |
+| Total lint warnings | 168 | **157** | trending to 0 | 2 |
+| `jsx-a11y/control-has-associated-label` | 45 | **33** — fell again as a side effect of decomposition, not targeted | 0 | 2 |
+| Files importing Supabase directly | 0 | **0** ✅ now an ESLint **error**, not a ratchet | 0 | ✅ 3 |
+| Files over 700 lines | 0 | **0** ✅ — longest source file is **295**, held by a CI ratchet | 0 over 300 | ✅ 3 |
+| First-load JS (gzip) | 112.4 kB | **112.3 kB** | < 100 kB | ❌ **missed** — see 2 |
+| Lighthouse Performance (mobile) | not measured | **still not measured** — gate wired, assertion at `warn`; the dev sandbox has no Chrome | ≥ 90 | 3 |
+| UN inventory source | hardcoded array | **database** ✅ in code · 🔑 awaiting migration `013` | database | ✅ 3 |
+| Test files | 36 | **70** | — | ongoing |
 | Property pages in the sitemap | 0 | **0** | all | 5 |
 | `.ts`/`.tsx` files | 0 | **0** | incremental adoption | 6 |
-| axe violations (public + admin + chrome) | not measured | **0** ✅ enforced in CI, 30 assertions | 0 | ✅ 2 |
+| axe violations (public + admin + chrome) | 0 | **0** ✅ enforced in CI, 30 assertions | 0 | ✅ 2 |
 | Themes shipped | 2 | **2** ✅ | 2, both AA | ✅ |
-| JSON-LD geo error | ~500 km | **corrected** ✅ | correct | ✅ 5 |
-| Test coverage | 70.3% statements | **46.6% statements** — floor lowered a second time, see below | ≥ 70% | ongoing |
-| Overall audit score | ~6.5 / 10 | **~7 / 10** | **9 / 10** | — |
+| JSON-LD geo error | corrected | **corrected** ✅ | correct | ✅ 5 |
+| Test coverage | 46.6% statements | **57.1% statements** — floor *raised*, first time, see below | ≥ 70% | ongoing |
+| Overall audit score | ~7 / 10 | **~7 / 10** — unmoved by Block 3, as predicted | **9 / 10** | — |
 
-**Two numbers went the wrong way, and both are left visible rather than re-baselined.**
+**Coverage finally went the right way — and the CSS bundle went the wrong way again.
+Both are left visible rather than re-baselined.**
+
+**Coverage recovered 46.57% → 57.11% statements in Block 3, and the floor was raised for
+the first time since it started falling.** The two give-backs below happened because axe
+suites reached untested ground faster than they covered it; Block 3 covered that ground.
+A data-access layer and a decomposition both force tests onto exactly the surfaces that
+were dragging the denominator, which is what the paragraph below predicted they would do.
+Measured at the end of Block 3: **58.02% lines / 57.11% statements / 48.35% functions /
+46.53% branches**, with each floor set roughly a point beneath its measurement (57 / 56 /
+47 / 45). **The target is still 70% and this is still short of it** — the admin console is
+exercised now, not covered.
+
+**The history below is kept because the reasoning still governs the floor.**
 
 **Coverage fell 70.3% → 60.3%, and the floor was lowered — the first time this repo has
 given back a ratchet.** The axe suite renders six public pages that had no suite of their
@@ -626,16 +693,21 @@ each time was between lowering the number and deleting the gate that revealed it
 deleting a WCAG gate to protect a coverage percentage is the tail wagging the dog. What
 46.57% now says is true — **admin is almost entirely untested** — and that was equally true
 yesterday, merely invisible. Block 3 is where it is repaid, because a data-access layer and
-decomposition both require tests for exactly these surfaces.
+decomposition both require tests for exactly these surfaces. **That is now the one
+prediction in this document that paid out exactly as written: 46.57% → 57.11%.**
 
-**The CSS bundle rose 75.6 → 76.3 kB** despite the migration finishing, which retires the
-theory that the excess was two vocabularies coexisting. Block 2 then retired the second
-theory too: the icon consolidation landed and **the stylesheet did not move by one byte**,
-because icons are JavaScript. Two wrong predictions in a row on this line; the remaining
-lead is unused-utility pruning, and it should be measured before it is scheduled.
+**The CSS bundle rose 75.6 → 76.3 → 78.5 kB** across three revisions, which retires the
+theory that the excess was two vocabularies coexisting. Block 2 retired the second theory:
+the icon consolidation landed and **the stylesheet did not move by one byte**, because
+icons are JavaScript. Block 3 supplied the third data point — every JS number halved and
+**the stylesheet grew again.** Three wrong or empty predictions on this line; the remaining
+lead is unused-utility pruning, it should be measured before it is scheduled, and it is
+now load-bearing for a target in another block.
 
 **The score is capped at roughly 7 until Block 1 is executed, and no amount of further
-coding lifts it.**
+coding lifts it. Block 3 is the demonstration:** a data layer, a full decomposition and
+half the bundle, all delivered, and the number did not move — because none of it touched
+the anon key that can still read customer PII.
 
 ---
 
@@ -651,8 +723,8 @@ started.
 **For each agent-executable block, generate the plan when you start it:**
 
 ```
-/superpowers:writing-plans Block 2 of ROADMAP.md — the icon consolidation,
-the admin labels, and extending the axe gate over the admin console
+/superpowers:writing-plans Block 4 of ROADMAP.md — the UI revamp, starting with
+direction and the International surface
 ```
 
 **Four rules that have held so far and should keep holding.**
@@ -664,12 +736,17 @@ the admin labels, and extending the axe gate over the admin console
    console-in-dist — is held by CI, not by intention. When a defect is too large to fix at
    once, ship a ratchet rather than an error: a rule that fails the build on arrival with
    96 violations gets switched off within a day, and then nothing is enforced at all.
-3. **Measure, don't assert.** Every count here was re-measured on 2026-09-06. A roadmap
-   that gets more accurate is working; one whose numbers only ever improve is being marked
-   by the person who wrote it. This revision earns that on three counts: **coverage fell**
-   and the floor came down with it, **the CSS bundle rose** and took its explanation with
-   it, and **two parallel Version 10s each claimed work the other had not seen** — which
-   is the failure mode a document like this exists to prevent and did not.
+3. **Measure, don't assert.** Every count here was re-measured on 2026-09-08 by running
+   the ratchets, ESLint and a production build. A roadmap that gets more accurate is
+   working; one whose numbers only ever improve is being marked by the person who wrote
+   it. This revision earns that on two counts: **the bundle target was missed** and is
+   recorded as missed rather than moved, and **the CSS bundle rose a third time** and
+   took its third failed prediction with it.
+
+   **A specific way this document has been wrong twice: checkboxes lag the prose.**
+   Version 11 carried 3.2 and 3.3 as unticked while the paragraphs beneath them described
+   the work as landed — so the roadmap under-reported real progress for two days. Tick the
+   box in the commit that does the work, or the ledger and the checklist drift apart.
 4. **Work in one place, or reconcile immediately.** Two agents working from the same
    commit produced two Version 10s, two migrations of the same seven files, and a merge
    with eleven conflicts. Nothing was lost — the hand-migrated structure survived and the
