@@ -72,6 +72,55 @@ describe('Button', () => {
     );
     expect(screen.getByRole('link')).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
+
+  it('presses in on active, using the signature curve', () => {
+    // The tactility of a native control is almost entirely this: a small, fast
+    // scale-down on press. Without it a button is a coloured rectangle.
+    const { container } = render(<Button>Book a viewing</Button>);
+    const className = container.firstChild.className;
+
+    expect(className).toMatch(/active:scale-\[0\.97\]/);
+    expect(className).toMatch(/ease-spring/);
+  });
+
+  it('transitions transform as well as colour', () => {
+    // `transition-colors` cannot animate a scale. This was the actual defect:
+    // the press state would have snapped, because only colour was in the list.
+    const { container } = render(<Button>Book a viewing</Button>);
+    expect(container.firstChild.className).toMatch(
+      /transition-\[transform,background-color,box-shadow\]/
+    );
+  });
+
+  it('holds still for a visitor who asked the OS to stop moving things', () => {
+    const { container } = render(<Button>Book a viewing</Button>);
+    const className = container.firstChild.className;
+    expect(className).toMatch(/motion-reduce:transition-none/);
+    expect(className).toMatch(/motion-reduce:active:scale-100/);
+  });
+
+  it('does not press in while disabled, since nothing will happen', () => {
+    const { container } = render(<Button disabled>Book a viewing</Button>);
+    expect(container.firstChild.className).toMatch(/disabled:active:scale-100/);
+  });
+
+  it('gives the primary variant a lifted shadow', () => {
+    const { container } = render(<Button variant="primary">Go</Button>);
+    expect(container.firstChild.className).toMatch(/shadow-raised/);
+  });
+
+  it('offers a glass variant for controls sitting on a photograph', () => {
+    // A solid fill inside a frosted panel punches a hole in the material; a
+    // ghost button over a photograph disappears into it. This is the third
+    // thing, and it keeps its own border for the same reason the panel does.
+    const { container } = render(<Button variant="glass">Search</Button>);
+    const className = container.firstChild.className;
+    expect(className).toMatch(/bg-glass-strong/);
+    expect(className).toMatch(/border-glass-border/);
+    // The stylesheet's reduced-transparency and no-backdrop-filter fallbacks
+    // bind to this class; without it the control keeps a tint it cannot justify.
+    expect(className).toMatch(/\bglass-surface\b/);
+  });
 });
 
 describe('Badge', () => {
@@ -97,6 +146,33 @@ describe('Card', () => {
     const onClick = vi.fn();
     render(<Card onClick={onClick}>Pick me</Card>);
     expect(screen.getByRole('button', { name: /pick me/i })).toBeInTheDocument();
+  });
+
+  it('lifts on hover when it is a control, and only then', () => {
+    // A card that lifts under the cursor but does nothing when clicked is a
+    // promise the interface does not keep.
+    const { container: staticCard } = render(<Card>Listing</Card>);
+    expect(staticCard.firstChild.className).not.toMatch(/hover:-translate-y/);
+
+    const { container: clickable } = render(<Card onClick={() => {}}>Listing</Card>);
+    expect(clickable.firstChild.className).toMatch(/hover:-translate-y-1/);
+    expect(clickable.firstChild.className).toMatch(/ease-spring/);
+  });
+
+  it('settles back down under the finger, so the press is felt and not just seen', () => {
+    const { container } = render(<Card onClick={() => {}}>Listing</Card>);
+    const className = container.firstChild.className;
+    expect(className).toMatch(/active:translate-y-0/);
+    expect(className).toMatch(/active:scale-\[0\.99\]/);
+    expect(className).toMatch(/motion-reduce:hover:translate-y-0/);
+  });
+
+  it('sits on the material layer\u2019s radius and elevation, not Tailwind defaults', () => {
+    // `rounded-xl shadow-sm` was an 8px corner with a hairline grey shadow --
+    // the second-most-obvious tell after the typeface, per DESIGN.md.
+    const { container } = render(<Card>Listing</Card>);
+    expect(container.firstChild.className).toMatch(/rounded-lg/);
+    expect(container.firstChild.className).toMatch(/shadow-raised/);
   });
 });
 
