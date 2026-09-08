@@ -49,6 +49,14 @@ export default defineConfig({
       // Each floor sits ~1 point under its measurement: enough headroom that
       // ordinary work does not trip CI, tight enough that deleting a suite does.
       //
+      // Ratcheted again at the end of Block 3 (Tasks 22-34), which measured
+      // 58.02 lines / 57.11 statements / 48.35 functions / 46.53 branches.
+      // The percentages FELL against Slice 4B while the tests grew, because
+      // decomposition added ~60 new modules to the denominator faster than it
+      // added tests: the same behaviour, spread over more files. The floors
+      // move to ~1 point under the new measurement, which is still well above
+      // where Block 3 found them (51/42/40/50).
+      //
       // Ratcheted again after the 4C surface passes, which measured
       // 70.61 lines / 69.78 statements / 57.45 functions / 60.09 branches.
       // The jump is not new test-writing so much as the surface migrations
@@ -120,10 +128,10 @@ export default defineConfig({
       // Measured on 2026-09-07: 52.73% lines / 51.66% statements / 41.48%
       // functions / 43.86% branches. Each floor sits ~1 point under.
       thresholds: {
-        lines: 51,
-        functions: 40,
-        branches: 42,
-        statements: 50
+        lines: 57,
+        functions: 47,
+        branches: 45,
+        statements: 56
       }
     },
     include: ['**/*.{test,spec}.{js,jsx}'],

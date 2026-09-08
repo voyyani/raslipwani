@@ -9,7 +9,7 @@ import Icon from '../Icon';
  * an email link appeared. Those are the two props below; everything else was
  * already identical, drift included.
  */
-const CalendarEventCard = ({ booking, formatDate, onSelect, onStatusChange, detailsLabel, showEmail }) => (
+const CalendarEventCard = ({ booking, formatDate, onSelect, onStatusChange, detailsLabel = 'Details', showEmail = false }) => (
 <div 
   key={booking.id} 
   className={`p-4 rounded-lg border-l-4 shadow-sm ${
@@ -91,9 +91,5 @@ CalendarEventCard.propTypes = {
   showEmail: PropTypes.bool,
 };
 
-CalendarEventCard.defaultProps = {
-  detailsLabel: 'Details',
-  showEmail: false,
-};
 
 export default CalendarEventCard;

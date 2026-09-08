@@ -8,7 +8,7 @@ import SidebarLink from './SidebarLink';
  * the sign-out. Moved out of `AdminLayout.jsx` (Task 27) unchanged.
  */
 const AdminSidebar = ({
-  navSections, isOpen, isCollapsed, isActive, user, onClose, onToggleCollapse, onLogout,
+  navSections, isOpen, isCollapsed, isActive, user = null, onClose, onToggleCollapse, onLogout,
 }) => (
 <aside 
   className={`
@@ -131,8 +131,5 @@ AdminSidebar.propTypes = {
   onLogout: PropTypes.func.isRequired,
 };
 
-AdminSidebar.defaultProps = {
-  user: null,
-};
 
 export default AdminSidebar;

@@ -39,8 +39,8 @@ const ContactDetailsStep = ({
   minDate,
   notesLabel,
   notesPlaceholder,
-  aside,
-  onBack,
+  aside = null,
+  onBack = null,
   submitLabel,
   busyLabel,
   isSubmitting,
@@ -152,11 +152,5 @@ ContactDetailsStep.propTypes = {
   isSubmitting: PropTypes.bool.isRequired,
 };
 
-ContactDetailsStep.defaultProps = {
-  minDate: undefined,
-  notesPlaceholder: undefined,
-  aside: null,
-  onBack: null,
-};
 
 export default ContactDetailsStep;

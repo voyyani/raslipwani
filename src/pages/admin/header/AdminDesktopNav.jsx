@@ -9,7 +9,7 @@ import { adminNavItems } from './adminNavItems';
  * The admin header's desktop navigation and its dropdowns. Moved out of
  * `AdminHeader.jsx` (Task 27) unchanged.
  */
-const AdminDesktopNav = ({ isOnAdminDashboard, openDropdown, isScrolled, onDropdownChange }) => {
+const AdminDesktopNav = ({ isOnAdminDashboard, openDropdown = null, isScrolled, onDropdownChange }) => {
   const location = useLocation();
   const navItems = adminNavItems(isOnAdminDashboard);
 
@@ -93,8 +93,5 @@ AdminDesktopNav.propTypes = {
   onDropdownChange: PropTypes.func.isRequired,
 };
 
-AdminDesktopNav.defaultProps = {
-  openDropdown: null,
-};
 
 export default AdminDesktopNav;

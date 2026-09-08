@@ -10,7 +10,7 @@ import Textarea from './../ui/Textarea';
  * Moved out of `PropertyInterests.jsx` (Task 27) unchanged.
  */
 const PropertyInterestForm = ({
-  searchTerm, searchResults, searchLoading, selectedProperty, interestLevel, notes,
+  searchTerm, searchResults, searchLoading, selectedProperty = null, interestLevel, notes,
   isSubmitting, formatCurrency,
   onSearchTermChange, onSelectProperty, onInterestLevelChange, onNotesChange, onSubmit, onCancel,
 }) => (
@@ -124,8 +124,5 @@ PropertyInterestForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
 };
 
-PropertyInterestForm.defaultProps = {
-  selectedProperty: null,
-};
 
 export default PropertyInterestForm;

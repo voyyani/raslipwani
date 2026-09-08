@@ -103,7 +103,11 @@ describe('ServicesMain', () => {
       property_id: null,
     });
     expect(record.appointment_at).toContain('2030-01-15');
-  });
+    // 30s, not the global 15s: this walks three steps and types five fields
+    // into a controlled form, and `npm run test:coverage` runs it under v8
+    // instrumentation, which roughly triples it. Sized for the slowest way it
+    // is run rather than the fastest.
+  }, 30000);
 
   it('goes back to an earlier step without losing what was typed', async () => {
     const user = userEvent.setup({ delay: null });

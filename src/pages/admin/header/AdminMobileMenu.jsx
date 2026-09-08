@@ -9,7 +9,7 @@ import { adminNavItems } from './adminNavItems';
  * The admin header's mobile menu. Moved out of `AdminHeader.jsx` (Task 27)
  * unchanged.
  */
-const AdminMobileMenu = ({ isOpen, isOnAdminDashboard, openMobileDropdown, onDropdownChange, onClose }) => {
+const AdminMobileMenu = ({ isOpen, isOnAdminDashboard, openMobileDropdown = null, onDropdownChange, onClose }) => {
   const navItems = adminNavItems(isOnAdminDashboard);
 
   return (
@@ -193,8 +193,5 @@ AdminMobileMenu.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-AdminMobileMenu.defaultProps = {
-  openMobileDropdown: null,
-};
 
 export default AdminMobileMenu;

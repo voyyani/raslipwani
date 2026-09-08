@@ -12,7 +12,7 @@ import PropertySkeleton from './PropertySkeleton';
  * grid itself. Moved out of `Properties.jsx` (Task 25) unchanged.
  */
 const PropertyGrid = ({
-  properties, filteredProperties, suggestedProperties, activeFilters, isLoading, error,
+  properties, filteredProperties, suggestedProperties, activeFilters, isLoading, error = null,
   onSelect, onToggleFilters, onRemoveFilter, onReset,
 }) => (
 <div className="flex-1">
@@ -181,8 +181,5 @@ PropertyGrid.propTypes = {
   onReset: PropTypes.func.isRequired,
 };
 
-PropertyGrid.defaultProps = {
-  error: null,
-};
 
 export default PropertyGrid;

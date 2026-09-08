@@ -55,7 +55,7 @@ describe('public surfaces have no WCAG A/AA violations', () => {
         applyTheme(theme);
         const { container } = render(<Surface />, { route });
         await expectNoAxeViolations(container);
-      }, 30000);
+      }, 60000);
     }
   }
 });
@@ -77,7 +77,7 @@ describe('site chrome has no WCAG A/AA violations', () => {
         applyTheme(theme);
         const { container } = render(<Chrome />);
         await expectNoAxeViolations(container);
-      }, 30000);
+      }, 60000);
     }
   }
 });

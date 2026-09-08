@@ -6,7 +6,7 @@ import { TrendingUp } from 'lucide-react';
  * The investment calculator's results panel. Moved out of
  * `InvestmentCalculator.jsx` (Task 27) unchanged.
  */
-const CalculatorResults = ({ results, inputs, formatCurrency }) => (
+const CalculatorResults = ({ results = null, inputs, formatCurrency }) => (
 <div className="space-y-6">
   {/* Key Metrics */}
   <div className="bg-gradient-to-br from-brand to-indigo-700 rounded-2xl shadow-xl p-8 text-content-on-media">
@@ -131,8 +131,5 @@ CalculatorResults.propTypes = {
   formatCurrency: PropTypes.func.isRequired,
 };
 
-CalculatorResults.defaultProps = {
-  results: null,
-};
 
 export default CalculatorResults;

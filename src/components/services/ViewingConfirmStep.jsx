@@ -126,8 +126,5 @@ ViewingConfirmStep.propTypes = {
   onContinue: PropTypes.func.isRequired,
 };
 
-ViewingConfirmStep.defaultProps = {
-  experience: undefined,
-};
 
 export default ViewingConfirmStep;

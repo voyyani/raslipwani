@@ -54,6 +54,11 @@ describe('admin surfaces have no WCAG A/AA violations', () => {
   beforeEach(() => signInAsAdmin());
   afterEach(clearTheme);
 
+  // 60s per surface, not the global 15s: axe walks a fully rendered admin page
+  // (FullCalendar and all), and `npm run test:coverage` runs it under v8
+  // instrumentation, which roughly triples it. These are the slowest tests in
+  // the suite by an order of magnitude and the number is sized for the slowest
+  // way they are run, on the smallest machine that runs them.
   for (const [name, Surface, route] of SURFACES) {
     for (const theme of THEMES) {
       it(`${name} — ${theme}`, async () => {
@@ -78,7 +83,7 @@ describe('admin surfaces have no WCAG A/AA violations', () => {
         );
 
         await expectNoAxeViolations(container);
-      }, 30000);
+      }, 60000);
     }
   }
 });
@@ -98,7 +103,7 @@ describe('admin chrome has no WCAG A/AA violations', () => {
         applyTheme(theme);
         const { container } = render(<Chrome />);
         await expectNoAxeViolations(container);
-      }, 30000);
+      }, 60000);
     }
   }
 });

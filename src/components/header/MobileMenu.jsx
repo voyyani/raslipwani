@@ -19,7 +19,7 @@ const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
  * of the tab order while closed — `AnimatePresence` unmounted it instead, and
  * `aria-controls` pointed at nothing for as long as the menu was shut.
  */
-const MobileMenu = ({ isOpen, openMobileDropdown, onDropdownChange, onClose }) => (
+const MobileMenu = ({ isOpen, openMobileDropdown = null, onDropdownChange, onClose }) => (
 <>
       {/* Backdrop. `aria-hidden` and not focusable: the panel's own controls
           are the way out, and the click target is a convenience. */}
@@ -226,8 +226,5 @@ MobileMenu.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-MobileMenu.defaultProps = {
-  openMobileDropdown: null,
-};
 
 export default MobileMenu;

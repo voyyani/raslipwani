@@ -10,7 +10,7 @@ const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
  * The desktop navigation bar and its dropdowns. Moved out of `Header.jsx`
  * (Task 27) unchanged.
  */
-const DesktopNav = ({ openDropdown, isScrolled, onDropdownChange }) => {
+const DesktopNav = ({ openDropdown = null, isScrolled, onDropdownChange }) => {
   const location = useLocation();
 
   return (
@@ -133,8 +133,5 @@ DesktopNav.propTypes = {
   onDropdownChange: PropTypes.func.isRequired,
 };
 
-DesktopNav.defaultProps = {
-  openDropdown: null,
-};
 
 export default DesktopNav;
