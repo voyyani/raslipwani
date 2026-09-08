@@ -15,62 +15,13 @@ import {
  * Block 3 Task 33/34 moves `unProperties` into the database; keeping it as one
  * exported array here is the shape that swap replaces.
  */
-export const unProperties = [
-  {
-    id: 1,
-    title: 'Executive Apartment - Gigiri',
-    address: '500m from UN Complex, Gigiri',
-    price: 2500,
-    bedrooms: 3,
-    bathrooms: 2,
-    size: 150,
-    furnished: true,
-    security: '24/7 Armed Security',
-    parking: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
-    amenities: ['High-speed Internet', 'Generator Backup', 'Water Backup', 'DSTV', 'Gym', 'Swimming Pool'],
-    distance: '500m to UN',
-    availableFrom: '2026-02-01',
-    leaseTerms: 'Minimum 6 months',
-    preferredTenants: 'UN Staff, Diplomats, International NGOs'
-  },
-  {
-    id: 2,
-    title: 'Luxury Villa - Runda',
-    address: 'Runda Estate, 3km from UN',
-    price: 4500,
-    bedrooms: 4,
-    bathrooms: 3,
-    size: 280,
-    furnished: true,
-    security: 'Gated Community with 24/7 Security',
-    parking: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
-    amenities: ['High-speed Internet', 'Generator', 'Water Backup', 'Garden', 'Staff Quarters', 'Pool'],
-    distance: '3km to UN',
-    availableFrom: '2026-02-15',
-    leaseTerms: 'Minimum 12 months',
-    preferredTenants: 'Senior UN Officials, Ambassadors'
-  },
-  {
-    id: 3,
-    title: 'Modern Townhouse - Rosslyn',
-    address: 'Rosslyn Valley, 4km from UN',
-    price: 1800,
-    bedrooms: 3,
-    bathrooms: 2.5,
-    size: 180,
-    furnished: true,
-    security: 'Perimeter Wall + Security Guard',
-    parking: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
-    amenities: ['High-speed Internet', 'Generator', 'DSTV', 'Modern Kitchen', 'Balcony'],
-    distance: '4km to UN',
-    availableFrom: '2026-02-01',
-    leaseTerms: 'Flexible 3-12 months',
-    preferredTenants: 'UN Consultants, International Professionals'
-  }
-];
+/*
+ * `unProperties` used to live here: three listings with Unsplash photographs,
+ * invented prices and an availability date already in the past. Migration 013
+ * added `properties.segment`, the seed carries those three rows minus what was
+ * invented, and `UnHousingProperties.jsx` reads them through
+ * `propertyQueries.segment('un-diplomatic')` (Task 34).
+ */
 
 export const unServices = [
   {

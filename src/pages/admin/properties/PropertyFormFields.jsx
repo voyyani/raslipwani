@@ -157,6 +157,21 @@ const PropertyFormFields = ({
         <option value="sold">Sold</option>
         <option value="off-market">Off Market</option>
       </Select>
+
+      {/* The vocabulary migration 013's CHECK allows, so an admin cannot type a
+          value the database will reject. The segment pages under /international
+          read these. */}
+      <Select
+        label="Audience"
+        name="segment"
+        value={formData.segment}
+        onChange={onInputChange}
+      >
+        <option value="">General market</option>
+        <option value="un-diplomatic">UN &amp; diplomatic</option>
+        <option value="corporate">Corporate</option>
+        <option value="student">Student</option>
+      </Select>
     </div>
 
     <div className="bg-surface p-4 rounded-lg">

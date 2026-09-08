@@ -3,7 +3,7 @@ import { __client as supabase } from '@/services/client';
 import { mockFrom } from '@/test/utils/supabaseQueryMock';
 import {
   listFeatured, listAll, listRecentProperties, listPage, getById, updateProperty, setFeatured,
-  searchProperties, propertyQueries,
+  searchProperties, listBySegment, propertyQueries,
 } from '../properties';
 import { ServiceError } from '../unwrap';
 import { queryKeys } from '../queryKeys';
@@ -41,6 +41,25 @@ describe('listFeatured', () => {
   it('throws a ServiceError when the query fails', async () => {
     mockFrom(supabase, { properties: { data: null, error: { message: 'denied' } } });
     await expect(listFeatured()).rejects.toBeInstanceOf(ServiceError);
+  });
+});
+
+describe('listBySegment', () => {
+  it('asks for one audience, available only, newest first', async () => {
+    const builders = mockFrom(supabase, { properties: { data: [row], error: null } });
+
+    await expect(listBySegment('un-diplomatic')).resolves.toEqual([row]);
+
+    expect(builders.properties.eq).toHaveBeenCalledWith('segment', 'un-diplomatic');
+    expect(builders.properties.eq).toHaveBeenCalledWith('status', 'available');
+    expect(builders.properties.order).toHaveBeenCalledWith('created_at', { ascending: false });
+  });
+
+  it('is keyed by the segment, so two audiences cannot share a cache entry', () => {
+    expect(propertyQueries.segment('un-diplomatic').queryKey)
+      .toEqual(queryKeys.properties.segment('un-diplomatic'));
+    expect(propertyQueries.segment('corporate').queryKey)
+      .not.toEqual(propertyQueries.segment('un-diplomatic').queryKey);
   });
 });
 

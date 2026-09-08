@@ -10,6 +10,9 @@ const EMPTY_FORM = {
   property_type: '',
   status: 'available',
   purpose: 'sale',
+  // The audience this listing is marketed to. '' is the general market, which
+  // the database stores as NULL — see `toSubmitData` and migration 013.
+  segment: '',
   location: '',
   address: '',
   bedrooms: '',
@@ -32,6 +35,7 @@ function formFromProperty(property) {
     property_type: property.property_type,
     status: property.status,
     purpose: property.purpose || 'sale',
+    segment: property.segment || '',
     location: property.location,
     address: property.address || '',
     bedrooms: property.bedrooms,
@@ -169,6 +173,11 @@ export function usePropertyForm(property) {
       numericFields.forEach((field) => {
         if (submitData[field]) submitData[field] = Number(submitData[field]);
       });
+
+      // The general market is NULL in the database, not ''. Migration 013's
+      // CHECK allows NULL or one of three names, and '' is neither — sending
+      // the empty string would fail the write.
+      submitData.segment = submitData.segment || null;
 
       return submitData;
     },

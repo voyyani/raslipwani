@@ -47,6 +47,24 @@ export async function listAvailable() {
 }
 
 /** The public /properties grid, which filters client-side after one fetch. */
+/**
+ * Everything listed to one audience — the UN and diplomatic page is the first
+ * caller. `status = 'available'` because a segment page is a shop window, not
+ * an archive.
+ */
+export async function listBySegment(segment) {
+  const db = await getSupabase();
+  return unwrapList(
+    await db
+      .from(TABLE)
+      .select('*')
+      .eq('segment', segment)
+      .eq('status', 'available')
+      .order('created_at', { ascending: false }),
+    { table: TABLE, operation: 'listBySegment' }
+  );
+}
+
 export async function listAll({ sortField = 'created_at', sortDirection = 'desc' } = {}) {
   const db = await getSupabase();
   return unwrapList(
@@ -184,6 +202,12 @@ export const propertyQueries = {
     queryKey: queryKeys.properties.available(),
     queryFn: () => listAvailable(),
     staleTime: STALE_TIME.standard,
+  }),
+  segment: (segment) => ({
+    queryKey: queryKeys.properties.segment(segment),
+    queryFn: () => listBySegment(segment),
+    staleTime: STALE_TIME.standard,
+    enabled: Boolean(segment),
   }),
   all: (sort = {}) => ({
     queryKey: queryKeys.properties.list(sort),

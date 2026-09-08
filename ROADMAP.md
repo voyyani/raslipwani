@@ -388,13 +388,24 @@ First load is **215 kB gzip** against a **< 100 kB** target.
 - [ ] Route-level code splitting on the public side (admin is already lazy).
 - [ ] Lighthouse in CI as a gate, mobile profile.
 
-### 3.4 — Move `UNHousing.jsx`'s hardcoded inventory into the database
+### 3.4 — Move `UNHousing.jsx`'s hardcoded inventory into the database ✅ *(code done; one owner step)*
 
-`UNHousing.jsx:27+` embeds a literal `unProperties` array with Unsplash placeholders,
-invented prices and fixed dates (`2026-02-01`) that will silently go stale. Model these as
-`properties` rows with a segment tag so the admin CRM manages them. **Needs a migration, so
-it is blocked on Block 1.** Until then the page ships placeholder inventory: a known,
-temporary defect, not a finished state.
+`UNHousing.jsx` embedded a literal `unProperties` array with Unsplash placeholders,
+invented prices and fixed dates (`2026-02-01`) that would silently go stale.
+
+**Done (Block 3 Tasks 33–34):** migration `013_property_segments.sql` adds
+`properties.segment` with a CHECK and a partial index; the page reads
+`propertyQueries.segment('un-diplomatic')` and carries a real empty state; the admin
+property form has an Audience field offering exactly the vocabulary the CHECK allows. Five
+fields that were prose with no column behind them (`distance`, `security`, `parking`,
+`preferredTenants`, `leaseTerms`) are rendered from `description` rather than becoming five
+columns for one page.
+
+**Owner step, outstanding:** run `supabase/migrations/013_property_segments.sql`, then
+`supabase/seeds/013_un_inventory.sql`, then confirm three rows come back from
+`select id, title, price, segment from properties where segment = 'un-diplomatic';`. Until
+that runs the page renders its empty state — which is honest, where the placeholder array
+was not.
 
 **Exit:** zero direct Supabase imports in components and pages · no file over 300 lines ·
 first-load JS **under 100 kB gzip** · Lighthouse Performance ≥ 90 mobile · UN inventory
