@@ -25,6 +25,16 @@ import useDialog from './useDialog';
  * All four live in `useDialog`, not here, so that the one surface which cannot
  * wear this chrome — the full-bleed property gallery — still gets them.
  *
+ * ## Why the dialog is glass
+ *
+ * A modal is the one surface that is unambiguously *over* the page rather than
+ * part of it, which is DESIGN.md's own test for when glass is warranted. The
+ * two composited surfaces it costs — a blurred scrim and the panel — are inside
+ * the three-per-viewport cap because a modal suppresses the page's own panels
+ * behind it. The scrim is `scrim` rather than `surface-inverse`: an inverse
+ * surface is light in dark mode, so the old backdrop *brightened* the page it
+ * was meant to push back.
+ *
  * The portal matters for the same reason the trap does: rendering in place means
  * the dialog inherits the stacking and `overflow` of whatever contained it, and
  * a dialog clipped by an ancestor's `overflow: hidden` is a dialog with content
@@ -65,7 +75,7 @@ const Modal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         data-testid="modal-backdrop"
-        className="absolute inset-0 bg-surface-inverse/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-scrim/40 backdrop-blur-sm"
         onClick={closeOnBackdrop ? onClose : undefined}
         // The backdrop is a convenience for pointer users; Escape and the close
         // button are the real affordances, so it stays out of the a11y tree.
@@ -80,7 +90,8 @@ const Modal = ({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={`relative w-full ${SIZES[size] ?? SIZES.md} max-h-[90vh] overflow-y-auto
-          bg-surface-raised border border-line rounded-2xl shadow-xl focus:outline-none ${className}`}
+          glass-surface bg-glass-strong backdrop-blur-glass-strong backdrop-saturate-glass
+          border border-glass-border rounded-xl shadow-glass focus:outline-none ${className}`}
       >
         <div className="flex items-start justify-between gap-4 p-6 border-b border-line">
           <div>
@@ -97,7 +108,7 @@ const Modal = ({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg p-2 text-content-muted hover:bg-surface-sunken
+            className="shrink-0 rounded-md p-2 text-content-muted hover:bg-surface-sunken
               hover:text-content focus:outline-none focus-visible:ring-2
               focus-visible:ring-focus-ring"
           >

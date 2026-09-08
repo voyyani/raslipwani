@@ -51,6 +51,27 @@ describe('Modal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('presents the dialog on glass over a blurred backdrop', () => {
+    // A dialog is the one surface that is unambiguously over the page rather
+    // than part of it, which is DESIGN.md's own test for when glass is earned.
+    openModal();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.className).toMatch(/bg-glass-strong/);
+    expect(dialog.className).toMatch(/backdrop-blur-glass-strong/);
+    expect(dialog.className).toMatch(/border-glass-border/);
+    // The fallback hook: without it, a browser with no `backdrop-filter` shows
+    // an 88%-white panel with the unblurred page legible straight through it.
+    expect(dialog.className).toMatch(/\bglass-surface\b/);
+  });
+
+  it('pushes the page back with a scrim rather than an inverse surface', () => {
+    // `surface-inverse` is LIGHT in dark mode, so the old backdrop brightened
+    // the very page it was supposed to suppress.
+    openModal();
+    expect(screen.getByTestId('modal-backdrop').className).toMatch(/bg-scrim\/40/);
+    expect(screen.getByTestId('modal-backdrop').className).not.toMatch(/surface-inverse/);
+  });
+
   it('closes when the backdrop is clicked but not when the panel is', async () => {
     const onClose = vi.fn();
     openModal({ onClose });
