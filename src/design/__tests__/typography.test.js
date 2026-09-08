@@ -18,7 +18,11 @@ const tailwind = readFileSync(resolve(ROOT, 'tailwind.config.js'), 'utf8');
  */
 describe('font strategy', () => {
   it('ships no render-blocking font stylesheet', () => {
-    const links = html.match(/<link[^>]+fonts\.googleapis\.com[^>]*>/gs) ?? [];
+    // `rel="stylesheet"` specifically: a <link rel="preconnect"> to the same host
+    // is a connection hint, not a stylesheet, and blocks nothing. Matching every
+    // link to fonts.googleapis.com caught the preconnect and failed on it.
+    const links =
+      html.match(/<link[^>]*rel=["']stylesheet["'][^>]*fonts\.googleapis\.com[^>]*>/gs) ?? [];
 
     expect(links.length, 'expected the Poppins link to still be present').toBeGreaterThan(0);
 

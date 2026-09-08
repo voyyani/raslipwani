@@ -35,7 +35,7 @@ Every task's requirements implicitly include this section.
 
 | | |
 |---|---|
-| **First-load budget** | **112.4 kB gzip, unchanged.** `bundle-budget.json` is a ceiling that only falls. The revamp pays for itself — see Task 3 (the font) and Task 17 (the stylesheet). |
+| **First-load budget** | **112.8 kB gzip.** Raised once, in Phase A, by the 0.4 kB the material custom properties cost — those declarations *are* the design layer and cannot be pruned without deleting it. **That is the only raise the revamp gets.** Task 17 repays it by pruning the stylesheet (81.0 kB raw), the sole line in first load with real slack. |
 | **Live blur surfaces** | **≤ 3 `backdrop-filter` surfaces composited per viewport.** Beyond that, use the `glass-static` fallback (gradient + border, no filter). Blur is a GPU cost on the mid-range Android this market actually uses. |
 | **Brand colours** | `brand #0D4B6E` and `accent #FFC107` are **unchanged**. New tints extend the ramps; they never replace those two values. |
 | **Themes** | Two, both AA. Every material token is defined for **both** `light` and `dark`. A value defined in only one theme fails `tokens.test.js`. |
@@ -1143,7 +1143,7 @@ const GlassPanel = React.forwardRef(function GlassPanel(
   ref
 ) {
   const classes = [
-    'relative rounded-xl border border-glass-border shadow-glass',
+    'relative rounded-xl border border-glass shadow-glass',
     blur
       ? `${TONES[tone] ?? TONES.default} backdrop-blur-glass backdrop-saturate-glass`
       : OPAQUE,
@@ -1258,7 +1258,7 @@ const VARIANTS = {
   // For controls sitting on a photograph or inside a GlassPanel, where both a
   // solid fill and a plain ghost would be wrong.
   glass:
-    'bg-glass-strong text-content border border-glass-border backdrop-blur-glass hover:bg-glass',
+    'bg-glass-strong text-content border border-glass backdrop-blur-glass hover:bg-glass',
 };
 ```
 
@@ -1332,7 +1332,7 @@ In `Card.jsx`, extend the class list so the interactive branch adds:
 and the base uses `rounded-lg shadow-raised`.
 
 In `Modal.jsx`, give the backdrop `bg-scrim/40 backdrop-blur-sm` and the dialog surface
-`bg-glass-strong backdrop-blur-glass-strong border border-glass-border rounded-xl shadow-glass`.
+`bg-glass-strong backdrop-blur-glass-strong border border-glass rounded-xl shadow-glass`.
 
 - [ ] **Step 4: Run the tests**
 
@@ -1655,7 +1655,7 @@ floats over whatever is scrolling beneath it.
 
     rerender(<Header scrolled />);
     expect(container.firstChild.className).toMatch(/backdrop-blur-glass/);
-    expect(container.firstChild.className).toMatch(/border-glass-border/);
+    expect(container.firstChild.className).toMatch(/border-glass/);
   });
 ```
 
@@ -1668,7 +1668,7 @@ Expected: FAIL.
 
 Add a `scrolled` prop (defaulting to internal `useState` + a passive `scroll` listener
 thresholded at 24px, cleaned up on unmount). When `scrolled`, apply
-`bg-glass-subtle backdrop-blur-glass backdrop-saturate-glass border-b border-glass-border`;
+`bg-glass-subtle backdrop-blur-glass backdrop-saturate-glass border-b border-glass`;
 when not, `bg-transparent border-b border-transparent`. Transition with
 `transition-[background-color,backdrop-filter] duration-base ease-spring`.
 
