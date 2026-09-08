@@ -1,10 +1,20 @@
 import React from "react";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
 import { logger } from '../utils/logger';
 import Icon from './Icon';
+import CalendarToolbar from './calendar/CalendarToolbar';
+import CalendarSurface from './calendar/CalendarSurface';
+import CalendarEventCard from './calendar/CalendarEventCard';
+
+/**
+ * The bookings calendar: a month/week/day surface, and the appointments in
+ * whichever period is showing. The period header and the appointment card are
+ * their own components (Task 26) — the card because this file carried three
+ * copies of it, one per view.
+ */
 const BookingCalendar = ({
   bookings,
   selectedDate,
@@ -15,7 +25,6 @@ const BookingCalendar = ({
   viewMode,
   updateStatus
 }) => {
-  // Date highlighting for calendar
   const tileClassName = ({ date, view }) => {
     if (view !== 'month') return null;
     
@@ -108,149 +117,26 @@ const BookingCalendar = ({
   return (
     <>
       <div className="bg-surface-raised rounded-xl shadow-md p-4 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigatePeriod(-1)}
-              className="p-2 text-content-muted hover:text-content rounded-full hover:bg-surface-sunken"
-            >
-              <Icon name="chevron-left" />
-            </button>
-            
-            <h2 className="text-xl font-semibold">
-              {viewMode === 'day' && format(selectedDate, 'MMMM d, yyyy')}
-              {viewMode === 'week' && (
-                `${format(startOfWeek(selectedDate, { weekStartsOn: 0 }), 'MMM d')} - 
-                ${format(endOfWeek(selectedDate, { weekStartsOn: 0 }), 'MMM d, yyyy')}`
-              )}
-              {viewMode === 'month' && format(selectedDate, 'MMMM yyyy')}
-            </h2>
-            
-            <button 
-              onClick={() => navigatePeriod(1)}
-              className="p-2 text-content-muted hover:text-content rounded-full hover:bg-surface-sunken"
-            >
-              <Icon name="chevron-right" />
-            </button>
-          </div>
-          
-          <button
-            onClick={() => setSelectedDate(new Date())}
-            className="text-brand hover:text-brand-content text-sm flex items-center"
-          >
-            Today
-          </button>
-        </div>
+        <CalendarToolbar
+          selectedDate={selectedDate}
+          viewMode={viewMode}
+          onNavigate={navigatePeriod}
+          onToday={() => setSelectedDate(new Date())}
+        />
+
         
-        {viewMode === 'day' && (
-          <Calendar
-            onChange={setSelectedDate}
-            value={selectedDate}
-            tileClassName={tileClassName}
-            className="w-full border-0 custom-calendar"
-          />
-        )}
-        
-        {viewMode === 'week' && (
-          <div className="grid grid-cols-7 gap-1 mb-4">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center text-sm font-medium text-content-subtle py-2">
-                {day}
-              </div>
-            ))}
-            
-            {appointments.map(({ date, appointments }) => (
-              <div 
-                key={date.toString()}
-                className={`min-h-32 p-2 border rounded-lg ${
-                  isSameDay(date, new Date())
-                    ? 'border-brand bg-brand-subtle'
-                    : 'border-line'
-                } ${
-                  !isSameMonth(date, selectedDate) ? 'bg-surface opacity-75' : ''
-                }`}
-              >
-                <div className="flex justify-between">
-                  <span className={`text-sm font-medium ${
-                    isSameDay(date, new Date())
-                      ? 'text-brand'
-                      : 'text-content-muted'
-                  }`}>
-                    {format(date, 'd')}
-                  </span>
-                  {appointments.length > 0 && (
-                    <span className="text-xs bg-surface-sunken rounded-full px-2 py-1">
-                      {appointments.length}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-                  {appointments.slice(0, 4).map(app => (
-                    <div 
-                      key={app.id}
-                      className={`text-xs p-1 rounded cursor-pointer truncate ${
-                        app.status === 'confirmed' ? 'bg-success-surface text-success-content' :
-                        app.status === 'cancelled' ? 'bg-danger-surface text-danger-content' :
-                        'bg-warning-surface text-warning-content'
-                      }`}
-                      onClick={() => openBookingModal(app)}
-                      title={`${app.name} - ${formatDate(app.appointment_at)}`}
-                    >
-                      <div className="font-medium truncate">{app.name}</div>
-                      <div className="text-xs text-content-muted truncate">
-                        {format(new Date(app.appointment_at), 'h:mm a')}
-                      </div>
-                    </div>
-                  ))}
-                  {appointments.length > 4 && (
-                    <div className="text-xs text-content-subtle">
-                      +{appointments.length - 4} more
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {viewMode === 'month' && (
-          <Calendar
-            onChange={setSelectedDate}
-            value={selectedDate}
-            view="month"
-            tileClassName={tileClassName}
-            className="w-full border-0 custom-calendar"
-            tileContent={({ date, view }) => {
-              if (view !== 'month') return null;
-              const apps = getAppointmentsForDate(date);
-              return apps.length > 0 ? (
-                <div className="text-center text-xs mt-1">
-                  <span className="bg-brand-subtle text-brand-content rounded-full px-1">
-                    {apps.length}
-                  </span>
-                </div>
-              ) : null;
-            }}
-          />
-        )}
-        
-        <div className="flex flex-wrap gap-4 mt-4">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-accent rounded-full mr-2"></div>
-            <span className="text-sm">Pending</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-success-content rounded-full mr-2"></div>
-            <span className="text-sm">Confirmed</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-brand rounded-full mr-2"></div>
-            <span className="text-sm">Other Bookings</span>
-          </div>
-        </div>
+        <CalendarSurface
+          viewMode={viewMode}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          appointments={appointments}
+          tileClassName={tileClassName}
+          getAppointmentsForDate={getAppointmentsForDate}
+          openBookingModal={openBookingModal}
+          formatDate={formatDate}
+        />
       </div>
-      
+
       <div className="bg-surface-raised rounded-xl shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">
           {viewMode === 'day' && `Appointments for ${selectedDate.toLocaleDateString('en-US', { 
@@ -283,76 +169,17 @@ const BookingCalendar = ({
         ) : (
           <div className="space-y-4">
             {viewMode === 'day' && appointments.map(booking => (
-              <div 
-                key={booking.id} 
-                className={`p-4 rounded-lg border-l-4 shadow-sm ${
-                  booking.status === 'confirmed' ? 'border-success-border bg-success-surface' :
-                  booking.status === 'cancelled' ? 'border-danger-border bg-danger-surface' :
-                  'border-warning-border bg-warning-surface'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-content">{booking.name}</h3>
-                    <p className="text-sm text-content-muted">{booking.service || booking.viewing_type}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    booking.status === 'confirmed' ? 'bg-success-surface text-success-content' :
-                    booking.status === 'cancelled' ? 'bg-danger-surface text-danger-content' :
-                    'bg-warning-surface text-warning-content'
-                  }`}>
-                    {booking.status}
-                  </span>
-                </div>
-                
-                <div className="mt-3">
-                  <p className="text-sm text-content-muted flex items-center">
-                    <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
-                    <span>{formatDate(booking.appointment_at)}</span>
-                  </p>
-                </div>
-                
-                {/* Status Controls */}
-                <div className="flex justify-between mt-4">
-                  <div className="flex gap-2">
-                    {booking.status !== 'confirmed' && (
-                      <button
-                        onClick={() => updateStatus(booking.id, 'confirmed')}
-                        className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
-                        title="Confirm appointment"
-                      >
-                        <Icon name="check" className="mr-1" /> Confirm
-                      </button>
-                    )}
-                    {booking.status !== 'cancelled' && (
-                      <button
-                        onClick={() => updateStatus(booking.id, 'cancelled')}
-                        className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
-                        title="Cancel appointment"
-                      >
-                        <Icon name="times" className="mr-1" /> Cancel
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => openBookingModal(booking)}
-                      className="text-brand hover:text-brand-content text-sm flex items-center"
-                    >
-                      <Icon name="eye" className="mr-1" /> View Details
-                    </button>
-                    <a 
-                      href={`mailto:${booking.email}`}
-                      className="text-purple-600 hover:text-purple-800 text-sm flex items-center"
-                    >
-                      <Icon name="envelope" className="mr-1" /> Email
-                    </a>
-                  </div>
-                </div>
-              </div>
+              <CalendarEventCard
+                key={booking.id}
+                booking={booking}
+                formatDate={formatDate}
+                onSelect={openBookingModal}
+                onStatusChange={updateStatus}
+                detailsLabel="View Details"
+                showEmail
+              />
             ))}
-            
+
             {viewMode === 'week' && appointments.map(day => (
               day.appointments.length > 0 && (
                 <div key={day.date.toString()} className="mb-6">
@@ -361,137 +188,27 @@ const BookingCalendar = ({
                   </h3>
                   <div className="space-y-3">
                     {day.appointments.map(booking => (
-                      <div 
-                        key={booking.id} 
-                        className={`p-4 rounded-lg border-l-4 shadow-sm ${
-                          booking.status === 'confirmed' ? 'border-success-border bg-success-surface' :
-                          booking.status === 'cancelled' ? 'border-danger-border bg-danger-surface' :
-                          'border-warning-border bg-warning-surface'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-medium text-content">{booking.name}</h3>
-                            <p className="text-sm text-content-muted">{booking.service || booking.viewing_type}</p>
-                          </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            booking.status === 'confirmed' ? 'bg-success-surface text-success-content' :
-                            booking.status === 'cancelled' ? 'bg-danger-surface text-danger-content' :
-                            'bg-warning-surface text-warning-content'
-                          }`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                        
-                        <div className="mt-3">
-                          <p className="text-sm text-content-muted flex items-center">
-                            <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
-                            <span>{formatDate(booking.appointment_at)}</span>
-                          </p>
-                        </div>
-                        
-                        {/* Status Controls */}
-                        <div className="flex justify-between mt-4">
-                          <div className="flex gap-2">
-                            {booking.status !== 'confirmed' && (
-                              <button
-                                onClick={() => updateStatus(booking.id, 'confirmed')}
-                                className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
-                                title="Confirm appointment"
-                              >
-                                <Icon name="check" className="mr-1" /> Confirm
-                              </button>
-                            )}
-                            {booking.status !== 'cancelled' && (
-                              <button
-                                onClick={() => updateStatus(booking.id, 'cancelled')}
-                                className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
-                                title="Cancel appointment"
-                              >
-                                <Icon name="times" className="mr-1" /> Cancel
-                              </button>
-                            )}
-                          </div>
-                          
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => openBookingModal(booking)}
-                              className="text-brand hover:text-brand-content text-sm flex items-center"
-                            >
-                              <Icon name="eye" className="mr-1" /> Details
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <CalendarEventCard
+                        key={booking.id}
+                        booking={booking}
+                        formatDate={formatDate}
+                        onSelect={openBookingModal}
+                        onStatusChange={updateStatus}
+                      />
                     ))}
                   </div>
                 </div>
               )
             ))}
-            
+
             {viewMode === 'month' && appointments.map(booking => (
-              <div 
-                key={booking.id} 
-                className={`p-4 rounded-lg border-l-4 shadow-sm ${
-                  booking.status === 'confirmed' ? 'border-success-border bg-success-surface' :
-                  booking.status === 'cancelled' ? 'border-danger-border bg-danger-surface' :
-                  'border-warning-border bg-warning-surface'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-content">{booking.name}</h3>
-                    <p className="text-sm text-content-muted">{booking.service || booking.viewing_type}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    booking.status === 'confirmed' ? 'bg-success-surface text-success-content' :
-                    booking.status === 'cancelled' ? 'bg-danger-surface text-danger-content' :
-                    'bg-warning-surface text-warning-content'
-                  }`}>
-                    {booking.status}
-                  </span>
-                </div>
-                
-                <div className="mt-3">
-                  <p className="text-sm text-content-muted flex items-center">
-                    <Icon name="clock" className="mr-2 text-content-subtle flex-shrink-0" />
-                    <span>{formatDate(booking.appointment_at)}</span>
-                  </p>
-                </div>
-                
-                {/* Status Controls */}
-                <div className="flex justify-between mt-4">
-                  <div className="flex gap-2">
-                    {booking.status !== 'confirmed' && (
-                      <button
-                        onClick={() => updateStatus(booking.id, 'confirmed')}
-                        className="px-3 py-1 bg-success-surface text-success-content rounded-full text-xs flex items-center"
-                        title="Confirm appointment"
-                      >
-                        <Icon name="check" className="mr-1" /> Confirm
-                      </button>
-                    )}
-                    {booking.status !== 'cancelled' && (
-                      <button
-                        onClick={() => updateStatus(booking.id, 'cancelled')}
-                        className="px-3 py-1 bg-danger-surface text-danger-content rounded-full text-xs flex items-center"
-                        title="Cancel appointment"
-                      >
-                        <Icon name="times" className="mr-1" /> Cancel
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => openBookingModal(booking)}
-                      className="text-brand hover:text-brand-content text-sm flex items-center"
-                    >
-                      <Icon name="eye" className="mr-1" /> Details
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <CalendarEventCard
+                key={booking.id}
+                booking={booking}
+                formatDate={formatDate}
+                onSelect={openBookingModal}
+                onStatusChange={updateStatus}
+              />
             ))}
           </div>
         )}
