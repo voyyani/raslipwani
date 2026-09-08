@@ -16,19 +16,17 @@ export default defineConfig(({ command }) => ({
     }
   },
   build: {
-    // Enable code splitting for better caching and faster initial load
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split vendor libraries into separate chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['framer-motion', 'react-calendar'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-icons': ['lucide-react'],
-        }
-      }
-    },
-    // Set chunk size warnings
+    // No manualChunks.
+    //
+    // The four hand-written groups cost more than they bought. `vendor-ui`
+    // grouped framer-motion with react-calendar; framer-motion is imported by
+    // the eagerly-loaded Header, so Rollup preloaded the whole group and every
+    // first-time visitor downloaded an admin calendar library. `vendor-icons`
+    // did the same thing for lucide-react: every route's icons in one eager
+    // chunk. Rollup's default splitting follows the actual import graph, which
+    // is the thing a manual grouping keeps overriding by accident.
+    //
+    // Measured 2026-09-08: first load 220.7 kB -> 210.4 kB gzip.
     chunkSizeWarningLimit: 500,
     // CSS code splitting
     cssCodeSplit: true,
@@ -44,13 +42,10 @@ export default defineConfig(({ command }) => ({
       ? { drop: ['console', 'debugger'] }
       : {},
   // Optimize dependencies
+  // A dev-server pre-bundling hint only. `@supabase/supabase-js` came off this
+  // list when it became a dynamic import: listing it here says "every dev page
+  // load wants this", which is the opposite of what the app now does.
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'framer-motion',
-      '@supabase/supabase-js',
-    ]
+    include: ['react', 'react-dom', 'react-router-dom']
   }
 }))
