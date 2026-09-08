@@ -42,6 +42,27 @@ export function contrastRatio(a, b) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/**
+ * Composite a translucent overlay over an opaque backdrop, returning the colour
+ * the screen actually shows.
+ *
+ * This exists because glass has no fixed colour. Every other value in the token
+ * layer can be checked as written; a panel at 72% opacity can only be checked
+ * *against* something, and the honest something is the worst case a photograph
+ * can put behind it.
+ *
+ * Standard source-over alpha compositing, which is what the compositor does.
+ * Returns lowercase hex so it can be fed straight back into `contrastRatio`.
+ */
+export function compositeOver(overlayHex, alpha, backdropHex) {
+  const overlay = hexToRgb(overlayHex);
+  const backdrop = hexToRgb(backdropHex);
+
+  const channel = (i) => Math.round(overlay[i] * alpha + backdrop[i] * (1 - alpha));
+
+  return `#${[0, 1, 2].map((i) => channel(i).toString(16).padStart(2, '0')).join('')}`;
+}
+
 /** WCAG thresholds, named so a failing assertion says which rule it broke. */
 export const WCAG = {
   /** 1.4.3 — normal-size text, AA. */

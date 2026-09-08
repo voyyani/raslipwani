@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 
 import { renderTokensCss, OUTPUT_PATH } from '../../../scripts/generate-tokens.mjs';
 import { THEMES, tokensFor } from '../tokens';
+import { materialsFor } from '../materials';
 import { hexToRgb } from '../contrast';
 
 /**
@@ -50,6 +51,30 @@ describe('src/styles/tokens.css', () => {
         `--${name}: ${hexToRgb(hex).join(' ')};`
       );
     }
+  });
+
+  it.each(THEMES)('carries every %s material, verbatim', (theme) => {
+    // Colours become `245 249 252` so Tailwind's <alpha-value> slot works.
+    // Materials must not: a length or a cubic-bézier put through that treatment
+    // is no longer a length or a curve.
+    const scope = theme === 'light' ? ':root' : '.dark';
+    const block = onDisk.split(`${scope} {`)[1].split('}')[0];
+
+    for (const [name, value] of Object.entries(materialsFor(theme))) {
+      expect(block, `${scope} is missing --${name}`).toContain(`--${name}: ${value};`);
+    }
+  });
+
+  it('emits materials as raw CSS values rather than as RGB channels', () => {
+    expect(onDisk).toMatch(/--glass-blur:\s*20px;/);
+    expect(onDisk).toMatch(/--radius-lg:\s*20px;/);
+    expect(onDisk).toMatch(/--ease-spring:\s*cubic-bezier\(0\.32, 0\.72, 0, 1\);/);
+    expect(onDisk).toMatch(/--glass-bg:\s*rgb\(255 255 255 \/ 0\.72\);/);
+  });
+
+  it('gives the dark theme its own material values', () => {
+    const dark = onDisk.slice(onDisk.indexOf('.dark {'));
+    expect(dark).toMatch(/--glass-blur:\s*32px;/);
   });
 });
 

@@ -44,6 +44,30 @@
   --scrim: 0 0 0; /* #000000 */
   --surface-chrome: 10 46 70; /* #0A2E46 */
   --surface-chrome-raised: 18 58 84; /* #123A54 */
+
+  /* Materials — see src/design/materials.js and DESIGN.md */
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-bg-strong: rgb(255 255 255 / 0.88);
+  --glass-bg-subtle: rgb(255 255 255 / 0.55);
+  --glass-bg-media: rgb(10 46 70 / 0.78);
+  --glass-border: rgb(255 255 255 / 0.60);
+  --glass-highlight: rgb(255 255 255 / 0.90);
+  --glass-blur: 20px;
+  --glass-blur-strong: 32px;
+  --glass-saturate: 180%;
+  --shadow-glass: 0 1px 2px rgb(11 37 55 / 0.04), 0 8px 24px -4px rgb(11 37 55 / 0.10), 0 24px 48px -12px rgb(11 37 55 / 0.14);
+  --shadow-raised: 0 1px 2px rgb(11 37 55 / 0.05), 0 4px 12px -2px rgb(11 37 55 / 0.08);
+  --shadow-pressed: inset 0 1px 2px rgb(11 37 55 / 0.12);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.30, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
 }
 
 
@@ -86,4 +110,28 @@
   --scrim: 0 0 0; /* #000000 */
   --surface-chrome: 10 46 70; /* #0A2E46 */
   --surface-chrome-raised: 18 58 84; /* #123A54 */
+
+  /* Materials — see src/design/materials.js and DESIGN.md */
+  --glass-bg: rgb(255 255 255 / 0.08);
+  --glass-bg-strong: rgb(255 255 255 / 0.14);
+  --glass-bg-subtle: rgb(255 255 255 / 0.05);
+  --glass-bg-media: rgb(10 46 70 / 0.78);
+  --glass-border: rgb(255 255 255 / 0.14);
+  --glass-highlight: rgb(255 255 255 / 0.22);
+  --glass-blur: 32px;
+  --glass-blur-strong: 48px;
+  --glass-saturate: 140%;
+  --shadow-glass: 0 1px 2px rgb(0 0 0 / 0.24), 0 8px 24px -4px rgb(0 0 0 / 0.40), 0 24px 48px -12px rgb(0 0 0 / 0.52);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.28), 0 4px 12px -2px rgb(0 0 0 / 0.36);
+  --shadow-pressed: inset 0 1px 2px rgb(0 0 0 / 0.40);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.30, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
 }
