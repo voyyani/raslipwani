@@ -129,7 +129,31 @@ export default {
       },
 
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        // The UI face is the platform's own. On iOS and macOS this resolves to
+        // SF Pro, which is the actual typeface the "premium native" brief is
+        // reaching for -- not an imitation of it, and optically sized by the OS.
+        // It also costs zero bytes and zero requests, which is the first
+        // instalment on this revamp's obligation to hold its own budget.
+        //
+        // The outgoing face was Poppins: a geometric sans, and the default of
+        // roughly every startup landing page since 2018. See DESIGN.md.
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"SF Pro Text"',
+          '"Segoe UI Variable Text"',
+          '"Segoe UI"',
+          'Inter',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ],
+
+        // Poppins survives for display headlines only, where its geometry reads
+        // as confident rather than generic. Loaded non-blocking in index.html:
+        // a slow network gets the system face and loses nothing structural.
+        display: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
     },
   },

@@ -11,11 +11,32 @@
     <!-- DNS prefetch for Supabase -->
     <link rel="dns-prefetch" href="https://supabase.co" />
     <!--
-      Poppins is the font tailwind.config.js declares and the one the app actually
-      uses. It is linked here rather than @import-ed from index.css so the browser
-      can discover it in the initial HTML instead of after the CSS bundle parses.
+      Poppins is the DISPLAY face only — hero headlines at weight 600. The UI is
+      set in the platform's own face (see tailwind.config.js), which on iOS and
+      macOS is SF Pro: the typeface this design is actually reaching for, at zero
+      bytes and zero requests.
+
+      Loaded without blocking render. `media="print"` keeps it off the critical
+      path and onload promotes it, so a slow connection paints immediately in the
+      system face rather than staring at invisible text. `display=optional` means
+      a late arrival is simply not used, which is the right trade for a face that
+      styles headlines rather than body copy.
+
+      Weights narrowed 400;500;600;700 -> 600: the other three existed to set body
+      copy, and body copy no longer uses this font.
     -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=optional"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=optional"
+      />
+    </noscript>
     <title>Raslipwani Properties — Real Estate Across Kenya</title>
 
     <!--
