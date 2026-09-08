@@ -1026,6 +1026,30 @@ git commit -m "feat(design): bind glass, radius, elevation and motion to Tailwin
 
 # Phase B — Primitives
 
+> **As built (2026-09-08).** Four deviations, each with a reason:
+>
+> 1. **The opaque fallback is per-tone.** The plan's single `OPAQUE` constant
+>    would have put `content-on-media`'s white text on a white `surface-raised`
+>    panel in light mode — the media tone's own failure, reintroduced by its
+>    fallback. A `glass-media-solid` material was added to both themes.
+> 2. **`.glass-surface` fallbacks in `index.css`.** Browsers without
+>    `backdrop-filter` and visitors with `prefers-reduced-transparency: reduce`
+>    were both getting a translucent panel over an unblurred photograph. Neither
+>    condition is visible to React, so the substitution is CSS.
+> 3. **`noBespokeGlass.test.js` replaces the honour system.** "Only `GlassPanel`
+>    may emit glass" is now a census over `src/`, with `Button` and `Modal`
+>    named as the only other implementations. `data-glass` on every panel makes
+>    the three-per-viewport cap countable.
+> 4. **Button and Card share one commit.** Their contracts live in one test file;
+>    splitting them would have left a commit whose tests do not pass.
+>
+> Phase B's utilities cost 0.9 kB gzip and were paid for in the same phase by
+> moving the maintenance screen's 6 kB stylesheet into its own lazy chunk. First
+> load: **112.1 kB** against the 112.4 kB ceiling, with the stylesheet at 12.9 kB —
+> lower than before the material layer existed. Suite: 75 files, 625 passed,
+> 1 expected fail; axe clean; lint 0 errors; palette 94, file size 295, both at
+> ceiling.
+
 ### Task 8: The `GlassPanel` primitive
 
 One component emits glass. Nothing else may — that is what keeps "≤ 3 live blur surfaces per
@@ -1038,7 +1062,7 @@ viewport" checkable rather than aspirational, and what stops glass leaking onto 
 **Interfaces:**
 - Produces: `<GlassPanel tone="default|strong|subtle" as={elementType} blur={bool} className>`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/components/ui/__tests__/GlassPanel.test.jsx`:
 
@@ -1089,12 +1113,12 @@ describe('GlassPanel', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/components/ui/__tests__/GlassPanel.test.jsx`
 Expected: FAIL — `Cannot find module '../GlassPanel'`
 
-- [ ] **Step 3: Write the component**
+- [x] **Step 3: Write the component**
 
 Create `src/components/ui/GlassPanel.jsx`:
 
@@ -1170,12 +1194,12 @@ GlassPanel.propTypes = {
 export default GlassPanel;
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run: `npx vitest run src/components/ui/__tests__/GlassPanel.test.jsx`
 Expected: PASS (6 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/ui/GlassPanel.jsx src/components/ui/__tests__/GlassPanel.test.jsx
@@ -1196,7 +1220,7 @@ Every button on the site, lifted in one commit.
 - Modify: `src/components/ui/Button.jsx:8-27`
 - Test: `src/components/ui/__tests__/Button.test.jsx` (extend)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to the existing `describe('Button', ...)` in
 `src/components/ui/__tests__/Button.test.jsx`:
@@ -1225,12 +1249,12 @@ Append to the existing `describe('Button', ...)` in
   });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/components/ui/__tests__/Button.test.jsx`
 Expected: FAIL — the base string has `transition-colors` and no `active:` state.
 
-- [ ] **Step 3: Update the base and variants**
+- [x] **Step 3: Update the base and variants**
 
 In `src/components/ui/Button.jsx`, replace `BASE` and `VARIANTS`:
 
@@ -1264,7 +1288,7 @@ const VARIANTS = {
 
 Add `'glass'` to the `variant` PropTypes `oneOf` list.
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `npx vitest run src/components/ui/__tests__/Button.test.jsx`
 Expected: PASS
@@ -1272,7 +1296,7 @@ Expected: PASS
 Run: `npm run test:run`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/ui/Button.jsx src/components/ui/__tests__/Button.test.jsx
@@ -1287,7 +1311,7 @@ git commit -m "feat(ui): give Button native press physics and a glass variant"
 - Modify: `src/components/ui/Card.jsx`, `src/components/ui/Modal.jsx`
 - Test: extend both existing test files
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `src/components/ui/__tests__/Card.test.jsx`:
 
@@ -1314,12 +1338,12 @@ In `src/components/ui/__tests__/Modal.test.jsx`:
   });
 ```
 
-- [ ] **Step 2: Run them and watch them fail**
+- [x] **Step 2: Run them and watch them fail**
 
 Run: `npx vitest run src/components/ui/__tests__/Card.test.jsx src/components/ui/__tests__/Modal.test.jsx`
 Expected: FAIL on both.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `Card.jsx`, extend the class list so the interactive branch adds:
 
@@ -1334,18 +1358,18 @@ and the base uses `rounded-lg shadow-raised`.
 In `Modal.jsx`, give the backdrop `bg-scrim/40 backdrop-blur-sm` and the dialog surface
 `bg-glass-strong backdrop-blur-glass-strong border border-glass-border rounded-xl shadow-glass`.
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `npm run test:run`
 Expected: PASS
 
-- [ ] **Step 5: Verify the accessibility gate still holds**
+- [x] **Step 5: Verify the accessibility gate still holds**
 
 Run: `npm run test:a11y`
 Expected: PASS, 0 violations. Glass changes contrast; this is the first surface-level check
 that the composite maths in Task 5 matches what actually renders.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/ui/Card.jsx src/components/ui/Modal.jsx src/components/ui/__tests__/
