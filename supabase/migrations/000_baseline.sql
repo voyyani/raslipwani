@@ -129,7 +129,10 @@ ALTER TABLE public.properties
   ADD COLUMN IF NOT EXISTS featured      BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS purpose       VARCHAR DEFAULT '',
   ADD COLUMN IF NOT EXISTS status        VARCHAR(20) DEFAULT 'available',
-  ADD COLUMN IF NOT EXISTS updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+  ADD COLUMN IF NOT EXISTS updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- The audience a listing is marketed to; NULL for the general market. Added
+  -- by 013_property_segments.sql, which also carries its CHECK and its index.
+  ADD COLUMN IF NOT EXISTS segment       TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_properties_status     ON public.properties(status);
 CREATE INDEX IF NOT EXISTS idx_properties_purpose    ON public.properties(purpose);
