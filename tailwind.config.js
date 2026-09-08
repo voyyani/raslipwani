@@ -128,6 +128,41 @@ export default {
         dark: '#0A2E46',
       },
 
+      // ---- Glass grounds. ---------------------------------------------------
+      //
+      // Declared on `backgroundColor` and `borderColor` rather than on `colors`,
+      // and that is a budget decision with a measurement behind it. A name under
+      // `colors` is generated for every colour property Tailwind knows —
+      // text-, ring-, divide-, from-, via-, to-, caret-, accent- — which for six
+      // glass names is a few hundred rules nothing will ever use. Glass is a
+      // ground and an edge; it is never a text colour or a gradient stop.
+      //
+      // Values are full `rgb()` rather than channels, because their alpha is part
+      // of the material rather than a modifier a caller chooses. `bg-glass/50` is
+      // therefore deliberately not a thing: a caller who wants a different
+      // opacity wants a different material, and these are the ones DESIGN.md
+      // sanctions.
+      backgroundColor: {
+        glass: {
+          DEFAULT: 'var(--glass-bg)',
+          strong: 'var(--glass-bg-strong)',
+          subtle: 'var(--glass-bg-subtle)',
+          // Over photography. Not interchangeable with the others — see
+          // DESIGN.md, "Why glass-bg-media exists".
+          media: 'var(--glass-bg-media)',
+          // The media ground with the alpha removed, for the panels that cannot
+          // composite: no backdrop-filter, or reduced transparency requested.
+          'media-solid': 'var(--glass-media-solid)',
+        },
+      },
+
+      borderColor: {
+        glass: {
+          DEFAULT: 'var(--glass-border)',
+          highlight: 'var(--glass-highlight)',
+        },
+      },
+
       fontFamily: {
         // The UI face is the platform's own. On iOS and macOS this resolves to
         // SF Pro, which is the actual typeface the "premium native" brief is
@@ -154,6 +189,46 @@ export default {
         // as confident rather than generic. Loaded non-blocking in index.html:
         // a slow network gets the system face and loses nothing structural.
         display: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      },
+
+      // ---- Materials. ------------------------------------------------------
+      //
+      // These resolve to the custom properties generated from
+      // src/design/materials.js, exactly as the colours do — so a component
+      // writes `rounded-lg` and gets whatever DESIGN.md currently says that is,
+      // rather than whatever Tailwind's default scale happened to mean.
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        '2xl': 'var(--radius-2xl)',
+      },
+
+      boxShadow: {
+        glass: 'var(--shadow-glass)',
+        raised: 'var(--shadow-raised)',
+        pressed: 'var(--shadow-pressed)',
+      },
+
+      backdropBlur: {
+        glass: 'var(--glass-blur)',
+        'glass-strong': 'var(--glass-blur-strong)',
+      },
+
+      backdropSaturate: {
+        glass: 'var(--glass-saturate)',
+      },
+
+      transitionTimingFunction: {
+        spring: 'var(--ease-spring)',
+        'out-soft': 'var(--ease-out-soft)',
+      },
+
+      transitionDuration: {
+        fast: 'var(--dur-fast)',
+        base: 'var(--dur-base)',
+        slow: 'var(--dur-slow)',
       },
     },
   },
