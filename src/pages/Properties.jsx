@@ -1,744 +1,261 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { propertyQueries } from '@/services/properties';
+import { useFilters } from '@/hooks/useFilters';
 import PropertyModal from '../components/PropertyModal';
-import Icon from '../components/Icon';
+import PropertySearchHero from './properties/PropertySearchHero';
+import PropertyFilterBar from './properties/PropertyFilterBar';
+import PropertyGrid from './properties/PropertyGrid';
 
-// A stable reference: the "Apply filters and sorting" effect below depends on
-// `properties`, and a fresh `[]` literal on every render (the natural way to
-// default an unresolved query's `data`) would give that effect a new
-// dependency identity every render, re-running it and re-rendering forever.
+// A stable reference: `properties` feeds the memos below, and a fresh `[]`
+// literal on every render (the natural way to default an unresolved query's
+// `data`) would give each of them a new dependency identity every render.
 const EMPTY_PROPERTIES = [];
+
+// The filter offers coarse categories; the listings carry finer property types.
+const PROPERTY_TYPE_MAP = {
+  house: ['house', 'apartment', 'villa'],
+  land: ['land'],
+  commercial: ['commercial', 'office'],
+  apartment: ['apartment'],
+  villa: ['villa'],
+  office: ['commercial', 'office'],
+};
+
+const INITIAL_FILTERS = { search: '', type: 'all', purpose: 'all', sort: 'newest' };
+
+const capitalise = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+// SEO derived values
+const BASE_URL = 'https://raslipwani.co.ke/properties';
+const LIST_TITLE = 'Properties for Sale & Rent Across Kenya | Raslipwani Properties';
+const LIST_DESCRIPTION =
+  'Browse premium properties across Kenya. Filter by type, purpose, and location. Find apartments, villas, land, and commercial listings.';
 
 const Properties = () => {
   const { data: properties = EMPTY_PROPERTIES, isLoading: loading, error } = useQuery(
     propertyQueries.all()
   );
-  const [filteredProperties, setFilteredProperties] = useState([]);
-  const [sortOption, setSortOption] = useState('newest');
-  const [filterOption, setFilterOption] = useState('all');
-  const [purposeFilter, setPurposeFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const { filters, setFilter, resetFilters } = useFilters(INITIAL_FILTERS);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeFilters, setActiveFilters] = useState([]);
-  const [suggestedProperties, setSuggestedProperties] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const propertyTypeMap = {
-    'house': ['house', 'apartment', 'villa'],
-    'land': ['land'],
-    'commercial': ['commercial', 'office'],
-    'apartment': ['apartment'],
-    'villa': ['villa'],
-    'office': ['commercial', 'office'],
-  };
-
-  // SEO derived values
-  const baseUrl = 'https://raslipwani.co.ke/properties';
-  const canonicalUrl = baseUrl; // Keep canonical clean without query params to avoid duplicate content
-  const listTitle = 'Properties for Sale & Rent Across Kenya | Raslipwani Properties';
-  const listDescription = 'Browse premium properties across Kenya. Filter by type, purpose, and location. Find apartments, villas, land, and commercial listings.';
-
-  // Initialize from URL params
+  // Routing, not filtering: `?type=` and `?purpose=` are how the rest of the
+  // site links into a pre-filtered listing, so the URL seeds the filters here
+  // rather than inside the hook six other screens share.
   useEffect(() => {
     const type = searchParams.get('type');
     const purpose = searchParams.get('purpose');
-    
-    if (type) {
-      setFilterOption(type);
-      setActiveFilters(prev => [...prev, { 
-        type: 'propertyType', 
-        value: type, 
-        label: `Type: ${type.charAt(0).toUpperCase() + type.slice(1)}` 
-      }]);
-    }
-    
-    if (purpose) {
-      setPurposeFilter(purpose);
-      setActiveFilters(prev => [...prev, { 
-        type: 'purpose', 
-        value: purpose, 
-        label: `For: ${purpose.charAt(0).toUpperCase() + purpose.slice(1)}` 
-      }]);
-    }
-  }, [searchParams]);
 
-  // Apply filters and sorting
-  useEffect(() => {
+    if (type) setFilter('type', type);
+    if (purpose) setFilter('purpose', purpose);
+  }, [searchParams, setFilter]);
+
+  const filteredProperties = useMemo(() => {
     let result = [...properties];
-    
-    if (searchQuery) {
-      result = result.filter(property => 
-        property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+    if (filters.search) {
+      const term = filters.search.toLowerCase();
+      result = result.filter(property =>
+        property.title.toLowerCase().includes(term) ||
+        property.location.toLowerCase().includes(term) ||
+        property.description.toLowerCase().includes(term)
       );
     }
-    
-    if (filterOption !== 'all') {
-      const mappedTypes = propertyTypeMap[filterOption] || [filterOption];
-      
-      result = result.filter(property => 
-        property.property_type && 
+
+    if (filters.type !== 'all') {
+      const mappedTypes = PROPERTY_TYPE_MAP[filters.type] || [filters.type];
+      result = result.filter(property =>
+        property.property_type &&
         mappedTypes.includes(property.property_type.toLowerCase())
       );
     }
-    
-    if (purposeFilter !== 'all') {
-      result = result.filter(property => 
-        property.purpose && 
-        property.purpose.toLowerCase() === purposeFilter.toLowerCase()
+
+    if (filters.purpose !== 'all') {
+      result = result.filter(property =>
+        property.purpose &&
+        property.purpose.toLowerCase() === filters.purpose.toLowerCase()
       );
     }
-    
-    if (sortOption === 'price-low') {
+
+    if (filters.sort === 'price-low') {
       result.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-high') {
+    } else if (filters.sort === 'price-high') {
       result.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'newest') {
+    } else if (filters.sort === 'newest') {
       result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    } else if (sortOption === 'oldest') {
+    } else if (filters.sort === 'oldest') {
       result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
-    
-    setFilteredProperties(result);
-  }, [properties, sortOption, filterOption, purposeFilter, searchQuery]);
+
+    return result;
+  }, [properties, filters]);
+
+  const activeFilters = useMemo(() => {
+    const chips = [];
+
+    if (filters.type !== 'all') {
+      chips.push({ type: 'propertyType', value: filters.type, label: `Type: ${capitalise(filters.type)}` });
+    }
+    if (filters.purpose !== 'all') {
+      chips.push({ type: 'purpose', value: filters.purpose, label: `For: ${capitalise(filters.purpose)}` });
+    }
+    if (filters.search) {
+      chips.push({ type: 'search', value: filters.search, label: `Search: "${filters.search}"` });
+    }
+
+    return chips;
+  }, [filters]);
+
+  // Something to look at when a search comes back empty. Picked once per empty
+  // result rather than on every render, so the four suggestions do not reshuffle
+  // under the visitor while they read them.
+  const suggestedProperties = useMemo(() => {
+    if (filteredProperties.length > 0 || properties.length === 0) return EMPTY_PROPERTIES;
+
+    return properties
+      .filter(p => p.featured)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4);
+  }, [filteredProperties, properties]);
 
   // Build ItemList JSON-LD for listings (up to 20 items)
   const itemListJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Property Listings",
-    "itemListElement": (filteredProperties ?? properties ?? []).slice(0, 20).map((p, idx) => ({
-      "@type": "ListItem",
-      "position": idx + 1,
-  "url": `https://raslipwani.co.ke/properties/${p.slug || p.id}`,
-      "item": {
-        "@type": "RealEstateListing",
-        "name": p.title,
-        "description": p.description?.slice(0, 160),
-        "image": p.images || [],
-        "offers": {
-          "@type": "Offer",
-          "price": p.price,
-          "priceCurrency": "KES",
-          "availability": p.status === 'available' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Property Listings',
+    itemListElement: filteredProperties.slice(0, 20).map((p, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `https://raslipwani.co.ke/properties/${p.slug || p.id}`,
+      item: {
+        '@type': 'RealEstateListing',
+        name: p.title,
+        description: p.description?.slice(0, 160),
+        image: p.images || [],
+        offers: {
+          '@type': 'Offer',
+          price: p.price,
+          priceCurrency: 'KES',
+          availability:
+            p.status === 'available' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         },
-        "address": p.address ? {
-          "@type": "PostalAddress",
-          "streetAddress": p.address,
-          "addressLocality": p.location,
-          "addressCountry": "KE"
-        } : undefined
-      }
-    }))
+        address: p.address
+          ? {
+              '@type': 'PostalAddress',
+              streetAddress: p.address,
+              addressLocality: p.location,
+              addressCountry: 'KE',
+            }
+          : undefined,
+      },
+    })),
   };
-  // Update active filters
-  useEffect(() => {
-    const filters = [];
-    
-    if (filterOption !== 'all') {
-      filters.push({
-        type: 'propertyType',
-        value: filterOption,
-        label: `Type: ${filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}`
-      });
-    }
-    
-    if (purposeFilter !== 'all') {
-      filters.push({
-        type: 'purpose',
-        value: purposeFilter,
-        label: `For: ${purposeFilter.charAt(0).toUpperCase() + purposeFilter.slice(1)}`
-      });
-    }
-    
-    if (searchQuery) {
-      filters.push({
-        type: 'search',
-        value: searchQuery,
-        label: `Search: "${searchQuery}"`
-      });
-    }
-    
-    setActiveFilters(filters);
-  }, [filterOption, purposeFilter, searchQuery]);
 
-  // Fetch suggested properties when no results
-  useEffect(() => {
-    if (filteredProperties.length === 0 && properties.length > 0) {
-      const featured = properties
-        .filter(p => p.featured)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 4);
-      setSuggestedProperties(featured);
-    }
-  }, [filteredProperties, properties]);
-
-  // Open modal function
   const openModal = (property) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
     document.body.style.overflow = 'hidden';
   };
 
-  // Close modal function
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedProperty(null);
     document.body.style.overflow = 'auto';
   };
 
-  // Remove a specific filter
+  // Clearing a filter that came in through the URL has to clear the URL too,
+  // or the effect above puts it straight back.
   const removeFilter = (filterType) => {
     if (filterType === 'propertyType') {
-      setFilterOption('all');
+      setFilter('type', 'all');
       const params = new URLSearchParams(searchParams);
       params.delete('type');
       setSearchParams(params);
     }
     if (filterType === 'purpose') {
-      setPurposeFilter('all');
+      setFilter('purpose', 'all');
       const params = new URLSearchParams(searchParams);
       params.delete('purpose');
       setSearchParams(params);
     }
     if (filterType === 'search') {
-      setSearchQuery('');
+      setFilter('search', '');
     }
   };
 
-  // Clear all filters
   const clearAllFilters = () => {
-    setSearchQuery('');
-    setFilterOption('all');
-    setPurposeFilter('all');
-    setSortOption('newest');
+    resetFilters();
     setSearchParams({});
   };
 
   return (
     <>
       <Helmet>
-        <title>{listTitle}</title>
-        <meta name="description" content={listDescription} />
-        <link rel="canonical" href={canonicalUrl} />
+        <title>{LIST_TITLE}</title>
+        <meta name="description" content={LIST_DESCRIPTION} />
+        {/* Canonical stays clean of query params, to avoid duplicate content */}
+        <link rel="canonical" href={BASE_URL} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={listTitle} />
-        <meta property="og:description" content={listDescription} />
-        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={LIST_TITLE} />
+        <meta property="og:description" content={LIST_DESCRIPTION} />
+        <meta property="og:url" content={BASE_URL} />
         <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-properties-hero_md_omfqo1.jpg" />
         {/* Structured Data: ItemList */}
         <script type="application/ld+json">
           {JSON.stringify(itemListJsonLd)}
         </script>
       </Helmet>
-      
-      <>
-        {/* Enhanced Hero Section */}
-        <section className="relative bg-gradient-to-br from-surface-inverse via-brand-hover to-primary pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}></div>
-          </div>
-          
-          {/* Animated Background Elements */}
-          <div className="absolute top-20 left-10 w-24 h-24 bg-content-on-brand/5 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-12"
-            >
-              <motion.h1 
-                className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-surface-raised to-surface-sunken bg-clip-text text-transparent leading-tight"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                Discover Your <span className="text-primary">Dream Property</span>
-              </motion.h1>
-              
-              <motion.p 
-                className="text-xl text-content-inverse max-w-3xl mx-auto mb-8 font-light leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                Premium real estate portfolio across Kenya's most desirable locations. 
-                Find your perfect home, investment, or commercial space.
-              </motion.p>
-            </motion.div>
-            
-            {/* Enhanced Search Bar */}
-            <motion.div 
-              className="max-w-4xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <div className="bg-surface-raised rounded-2xl shadow-2xl p-2 border border-line">
-                <div className="flex flex-col md:flex-row gap-2">
-                  <div className="flex-1 relative">
-                    <Icon name="map-marker-alt" size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-content-subtle" />
-                    <input
-                      type="text"
-                      placeholder="Search by location, property type, or keyword..."
-                      className="w-full pl-12 pr-4 py-4 bg-transparent border-none focus:ring-0 focus:outline-none text-content placeholder-content-subtle"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setIsFilterOpen(!isFilterOpen)}
-                      className="flex items-center gap-2 bg-surface-sunken hover:bg-surface-sunken text-content px-6 py-4 rounded-xl transition-colors font-medium"
-                    >
-                      <Icon name="filter" size={18} />
-                      <span className="hidden sm:inline">Filters</span>
-                    </button>
-                    
-                    <button className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-content-on-brand px-8 py-4 rounded-xl transition-colors font-medium shadow-lg hover:shadow-xl">
-                      <Icon name="search" size={18} />
-                      <span>Search</span>
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Quick Filter Chips */}
-                <div className="flex flex-wrap gap-2 mt-4 px-2 pb-2">
-                  {[
-                    { label: 'Nairobi', value: 'nairobi' },
-                    { label: 'Mombasa', value: 'mombasa' },
-                    { label: 'Kilifi', value: 'kilifi' },
-                    { label: 'Diani', value: 'diani' },
-                    { label: 'Apartments', value: 'apartment' },
-                    { label: 'Lands', value: 'land' }
-                  ].map((chip, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSearchQuery(chip.value)}
-                      className="bg-surface hover:bg-primary hover:text-content-on-brand text-content px-3 py-1.5 rounded-full text-sm transition-all duration-300 border border-line hover:border-primary"
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-        
-        <main className="flex-grow bg-surface">
-          <div className="container mx-auto px-4 py-12">
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Enhanced Filters Sidebar */}
-              <motion.div 
-                className={`lg:w-80 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="bg-surface-raised rounded-2xl shadow-lg p-6 sticky top-24 border border-line">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-content">Filter Properties</h2>
-                    <button 
-                      type="button"
-                      onClick={() => setIsFilterOpen(false)}
-                      aria-label="Close filters"
-                      className="lg:hidden text-content-subtle hover:text-content-muted"
-                    >
-                      <Icon name="times" size={20} aria-hidden="true" />
-                    </button>
-                  </div>
-                  
-                  {/* Purpose Filter (Rent/Sale) */}
-                  <div className="mb-6">
-                    <span id="purpose-filter-label" className="block text-content mb-3 font-medium">Purpose</span>
-                    <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="purpose-filter-label">
-                      {[
-                        { value: 'all', label: 'All', icon: '🏠' },
-                        { value: 'sale', label: 'For Sale', icon: '💰' },
-                        { value: 'rent', label: 'For Rent', icon: '📅' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => setPurposeFilter(option.value)}
-                          aria-pressed={purposeFilter === option.value}
-                          className={`p-3 rounded-xl border-2 transition-all duration-300 text-center ${
-                            purposeFilter === option.value
-                              ? 'border-primary bg-primary/10 text-primary font-medium'
-                              : 'border-line hover:border-line-strong text-content'
-                          }`}
-                        >
-                          <div className="text-lg mb-1">{option.icon}</div>
-                          <div className="text-sm">{option.label}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Property Type */}
-                  <div className="mb-6">
-                    <label htmlFor="property-type-filter" className="block text-content mb-3 font-medium">Property Type</label>
-                    <select
-                      id="property-type-filter"
-                      className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
-                      value={filterOption}
-                      onChange={(e) => setFilterOption(e.target.value)}
-                    >
-                      <option value="all">All Property Types</option>
-                      <option value="house">House</option>
-                      <option value="apartment">Apartment</option>
-                      <option value="villa">Villa</option>
-                      <option value="land">Land</option>
-                      <option value="commercial">Commercial</option>
-                    </select>
-                  </div>
-                  
-                  {/* Sort By */}
-                  <div className="mb-6">
-                    <label htmlFor="sort-by-filter" className="block text-content mb-3 font-medium">Sort By</label>
-                    <select
-                      id="sort-by-filter"
-                      className="w-full px-4 py-3 border-2 border-line rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-surface-raised"
-                      value={sortOption}
-                      onChange={(e) => setSortOption(e.target.value)}
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="price-low">Price: Low to High</option>
-                      <option value="price-high">Price: High to Low</option>
-                      <option value="oldest">Oldest First</option>
-                    </select>
-                  </div>
-                  
-                  {/* Reset Filters */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-surface-sunken hover:bg-surface-sunken text-content font-medium py-3 rounded-xl transition-colors border-2 border-transparent hover:border-line-strong"
-                    onClick={clearAllFilters}
-                  >
-                    Reset All Filters
-                  </motion.button>
-                </div>
-              </motion.div>
-              
-              {/* Property Listings */}
-              <div className="flex-1">
-                <motion.div 
-                  className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-content">
-                      {filteredProperties.length} Properties Found
-                    </h2>
-                    <p className="text-content-muted mt-2">
-                      Showing {filteredProperties.length} of {properties.length} premium properties across Kenya
-                    </p>
-                  </div>
-                  
-                  <button 
-                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="lg:hidden flex items-center gap-2 bg-surface-raised border-2 border-line text-content px-4 py-2 rounded-xl hover:border-primary transition-colors"
-                  >
-                    <Icon name="filter" size={18} />
-                    <span>Filters</span>
-                  </button>
-                </motion.div>
-                
-                {/* Active Filters */}
-                {activeFilters.length > 0 && (
-                  <motion.div 
-                    className="mb-8"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-content">Active Filters</h3>
-                      <button 
-                        onClick={clearAllFilters}
-                        className="text-sm text-primary hover:underline font-medium"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {activeFilters.map((filter, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="bg-primary/10 text-primary rounded-full pl-4 pr-3 py-2 flex items-center border border-primary/20"
-                        >
-                          <span className="text-sm font-medium mr-2">{filter.label}</span>
-                          <button 
-                            type="button"
-                            onClick={() => removeFilter(filter.type)}
-                            aria-label={`Remove filter: ${filter.label}`}
-                            className="text-primary/70 hover:text-primary transition-colors"
-                          >
-                            <Icon name="times" size={16} aria-hidden="true" />
-                          </button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-                
-                {error && (
-                  <motion.div 
-                    className="bg-danger-surface border-2 border-danger-border text-danger-content px-6 py-4 rounded-2xl mb-8"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 bg-danger-surface rounded-full flex items-center justify-center mr-3">
-                        <Icon name="times" className="text-danger-content" aria-hidden="true" />
-                      </div>
-                      {`Failed to load properties: ${error.message}`}
-                    </div>
-                  </motion.div>
-                )}
-                
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {[1, 2, 3, 4, 5, 6].map((item) => (
-                      <PropertySkeleton key={item} />
-                    ))}
-                  </div>
-                ) : filteredProperties.length === 0 ? (
-                  <div>
-                    <motion.div 
-                      className="text-center py-16 bg-surface-raised rounded-2xl shadow-lg mb-12 border border-line"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <Icon name="search" size={30} className="text-primary" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-content mb-4">No properties match your criteria</h3>
-                      <p className="text-content-muted mb-8 max-w-md mx-auto">
-                        Try adjusting your filters or search terms to find your perfect property in Kenya
-                      </p>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="bg-primary hover:bg-primary-dark text-content-on-brand font-medium py-3 px-8 rounded-xl transition-colors shadow-lg hover:shadow-xl"
-                        onClick={clearAllFilters}
-                      >
-                        Reset Filters & Search
-                      </motion.button>
-                    </motion.div>
-                    
-                    {/* Suggested Properties */}
-                    {suggestedProperties.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="mb-12"
-                      >
-                        <h3 className="text-2xl font-bold text-content mb-8 text-center">
-                          Featured Properties You Might Like
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {suggestedProperties.map((property, index) => (
-                            <PropertyCard 
-                              key={property.id} 
-                              property={property} 
-                              index={index}
-                              openModal={openModal}
-                            />
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                ) : (
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ staggerChildren: 0.1 }}
-                  >
-                    {filteredProperties.map((property, index) => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property} 
-                        index={index}
-                        openModal={openModal}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </div>
-        </main>
-        
-        {/* Property Modal */}
-        <AnimatePresence>
-          {isModalOpen && selectedProperty && (
-            <PropertyModal 
-              property={selectedProperty} 
-              closeModal={closeModal}
+
+      <PropertySearchHero
+        search={filters.search}
+        onSearchChange={(value) => setFilter('search', value)}
+        onToggleFilters={() => setIsFilterOpen(!isFilterOpen)}
+      />
+
+      <main className="flex-grow bg-surface">
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <PropertyFilterBar
+              filters={filters}
+              isOpen={isFilterOpen}
+              onFilterChange={setFilter}
+              onReset={clearAllFilters}
+              onClose={() => setIsFilterOpen(false)}
             />
-          )}
-        </AnimatePresence>
-      </>
+
+            <PropertyGrid
+              properties={properties}
+              filteredProperties={filteredProperties}
+              suggestedProperties={suggestedProperties}
+              activeFilters={activeFilters}
+              isLoading={loading}
+              error={error}
+              onSelect={openModal}
+              onToggleFilters={() => setIsFilterOpen(!isFilterOpen)}
+              onRemoveFilter={removeFilter}
+              onReset={clearAllFilters}
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* Property Modal */}
+      <AnimatePresence>
+        {isModalOpen && selectedProperty && (
+          <PropertyModal
+            property={selectedProperty}
+            closeModal={closeModal}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
-
-// Enhanced Property Card Component
-const PropertyCard = ({ property, index, openModal }) => {
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  const getPurposeIcon = (purpose) => {
-    switch (purpose) {
-      case 'sale': return '💰';
-      case 'rent': return '📅';
-      default: return '🏠';
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -8 }}
-      className="bg-surface-raised rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-line"
-      onClick={() => openModal(property)}
-    >
-      <div className="relative pb-[70%] overflow-hidden">
-        {property.images?.[0] ? (
-          <img 
-            src={property.images[0]} 
-            alt={`${property.title} in ${property.location}`}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading={index > 2 ? "lazy" : "eager"}
-            width="400"
-            height="280"
-          />
-        ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-surface-sunken to-surface-sunken flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-2">🏠</div>
-              <span className="text-content-subtle text-sm">Image Coming Soon</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {property.featured && (
-            <div className="bg-primary text-content-on-brand text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-              Featured
-            </div>
-          )}
-          <div className="bg-content-on-brand/90 backdrop-blur-sm text-content text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
-            {getPurposeIcon(property.purpose)} {property.purpose === 'sale' ? 'For Sale' : 'For Rent'}
-          </div>
-        </div>
-        
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-surface-inverse/0 group-hover:bg-surface-inverse/10 transition-all duration-500"></div>
-      </div>
-      
-      <div className="p-5">
-        <div className="flex justify-between items-start mb-3">
-          <h2 className="text-lg font-bold text-content group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-            {property.title}
-          </h2>
-          <span className="text-lg font-bold text-primary whitespace-nowrap ml-2">
-            {formatPrice(property.price)}
-          </span>
-        </div>
-        
-        <p className="text-content-muted mb-4 flex items-center text-sm">
-          <Icon name="map-marker-alt" size={16} className="mr-2 text-primary flex-shrink-0" />
-          <span className="line-clamp-1">{property.location}</span>
-        </p>
-        
-        <div className="flex justify-between mb-4 text-sm text-content-subtle">
-          <div className="flex items-center">
-            <span className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center mr-1.5">
-              <span className="text-primary text-xs">🛏️</span>
-            </span>
-            <span>{property.bedrooms || 0} Beds</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center mr-1.5">
-              <span className="text-primary text-xs">🚿</span>
-            </span>
-            <span>{property.bathrooms || 0} Baths</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center mr-1.5">
-              <span className="text-primary text-xs">📐</span>
-            </span>
-            <span>{property.area_sqft || 'N/A'} sqft</span>
-          </div>
-        </div>
-        
-        <div className="pt-3 border-t border-line">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-content-subtle capitalize">
-              {property.property_type}
-            </span>
-            <div className="text-primary font-medium text-sm group-hover:text-primary-dark transition-colors flex items-center">
-              View Details
-              <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Enhanced Property Skeleton Loader
-const PropertySkeleton = () => (
-  <div className="bg-surface-raised rounded-2xl overflow-hidden shadow-lg animate-pulse border border-line">
-    <div className="pb-[70%] relative bg-gradient-to-br from-surface-sunken to-surface-sunken"></div>
-    <div className="p-5">
-      <div className="flex justify-between mb-3">
-        <div className="h-5 bg-surface-sunken rounded w-3/5"></div>
-        <div className="h-5 bg-surface-sunken rounded w-1/4"></div>
-      </div>
-      <div className="h-4 bg-surface-sunken rounded w-4/5 mb-4"></div>
-      <div className="flex justify-between mb-4">
-        <div className="h-3 bg-surface-sunken rounded w-16"></div>
-        <div className="h-3 bg-surface-sunken rounded w-16"></div>
-        <div className="h-3 bg-surface-sunken rounded w-16"></div>
-      </div>
-      <div className="h-8 bg-surface-sunken rounded"></div>
-    </div>
-  </div>
-);
 
 export default Properties;

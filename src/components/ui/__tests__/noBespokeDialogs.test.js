@@ -39,7 +39,7 @@ const NOT_DIALOGS = new Set([
   'src/pages/admin/AdminHeader.jsx',
   'src/components/admin/MobileBookingCard.jsx',
   'src/components/admin/MobilePropertyCard.jsx',
-  'src/pages/PropertyDetail.jsx',
+  'src/pages/property-detail/PropertyGallery.jsx',
 ]);
 
 function sourceFiles(dir = path.join(repoRoot, 'src'), acc = []) {

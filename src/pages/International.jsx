@@ -1,759 +1,97 @@
 import React, { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import InvestmentCalculator from '../components/InvestmentCalculator';
 import Modal from '../components/ui/Modal';
-import { 
-  Globe, 
-  TrendingUp, 
-  Home, 
-  Shield, 
-  Video, 
-  DollarSign,
-  Users,
-  Building,
-  Briefcase,
-  MapPin,
-  Phone,
-  Mail,
-  CheckCircle,
-  Star,
-  Clock,
-  Car,
-  Wifi,
-  Calendar,
-  FileText,
-  MessageSquare,
-  Download,
-  AlertCircle,
-  ChevronRight
-} from 'lucide-react';
+import InternationalHero from './international/InternationalHero';
+import AudienceTriage from './international/AudienceTriage';
+import WhyNairobiSection from './international/WhyNairobiSection';
+import InvestmentOpportunities from './international/InvestmentOpportunities';
+import DiasporaSection from './international/DiasporaSection';
+import RelocationServices from './international/RelocationServices';
+import FeaturedProperties from './international/FeaturedProperties';
+import InternationalCta from './international/InternationalCta';
+import { currencies } from './international/internationalContent';
 
+/**
+ * The /international page: one long scroll for three different audiences,
+ * with a currency the visitor picks once and every price on the page respects.
+ *
+ * The eight sections are their own components and the copy is data (Task 25);
+ * what stays here is the currency, the section refs the navigation scrolls
+ * between, and the calculator dialog.
+ */
 const International = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [showCalculator, setShowCalculator] = useState(false);
-  
-  const overviewRef = useRef(null);
-  const investRef = useRef(null);
-  const diasporaRef = useRef(null);
-  const servicesRef = useRef(null);
-  const propertiesRef = useRef(null);
 
-  const currencies = [
-    { code: 'USD', symbol: '$', rate: 1 },
-    { code: 'EUR', symbol: '€', rate: 0.92 },
-    { code: 'GBP', symbol: '£', rate: 0.79 },
-    { code: 'KES', symbol: 'KSh', rate: 129.5 }
-  ];
+  const sectionRefs = {
+    overview: useRef(null),
+    invest: useRef(null),
+    diaspora: useRef(null),
+    services: useRef(null),
+    properties: useRef(null),
+  };
 
-  const scrollToSection = (ref, section) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToSection = (section) => {
+    sectionRefs[section]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setActiveSection(section);
   };
 
   const formatCurrency = (amount) => {
     const curr = currencies.find(c => c.code === selectedCurrency);
     const convertedAmount = amount * curr.rate;
-    
+
     if (selectedCurrency === 'KES') {
       return `${curr.symbol} ${convertedAmount.toLocaleString('en-KE', { maximumFractionDigits: 0 })}`;
     }
     return `${curr.symbol}${convertedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
-  // Merged in from the former InternationalHub.jsx. That page's real contribution
-  // was audience segmentation — three distinct people arrive at /international and
-  // each needs a different next page. Every path here resolves to a real route or
-  // a real section; a triage card that goes nowhere is worse than no triage at all.
-  const audiencePaths = [
-    {
-      icon: Building,
-      title: 'UN Staff & Diplomats',
-      description: 'Housing near the UN complex in Gigiri and Runda, with fast-track viewings and furnished options.',
-      benefits: ['Fast-track viewings', 'Furnished options', 'Diplomatic services support'],
-      cta: 'View UN & diplomatic housing',
-      to: '/international/un-housing'
-    },
-    {
-      icon: Globe,
-      title: 'African Diaspora',
-      description: 'Own and manage Nairobi property from abroad, with monthly USD returns and full remote reporting.',
-      benefits: ['Remote property management', 'Monthly USD returns', 'Full transparency'],
-      cta: 'See diaspora investment',
-      section: 'diaspora'
-    },
-    {
-      icon: Briefcase,
-      title: 'International Professionals',
-      description: 'Premium homes for expatriates and relocating professionals, with flexible leases and relocation help.',
-      benefits: ['Corporate housing', 'Flexible leases', 'Relocation assistance'],
-      cta: 'Browse listings',
-      to: '/properties'
-    }
-  ];
-
-  const investmentOpportunities = [
-    {
-      title: 'Premium Residential',
-      roi: '10-12% Annual',
-      minInvestment: '$50,000',
-      description: 'High-end apartments and houses in prime locations serving expatriates and professionals',
-      features: ['Guaranteed tenant pool', 'Professional management', 'Capital appreciation']
-    },
-    {
-      title: 'Diaspora Portfolio',
-      roi: '12-14% Annual',
-      minInvestment: '$30,000',
-      description: 'Diversified investment portfolio with remote management and USD returns',
-      features: ['Monthly USD returns', 'Full transparency', 'Exit flexibility']
-    },
-    {
-      title: 'Commercial Real Estate',
-      roi: '15-20% Annual',
-      minInvestment: '$100,000',
-      description: 'Office spaces and retail units leased to international organizations',
-      features: ['Long-term contracts', 'Blue-chip tenants', 'Stable income']
-    }
-  ];
-
-  const whyNairobi = [
-    {
-      stat: '40+',
-      label: 'International HQs',
-      detail: 'UN, World Bank, and more'
-    },
-    {
-      stat: '15%',
-      label: 'Market Growth',
-      detail: 'Annual property appreciation'
-    },
-    {
-      stat: '$2B+',
-      label: 'Economic Activity',
-      detail: 'International organizations'
-    },
-    {
-      stat: '5,000+',
-      label: 'Expats Annually',
-      detail: 'Creating housing demand'
-    }
-  ];
-
-  const internationalServices = [
-    {
-      icon: Video,
-      title: 'Virtual Property Tours',
-      description: 'HD video tours, 360° views, and live virtual walkthroughs from anywhere in the world'
-    },
-    {
-      icon: DollarSign,
-      title: 'Multi-Currency Transactions',
-      description: 'Pay in USD, EUR, GBP or KES with transparent exchange rates'
-    },
-    {
-      icon: Home,
-      title: 'Remote Property Management',
-      description: 'Full management service - tenant screening, rent collection, maintenance, reporting'
-    },
-    {
-      icon: Shield,
-      title: 'Legal & Compliance Support',
-      description: 'Navigate Kenya property laws, visa requirements, and tax obligations'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Investment Reporting',
-      description: 'Monthly statements, tax documents, ROI tracking in your preferred currency'
-    },
-    {
-      icon: Users,
-      title: 'Relocation Assistance',
-      description: 'Complete support for your move to Nairobi - from arrival to settlement'
-    }
-  ];
-
-  const featuredProperties = [
-    {
-      title: 'Executive Apartment - Kilimani',
-      location: 'Near UN Complex, 2km',
-      price: 80000,
-      bedrooms: 3,
-      type: 'Sale',
-      furnished: true,
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'
-    },
-    {
-      title: 'Luxury Villa - Runda',
-      location: 'Diplomatic Area',
-      price: 250000,
-      bedrooms: 5,
-      type: 'Sale',
-      furnished: true,
-      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800'
-    },
-    {
-      title: 'Modern Townhouse - Lavington',
-      location: 'Near International Schools',
-      price: 150000,
-      bedrooms: 4,
-      type: 'Sale',
-      furnished: false,
-      image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800'
-    }
-  ];
-
-  const diasporaFeatures = [
-    {
-      icon: FileText,
-      title: 'Document Management',
-      description: 'Access all property documents, leases, and reports from your dashboard'
-    },
-    {
-      icon: Video,
-      title: 'Virtual Inspections',
-      description: 'Schedule live video property inspections whenever you need'
-    },
-    {
-      icon: MessageSquare,
-      title: 'Direct Communication',
-      description: 'Message tenants and property managers instantly via platform'
-    },
-    {
-      icon: Download,
-      title: 'Financial Reports',
-      description: 'Download monthly income statements and annual tax documents'
-    },
-    {
-      icon: Calendar,
-      title: 'Automated Reminders',
-      description: 'Get notified about rent payments, maintenance, and important dates'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Performance Analytics',
-      description: 'Track property value, rental income, and ROI in real-time'
-    }
-  ];
-
   return (
     <>
       <Helmet>
         <title>International Property Services | Nairobi Real Estate | Raslipwani</title>
-        <meta 
-          name="description" 
-          content="International real estate services in Nairobi. Investment opportunities for diaspora, expats, and global investors. Remote property management, multi-currency support, 12-15% ROI." 
+        <meta
+          name="description"
+          content="International real estate services in Nairobi. Investment opportunities for diaspora, expats, and global investors. Remote property management, multi-currency support, 12-15% ROI."
         />
         <meta name="keywords" content="Nairobi international property, Kenya diaspora investment, expat housing Nairobi, international real estate Kenya, African diaspora property" />
       </Helmet>
 
       <main className="flex-grow">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-brand-hover via-indigo-900 to-purple-900 text-content-on-brand py-24 overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEyYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-pulse"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center gap-2 bg-content-on-brand/10 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-content-on-brand/20">
-              <Globe className="w-5 h-5" />
-              <span className="text-sm font-medium">International Property Services</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Your Gateway to<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500">
-                Nairobi Real Estate
-              </span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-content-on-brand/90 mb-8 max-w-4xl mx-auto">
-              Whether you're in the diaspora, relocating for work, or seeking investment opportunities - 
-              we make Nairobi real estate accessible from anywhere in the world.
-            </p>
+        <InternationalHero
+          activeSection={activeSection}
+          selectedCurrency={selectedCurrency}
+          onCurrencyChange={setSelectedCurrency}
+          onNavigate={scrollToSection}
+          onOpenCalculator={() => setShowCalculator(true)}
+        />
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <button 
-                onClick={() => scrollToSection(propertiesRef, 'properties')}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-content px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                Explore Properties
-              </button>
-              <button 
-                onClick={() => setShowCalculator(!showCalculator)}
-                className="bg-content-on-brand/10 hover:bg-content-on-brand/20 backdrop-blur-sm border-2 border-content-on-brand/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all"
-              >
-                Investment Calculator
-              </button>
-            </div>
+        <AudienceTriage onScrollToDiaspora={scrollToSection} />
 
-            {/* Currency Selector */}
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <span className="text-sm text-content-on-brand/80">View prices in:</span>
-              {currencies.map(curr => (
-                <button
-                  key={curr.code}
-                  onClick={() => setSelectedCurrency(curr.code)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedCurrency === curr.code
-                      ? 'bg-surface-raised text-brand-content'
-                      : 'bg-content-on-brand/10 hover:bg-content-on-brand/20 text-content-on-brand'
-                  }`}
-                >
-                  {curr.code}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+        {/*
+          The calculator used to render its own overlay with a hand-drawn close
+          cross and no way out but the mouse: no focus trap, no Escape, no focus
+          returned to the button that opened it. `Modal` carries all three.
+        */}
+        <Modal
+          isOpen={showCalculator}
+          onClose={() => setShowCalculator(false)}
+          title="Investment Calculator"
+          description="Model returns on a Nairobi property before you commit to a viewing."
+          size="3xl"
+          bodyClassName=""
+        >
+          <InvestmentCalculator />
+        </Modal>
 
-        {/* Floating Navigation Pills */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex gap-2 bg-content-on-brand/10 backdrop-blur-md rounded-full p-2 border border-content-on-brand/20">
-          {[
-            { label: 'Overview', ref: overviewRef, section: 'overview' },
-            { label: 'Investment', ref: investRef, section: 'invest' },
-            { label: 'For Diaspora', ref: diasporaRef, section: 'diaspora' },
-            { label: 'Services', ref: servicesRef, section: 'services' },
-            { label: 'Properties', ref: propertiesRef, section: 'properties' }
-          ].map(item => (
-            <button
-              key={item.section}
-              onClick={() => scrollToSection(item.ref, item.section)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                activeSection === item.section
-                  ? 'bg-surface-raised text-brand-content'
-                  : 'text-content-on-brand hover:bg-content-on-brand/10'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Audience triage — the first decision a visitor has to make */}
-      <section className="py-16 bg-surface-raised border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-content mb-4">
-              Capturing the UN Nairobi Opportunity
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              Nairobi is the UN&apos;s only headquarters city in the global south. Three
-              groups of people buy and rent here for very different reasons — start with
-              the one that describes you.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {audiencePaths.map((audience) => {
-              const Icon = audience.icon;
-              const body = (
-                <>
-                  <div className="bg-gradient-to-br from-brand to-indigo-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="w-8 h-8 text-content-on-brand" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-content mb-3">{audience.title}</h3>
-                  <p className="text-content-muted mb-6">{audience.description}</p>
-                  <ul className="space-y-2 mb-6">
-                    {audience.benefits.map((benefit) => (
-                      <li key={benefit} className="flex items-center text-sm text-content">
-                        <span className="w-2 h-2 bg-brand rounded-full mr-3" aria-hidden="true" />
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                  <span className="inline-flex items-center gap-2 font-semibold text-brand-content">
-                    {audience.cta}
-                    <ChevronRight className="w-4 h-4" />
-                  </span>
-                </>
-              );
-              const cardClass =
-                'group block text-left w-full h-full bg-gradient-to-br from-brand-subtle to-indigo-50 p-8 rounded-2xl border-2 border-line hover:border-blue-300 transition-all hover:shadow-xl';
-
-              return audience.to ? (
-                <Link key={audience.title} to={audience.to} className={cardClass}>
-                  {body}
-                </Link>
-              ) : (
-                <button
-                  key={audience.title}
-                  type="button"
-                  onClick={() => scrollToSection(diasporaRef, audience.section)}
-                  className={cardClass}
-                >
-                  {body}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/*
-        The calculator used to render its own overlay with a hand-drawn close
-        cross and no way out but the mouse: no focus trap, no Escape, no focus
-        returned to the button that opened it. `Modal` carries all three.
-      */}
-      <Modal
-        isOpen={showCalculator}
-        onClose={() => setShowCalculator(false)}
-        title="Investment Calculator"
-        description="Model returns on a Nairobi property before you commit to a viewing."
-        size="3xl"
-        bodyClassName=""
-      >
-        <InvestmentCalculator />
-      </Modal>
-
-      {/* Why Nairobi Section */}
-      <section ref={overviewRef} className="py-20 bg-gradient-to-b from-surface to-surface-raised">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
-              Why Nairobi? Why Now?
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              East Africa's hub for international business, diplomacy, and investment - creating unprecedented real estate opportunities
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8 mb-16">
-            {whyNairobi.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center p-8 bg-surface-raised rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              >
-                <div className="text-6xl font-bold bg-gradient-to-r from-brand to-purple-600 bg-clip-text text-transparent mb-2">
-                  {item.stat}
-                </div>
-                <div className="text-lg font-semibold text-content mb-2">{item.label}</div>
-                <div className="text-sm text-content-muted">{item.detail}</div>
-              </motion.div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* Investment Opportunities */}
-      <section ref={investRef} className="py-20 bg-surface-raised">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
-              Investment Opportunities
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              Transparent, professionally managed investments with attractive returns
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {investmentOpportunities.map((opp, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-line hover:border-line"
-              >
-                <div className="bg-gradient-to-r from-brand via-indigo-600 to-purple-600 p-8 text-content-on-brand">
-                  <h3 className="text-2xl font-bold mb-3">{opp.title}</h3>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-4xl font-bold">{opp.roi}</span>
-                  </div>
-                  <span className="text-content-on-brand/80 text-sm">expected returns</span>
-                </div>
-                
-                <div className="p-8">
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-success-border rounded-xl p-4 mb-6">
-                    <div className="text-sm text-success-content font-medium mb-1">From</div>
-                    <div className="text-3xl font-bold text-success-content">{opp.minInvestment}</div>
-                  </div>
-                  
-                  <p className="text-content-muted mb-6 leading-relaxed">{opp.description}</p>
-                  
-                  <div className="space-y-3 mb-8">
-                    {opp.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-success-content flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-content">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Link
-                    to="/contact?inquiry=investment"
-                    className="block w-full bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-brand text-center py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
-                  >
-                    Learn More
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Diaspora Section */}
-      <section ref={diasporaRef} className="py-20 bg-gradient-to-br from-surface via-brand-subtle to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-brand-subtle px-6 py-3 rounded-full mb-6">
-              <Globe className="w-5 h-5 text-brand-content" />
-              <span className="text-sm font-semibold text-brand-content">For African Diaspora</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
-              Manage Your Property Portfolio Remotely
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              Own and manage Nairobi real estate from anywhere in the world with complete transparency and professional support
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <div className="bg-surface-raised rounded-2xl shadow-2xl p-8 border-2 border-line">
-                <h3 className="text-3xl font-bold text-content mb-6">Remote Management Dashboard</h3>
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-success-border">
-                    <div>
-                      <div className="text-sm text-content-muted">Monthly Income</div>
-                      <div className="text-2xl font-bold text-success-content">{formatCurrency(4000)}</div>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-success-content" />
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-brand-subtle to-indigo-50 rounded-xl border border-line">
-                    <div>
-                      <div className="text-sm text-content-muted">Portfolio Value</div>
-                      <div className="text-2xl font-bold text-brand-content">{formatCurrency(320000)}</div>
-                    </div>
-                    <Home className="w-8 h-8 text-brand-content" />
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-                    <div>
-                      <div className="text-sm text-content-muted">Annual ROI</div>
-                      <div className="text-2xl font-bold text-purple-600">13.2%</div>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-purple-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {diasporaFeatures.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    viewport={{ once: true }}
-                    className="bg-surface-raised p-6 rounded-xl shadow-lg hover:shadow-xl transition-all border border-line hover:border-line"
-                  >
-                    <Icon className="w-10 h-10 text-brand-content mb-4" />
-                    <h4 className="text-lg font-bold text-content mb-2">{feature.title}</h4>
-                    <p className="text-sm text-content-muted">{feature.description}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-brand via-indigo-600 to-purple-600 rounded-2xl p-12 text-content-on-brand text-center shadow-2xl">
-            <h3 className="text-3xl font-bold mb-4">Build Wealth Back Home</h3>
-            <p className="text-xl text-content-on-brand/90 mb-8 max-w-2xl mx-auto">
-              Start with as little as $30,000 and receive monthly USD returns directly to your international account
-            </p>
-            <Link
-              to="/contact?type=diaspora"
-              className="inline-flex items-center gap-2 bg-surface-raised text-brand-content hover:bg-surface-sunken px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg"
-            >
-              Schedule Consultation
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section ref={servicesRef} className="py-20 bg-surface-raised">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
-              International Services
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              Everything you need to invest, buy, or relocate - no matter where you are
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {internationalServices.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  viewport={{ once: true }}
-                  className="p-8 border-2 border-line rounded-2xl hover:border-brand hover:shadow-xl transition-all bg-gradient-to-br from-surface-raised to-surface group"
-                >
-                  <div className="bg-gradient-to-br from-brand-subtle to-indigo-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Icon className="w-7 h-7 text-brand-content" />
-                  </div>
-                  <h3 className="text-xl font-bold text-content mb-3">{service.title}</h3>
-                  <p className="text-content-muted leading-relaxed">{service.description}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Properties */}
-      <section ref={propertiesRef} className="py-20 bg-gradient-to-b from-surface to-surface-raised">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-content mb-4">
-              Featured International Properties
-            </h2>
-            <p className="text-xl text-content-muted max-w-3xl mx-auto">
-              Prime locations ideal for international clients, expats, and investors
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {featuredProperties.map((property, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-surface-raised rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-line hover:border-line"
-              >
-                <div className="relative h-64">
-                  <img 
-                    src={property.image} 
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-brand text-content-on-brand px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                      {property.type}
-                    </span>
-                  </div>
-                  {property.furnished && (
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-success-content text-content-on-brand px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                        Furnished
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-content mb-2">{property.title}</h3>
-                  <p className="text-content-muted mb-4 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    {property.location}
-                  </p>
-
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-3xl font-bold bg-gradient-to-r from-brand to-purple-600 bg-clip-text text-transparent">
-                      {formatCurrency(property.price)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-4 mb-6 text-content-muted">
-                    <span className="flex items-center gap-1">
-                      <Home className="w-4 h-4" />
-                      {property.bedrooms} bed
-                    </span>
-                  </div>
-
-                  <Link
-                    to={`/properties`}
-                    className="block w-full bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-brand text-center py-3 rounded-xl font-semibold transition-all"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              to="/properties?filter=international"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-700 text-content-on-brand px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl"
-            >
-              View All International Properties
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-brand via-indigo-600 to-purple-700 text-content-on-brand">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="text-xl mb-10 text-content-on-brand/90">
-            Schedule a consultation with our international property specialists
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link
-              to="/contact?type=international"
-              className="bg-surface-raised text-brand-content hover:bg-surface-sunken px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2 shadow-xl"
-            >
-              <Phone className="w-5 h-5" />
-              Schedule Consultation
-            </Link>
-            <button
-              onClick={() => setShowCalculator(true)}
-              className="bg-brand-hover hover:bg-brand-hover px-8 py-4 rounded-xl font-semibold text-lg transition-all inline-flex items-center justify-center gap-2"
-            >
-              <TrendingUp className="w-5 h-5" />
-              Calculate Returns
-            </button>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
-            <div className="bg-content-on-brand/10 backdrop-blur-sm rounded-xl p-6 border border-content-on-brand/20">
-              <Mail className="w-6 h-6 mb-3" />
-              <div className="text-sm text-content-on-brand/80 mb-1">Email Us</div>
-              <div className="font-semibold">international@raslipwani.com</div>
-            </div>
-            <div className="bg-content-on-brand/10 backdrop-blur-sm rounded-xl p-6 border border-content-on-brand/20">
-              <Phone className="w-6 h-6 mb-3" />
-              <div className="text-sm text-content-on-brand/80 mb-1">WhatsApp</div>
-              <div className="font-semibold">+254 758 066 526</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+        <WhyNairobiSection ref={sectionRefs.overview} />
+        <InvestmentOpportunities ref={sectionRefs.invest} />
+        <DiasporaSection ref={sectionRefs.diaspora} formatCurrency={formatCurrency} />
+        <RelocationServices ref={sectionRefs.services} />
+        <FeaturedProperties ref={sectionRefs.properties} formatCurrency={formatCurrency} />
+        <InternationalCta onOpenCalculator={() => setShowCalculator(true)} />
       </main>
     </>
   );
