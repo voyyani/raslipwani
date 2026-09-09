@@ -19,15 +19,19 @@ export const navItems = [
     label: 'Services', 
     icon: 'tools' 
   },
-  {
-    path: '/international',
-    label: 'International',
-    icon: 'globe',
-    dropdown: [
-      { path: '/international', label: 'Overview' },
-      { path: '/international/un-housing', label: 'UN & Diplomatic Housing' },
-    ],
-  },
+  // SHELVED for a later phase: the International section (Overview and UN &
+  // Diplomatic Housing) is withheld from the public site. Its pages remain in
+  // the repo under src/pages/international/. Restore this entry alongside the
+  // routes in src/App.jsx.
+  // {
+  //   path: '/international',
+  //   label: 'International',
+  //   icon: 'globe',
+  //   dropdown: [
+  //     { path: '/international', label: 'Overview' },
+  //     { path: '/international/un-housing', label: 'UN & Diplomatic Housing' },
+  //   ],
+  // },
   {
     path: '/about',
     label: 'About',

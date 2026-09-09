@@ -8,8 +8,9 @@ import Home from '@/pages/Home';
 import Properties from '@/pages/Properties';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
-import International from '@/pages/International';
-import UNHousing from '@/pages/UNHousing';
+// International section shelved for a later phase — not a public surface for now.
+// import International from '@/pages/International';
+// import UNHousing from '@/pages/UNHousing';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -32,8 +33,9 @@ const SURFACES = [
   ['Properties', Properties, '/properties'],
   ['About', About, '/about'],
   ['Contact', Contact, '/contact'],
-  ['International', International, '/international'],
-  ['UN housing', UNHousing, '/international/un-housing'],
+  // Shelved with the International section; restore with the imports above.
+  // ['International', International, '/international'],
+  // ['UN housing', UNHousing, '/international/un-housing'],
 ];
 
 const THEMES = ['light', 'dark'];

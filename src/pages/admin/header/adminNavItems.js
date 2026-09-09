@@ -25,11 +25,12 @@ export const adminNavItems = (isOnAdminDashboard) => [
     label: 'Services', 
     icon: 'tools' 
   },
-  { 
-    path: '/international', 
-    label: 'International', 
-    icon: 'th' 
-  },
+  // SHELVED for a later phase alongside the public route (see src/App.jsx).
+  // { 
+  //   path: '/international', 
+  //   label: 'International', 
+  //   icon: 'th' 
+  // },
   { 
     path: '/about', 
     label: 'About', 

@@ -51,7 +51,10 @@ function trigger() {
     .find((button) => button.getAttribute('aria-haspopup') === 'true');
 }
 
-describe('the header dropdown', () => {
+// SHELVED with the International section: it was the nav's only dropdown, so
+// there is no disclosure trigger in the header while the section is withheld.
+// Un-skip together with the nav entry in src/components/header/navItems.js.
+describe.skip('the header dropdown', () => {
   /**
    * The defect: the trigger was a `<button>` with **no `onClick`**. The menu
    * opened on `onMouseEnter` of its wrapper and nothing else, so a keyboard

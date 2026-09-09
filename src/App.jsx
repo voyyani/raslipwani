@@ -40,8 +40,15 @@ const Contact = lazy(() => import('./pages/Contact'));
 
 // International section. The hub triages three audiences; UN & diplomatic
 // housing is the one that needs a page of its own.
-const International = lazy(() => import('./pages/International'));
-const UNHousing = lazy(() => import('./pages/UNHousing'));
+//
+// SHELVED (phase deferred): the section is withheld from the public site for
+// now. The pages and their content live on under src/pages/International.jsx
+// and src/pages/international/ — restore by uncommenting these two imports,
+// the routes below, the nav entry in src/components/header/navItems.js, the
+// admin nav entry in src/pages/admin/header/adminNavItems.js, and the two
+// sitemap URLs in public/sitemap.xml.
+// const International = lazy(() => import('./pages/International'));
+// const UNHousing = lazy(() => import('./pages/UNHousing'));
 
 // Statutory pages. Mandatory for a business processing personal data under the
 // Kenyan Data Protection Act, 2019 — the footer has linked to them all along.
@@ -152,9 +159,10 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
-              {/* International section */}
+              {/* International section — SHELVED for a later phase.
               <Route path="/international" element={<International />} />
               <Route path="/international/un-housing" element={<UNHousing />} />
+              */}
 
               {/* Updated services routes */}
               <Route path="/services" element={<Services />} />
