@@ -12,9 +12,9 @@
  * thing on the page a portal aggregator cannot copy.
  */
 export const HERO = {
-  headline: 'Coastal property, handled properly.',
+  headline: 'Kenyan property, handled properly.',
   subhead:
-    'Homes, land and investment on the Kenyan coast at Kikambala — sold and let by ' +
+    'Homes, land and investment in Kenya , based on the coast at Kikambala — sold and let by ' +
     'people who answer the phone.',
 };
 
