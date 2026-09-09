@@ -57,13 +57,21 @@ const Footer = () => {
                   className="w-14 h-14 rounded-xl object-cover border-2 border-primary/80 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-xl"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-md">
-                  <svg className="w-2.5 h-2.5 text-content-on-media" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+                  {/* Three hand-pasted heroicons paths used to live in this file
+                      — the only icons in the footer not coming from the one set,
+                      at a stroke weight matching nothing else. They are also
+                      bytes in every first load, and the icon set is already
+                      here. */}
+                  <Icon name="check" size={10} className="text-content-on-media" aria-hidden="true" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-surface-raised to-surface-sunken bg-clip-text text-transparent leading-tight">
+                {/* Was gradient-clipped text between two surface tokens, which
+                    is a decoration standing in for emphasis — and one that
+                    inverts with the theme, since `surface-raised` is near-white
+                    in light and near-black in dark, on a ground that is dark in
+                    both. Emphasis comes from the display face and its weight. */}
+                <h3 className="font-display text-2xl font-semibold leading-tight tracking-tight text-content-on-media">
                   {siteName()}
                 </h3>
                 <p className="text-content-on-media/80 mt-2 text-sm leading-relaxed">
@@ -74,19 +82,25 @@ const Footer = () => {
             
             {/* Enhanced Social Links */}
             <div className="flex space-x-3 pt-4">
+              {/* One hover colour, not five. Each network's own brand colour was
+                  carried here as a literal — `blue-400`, a `purple-500 → pink-500`
+                  gradient — which is five palettes this design system does not
+                  own, on the one surface where the site is supposed to be
+                  quietest. The `backdrop-blur-sm` went with them: it was blurring
+                  the footer's own flat ground, which is a GPU cost with no job. */}
               {[
-                { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook', color: 'hover:bg-brand' },
-                { icon: 'instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram', color: 'hover:bg-gradient-to-r from-purple-500 to-pink-500' },
-                { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok', color: 'hover:bg-surface-chrome-raised' },
-                { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn', color: 'hover:bg-brand' },
-                { icon: 'twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter', color: 'hover:bg-blue-400' }
+                { icon: 'facebook', href: socialLinks.facebook || 'https://www.facebook.com/raslipwani/', label: 'Facebook' },
+                { icon: 'instagram', href: socialLinks.instagram || 'https://www.instagram.com/raslipwani/', label: 'Instagram' },
+                { icon: 'tiktok', href: socialLinks.tiktok || 'https://www.tiktok.com/@raslipwani0', label: 'TikTok' },
+                { icon: 'linkedin', href: socialLinks.linkedin || 'https://linkedin.com/company/raslipwani', label: 'LinkedIn' },
+                { icon: 'twitter', href: socialLinks.twitter || 'https://twitter.com/raslipwani', label: 'Twitter' }
               ].filter(s => s.href).map((social, index) => (
-                <a 
+                <a
                   key={index}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 bg-surface-chrome-raised/80 hover:bg-primary rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:shadow-lg backdrop-blur-sm"
+                  className="flex h-9 w-9 items-center justify-center rounded-md bg-surface-chrome-raised transition-[transform,background-color] duration-fast ease-spring hover:-translate-y-0.5 hover:bg-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                   aria-label={social.label}
                 >
                   <Icon name={social.icon} size={14} className="text-content-on-media" />
@@ -108,9 +122,12 @@ const Footer = () => {
                     to={link.path}
                     className="text-content-on-media/80 hover:text-content-on-media transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-surface-raised/5 px-2 -mx-2"
                   >
-                    <svg className="w-3 h-3 text-primary mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Icon
+                      name="chevron-right"
+                      size={12}
+                      aria-hidden="true"
+                      className="mr-3 -translate-x-1 text-brand-content opacity-0 transition-[opacity,transform] duration-fast ease-spring group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none"
+                    />
                     <span className="group-hover:translate-x-1 transition-transform duration-300 text-sm">{link.name}</span>
                   </Link>
                 </li>
@@ -127,10 +144,16 @@ const Footer = () => {
             <ul className="space-y-2.5">
               {services.map((service, index) => (
                 <li key={index}>
-                  <div className="text-content-on-media/80 hover:text-content-on-media transition-all duration-300 flex items-center group py-1.5 rounded-lg hover:bg-surface-raised/5 px-2 -mx-2 cursor-pointer">
-                    <svg className="w-3 h-3 text-primary mr-3 opacity-70 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                  {/* Not `cursor-pointer`: this is a list of what the agency
+                      does, not a link. A hand cursor on something that does
+                      nothing when clicked is a promise the footer breaks. */}
+                  <div className="-mx-2 flex items-center px-2 py-1.5 text-content-on-media/80">
+                    <Icon
+                      name="check"
+                      size={12}
+                      aria-hidden="true"
+                      className="mr-3 text-brand-content"
+                    />
                     <span className="text-sm">{service}</span>
                   </div>
                 </li>
@@ -243,18 +266,23 @@ const Footer = () => {
         </a>
       </div>
 
-      {/* Enhanced Desktop CTA */}
+      {/* Enhanced Desktop CTA. The fill was a two-stop gradient between one
+          colour and itself, with two literal greens on hover; it is a solid
+          fill, so it is now written as one. */}
       <div className="hidden lg:block fixed bottom-6 right-6 z-50">
         <a 
           href={`https://wa.me/${whatsappNumber}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-gradient-to-r from-success-content to-success-content hover:from-green-600 hover:to-green-700 text-content-on-media px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group"
+          className="group flex items-center gap-2 rounded-full bg-success-content px-4 py-3 text-content-on-media shadow-raised transition-[transform,opacity] duration-fast ease-spring hover:-translate-y-0.5 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           aria-label="Chat on WhatsApp"
         >
-          <Icon name="whatsapp" size={18} className="text-content-on-media group-hover:scale-110 transition-transform" />
+          <Icon name="whatsapp" size={18} className="text-content-on-media" />
           <span className="text-sm font-semibold">Chat with us</span>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-danger-content rounded-full animate-pulse"></div>
+          {/* A pulsing red dot used to sit here. It counted nothing — there is
+              no unread anything behind it — and PRODUCT.md is explicit that this
+              agency must not signal responsiveness it cannot meet while eight
+              enquiries are still unanswered. */}
         </a>
       </div>
     </footer>

@@ -1397,7 +1397,7 @@ first viewport.
 - Produces: `<HeroSearch onSearch={(criteria) => void} />` where `criteria` is
   `{ segment: string, location: string, maxPrice: number | null }`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/pages/home/__tests__/HeroSearch.test.jsx`:
 
@@ -1455,12 +1455,12 @@ describe('HeroSearch', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/pages/home/__tests__/HeroSearch.test.jsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Write `HeroSearch.jsx`**
+- [x] **Step 3: Write `HeroSearch.jsx`**
 
 ```jsx
 import React, { useState } from 'react';
@@ -1562,12 +1562,12 @@ HeroSearch.propTypes = {
 export default HeroSearch;
 ```
 
-- [ ] **Step 4: Run the test**
+- [x] **Step 4: Run the test**
 
 Run: `npx vitest run src/pages/home/__tests__/HeroSearch.test.jsx`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Mount it in the hero and replace the headline**
+- [x] **Step 5: Mount it in the hero and replace the headline**
 
 In `homeContent.js`, replace the hero copy. The outgoing headline is a category label; the
 replacement takes a position and names the place:
@@ -1594,12 +1594,12 @@ query parameters.
 **This is one of the three permitted live blur surfaces on this page.** The header (Task 13)
 is the second. Nothing else on Home may blur.
 
-- [ ] **Step 6: Verify the whole suite and the gate**
+- [x] **Step 6: Verify the whole suite and the gate**
 
 Run: `npm run test:run && npm run test:a11y`
 Expected: PASS, 0 violations.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/pages/home/
@@ -1613,7 +1613,7 @@ git commit -m "feat(home): replace the hero with a glass search panel and a poin
 **Files:** Modify `src/pages/home/HomeCards.jsx`, `FeaturedProperties.jsx`,
 `ServicesSection.jsx`, `WhyChooseUs.jsx`, `HomeCta.jsx`
 
-- [ ] **Step 1: Lower the palette ceiling first**
+- [x] **Step 1: Lower the palette ceiling first**
 
 ```bash
 npm run palette:ratchet
@@ -1621,7 +1621,7 @@ npm run palette:ratchet
 
 Note the count attributable to these five files — that is the budget this task spends.
 
-- [ ] **Step 2: Migrate each section**
+- [x] **Step 2: Migrate each section**
 
 For each file, in this order: `HomeCards` → `FeaturedProperties` → `ServicesSection` →
 `WhyChooseUs` → `HomeCta`.
@@ -1637,7 +1637,7 @@ For each file, in this order: `HomeCards` → `FeaturedProperties` → `Services
 - **One amber element on the page**, and Task 11 already spent it on the search button. Every
   call to action in these sections is `variant="primary"` or `"secondary"`.
 
-- [ ] **Step 3: Verify the ratchet fell**
+- [x] **Step 3: Verify the ratchet fell**
 
 ```bash
 npm run palette:ratchet
@@ -1645,12 +1645,12 @@ npm run palette:ratchet
 
 Expected: a **lower** count than Step 1. Update `palette-budget.json` to the new number.
 
-- [ ] **Step 4: Run the suite and the gate**
+- [x] **Step 4: Run the suite and the gate**
 
 Run: `npm run test:run && npm run test:a11y`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/pages/home/ palette-budget.json
@@ -1668,7 +1668,7 @@ floats over whatever is scrolling beneath it.
 - Modify: `src/components/Header.jsx`, `src/components/Footer.jsx`
 - Test: `src/components/__tests__/Header.test.jsx` (extend)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```jsx
   it('is transparent at the top of the page and frosts once scrolled', () => {
@@ -1683,12 +1683,12 @@ floats over whatever is scrolling beneath it.
   });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `npx vitest run src/components/__tests__/Header.test.jsx`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Add a `scrolled` prop (defaulting to internal `useState` + a passive `scroll` listener
 thresholded at 24px, cleaned up on unmount). When `scrolled`, apply
@@ -1699,17 +1699,93 @@ when not, `bg-transparent border-b border-transparent`. Transition with
 The footer keeps `surface-chrome` — it is deliberately dark in both themes and is not
 floating over anything. **Do not put glass on it.**
 
-- [ ] **Step 4: Run the suite and the gate**
+- [x] **Step 4: Run the suite and the gate**
 
 Run: `npm run test:run && npm run test:a11y`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/Header.jsx src/components/Footer.jsx src/components/__tests__/
 git commit -m "feat(chrome): frost the header on scroll, leave the footer solid"
 ```
+
+---
+
+## Phase C — built. What changed on the way
+
+The three tasks landed as written. Five things the plan did not anticipate, each
+decided against DESIGN.md rather than against taste:
+
+1. **The header could not hand-assemble its glass.** Task 13 specified
+   `bg-glass-subtle backdrop-blur-glass backdrop-saturate-glass border-b border-glass`
+   directly on `<header>`, which `noBespokeGlass.test.js` forbids for good reason: the
+   three-surfaces-per-viewport cap is only countable while every frosted surface carries
+   `data-glass` from `GlassPanel`. `GlassPanel` gained two additive props instead —
+   `shape="bar"` (chrome pinned to a viewport edge: no radius, no drop shadow, bottom edge
+   only) and `tone="none"` (the absence of a material, for the header before anything has
+   scrolled under it). Task 14's sticky filter bar wants the same `bar` shape.
+
+2. **A transparent header is only correct over a photograph.** Transparent-at-top applied
+   site-wide would put brand-blue links on an uncontrolled image on Home, and white links
+   on `surface` everywhere else. The header now reads the route: on `/` it is `fixed`,
+   transparent, and its links, brand name and menu button go `content-on-media`; on every
+   other route it is `sticky` and frosts as soon as content passes under it. `fixed` is
+   chosen by route and never by scroll position, because swapping `fixed` for `sticky`
+   mid-scroll takes the header's own height out of the document and jumps the page.
+
+3. **The hero carries two scrims, not one.** The flat `surface-inverse/40 → /70` wash dimmed
+   the photograph hardest where the sky is. The bottom scrim is now weighted to where the
+   type and the panel sit (`from-scrim/85 via-scrim/55 via-45% to-transparent`), and a
+   separate 160px top scrim exists solely so the transparent header's white links have
+   something to read against. The stops are measured, not chosen: `scrim` is pure black, so
+   55% of it over the brightest thing a photograph can be still puts white text at 4.75:1,
+   85% puts it at 9:1, and the top band at 60% gives the header 5.7:1.
+
+4. **`Field` labels needed the media contract.** A label hard-codes `text-content`, which is
+   correct on every opaque ground in the app and near-invisible on `glass-bg-media`, which
+   is dark in *both* themes. `TONES.media` in `GlassPanel` now carries
+   `[&_label]:text-content-on-media`, so the fix lives in the one file that measured the
+   material rather than at each call site.
+
+5. **The hero's criteria had to actually filter something.** A budget field that navigates
+   and changes nothing is a decoration. `Properties` now seeds `search`, `segment` and
+   `maxPrice` from the URL alongside the existing `type` and `purpose`, filters on all
+   three, and offers each as a removable chip. `SEGMENT_MATCHERS` translates the three
+   audiences' own words into what the data can answer — only `un-diplomatic` is a real
+   `segment` value; the other two are property-type shapes. No column was invented, and the
+   five UN fields stay as `description` prose exactly as Block 3 left them.
+
+Removed rather than migrated, each because it was saying something untrue:
+
+- The header's **scroll-progress bar**, which scaled 0 → 1 the moment `scrollY` passed 10px
+  and then stayed there for the rest of the page.
+- The header's **green "online" dot** and the footer WhatsApp button's **pulsing red badge**,
+  both of which signal responsiveness PRODUCT.md is explicit this agency must not promise
+  while eight enquiries sit unanswered.
+- The hero's **two buttons**, which only moved the visitor somewhere else to start over. The
+  search panel does the first step in place, so `Home` no longer keeps a ref for the hero to
+  scroll to and `ServicesSection` no longer forwards one.
+- **`BenefitCard`**, imported by `WhyChooseUs` and never rendered.
+- **Six emoji** standing in for the benefits strip's icons, and **five hand-pasted heroicons
+  paths** in the footer and the home property card.
+
+Measured after the phase:
+
+| | Before | After |
+|---|---:|---:|
+| Literal palette classes | 94 | **89** |
+| First load (gzip) | 112.8 kB | **112.8 kB** |
+| Tests | 646 | **647** + 1 expected fail |
+| axe violations | 0 | **0** |
+
+First load came in 0.3 kB over on the first build. It was paid back rather than re-budgeted —
+`bundle-budget.json` says Phase A's raise is the only one this revamp is permitted — by
+deleting the five inline SVG paths, dropping the layout-property transitions the header was
+running on every scroll frame (padding, logo size, type size — animating layout is precisely
+the cost the blur cap exists to avoid), and collapsing the WhatsApp button's one-colour
+gradient into the solid fill it always was.
 
 ---
 

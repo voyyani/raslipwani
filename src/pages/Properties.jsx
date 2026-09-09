@@ -25,7 +25,37 @@ const PROPERTY_TYPE_MAP = {
   office: ['commercial', 'office'],
 };
 
-const INITIAL_FILTERS = { search: '', type: 'all', purpose: 'all', sort: 'newest' };
+/**
+ * The home page's hero asks "what are you looking for?" in the three audiences'
+ * own words (PRODUCT.md), not in the database's. This is where those words are
+ * translated into what the data can actually answer.
+ *
+ * Only `un-diplomatic` is a real `segment` value; the other two are the coarse
+ * shapes of the catalogue. Nothing here invents a column — the five UN fields
+ * still live in `description` prose exactly as Block 3 left them.
+ */
+const SEGMENT_MATCHERS = {
+  residential: (property) =>
+    ['house', 'apartment', 'villa'].includes(property.property_type?.toLowerCase()),
+  investment: (property) =>
+    ['land', 'commercial', 'office'].includes(property.property_type?.toLowerCase()),
+  'un-diplomatic': (property) => property.segment === 'un-diplomatic',
+};
+
+const SEGMENT_LABELS = {
+  residential: 'A home to live in',
+  investment: 'An investment',
+  'un-diplomatic': 'UN or diplomatic housing',
+};
+
+const INITIAL_FILTERS = {
+  search: '',
+  type: 'all',
+  purpose: 'all',
+  segment: 'all',
+  maxPrice: '',
+  sort: 'newest',
+};
 
 const capitalise = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -51,9 +81,17 @@ const Properties = () => {
   useEffect(() => {
     const type = searchParams.get('type');
     const purpose = searchParams.get('purpose');
+    const search = searchParams.get('search');
+    const segment = searchParams.get('segment');
+    const maxPrice = searchParams.get('maxPrice');
 
     if (type) setFilter('type', type);
     if (purpose) setFilter('purpose', purpose);
+    // The home page's hero search arrives here. A criterion that landed in the
+    // URL and then filtered nothing would make the whole panel a decoration.
+    if (search) setFilter('search', search);
+    if (segment && SEGMENT_MATCHERS[segment]) setFilter('segment', segment);
+    if (maxPrice && Number.isFinite(Number(maxPrice))) setFilter('maxPrice', maxPrice);
   }, [searchParams, setFilter]);
 
   const filteredProperties = useMemo(() => {
@@ -83,6 +121,17 @@ const Properties = () => {
       );
     }
 
+    if (filters.segment !== 'all' && SEGMENT_MATCHERS[filters.segment]) {
+      result = result.filter(SEGMENT_MATCHERS[filters.segment]);
+    }
+
+    if (filters.maxPrice !== '') {
+      const ceiling = Number(filters.maxPrice);
+      if (Number.isFinite(ceiling)) {
+        result = result.filter((property) => Number(property.price) <= ceiling);
+      }
+    }
+
     if (filters.sort === 'price-low') {
       result.sort((a, b) => a.price - b.price);
     } else if (filters.sort === 'price-high') {
@@ -107,6 +156,24 @@ const Properties = () => {
     }
     if (filters.search) {
       chips.push({ type: 'search', value: filters.search, label: `Search: "${filters.search}"` });
+    }
+    if (filters.segment !== 'all') {
+      chips.push({
+        type: 'segment',
+        value: filters.segment,
+        label: `Looking for: ${SEGMENT_LABELS[filters.segment] ?? filters.segment}`,
+      });
+    }
+    if (filters.maxPrice !== '') {
+      chips.push({
+        type: 'maxPrice',
+        value: filters.maxPrice,
+        label: `Up to ${new Intl.NumberFormat('en-KE', {
+          style: 'currency',
+          currency: 'KES',
+          maximumFractionDigits: 0,
+        }).format(Number(filters.maxPrice))}`,
+      });
     }
 
     return chips;
@@ -186,6 +253,21 @@ const Properties = () => {
     }
     if (filterType === 'search') {
       setFilter('search', '');
+      const params = new URLSearchParams(searchParams);
+      params.delete('search');
+      setSearchParams(params);
+    }
+    if (filterType === 'segment') {
+      setFilter('segment', 'all');
+      const params = new URLSearchParams(searchParams);
+      params.delete('segment');
+      setSearchParams(params);
+    }
+    if (filterType === 'maxPrice') {
+      setFilter('maxPrice', '');
+      const params = new URLSearchParams(searchParams);
+      params.delete('maxPrice');
+      setSearchParams(params);
     }
   };
 

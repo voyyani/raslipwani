@@ -120,6 +120,45 @@ describe('GlassPanel', () => {
     expect(container.firstChild.className).toMatch(/p-6/);
   });
 
+  it('drops the radius and the drop shadow when it is a bar', () => {
+    // Chrome pinned to a viewport edge. A radius there leaves four gaps against
+    // the window and a drop shadow doubles the border it already has.
+    const { container } = render(
+      <GlassPanel as="header" shape="bar" tone="subtle">
+        chrome
+      </GlassPanel>
+    );
+
+    expect(container.firstChild.tagName).toBe('HEADER');
+    expect(container.firstChild.className).toMatch(/border-b border-glass-border/);
+    expect(container.firstChild.className).not.toMatch(/rounded-xl/);
+    expect(container.firstChild.className).not.toMatch(/shadow-glass/);
+  });
+
+  it('emits no material at all for tone="none", and is not counted as a blur surface', () => {
+    // The header before the page has scrolled anything underneath it. Absence of
+    // a material, not a lighter one — so no filter, no edge, and nothing for the
+    // three-surfaces-per-viewport cap to count.
+    const { container } = render(
+      <GlassPanel as="header" shape="bar" tone="none">
+        chrome
+      </GlassPanel>
+    );
+
+    expect(container.firstChild).toHaveAttribute('data-glass', 'off');
+    expect(container.firstChild.className).toMatch(/bg-transparent/);
+    expect(container.firstChild.className).not.toMatch(/backdrop-blur/);
+    expect(container.firstChild.className).not.toMatch(/border-glass-border/);
+  });
+
+  it('carries its media text colour down onto the labels inside it', () => {
+    // A `Field` label hard-codes `text-content` — correct on every opaque ground
+    // in the app, and wrong on this one, which is dark in *both* themes. Without
+    // this the hero search panel ships near-black labels on a near-black panel.
+    const { container } = render(<GlassPanel tone="media">x</GlassPanel>);
+    expect(container.firstChild.className).toMatch(/\[&_label\]:text-content-on-media/);
+  });
+
   it('falls back to the default ground for an unknown tone', () => {
     // PropTypes already shouts about this in development; the point here is that
     // the panel still renders a sanctioned material rather than no ground at

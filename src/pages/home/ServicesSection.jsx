@@ -1,36 +1,35 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+
 import { ServiceCard } from './HomeCards';
 import { services } from './homeContent';
+import { enter } from './homeMotion';
 
 /**
- * The four services, as an icon grid. It is also the target the hero's
- * second button scrolls to, which is why it forwards a ref. Moved out of
- * `Home.jsx` (Task 26).
+ * The four services, as an icon row.
+ *
+ * It used to forward a ref so the hero's second button could scroll to it. The
+ * hero now does the first step of the job in place rather than sending anyone
+ * anywhere, so the button and the ref are both gone; the section keeps a stable
+ * `id` for anything that wants to link to it.
  */
-const ServicesSection = React.forwardRef((props, ref) => (
-<section ref={ref} className="py-8 md:py-16 bg-surface">
-  <div className="container mx-auto px-4">
-    <div className="text-center mb-6 md:mb-10">
-      <motion.h2 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-xl md:text-2xl font-bold text-primary"
+const ServicesSection = () => (
+  <section id="services" className="bg-surface py-12 md:py-20">
+    <div className="container mx-auto px-4">
+      <motion.h2
+        {...enter(0)}
+        className="text-center font-display text-xl font-semibold tracking-tight text-content md:text-2xl"
       >
         Our Premium Services
       </motion.h2>
-    </div>
-    
-    <div className="flex flex-wrap justify-center gap-4 md:gap-8 max-w-3xl mx-auto">
-      {services.map((service, index) => (
-        <ServiceCard key={index} {...service} index={index} />
-      ))}
-    </div>
-  </div>
-</section>
-));
 
-ServicesSection.displayName = 'ServicesSection';
+      <div className="mx-auto mt-8 flex max-w-3xl flex-wrap justify-center gap-6 md:mt-10 md:gap-10">
+        {services.map((service, index) => (
+          <ServiceCard key={service.title} {...service} index={index} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default ServicesSection;

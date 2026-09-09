@@ -48,27 +48,58 @@ const TONES = {
   media: {
     glass: 'bg-glass-media',
     opaque: 'bg-glass-media-solid',
-    text: 'text-content-on-media',
+    // The panel's own text, and the labels of any `Field` inside it. A label
+    // hard-codes `text-content` — correct on every opaque ground in the app, and
+    // wrong on this one, which is dark in *both* themes. Overriding it here
+    // rather than at the call site is what keeps the media contract in the one
+    // file that measured it.
+    text: 'text-content-on-media [&_label]:text-content-on-media',
   },
+  // Chrome with no ground yet: a bar floating over a photograph, before the page
+  // has scrolled anything underneath it. Not a material — the absence of one —
+  // so it emits no filter and takes no edge.
+  none: { glass: 'bg-transparent', opaque: 'bg-transparent', text: '' },
 };
 
-/** The bright top edge. Always present — translucency is not a boundary. */
-const EDGE = 'relative rounded-xl border border-glass-border shadow-glass';
+/**
+ * The shape of the surface.
+ *
+ * `panel` is a floating rectangle: rounded on every corner, edged all the way
+ * round, lifted off the page. `bar` is chrome pinned to an edge of the viewport
+ * — the header, and the sticky filter bar — where a radius would leave four
+ * gaps against the window and a drop shadow would double the border. Same
+ * material, same fallbacks, same `data-glass` marker; different geometry.
+ */
+const SHAPES = {
+  panel: 'relative rounded-xl border border-glass-border shadow-glass',
+  bar: 'relative border-b border-glass-border',
+};
 
 const GlassPanel = React.forwardRef(function GlassPanel(
-  { children, tone = 'default', as: Component = 'div', blur = true, className = '', ...rest },
+  {
+    children,
+    tone = 'default',
+    shape = 'panel',
+    as: Component = 'div',
+    blur = true,
+    className = '',
+    ...rest
+  },
   ref
 ) {
   const material = TONES[tone] ?? TONES.default;
+  // `none` is the absence of a material, so it also declines the edge: a border
+  // over a photograph with nothing behind it is a line, not a boundary.
+  const live = blur && tone !== 'none';
 
   const classes = [
-    EDGE,
+    tone === 'none' ? 'relative' : SHAPES[shape] ?? SHAPES.panel,
     material.text,
     // `glass-surface` is not decoration: it is the hook the stylesheet's
     // no-backdrop-filter and reduced-transparency fallbacks bind to.
-    blur ? 'glass-surface' : '',
-    blur && tone === 'media' ? 'glass-surface-media' : '',
-    blur ? `${material.glass} backdrop-blur-glass backdrop-saturate-glass` : material.opaque,
+    live ? 'glass-surface' : '',
+    live && tone === 'media' ? 'glass-surface-media' : '',
+    live ? `${material.glass} backdrop-blur-glass backdrop-saturate-glass` : material.opaque,
     className,
   ]
     .filter(Boolean)
@@ -80,7 +111,7 @@ const GlassPanel = React.forwardRef(function GlassPanel(
       className={classes}
       // Counting live blur surfaces is the only way the three-per-viewport cap
       // is enforceable after the fact.
-      data-glass={blur ? tone : 'off'}
+      data-glass={live ? tone : 'off'}
       {...rest}
     >
       {children}
@@ -90,7 +121,9 @@ const GlassPanel = React.forwardRef(function GlassPanel(
 
 GlassPanel.propTypes = {
   children: PropTypes.node,
-  tone: PropTypes.oneOf(['default', 'strong', 'subtle', 'media']),
+  tone: PropTypes.oneOf(['default', 'strong', 'subtle', 'media', 'none']),
+  /** `panel` floats; `bar` is pinned to a viewport edge and drops the radius. */
+  shape: PropTypes.oneOf(['panel', 'bar']),
   /** The element to render. A panel with a heading should be a `section`. */
   as: PropTypes.elementType,
   /** Drop the filter — for the fourth panel in a viewport. Goes opaque. */

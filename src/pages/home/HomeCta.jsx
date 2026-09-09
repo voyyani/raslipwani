@@ -2,45 +2,49 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import Button from '../../components/ui/Button';
+import { enter } from './homeMotion';
+
 /**
- * The home page's closing call to action. Moved out of `Home.jsx`
- * (Task 26) unchanged.
+ * The home page's closing call to action.
+ *
+ * Two changes worth naming. The gradient ran `primary → secondary`, two of the
+ * five literal brand colours that survive from before the token layer; it now
+ * runs between the two brand tokens, so it follows a theme instead of ignoring
+ * one.
+ *
+ * And the two links were the same weight, which is not a hierarchy — the visitor
+ * has to read both to find out which one this section is for. "Get in Touch" is
+ * the one, so it is the button; browsing is the fallback, so it is a link. The
+ * button is `secondary` rather than amber: the page's one amber element is the
+ * hero's search, and a second halves the value of the first (DESIGN.md rule 3).
  */
 const HomeCta = () => (
-<section className="py-20 bg-gradient-to-r from-primary to-secondary">
-  <div className="container mx-auto px-4 text-center">
-    <motion.h2 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-3xl font-bold text-content-on-brand mb-4"
-    >
-      Ready to Begin Your Journey?
-    </motion.h2>
-    <motion.p 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-content-on-brand text-xl mb-8 max-w-2xl mx-auto"
-    >
-      Our experts are ready to guide you to your dream property in Kenya
-    </motion.p>
-    <div className="flex flex-col sm:flex-row justify-center gap-4">
-      <Link 
-        to="/contact" 
-        className="inline-block bg-surface-raised text-primary font-bold py-3 px-8 rounded-md hover:bg-surface-sunken transition-all duration-300 shadow-lg hover:shadow-xl"
+  <section className="bg-gradient-to-br from-brand to-brand-hover py-20 text-content-on-brand">
+    <div className="container mx-auto px-4 text-center">
+      <motion.h2 {...enter(0)} className="font-display text-3xl font-semibold tracking-tight">
+        Ready to Begin Your Journey?
+      </motion.h2>
+      <motion.p {...enter(1)} className="mx-auto mt-4 max-w-2xl text-lg text-content-on-brand/90">
+        Our experts are ready to guide you to your dream property in Kenya
+      </motion.p>
+
+      <motion.div
+        {...enter(2)}
+        className="mt-8 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-8"
       >
-        Get in Touch
-      </Link>
-      <Link 
-        to="/properties" 
-        className="inline-block bg-transparent border-2 border-content-on-brand text-content-on-brand font-bold py-3 px-8 rounded-md hover:bg-content-on-brand/10 transition-all duration-300"
-      >
-        Browse Listings
-      </Link>
+        <Button to="/contact" variant="secondary" size="lg">
+          Get in Touch
+        </Button>
+        <Link
+          to="/properties"
+          className="rounded-sm font-semibold underline decoration-content-on-brand/40 underline-offset-4 transition-colors duration-fast hover:decoration-content-on-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-brand motion-reduce:transition-none"
+        >
+          Browse Listings
+        </Link>
+      </motion.div>
     </div>
-  </div>
-</section>
+  </section>
 );
 
 export default HomeCta;

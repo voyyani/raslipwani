@@ -1,82 +1,115 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import HeroSearch from './HeroSearch';
+import { HERO } from './homeContent';
+import { enterOnMount } from './homeMotion';
+
 /**
- * The home page's hero, with the responsive background it preloads and the
- * two calls to action under it. Moved out of `Home.jsx` (Task 26).
+ * The first viewport.
+ *
+ * What changed, and why:
+ *
+ * - **The overlay.** It was a flat `surface-inverse/40 → /70` wash across the
+ *   whole image, which dims the photograph everywhere and is darkest exactly
+ *   where the sky is. It is now a scrim that is strongest at the bottom edge,
+ *   where the search panel and the headline sit, and nearly absent at the top,
+ *   where the picture is. Photography is the product; the interface frames it.
+ * - **The two buttons.** "Browse Properties" and "Our Services" were the only
+ *   things a visitor could do here, and both of them just moved them somewhere
+ *   else to start over. The search panel does the first step of the job in
+ *   place, so the buttons are gone rather than sitting beside it competing.
+ * - **The headline.** See `homeContent.js`.
+ *
+ * This section holds **one** of the page's three permitted live blur surfaces:
+ * the search panel. The header (which is transparent while the hero is on
+ * screen) is the second. Nothing else on Home blurs.
  */
-const HeroSection = ({ heroLoaded, onHeroLoad, onExplore }) => (
-<section className="relative bg-cover bg-center min-h-screen flex items-center">
-  {/* Background overlay with gradient */}
-  <div className="absolute inset-0 bg-gradient-to-b from-surface-inverse/40 to-surface-inverse/70 z-0"></div>
-  
-  {/* Optimized responsive background */}
-  <picture className="absolute inset-0 z-[-1] pointer-events-none">
-    <source 
-      srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/kenya-property-hero_sm_omfqo1.jpg" 
-      media="(max-width: 640px)"
-    />
-    <source 
-      srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" 
-      media="(max-width: 1024px)"
-    />
-    <img 
-      src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/kenya-property-hero_lg_omfqo1.jpg" 
-      alt="Luxury property with city view in Nairobi, Kenya"
-      className="w-full h-full object-cover"
-      loading="eager"
-      fetchpriority="high"
-      width="1920"
-      height="1080"
-      onLoad={onHeroLoad}
-    />
-  </picture>
-  
-  {/* Loading overlay */}
-  {!heroLoaded && (
-    <div className="absolute inset-0 bg-surface-sunken animate-pulse z-10"></div>
-  )}
-  
-  <div className="container mx-auto px-4 relative z-10">
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="max-w-2xl text-content-on-brand"
-    >
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-        Your Trusted Real Estate Partner in Kenya
-      </h1>
-      <p className="text-xl mb-8 max-w-xl">
-        Buy, sell or invest in houses, land &amp; apartments across Nairobi, Mombasa, Kilifi, Diani and beyond. Expert guidance from listing to keys.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link 
-          to="/properties" 
-          className="bg-primary hover:bg-primary-dark text-content-on-brand font-bold py-3 px-6 rounded-md transition-colors duration-300 text-center shadow-lg hover:shadow-xl"
-        >
-          Browse Properties
-        </Link>
-        <button 
-          onClick={onExplore}
-          className="bg-content-on-brand/10 backdrop-blur-sm hover:bg-content-on-brand/20 text-content-on-brand font-bold py-3 px-6 rounded-md transition-all duration-300 border border-content-on-brand/30"
-        >
-          Our Services
-        </button>
+const HeroSection = ({ heroLoaded, onHeroLoad }) => {
+  const navigate = useNavigate();
+
+  // The criteria travel as query parameters rather than as router state, so a
+  // search is a link a visitor can send to someone else — which, for the
+  // diaspora audience buying on someone else's advice, is the point.
+  const search = ({ location, segment, maxPrice }) => {
+    const params = new URLSearchParams();
+    if (location) params.set('search', location);
+    if (segment) params.set('segment', segment);
+    if (maxPrice !== null && maxPrice !== undefined && !Number.isNaN(maxPrice)) {
+      params.set('maxPrice', String(maxPrice));
+    }
+
+    const query = params.toString();
+    navigate(query ? `/properties?${query}` : '/properties');
+  };
+
+  return (
+    <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden">
+      <picture className="pointer-events-none absolute inset-0 z-0">
+        <source
+          srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/kenya-property-hero_sm_omfqo1.jpg"
+          media="(max-width: 640px)"
+        />
+        <source
+          srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg"
+          media="(max-width: 1024px)"
+        />
+        <img
+          src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/kenya-property-hero_lg_omfqo1.jpg"
+          alt="Luxury property with city view in Nairobi, Kenya"
+          className="h-full w-full object-cover"
+          loading="eager"
+          fetchpriority="high"
+          width="1920"
+          height="1080"
+          onLoad={onHeroLoad}
+        />
+      </picture>
+
+      {/* Two scrims, each with a job, instead of one flat wash over everything.
+          The stops are not taste: `scrim` is pure black, so 55% of it over the
+          brightest thing a photograph can be still puts white text at 4.75:1,
+          and 85% at the bottom edge puts it at 9:1. Above 45% the gradient is
+          gone and the picture is the picture. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-0 bg-gradient-to-t from-scrim/85 via-45% via-scrim/55 to-transparent"
+      />
+      {/* The header is transparent while it is over this photograph (see
+          Header.jsx). This is what its white links read against — 5.7:1 over a
+          blown-out sky, and invisible over a dark one. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-scrim/60 to-transparent"
+      />
+
+      {!heroLoaded && (
+        <div aria-hidden="true" className="absolute inset-0 z-0 animate-pulse bg-surface-sunken" />
+      )}
+
+      <div className="container relative z-10 mx-auto px-4 pb-14 pt-32 sm:pb-20">
+        <motion.div {...enterOnMount(0)} className="max-w-3xl text-content-on-media">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+            {HERO.headline}
+          </h1>
+          <p className="mt-4 max-w-xl text-lg text-content-on-media/90 sm:text-xl">
+            {HERO.subhead}
+          </p>
+        </motion.div>
+
+        <motion.div {...enterOnMount(1)} className="mt-8">
+          <HeroSearch onSearch={search} />
+        </motion.div>
       </div>
-    </motion.div>
-  </div>
-  
-  {/* Scroll indicator removed to eliminate hovering circle */}
-</section>
-);
+    </section>
+  );
+};
 
 HeroSection.propTypes = {
   heroLoaded: PropTypes.bool.isRequired,
   onHeroLoad: PropTypes.func.isRequired,
-  onExplore: PropTypes.func.isRequired,
 };
 
 export default HeroSection;

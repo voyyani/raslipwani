@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -11,12 +11,15 @@ import WhyChooseUs from './home/WhyChooseUs';
 import HomeCta from './home/HomeCta';
 
 /**
- * The home page. Its five sections and four card shapes are their own
- * components (Task 26); the page keeps the featured-listings query, the modal
- * a card opens, and the ref the hero scrolls to.
+ * The home page. Its five sections and three card shapes are their own
+ * components; the page keeps the featured-listings query and the modal a card
+ * opens.
+ *
+ * The hero used to hand back a ref so its second button could scroll to the
+ * services strip. It now runs a search instead of moving the visitor somewhere
+ * else to start over, so neither the ref nor the button survives.
  */
 const Home = () => {
-  const servicesRef = useRef(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,13 +36,6 @@ const Home = () => {
     // itself comes from cachePolicy — this file no longer sets its own.
     refetchOnWindowFocus: true,
   });
-
-  const scrollToServices = () => {
-    servicesRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  };
 
   const openModal = (property) => {
     setSelectedProperty(property);
@@ -102,13 +98,9 @@ const Home = () => {
       </Helmet>
 
       <main className="flex-grow">
-        <HeroSection
-          heroLoaded={heroLoaded}
-          onHeroLoad={() => setHeroLoaded(true)}
-          onExplore={scrollToServices}
-        />
+        <HeroSection heroLoaded={heroLoaded} onHeroLoad={() => setHeroLoaded(true)} />
 
-        <ServicesSection ref={servicesRef} />
+        <ServicesSection />
 
         <FeaturedProperties
           properties={featuredProperties}
