@@ -77,13 +77,29 @@ Tailwind utilities. Never hand-write these values into a component.
 
 | Token | Light | Dark | Where |
 |---|---|---|---|
-| `glass-bg` | `white / 0.72` | `white / 0.08` | Default floating panel, over the app's own ground |
-| `glass-bg-strong` | `white / 0.88` | `white / 0.14` | Panels carrying form controls or long text |
-| `glass-bg-subtle` | `white / 0.55` | `white / 0.05` | Chrome that must not compete: the sticky header |
-| **`glass-bg-media`** | `#0A2E46 / 0.78` | **same** | **Over photography.** See below — this one is not optional |
-| `glass-border` | `white / 0.60` | `white / 0.14` | The bright top edge. Always present |
-| `glass-blur` | `20px` | `32px` | Dark needs more blur to separate |
-| `glass-saturate` | `180%` | `140%` | Saturation is what makes it read as glass rather than fog |
+| `glass-bg` | `#FAFCFE / 0.80` | `white / 0.08` | Default floating panel, over the app's own ground |
+| `glass-bg-strong` | `#FAFCFE / 0.92` | `white / 0.14` | Panels carrying form controls or long text |
+| `glass-bg-subtle` | `#FAFCFE / 0.68` | `white / 0.05` | Chrome that must not compete: the sticky header |
+| **`glass-bg-media`** | `#0A2E46 / 0.88` | **same** | **Over photography.** See below — this one is not optional |
+| `glass-border` | `white / 0.42` | `white / 0.11` | The bright top edge. Always present |
+| `glass-blur` | `14px` | `24px` | Dark needs more blur to separate |
+| `glass-saturate` | `125%` | `118%` | Saturation is what makes it read as glass rather than fog |
+
+**Quieted 2026-09-09.** The first cut of this material was too bright and too glassy, and
+both halves of that are measurable rather than a matter of taste. The light tint was pure
+`#FFFFFF` at 72%, which is milk rather than glass on a page whose ground was also white; it
+is now `surface-raised` at 80%, so the pane belongs to the same family as everything beside
+it. Saturation was 180% — past a pane and into a filter, pushing the coastal blues and the
+photography's greens well beyond what was actually behind the glass. The blur came down with
+it: 20px was doing separation work that opacity was already doing, at a real per-frame GPU
+cost on the mid-range Android this market browses on.
+
+The grounds moved with the material. **Nothing in the light theme is pure white any more** —
+`surface-raised` is `#FAFCFE` and `surface` is `#EFF5FA`, because `surface-raised` is the
+ground under every card, every form control and the two widest bands on the home page, and
+at `#FFFFFF` it put body text at 17:1 across most of the viewport. That is not crispness, it
+is glare, on a site read outdoors on a phone. `surface-sunken` deliberately did not move:
+`content-subtle` sits at 4.57:1 on it and there is no room below that.
 
 ### Why `glass-bg-media` exists
 
@@ -92,8 +108,14 @@ over the app's own dark ground and **catastrophic over a bright photograph**: it
 to nearly white, and its text measures **1.13:1**. Invisible.
 
 `glass-bg-media` tints toward `surface-inverse` instead and carries `content-on-media` text,
-measured at **15.94:1** over black and **7.05:1** over white. It is **the same value in both
+measured at **15.17:1** over black and **9.80:1** over white. It is **the same value in both
 themes**, because a photograph does not flip with the lights.
+
+Raising it from 0.78 to 0.88 in the 2026-09-09 quieting improved the worst case — the white
+end went from 7.05:1 to 9.80:1 — because on this material, less glassy is also more legible.
+It is the one glass token whose opacity should keep climbing rather than falling if the
+question ever comes up again: a photograph is not a design system, and nothing behind it can
+be relied on.
 
 This is proven by `src/design/__tests__/glassContrast.test.js`, which composites the glass
 over the darkest and lightest ground a photograph can present and demands the text survive
@@ -139,6 +161,14 @@ it, not beside it.
 Roles, not values: `surface-raised` survives a theme swap; `bg-white` has already decided and
 cannot be themed. The literal palette is fenced by
 `eslint-rules/no-raw-palette-classes.js` under a ratcheting ceiling that only falls.
+
+**The theme is reachable from the public site.** `ThemeToggle` had lived only in the admin
+shell, which meant the dark theme existed, was held to AA, was tested — and could not be
+asked for by any of the people the site is actually built for. It now sits in the public
+header (in its `media` tone while the header is still transparent over the hero photograph)
+and, below `sm`, in the mobile menu panel. It stays three options rather than a switch:
+`light | dark | system`, because a two-state switch destroys the "follow my OS" preference
+the first time anyone touches it.
 
 ---
 

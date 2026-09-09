@@ -28,10 +28,21 @@
 export const THEME_TOKENS = {
   light: {
     // Grounds, from the page backwards to the thing furthest in front of it.
-    surface: '#F5F9FC',
-    'surface-raised': '#FFFFFF',
+    //
+    // Nothing here is pure white any more. `surface-raised` is the ground under
+    // every card, every form control and the two widest bands on the home page,
+    // and at #FFFFFF it put body text at 17:1 across most of the viewport —
+    // which is not "crisp", it is glare, on a site whose primary audience reads
+    // it outdoors on a phone. Backing the raised ground off white and the page
+    // ground a step further down keeps the same order of depth (sunken < page <
+    // raised < overlay) with less light coming off the screen.
+    //
+    // `surface-sunken` deliberately did not move: `content-subtle` sits at
+    // 4.57:1 on it, and there is no room below that.
+    surface: '#EFF5FA',
+    'surface-raised': '#FAFCFE',
     'surface-sunken': '#E7F0F7',
-    'surface-overlay': '#FFFFFF',
+    'surface-overlay': '#FCFDFE',
     'surface-inverse': '#0A2E46',
 
     // Text and iconography.

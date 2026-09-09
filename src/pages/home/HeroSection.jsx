@@ -47,26 +47,21 @@ const HeroSection = ({ heroLoaded, onHeroLoad }) => {
 
   return (
     <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden">
-      <picture className="pointer-events-none absolute inset-0 z-0">
-        <source
-          srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_800/v1718900000/kenya-property-hero_sm_omfqo1.jpg"
-          media="(max-width: 640px)"
-        />
-        <source
-          srcSet="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg"
-          media="(max-width: 1024px)"
-        />
-        <img
-          src="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1920/v1718900000/kenya-property-hero_lg_omfqo1.jpg"
-          alt="Luxury property with city view in Nairobi, Kenya"
-          className="h-full w-full object-cover"
-          loading="eager"
-          fetchpriority="high"
-          width="1920"
-          height="1080"
-          onLoad={onHeroLoad}
-        />
-      </picture>
+      {/* Served from `public/`, so it is one file at one size rather than the
+          three Cloudinary widths this used to request. It is still the page's
+          LCP element, so it keeps `eager` and `fetchpriority="high"` — and the
+          intrinsic dimensions stay on the tag, because without them the layout
+          shifts by the height of the viewport while it loads. */}
+      <img
+        src="/hero.jpg"
+        alt="Coastal property at Kikambala on the Kenyan coast"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+        loading="eager"
+        fetchpriority="high"
+        width="1452"
+        height="870"
+        onLoad={onHeroLoad}
+      />
 
       {/* Two scrims, each with a job, instead of one flat wash over everything.
           The stops are not taste: `scrim` is pure black, so 55% of it over the
