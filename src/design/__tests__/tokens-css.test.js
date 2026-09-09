@@ -66,15 +66,30 @@ describe('src/styles/tokens.css', () => {
   });
 
   it('emits materials as raw CSS values rather than as RGB channels', () => {
-    expect(onDisk).toMatch(/--glass-blur:\s*20px;/);
-    expect(onDisk).toMatch(/--radius-lg:\s*20px;/);
-    expect(onDisk).toMatch(/--ease-spring:\s*cubic-bezier\(0\.32, 0\.72, 0, 1\);/);
-    expect(onDisk).toMatch(/--glass-bg:\s*rgb\(255 255 255 \/ 0\.72\);/);
+    // The shape is the point, not the numbers: a blur is a length, a curve is a
+    // cubic-bezier, and a glass ground keeps its own alpha inside an `rgb()`
+    // rather than being split into channels the way a colour token is. Asserting
+    // the literal values here made a deliberate change to the material — the one
+    // thing DESIGN.md expects to be tuned — look like a regression.
+    const light = materialsFor('light');
+
+    expect(onDisk).toMatch(/--glass-blur:\s*\d+px;/);
+    expect(onDisk).toMatch(/--radius-lg:\s*\d+px;/);
+    expect(onDisk).toMatch(/--ease-spring:\s*cubic-bezier\([^)]+\);/);
+    expect(onDisk).toContain(`--glass-bg: ${light['glass-bg']};`);
+    expect(light['glass-bg']).toMatch(/^rgb\(\d+ \d+ \d+ \/ 0?\.\d+\)$/);
   });
 
   it('gives the dark theme its own material values', () => {
     const dark = onDisk.slice(onDisk.indexOf('.dark {'));
-    expect(dark).toMatch(/--glass-blur:\s*32px;/);
+    const darkBlur = materialsFor('dark')['glass-blur'];
+
+    // Dark separates by blur where light separates by opacity, so this one is
+    // load-bearing in a way the exact number is not.
+    expect(dark).toContain(`--glass-blur: ${darkBlur};`);
+    expect(parseInt(darkBlur, 10)).toBeGreaterThan(
+      parseInt(materialsFor('light')['glass-blur'], 10)
+    );
   });
 });
 

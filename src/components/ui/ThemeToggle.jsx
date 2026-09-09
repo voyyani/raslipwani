@@ -31,9 +31,35 @@ const OPTIONS = [
   { value: 'system', icon: 'desktop', label: 'Match system theme' },
 ];
 
-const ThemeToggle = ({ className = '' }) => {
+/**
+ * Two grounds.
+ *
+ * `default` is the admin shell and any header that has the page's own surface
+ * behind it. `media` is the public header while it is still transparent over the
+ * hero photograph, where `surface-sunken` would appear as a pale slab floating
+ * on the picture and `content-subtle` would be a coin flip against it. Same
+ * control, same behaviour; it borrows `content-on-media` exactly as the links
+ * beside it do.
+ */
+const TONES = {
+  default: {
+    group: 'border-line bg-surface-sunken',
+    selected: 'bg-surface-raised text-content shadow-raised',
+    unselected: 'text-content-subtle hover:text-content',
+    ring: 'focus-visible:ring-offset-surface-sunken',
+  },
+  media: {
+    group: 'border-line-media bg-content-on-media/10',
+    selected: 'bg-content-on-media/25 text-content-on-media',
+    unselected: 'text-content-on-media/70 hover:text-content-on-media',
+    ring: 'focus-visible:ring-offset-transparent',
+  },
+};
+
+const ThemeToggle = ({ tone = 'default', className = '' }) => {
   const { preference, setPreference } = useTheme();
   const groupRef = useRef(null);
+  const skin = TONES[tone] ?? TONES.default;
 
   /** Moves selection by `step`, wrapping, and takes focus with it. */
   const move = (step) => {
@@ -68,7 +94,7 @@ const ThemeToggle = ({ className = '' }) => {
       role="radiogroup"
       aria-label="Colour theme"
       onKeyDown={onKeyDown}
-      className={`inline-flex items-center gap-0.5 rounded-full border border-line bg-surface-sunken p-0.5 ${className}`}
+      className={`inline-flex items-center gap-0.5 rounded-full border p-0.5 ${skin.group} ${className}`}
     >
       {OPTIONS.map(({ value, icon, label }) => {
         const selected = preference === value;
@@ -86,11 +112,10 @@ const ThemeToggle = ({ className = '' }) => {
             tabIndex={selected ? 0 : -1}
             onClick={() => setPreference(value)}
             className={[
-              'rounded-full p-1.5 transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 focus-visible:ring-offset-surface-sunken',
-              selected
-                ? 'bg-surface-raised text-content shadow-sm'
-                : 'text-content-subtle hover:text-content',
+              'rounded-full p-1.5 transition-colors duration-fast motion-reduce:transition-none',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1',
+              skin.ring,
+              selected ? skin.selected : skin.unselected,
             ].join(' ')}
           >
             <Icon name={icon} size={15} />
@@ -102,6 +127,8 @@ const ThemeToggle = ({ className = '' }) => {
 };
 
 ThemeToggle.propTypes = {
+  /** `media` for a header still floating on a photograph. See `TONES`. */
+  tone: PropTypes.oneOf(['default', 'media']),
   /** Spacing for the surface it sits in. Colour comes from the token layer. */
   className: PropTypes.string,
 };

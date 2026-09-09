@@ -59,7 +59,11 @@ const Home = () => {
         />
         <meta property="og:title" content="Kenyan Real Estate Experts | Raslipwani Properties" />
         <meta property="og:description" content="Find your perfect property with Kenya's leading real estate specialists" />
-        <meta property="og:image" content="https://res.cloudinary.com/dzqdxosk2/image/upload/f_auto,q_auto,w_1200/v1718900000/kenya-property-hero_md_omfqo1.jpg" />
+        {/* The same photograph the hero leads with — a share card showing an
+            image that is no longer on the page is a small broken promise. An
+            absolute URL, because a social scraper has no page to resolve a root
+            path against. */}
+        <meta property="og:image" content="https://raslipwani.co.ke/hero.jpg" />
         {/* Local Business Schema */}
         <script type="application/ld+json">
           {JSON.stringify({

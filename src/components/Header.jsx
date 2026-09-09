@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import AuthButtons from './AuthButtons';
 import { useSettings } from '../hooks/useSettings';
 import GlassPanel from './ui/GlassPanel';
+import ThemeToggle from './ui/ThemeToggle';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
@@ -147,8 +148,17 @@ const Header = ({ scrolled }) => {
             onDropdownChange={setOpenDropdown}
           />
 
-          {/* Right Section - Auth & Mobile Menu */}
-          <div className="flex items-center gap-4">
+          {/* Right Section - Theme, Auth & Mobile Menu */}
+          <div className="flex items-center gap-3">
+            {/* The admin shell has had this control since the theme layer
+                shipped; the public site, which is where most of the visitors
+                are, had no way to ask for either theme. On a narrow screen it
+                moves into the menu panel rather than crowding the brand. */}
+            <ThemeToggle
+              tone={overMedia ? 'media' : 'default'}
+              className="hidden sm:inline-flex"
+            />
+
             <div className="hidden md:block">
               <AuthButtons />
             </div>

@@ -20,11 +20,14 @@
 /** Per-theme materials. Every key must exist in both — `materials.test.js` asserts it. */
 export const MATERIAL_TOKENS = {
   light: {
-    // Light glass separates by opacity: white at 72% over a bright coastal
-    // photograph is unmistakably a pane of something.
-    'glass-bg': 'rgb(255 255 255 / 0.72)',
-    'glass-bg-strong': 'rgb(255 255 255 / 0.88)',
-    'glass-bg-subtle': 'rgb(255 255 255 / 0.55)',
+    // Light glass separates by opacity. It used to do that with pure white at
+    // 72%, which reads as milk rather than as glass: a bright pane over a bright
+    // coastal photograph, on a bright page. The tint is now `surface-raised`
+    // rather than #FFFFFF, and each stop is more opaque — a quieter pane, and
+    // one that belongs to the same family as the ground beside it.
+    'glass-bg': 'rgb(250 252 254 / 0.80)',
+    'glass-bg-strong': 'rgb(250 252 254 / 0.92)',
+    'glass-bg-subtle': 'rgb(250 252 254 / 0.68)',
 
     // Glass laid over PHOTOGRAPHY rather than over the app's own ground.
     //
@@ -35,7 +38,7 @@ export const MATERIAL_TOKENS = {
     //
     // Identical in both themes, because a photograph does not flip with the
     // lights. See the dark theme's copy of this value and glassContrast.test.js.
-    'glass-bg-media': 'rgb(10 46 70 / 0.78)',
+    'glass-bg-media': 'rgb(10 46 70 / 0.88)',
 
 
     // The same ground with the alpha taken out, for the two cases where the
@@ -46,21 +49,26 @@ export const MATERIAL_TOKENS = {
     // does. Identical in light and dark for the same reason `glass-bg-media` is.
     'glass-media-solid': 'rgb(10 46 70)',
 
-    'glass-border': 'rgb(255 255 255 / 0.60)',
-    'glass-highlight': 'rgb(255 255 255 / 0.90)',
+    // The bright top edge, dimmed. At 60% white on a near-white panel the edge
+    // was competing with the panel instead of describing it.
+    'glass-border': 'rgb(255 255 255 / 0.42)',
+    'glass-highlight': 'rgb(255 255 255 / 0.65)',
 
-    'glass-blur': '20px',
-    'glass-blur-strong': '32px',
-    // Saturation is the difference between glass and fog. Backdrop content seen
-    // through a real pane keeps its colour; through fog it goes grey.
-    'glass-saturate': '180%',
+    'glass-blur': '14px',
+    'glass-blur-strong': '22px',
+    // Saturation is the difference between glass and fog: backdrop content seen
+    // through a real pane keeps its colour, through fog it goes grey. 180% was
+    // past a pane and into a filter — it pushed the coastal blues and the
+    // photography's greens well beyond what was actually behind the glass. 125%
+    // still reads as a pane and stops shouting.
+    'glass-saturate': '125%',
 
     // Three stops: a contact edge, a lift, and an ambient pool. Tinted with the
     // content colour (#0B2537) rather than black.
     'shadow-glass':
-      '0 1px 2px rgb(11 37 55 / 0.04), 0 8px 24px -4px rgb(11 37 55 / 0.10), 0 24px 48px -12px rgb(11 37 55 / 0.14)',
+      '0 1px 2px rgb(11 37 55 / 0.03), 0 6px 18px -4px rgb(11 37 55 / 0.07), 0 18px 36px -12px rgb(11 37 55 / 0.10)',
     'shadow-raised':
-      '0 1px 2px rgb(11 37 55 / 0.05), 0 4px 12px -2px rgb(11 37 55 / 0.08)',
+      '0 1px 2px rgb(11 37 55 / 0.04), 0 3px 9px -2px rgb(11 37 55 / 0.06)',
     'shadow-pressed': 'inset 0 1px 2px rgb(11 37 55 / 0.12)',
   },
 
@@ -80,7 +88,7 @@ export const MATERIAL_TOKENS = {
     // the International cards, every property image. The ordinary contrast test
     // could never have caught it, because it compares two opaque tokens against
     // a colour the browser stops painting the moment a panel goes translucent.
-    'glass-bg-media': 'rgb(10 46 70 / 0.78)',
+    'glass-bg-media': 'rgb(10 46 70 / 0.88)',
 
 
     // The same ground with the alpha taken out, for the two cases where the
@@ -91,12 +99,15 @@ export const MATERIAL_TOKENS = {
     // does. Identical in light and dark for the same reason `glass-bg-media` is.
     'glass-media-solid': 'rgb(10 46 70)',
 
-    'glass-border': 'rgb(255 255 255 / 0.14)',
-    'glass-highlight': 'rgb(255 255 255 / 0.22)',
+    'glass-border': 'rgb(255 255 255 / 0.11)',
+    'glass-highlight': 'rgb(255 255 255 / 0.16)',
 
-    'glass-blur': '32px',
-    'glass-blur-strong': '48px',
-    'glass-saturate': '140%',
+    // Dark still needs more blur than light to separate — it has no opacity to
+    // separate with — but not half again as much as it was using. Both stops
+    // come down with light's, and the saturation with them.
+    'glass-blur': '24px',
+    'glass-blur-strong': '34px',
+    'glass-saturate': '118%',
 
     // Black on dark, because there is no warm ground left to muddy.
     'shadow-glass':

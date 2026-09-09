@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Link, NavLink } from 'react-router-dom';
 import Icon from '../Icon';
 import AuthButtons from '../AuthButtons';
+import ThemeToggle from '../ui/ThemeToggle';
 import { navItems } from './navItems';
 
 const slug = (label) => label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -136,34 +137,45 @@ const MobileMenu = ({ isOpen, openMobileDropdown = null, onDropdownChange, onClo
               );
             }
 
-            // Regular menu items
+            // Regular menu items. The active row used to be marked three times
+            // over — a tinted ground, a 4px colour bar down the right edge, and
+            // a dot. One of those is a state; three is decoration. The ground
+            // and the text colour stay; the bar and the dot are gone.
             return (
               <div key={item.label} className="border-b border-line last:border-b-0">
                 <NavLink
                   to={item.path}
                   onClick={onClose}
-                  className={`flex items-center gap-4 px-6 py-5 font-medium transition-all duration-300 group
-                   ${isActive 
-                      ? 'text-primary bg-primary/5 border-r-4 border-primary' 
-                      : 'text-content-muted hover:text-primary hover:bg-surface'}`}
+                  className={`group flex items-center gap-4 px-6 py-5 font-medium transition-colors duration-fast motion-reduce:transition-none ${
+                    isActive
+                      ? 'bg-brand-subtle text-brand-content'
+                      : 'text-content-muted hover:bg-surface hover:text-brand-content'
+                  }`}
                 >
-                  <div className={`p-2 rounded-lg transition-colors ${
-                    isActive ? 'bg-primary/10 text-primary' : 'bg-surface-sunken text-content-muted group-hover:bg-primary/10 group-hover:text-primary'
+                  <div className={`rounded-md p-2 transition-colors ${
+                    isActive
+                      ? 'bg-surface-raised text-brand-content'
+                      : 'bg-surface-sunken text-content-muted group-hover:text-brand-content'
                   }`}>
                     <Icon name={item.icon} size={20} />
                   </div>
                   <span className="flex-1">{item.label}</span>
-                  <div className={`w-2 h-2 rounded-full transition-colors ${
-                    isActive ? 'bg-primary' : 'bg-transparent group-hover:bg-primary/30'
-                  }`}></div>
                 </NavLink>
               </div>
             );
           })}
         </nav>
         
+        {/* Theme, then auth. The header hides its own theme control below `sm`
+            rather than crowding the brand, so this is where a phone gets it —
+            labelled, because in the panel there is room to say what it does. */}
+        <div className="flex items-center justify-between gap-4 border-t border-line px-6 py-4">
+          <span className="text-sm font-medium text-content-muted">Theme</span>
+          <ThemeToggle />
+        </div>
+
         {/* Auth Section for Mobile */}
-        <div className="px-6 py-4 border-t border-line bg-primary/5">
+        <div className="px-6 py-4 border-t border-line bg-brand-subtle">
           <div className="flex items-center justify-center">
             <AuthButtons />
           </div>
@@ -197,7 +209,7 @@ const MobileMenu = ({ isOpen, openMobileDropdown = null, onDropdownChange, onClo
           <div className="flex justify-center space-x-4 mt-6 pt-6 border-t border-line">
             {[
               { icon: 'whatsapp', href: 'https://wa.me/254758066526', color: 'hover:text-success-content' },
-              { icon: 'instagram', href: 'https://www.instagram.com/raslipwani/', color: 'hover:text-pink-500' },
+              { icon: 'instagram', href: 'https://www.instagram.com/raslipwani/', color: 'hover:text-brand-content' },
               { icon: 'facebook', href: 'https://www.facebook.com/raslipwani/', color: 'hover:text-brand' },
               { icon: 'tiktok', href: 'https://www.tiktok.com/@raslipwani0', color: 'hover:text-content' }
             ].map((social, index) => (
