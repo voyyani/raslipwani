@@ -58,6 +58,25 @@
   }
 }
 
+/* A scrollbar that belongs to the design system. The browser's default is grey
+   chrome on a themed surface — the cheapest tell that a panel was assembled
+   rather than built. Thin, tokened, and invisible until it is needed. */
+.scrollbar-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border-strong) / 0.6) transparent;
+}
+.scrollbar-quiet::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-quiet::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-quiet::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--border-strong) / 0.6);
+  border-radius: 999px;
+}
+
 /* Base styles */
 :root {
   font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;

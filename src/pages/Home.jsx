@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { propertyQueries } from '@/services/properties';
-import PropertyModal from '../components/PropertyModal';
+
+// Loaded on first open, not with the page: the dialog is the heaviest thing
+// here and most visits never open it.
+const PropertyModal = lazy(() => import('../components/PropertyModal'));
 import HeroSection from './home/HeroSection';
 import ServicesSection from './home/ServicesSection';
 import FeaturedProperties from './home/FeaturedProperties';
@@ -118,14 +121,13 @@ const Home = () => {
       </main>
 
       {/* Property Modal */}
-      <AnimatePresence>
-        {isModalOpen && selectedProperty && (
-          <PropertyModal
-            property={selectedProperty}
-            closeModal={closeModal}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {isModalOpen && selectedProperty && (
+            <PropertyModal property={selectedProperty} closeModal={closeModal} />
+          )}
+        </AnimatePresence>
+      </Suspense>
     </>
   );
 };

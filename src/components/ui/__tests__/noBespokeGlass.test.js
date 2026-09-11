@@ -31,6 +31,9 @@ const ALLOWED = new Set([
   'src/components/ui/Button.jsx',
   // The dialog surface and its blurred scrim.
   'src/components/ui/Modal.jsx',
+  // The other dialog shell: its panel is a `GlassPanel`, and only the scrim
+  // behind it — the same `backdrop-blur-sm` Modal's scrim uses — is bespoke.
+  'src/components/PropertyModal.jsx',
 ]);
 
 /** Utility fragments that only ever appear on a hand-assembled glass surface. */

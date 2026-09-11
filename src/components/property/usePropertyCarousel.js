@@ -21,6 +21,10 @@ export function usePropertyCarousel(images) {
   const [isDragging, setIsDragging] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [showControls, setShowControls] = useState(true);
+  // Which way the last change of image travelled: +1 forward, -1 back. The
+  // gallery slides the incoming photograph in from that side, so a swipe left
+  // brings the next one in from the right the way the finger implied.
+  const [direction, setDirection] = useState(1);
   const imageRef = useRef(null);
   const lastTouchDistance = useRef(0);
 
@@ -35,15 +39,24 @@ export function usePropertyCarousel(images) {
   }, [currentImageIndex, isFullscreen]);
 
   const handlePrev = () => {
+    setDirection(-1);
     setCurrentImageIndex(prev => 
       prev === 0 ? images.length - 1 : prev - 1
     );
   };
 
   const handleNext = () => {
+    setDirection(1);
     setCurrentImageIndex(prev => 
       (prev + 1) % images.length
     );
+  };
+
+  /** Jump straight to an image — the thumbnail rail's move. */
+  const goTo = (index) => {
+    if (index === currentImageIndex) return;
+    setDirection(index > currentImageIndex ? 1 : -1);
+    setCurrentImageIndex(index);
   };
 
   // Touch handling for mobile swipe
@@ -186,6 +199,8 @@ export function usePropertyCarousel(images) {
 
   return {
     currentImageIndex,
+    direction,
+    goTo,
     isFullscreen,
     zoomLevel,
     position,
